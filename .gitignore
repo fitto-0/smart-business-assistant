@@ -1,0 +1,48 @@
+
+# ============================================
+# SMART BUSINESS ASSISTANT - Git Ignore
+# ============================================
+
+# Dépendances
+node_modules/
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# Variables d'environnement (ne pas versionner)
+.env
+.env.local
+.env.development
+.env.production
+
+# Builds
+.next/
+out/
+build/
+dist/
+
+# Logs
+*.log
+npm-debug.log*
+pnpm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+
+# Tests
+coverage/
+.nyc_output/
+
+# Divers
+*.pid
+*.seed
+*.pid.lock
+.pnp.*
+.yarn/
