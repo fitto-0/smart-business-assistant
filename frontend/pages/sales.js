@@ -1,5 +1,6 @@
+import { useEffect, useState } from 'react';
 import Layout from '../components/Layout';
-import { monthlySales, categoryData, products } from '../data/mockData';
+import { apiGet } from '../lib/api';
 import {
   AreaChart, Area, BarChart, Bar, LineChart, Line,
   XAxis, YAxis, CartesianGrid, Tooltip, Legend,
@@ -23,12 +24,37 @@ const CustomTooltip = ({ active, payload, label }) => {
 };
 
 export default function SalesPage() {
-  const totalSales = monthlySales.reduce((s, m) => s + m.ventes, 0);
-  const totalOrders = monthlySales.reduce((s, m) => s + m.commandes, 0);
-  const avgMonthly = Math.round(totalSales / 12);
-  const bestMonth = monthlySales.reduce((a, b) => a.ventes > b.ventes ? a : b);
+  const [monthlySales, setMonthlySales] = useState([]);
+  const [topProducts, setTopProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  const topProducts = [...products].sort((a, b) => b.revenue - a.revenue).slice(0, 5);
+  useEffect(() => {
+    const loadSales = async () => {
+      try {
+        const [monthly, top] = await Promise.all([
+          apiGet('/api/sales/monthly'),
+          apiGet('/api/sales/top-products', { limit: 5 })
+        ]);
+        setMonthlySales(monthly?.data || []);
+        setTopProducts(top?.data || []);
+      } catch (error) {
+        console.error('Failed to load sales data', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadSales();
+  }, []);
+
+  const totalSales = (monthlySales || []).reduce((s, m) => s + Number(m.actual || 0), 0);
+  const totalOrders = (monthlySales || []).reduce((s, m) => s + Number(m.orders || 0), 0);
+  const avgMonthly = Math.round(totalSales / Math.max(monthlySales.length, 1));
+  const bestMonth = (monthlySales || []).reduce((a, b) => (Number(a.actual || 0) > Number(b.actual || 0) ? a : b), { month: 'N/A', actual: 0 });
+
+  if (loading) {
+    return <Layout title="Analyse des Ventes"><div className="card text-center py-16 text-slate-400">Chargement des ventes…</div></Layout>;
+  }
 
   return (
     <Layout title="Analyse des Ventes">
@@ -71,8 +97,8 @@ export default function SalesPage() {
             <YAxis tick={{ fill: '#64748b', fontSize: 11 }} axisLine={false} tickLine={false} tickFormatter={v => `${v / 1000}k`} />
             <Tooltip content={<CustomTooltip />} />
             <Legend wrapperStyle={{ fontSize: '12px', paddingTop: '16px' }} />
-            <Area type="monotone" dataKey="ventes" name="Ventes (DA)" stroke="#6366f1" strokeWidth={2.5} fill="url(#sg)" />
-            <Line type="monotone" dataKey="objectif" name="Objectif (DA)" stroke="#06b6d4" strokeWidth={2} strokeDasharray="6 4" dot={false} />
+            <Area type="monotone" dataKey="actual" name="Ventes (DA)" stroke="#6366f1" strokeWidth={2.5} fill="url(#sg)" />
+            <Line type="monotone" dataKey="target" name="Objectif (DA)" stroke="#06b6d4" strokeWidth={2} strokeDasharray="6 4" dot={false} />
           </ComposedChart>
         </ResponsiveContainer>
       </div>
@@ -88,7 +114,7 @@ export default function SalesPage() {
               <XAxis dataKey="month" tick={{ fill: '#64748b', fontSize: 10 }} axisLine={false} tickLine={false} />
               <YAxis tick={{ fill: '#64748b', fontSize: 11 }} axisLine={false} tickLine={false} />
               <Tooltip content={<CustomTooltip />} />
-              <Bar dataKey="commandes" name="Commandes" fill="#06b6d4" radius={[5, 5, 0, 0]} />
+              <Bar dataKey="orders" name="Commandes" fill="#06b6d4" radius={[5, 5, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>
         </div>
@@ -145,9 +171,9 @@ export default function SalesPage() {
                 return (
                   <tr key={row.month} className="hover:bg-slate-700/20 transition-colors">
                     <td className="table-cell font-semibold text-white">{row.month}</td>
-                    <td className="table-cell font-semibold text-primary-300">{fmt(row.ventes)} DA</td>
-                    <td className="table-cell text-slate-400">{fmt(row.objectif)} DA</td>
-                    <td className="table-cell text-cyan-300">{row.commandes}</td>
+                    <td className="table-cell font-semibold text-primary-300">{fmt(row.actual || 0)} DA</td>
+                    <td className="table-cell text-slate-400">{fmt(row.target || 0)} DA</td>
+                    <td className="table-cell text-cyan-300">{row.orders}</td>
                     <td className={`table-cell font-semibold ${ecart >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
                       {ecart >= 0 ? '+' : ''}{fmt(ecart)} DA
                     </td>

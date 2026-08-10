@@ -7,9 +7,9 @@
 -- ===================== UTILISATEUR DÉMO =====================
 -- Note : Le mot de passe "demo123" hashé avec bcrypt (10 rounds)
 INSERT INTO users (name, email, password_hash, company, role) VALUES
-('Admin Demo', 'demo@smartbusiness.com', '$2a$10$rGYHRm3wmukx8nCQ.CR0Ne1qZRRTJH/cEqAW0LcI3KFLWS9YKLkku', 'SmartBiz SARL', 'admin'),
-('Karim Khali', 'karim@boutique.dz', '$2a$10$rGYHRm3wmukx8nCQ.CR0Ne1qZRRTJH/cEqAW0LcI3KFLWS9YKLkku', 'Boutique El Karama', 'user'),
-('Sophie Martin', 'sophie@martinedz.com', '$2a$10$rGYHRm3wmukx8nCQ.CR0Ne1qZRRTJH/cEqAW0LcI3KFLWS9YKLkku', 'Martin Boutique', 'user');
+('Admin Demo', 'demo@smartbusiness.com', '$2a$10$pkdmXPXhmR3uhhR4NFBF1ez1/TuWxQIo/IAdDGbN1gVkToyvJoAli', 'SmartBiz SARL', 'admin'),
+('Karim Khali', 'karim@boutique.dz', '$2a$10$pkdmXPXhmR3uhhR4NFBF1ez1/TuWxQIo/IAdDGbN1gVkToyvJoAli', 'Boutique El Karama', 'user'),
+('Sophie Martin', 'sophie@martinedz.com', '$2a$10$pkdmXPXhmR3uhhR4NFBF1ez1/TuWxQIo/IAdDGbN1gVkToyvJoAli', 'Martin Boutique', 'user');
 
 -- ===================== PRODUITS =====================
 INSERT INTO products (name, category, price, stock, sold, revenue, trend, description) VALUES

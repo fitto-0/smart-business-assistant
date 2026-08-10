@@ -17,8 +17,7 @@ export default function RegisterPage() {
     if (form.password.length < 6) { toast.error('Le mot de passe doit contenir au moins 6 caractères'); return; }
     setLoading(true);
     try {
-      await new Promise(r => setTimeout(r, 800));
-      register(form.name, form.email, form.password, form.company);
+      await register(form.name, form.email, form.password, form.company);
       toast.success('Compte créé avec succès !');
       router.push('/');
     } catch (err) {

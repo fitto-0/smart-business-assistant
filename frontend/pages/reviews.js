@@ -1,6 +1,7 @@
+import { useEffect, useState } from 'react';
 import Layout from '../components/Layout';
-import { customerReviews, sentimentStats } from '../data/mockData';
-import { PieChart, Pie, Cell, RadialBarChart, RadialBar, Tooltip, ResponsiveContainer } from 'recharts';
+import { apiGet } from '../lib/api';
+import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from 'recharts';
 import { Star, ThumbsUp, ThumbsDown, Minus, MessageSquare } from 'lucide-react';
 
 const SentimentIcon = ({ s }) => {
@@ -35,15 +36,42 @@ const ScoreBar = ({ score }) => {
   );
 };
 
-const pieData = [
-  { name: 'Positif', value: sentimentStats.positif.percentage, color: '#10b981' },
-  { name: 'Neutre', value: sentimentStats.neutre.percentage, color: '#f59e0b' },
-  { name: 'Négatif', value: sentimentStats.négatif.percentage, color: '#ef4444' },
-];
-
 export default function ReviewsPage() {
-  const avgRating = (customerReviews.reduce((s, r) => s + r.rating, 0) / customerReviews.length).toFixed(1);
-  const avgScore = (customerReviews.reduce((s, r) => s + r.score, 0) / customerReviews.length * 100).toFixed(0);
+  const [reviews, setReviews] = useState([]);
+  const [stats, setStats] = useState([]);
+  const [averageRating, setAverageRating] = useState(0);
+  const [totalReviews, setTotalReviews] = useState(0);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const loadReviews = async () => {
+      try {
+        const data = await apiGet('/api/analysis/sentiment');
+        setReviews(data.reviews || []);
+        setStats(data.stats || []);
+        setAverageRating(Number(data.averageRating || 0));
+        setTotalReviews(Number(data.totalReviews || 0));
+      } catch (error) {
+        console.error('Failed to load reviews', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadReviews();
+  }, []);
+
+  const pieData = [
+    { name: 'Positif', value: Number((stats.find(s => s.sentiment === 'positif')?.percentage || 0)), color: '#10b981' },
+    { name: 'Neutre', value: Number((stats.find(s => s.sentiment === 'neutre')?.percentage || 0)), color: '#f59e0b' },
+    { name: 'Négatif', value: Number((stats.find(s => s.sentiment === 'négatif')?.percentage || 0)), color: '#ef4444' },
+  ];
+
+  const avgScore = Number((reviews.reduce((s, r) => s + Number(r.score || 0), 0) / Math.max(reviews.length, 1) * 100).toFixed(0));
+
+  if (loading) {
+    return <Layout title="Analyse des Avis Clients"><div className="card text-center py-16 text-slate-400">Chargement des avis…</div></Layout>;
+  }
 
   return (
     <Layout title="Analyse des Avis Clients">
@@ -55,7 +83,7 @@ export default function ReviewsPage() {
           </div>
           <div>
             <p className="text-xs text-slate-400">Note Moyenne</p>
-            <p className="text-2xl font-bold text-white">{avgRating}<span className="text-base text-slate-400">/5</span></p>
+            <p className="text-2xl font-bold text-white">{averageRating.toFixed(1)}<span className="text-base text-slate-400">/5</span></p>
           </div>
         </div>
         <div className="card flex items-center gap-4">
@@ -64,7 +92,7 @@ export default function ReviewsPage() {
           </div>
           <div>
             <p className="text-xs text-slate-400">Avis Positifs</p>
-            <p className="text-2xl font-bold text-white">{sentimentStats.positif.count} <span className="text-sm text-emerald-400">({sentimentStats.positif.percentage}%)</span></p>
+            <p className="text-2xl font-bold text-white">{stats.find(s => s.sentiment === 'positif')?.count || 0} <span className="text-sm text-emerald-400">({stats.find(s => s.sentiment === 'positif')?.percentage || 0}%)</span></p>
           </div>
         </div>
         <div className="card flex items-center gap-4">
@@ -73,7 +101,7 @@ export default function ReviewsPage() {
           </div>
           <div>
             <p className="text-xs text-slate-400">Avis Négatifs</p>
-            <p className="text-2xl font-bold text-white">{sentimentStats.négatif.count} <span className="text-sm text-red-400">({sentimentStats.négatif.percentage}%)</span></p>
+            <p className="text-2xl font-bold text-white">{stats.find(s => s.sentiment === 'négatif')?.count || 0} <span className="text-sm text-red-400">({stats.find(s => s.sentiment === 'négatif')?.percentage || 0}%)</span></p>
           </div>
         </div>
         <div className="card flex items-center gap-4">
@@ -136,8 +164,8 @@ export default function ReviewsPage() {
           <div className="mt-5 p-3 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center gap-3">
             <Star size={20} className="text-amber-400 fill-amber-400 flex-shrink-0" />
             <div>
-              <p className="text-sm font-bold text-white">Note globale : {avgRating}/5</p>
-              <p className="text-xs text-slate-400">Basé sur {customerReviews.length} avis clients</p>
+              <p className="text-sm font-bold text-white">Note globale : {averageRating.toFixed(1)}/5</p>
+              <p className="text-xs text-slate-400">Basé sur {totalReviews} avis clients</p>
             </div>
           </div>
         </div>
@@ -147,16 +175,16 @@ export default function ReviewsPage() {
       <div className="card">
         <h3 className="text-base font-bold text-white mb-5">Tous les Avis Clients</h3>
         <div className="space-y-4">
-          {customerReviews.map(review => (
+          {reviews.map(review => (
             <div key={review.id} className="p-4 rounded-xl bg-dark-900/50 border border-slate-700/40 hover:border-slate-600/60 transition-all">
               <div className="flex items-start justify-between gap-3 mb-3">
                 <div className="flex items-center gap-3">
                   <div className="w-9 h-9 rounded-full bg-gradient-to-br from-primary-500 to-purple-600 flex items-center justify-center text-white font-bold text-sm flex-shrink-0">
-                    {review.customer[0]}
+                    {review.customer_name?.[0] || 'C'}
                   </div>
                   <div>
-                    <p className="text-sm font-semibold text-white">{review.customer}</p>
-                    <p className="text-xs text-slate-400">{review.product}</p>
+                    <p className="text-sm font-semibold text-white">{review.customer_name}</p>
+                    <p className="text-xs text-slate-400">{review.product_name || 'Produit'}</p>
                   </div>
                 </div>
                 <div className="flex flex-col items-end gap-1.5 flex-shrink-0">
@@ -171,7 +199,7 @@ export default function ReviewsPage() {
                   <span>{review.date}</span>
                 </div>
                 <div className="w-40">
-                  <p className="text-xs text-slate-500 mb-1">Score IA : {Math.round(review.score * 100)}%</p>
+                  <p className="text-xs text-slate-500 mb-1">Score IA : {Math.round(Number(review.score || 0) * 100)}%</p>
                   <ScoreBar score={review.score} />
                 </div>
               </div>

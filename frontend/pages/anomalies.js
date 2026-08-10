@@ -1,8 +1,8 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import Layout from '../components/Layout';
-import { anomalies as initialAnomalies } from '../data/mockData';
+import { apiGet, apiPut } from '../lib/api';
 import toast from 'react-hot-toast';
-import { AlertTriangle, CheckCircle, Clock, XCircle, TrendingDown, Package, Star, RefreshCw } from 'lucide-react';
+import { AlertTriangle, CheckCircle, Clock, XCircle, TrendingDown, Package, Star } from 'lucide-react';
 
 const SEVERITY_CONFIG = {
   critique: { label: 'Critique', cls: 'badge-red', dot: 'bg-red-500', border: 'border-red-500/30 bg-red-500/5' },
@@ -24,16 +24,42 @@ const TYPE_ICONS = {
 };
 
 export default function AnomaliesPage() {
-  const [anomalies, setAnomalies] = useState(initialAnomalies);
+  const [anomalies, setAnomalies] = useState([]);
   const [filter, setFilter] = useState('tous');
+  const [loading, setLoading] = useState(true);
 
-  const markResolved = (id) => {
-    setAnomalies(anomalies.map(a => a.id === id ? { ...a, status: 'résolu' } : a));
-    toast.success('Anomalie marquée comme résolue ✓');
+  useEffect(() => {
+    const loadAnomalies = async () => {
+      try {
+        const data = await apiGet('/analysis/anomalies');
+        setAnomalies(data.anomalies || []);
+      } catch (error) {
+        toast.error(error.message || 'Impossible de charger les anomalies');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadAnomalies();
+  }, []);
+
+  const markResolved = async (id) => {
+    try {
+      await apiPut(`/api/analysis/anomalies/${id}/resolve`);
+      setAnomalies((current) => current.map((a) => a.id === id ? { ...a, status: 'résolu' } : a));
+      toast.success('Anomalie marquée comme résolue ✓');
+    } catch (error) {
+      toast.error(error.message || 'Échec de la mise à jour');
+    }
   };
-  const markInProgress = (id) => {
-    setAnomalies(anomalies.map(a => a.id === id ? { ...a, status: 'en_cours' } : a));
-    toast.success('Anomalie mise en cours de traitement');
+  const markInProgress = async (id) => {
+    try {
+      await apiPut(`/api/analysis/anomalies/${id}/in-progress`);
+      setAnomalies((current) => current.map((a) => a.id === id ? { ...a, status: 'en_cours' } : a));
+      toast.success('Anomalie mise en cours de traitement');
+    } catch (error) {
+      toast.error(error.message || 'Échec de la mise à jour');
+    }
   };
 
   const filtered = filter === 'tous' ? anomalies : anomalies.filter(a =>
@@ -90,6 +116,8 @@ export default function AnomaliesPage() {
         </div>
       </div>
 
+      {loading && <div className="card text-center py-12 text-slate-400">Chargement des anomalies…</div>}
+
       {/* Anomalies List */}
       <div className="space-y-4">
         {filtered.length === 0 && (
@@ -111,7 +139,7 @@ export default function AnomaliesPage() {
                 </div>
                 <div className="flex-1">
                   <div className="flex flex-wrap items-center gap-2 mb-2">
-                    <h3 className="text-sm font-bold text-white">{a.product}</h3>
+                    <h3 className="text-sm font-bold text-white">{a.product_name || a.product || 'Anomalie'}</h3>
                     <span className={sev.cls}>{sev.label}</span>
                     <div className={`flex items-center gap-1 ${sta.cls}`}>
                       <sta.icon size={12} />
@@ -119,7 +147,7 @@ export default function AnomaliesPage() {
                     </div>
                   </div>
                   <p className="text-sm text-slate-300 mb-1">{a.description}</p>
-                  <p className="text-xs text-slate-500">Détecté le {a.detected}</p>
+                  <p className="text-xs text-slate-500">Détecté le {a.detected_at || a.detected || '—'}</p>
                 </div>
                 <div className="flex sm:flex-col gap-2 flex-shrink-0">
                   {a.status !== 'résolu' && (

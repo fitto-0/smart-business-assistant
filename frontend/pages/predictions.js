@@ -1,6 +1,6 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import Layout from '../components/Layout';
-import { predictions, monthlySales } from '../data/mockData';
+import { apiGet } from '../lib/api';
 import {
   ComposedChart, Line, Area, XAxis, YAxis, CartesianGrid,
   Tooltip, Legend, ResponsiveContainer, ReferenceLine
@@ -23,14 +23,39 @@ const CustomTooltip = ({ active, payload, label }) => {
   );
 };
 
-const nextYearTotal = predictions.filter(p => p.prediction).reduce((s, p) => s + p.prediction, 0);
-const lastYearTotal = monthlySales.reduce((s, m) => s + m.ventes, 0);
-const growth = (((nextYearTotal - lastYearTotal) / lastYearTotal) * 100).toFixed(1);
-
 export default function PredictionsPage() {
   const [horizon, setHorizon] = useState(6);
+  const [predictions, setPredictions] = useState([]);
+  const [monthlySales, setMonthlySales] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  const displayData = predictions.slice(0, 12 + horizon);
+  useEffect(() => {
+    const loadPredictions = async () => {
+      try {
+        const [pred, monthly] = await Promise.all([
+          apiGet('/api/analysis/predictions'),
+          apiGet('/api/sales/monthly')
+        ]);
+        setPredictions(pred?.predictions || []);
+        setMonthlySales(monthly?.data || []);
+      } catch (error) {
+        console.error('Failed to load predictions', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadPredictions();
+  }, []);
+
+  const totalPredicted = (predictions || []).slice(0, 6).reduce((s, p) => s + Number(p.value || 0), 0);
+  const lastYearTotal = (monthlySales || []).reduce((s, m) => s + Number(m.actual || 0), 0);
+  const growth = lastYearTotal ? (((totalPredicted - lastYearTotal) / lastYearTotal) * 100).toFixed(1) : '0.0';
+  const displayData = (predictions || []).slice(0, 12 + horizon);
+
+  if (loading) {
+    return <Layout title="Prédictions IA"><div className="card text-center py-16 text-slate-400">Chargement des prédictions…</div></Layout>;
+  }
 
   return (
     <Layout title="Prédictions IA">
@@ -63,7 +88,7 @@ export default function PredictionsPage() {
           </div>
           <div>
             <p className="text-xs text-slate-400">CA Prédit 6 mois</p>
-            <p className="text-xl font-bold text-white">{fmt(predictions.filter(p => p.prediction).slice(0, 6).reduce((s, p) => s + p.prediction, 0))} DA</p>
+            <p className="text-xl font-bold text-white">{fmt(totalPredicted)} DA</p>
           </div>
         </div>
         <div className="card flex items-center gap-4">
@@ -152,14 +177,14 @@ export default function PredictionsPage() {
             </thead>
             <tbody>
               {predictions.filter(p => p.prediction).slice(0, horizon).map((p, i) => {
-                const prev = monthlySales[i]?.ventes || monthlySales[11].ventes;
-                const change = (((p.prediction - prev) / prev) * 100).toFixed(1);
+                const prev = monthlySales[i]?.actual || monthlySales[11]?.actual || 0;
+                const change = prev ? (((Number(p.value || 0) - prev) / prev) * 100).toFixed(1) : '0.0';
                 const confidence = 85 - i * 2;
                 return (
                   <tr key={p.month} className="hover:bg-slate-700/20 transition-colors">
                     <td className="table-cell font-semibold text-white">{p.month}</td>
                     <td className="table-cell"><span className="badge-blue">Prédiction IA</span></td>
-                    <td className="table-cell font-bold text-emerald-400">{fmt(p.prediction)} DA</td>
+                    <td className="table-cell font-bold text-emerald-400">{fmt(Number(p.value || 0))} DA</td>
                     <td className={`table-cell font-semibold ${parseFloat(change) >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
                       {parseFloat(change) >= 0 ? '+' : ''}{change}%
                     </td>

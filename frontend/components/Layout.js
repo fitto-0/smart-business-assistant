@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
-import { isAuthenticated, getUser, logout } from '../lib/auth';
+import { isAuthenticated, getUser, fetchCurrentUser, logout } from '../lib/auth';
 import {
   LayoutDashboard, TrendingUp, Package, MessageSquare,
   Brain, AlertTriangle, Lightbulb, User, LogOut,
@@ -26,12 +26,23 @@ export default function Layout({ children, title = 'Smart Business Assistant' })
   const [notifications] = useState(4);
 
   useEffect(() => {
-    if (!isAuthenticated()) {
-      router.push('/');
-      return;
-    }
-    setUser(getUser());
-  }, []);
+    const loadUser = async () => {
+      if (!isAuthenticated()) {
+        router.push('/');
+        return;
+      }
+
+      try {
+        const currentUser = await fetchCurrentUser();
+        setUser(currentUser);
+      } catch (error) {
+        logout();
+        router.push('/');
+      }
+    };
+
+    loadUser();
+  }, [router]);
 
   const handleLogout = () => {
     logout();

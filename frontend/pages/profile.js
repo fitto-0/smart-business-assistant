@@ -18,8 +18,7 @@ export default function ProfilePage() {
     if (!form.name) { toast.error('Le nom est requis'); return; }
     setLoading(true);
     try {
-      await new Promise(r => setTimeout(r, 600));
-      const updated = updateProfile({ name: form.name, company: form.company });
+      const updated = await updateProfile({ name: form.name, company: form.company });
       setUser(updated);
       toast.success('Profil mis à jour avec succès !');
     } catch (err) {

@@ -27,6 +27,52 @@ function analyzeSentimentLocal(text) {
   return { sentiment, score: parseFloat(score.toFixed(3)) };
 }
 
+// GET /api/analysis/predictions
+router.get('/predictions', auth, async (req, res) => {
+  try {
+    const result = await query(`
+      SELECT DATE_TRUNC('month', date)::DATE AS month_start,
+             TO_CHAR(DATE_TRUNC('month', date), 'YYYY-MM') AS month,
+             SUM(total_amount) AS total
+      FROM sales
+      GROUP BY DATE_TRUNC('month', date)
+      ORDER BY DATE_TRUNC('month', date)
+    `);
+
+    const monthlyValues = result.rows.map(r => Number(r.total || 0));
+    const labels = ['Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Juin', 'Juil', 'Août', 'Sep', 'Oct', 'Nov', 'Déc'];
+
+    const xMean = (monthlyValues.length > 0 ? monthlyValues.reduce((a, b, idx) => a + idx, 0) / monthlyValues.length : 0);
+    const yMean = monthlyValues.length > 0 ? monthlyValues.reduce((a, b) => a + b, 0) / monthlyValues.length : 0;
+    let numerator = 0;
+    let denominator = 0;
+    monthlyValues.forEach((value, index) => {
+      const x = index;
+      const xDelta = x - xMean;
+      const yDelta = value - yMean;
+      numerator += xDelta * yDelta;
+      denominator += xDelta * xDelta;
+    });
+
+    const slope = denominator ? numerator / denominator : 0;
+    const intercept = yMean - slope * xMean;
+
+    const predictions = Array.from({ length: 6 }, (_, index) => {
+      const forecastIndex = monthlyValues.length + index;
+      const value = Math.max(0, intercept + slope * forecastIndex);
+      return {
+        month: labels[(new Date().getMonth() + index + 1) % 12],
+        value: Math.round(value),
+      };
+    });
+
+    res.json({ predictions });
+  } catch (err) {
+    console.error('Erreur GET /predictions:', err);
+    res.status(500).json({ error: 'Erreur serveur' });
+  }
+});
+
 // GET /api/analysis/sentiment
 router.get('/sentiment', auth, async (req, res) => {
   try {

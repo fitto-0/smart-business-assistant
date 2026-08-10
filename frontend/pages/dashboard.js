@@ -1,5 +1,6 @@
+import { useEffect, useState } from 'react';
 import Layout from '../components/Layout';
-import { kpis, monthlySales, categoryData, weeklyRevenue, anomalies, recommendations } from '../data/mockData';
+import { apiGet } from '../lib/api';
 import {
   AreaChart, Area, BarChart, Bar, PieChart, Pie, Cell,
   XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer
@@ -44,8 +45,60 @@ const CustomTooltip = ({ active, payload, label }) => {
 };
 
 export default function Dashboard() {
-  const criticalAnomalies = anomalies.filter(a => a.severity === 'critique' || a.severity === 'haute');
-  const topRecs = recommendations.filter(r => r.priority === 'critique' || r.priority === 'haute').slice(0, 3);
+  const [kpis, setKpis] = useState({ totalRevenue: 0, revenueGrowth: 0, totalOrders: 0, avgOrderValue: 0, customerSatisfaction: 0, totalReviews: 0, stockAlerts: 0 });
+  const [monthlySales, setMonthlySales] = useState([]);
+  const [categoryData, setCategoryData] = useState([]);
+  const [weeklyRevenue, setWeeklyRevenue] = useState([]);
+  const [anomalies, setAnomalies] = useState([]);
+  const [recommendations, setRecommendations] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const loadData = async () => {
+      try {
+        const [salesKpis, monthly, categories, weekly, anomalyData, recData] = await Promise.all([
+          apiGet('/sales/kpis'),
+          apiGet('/sales/monthly'),
+          apiGet('/sales/categories'),
+          apiGet('/sales/recent', { limit: 7 }),
+          apiGet('/analysis/anomalies'),
+          apiGet('/analysis/recommendations')
+        ]);
+
+        const derivedKpis = {
+          ...salesKpis,
+          stockAlerts: anomalyData?.stats?.critical || 0,
+        };
+
+        setKpis(derivedKpis);
+        setMonthlySales(monthly?.data || []);
+        setCategoryData(categories?.data || []);
+        setWeeklyRevenue((weekly?.data || []).slice(0, 7).map((item) => ({
+          jour: new Date(item.date).toLocaleDateString('fr-FR', { weekday: 'short' }),
+          revenus: Number(item.total_amount || 0),
+        })));
+        setAnomalies(anomalyData?.anomalies || []);
+        setRecommendations(recData?.recommendations || []);
+      } catch (error) {
+        console.error('Failed to load dashboard data', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadData();
+  }, []);
+
+  const criticalAnomalies = (anomalies || []).filter(a => a.severity === 'critique' || a.severity === 'haute');
+  const topRecs = (recommendations || []).filter(r => r.priority === 'critique' || r.priority === 'haute').slice(0, 3);
+
+  if (loading) {
+    return (
+      <Layout title="Tableau de Bord">
+        <div className="card text-center py-16 text-slate-400">Chargement des données…</div>
+      </Layout>
+    );
+  }
 
   return (
     <Layout title="Tableau de Bord">
@@ -87,8 +140,8 @@ export default function Dashboard() {
               <YAxis tick={{ fill: '#64748b', fontSize: 11 }} axisLine={false} tickLine={false} tickFormatter={v => `${v/1000}k`} />
               <Tooltip content={<CustomTooltip />} />
               <Legend wrapperStyle={{ paddingTop: '16px', fontSize: '12px' }} />
-              <Area type="monotone" dataKey="ventes" name="Ventes (DA)" stroke="#6366f1" strokeWidth={2.5} fill="url(#salesGrad)" />
-              <Area type="monotone" dataKey="objectif" name="Objectif (DA)" stroke="#06b6d4" strokeWidth={2} strokeDasharray="5 5" fill="url(#objGrad)" />
+              <Area type="monotone" dataKey="actual" name="Ventes (DA)" stroke="#6366f1" strokeWidth={2.5} fill="url(#salesGrad)" />
+              <Area type="monotone" dataKey="target" name="Objectif (DA)" stroke="#06b6d4" strokeWidth={2} strokeDasharray="5 5" fill="url(#objGrad)" />
             </AreaChart>
           </ResponsiveContainer>
         </div>
@@ -159,7 +212,7 @@ export default function Dashboard() {
               <div key={a.id} className="flex items-start gap-3 p-2.5 rounded-xl bg-dark-900/50 border border-slate-700/30">
                 <div className={`w-2 h-2 rounded-full mt-1.5 flex-shrink-0 ${a.severity === 'critique' ? 'bg-red-500' : 'bg-amber-500'}`} />
                 <div>
-                  <p className="text-xs font-semibold text-slate-200">{a.product}</p>
+                  <p className="text-xs font-semibold text-slate-200">{a.product_name || a.product || 'Anomalie'}</p>
                   <p className="text-xs text-slate-500 mt-0.5">{a.description}</p>
                 </div>
                 <span className={`ml-auto text-xs flex-shrink-0 ${a.severity === 'critique' ? 'badge-red' : 'badge-yellow'}`}>
@@ -183,7 +236,7 @@ export default function Dashboard() {
           <div className="space-y-2.5">
             {topRecs.map(r => (
               <div key={r.id} className="flex items-start gap-3 p-2.5 rounded-xl bg-dark-900/50 border border-slate-700/30">
-                <span className="text-lg flex-shrink-0">{r.icon}</span>
+                <span className="text-lg flex-shrink-0">{r.icon || '💡'}</span>
                 <div>
                   <p className="text-xs font-semibold text-slate-200 leading-tight">{r.title}</p>
                   <p className="text-xs text-emerald-400 font-medium mt-1">{r.impact}</p>

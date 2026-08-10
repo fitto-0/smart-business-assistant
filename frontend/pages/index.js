@@ -19,8 +19,7 @@ export default function LoginPage() {
     e.preventDefault();
     setLoading(true);
     try {
-      await new Promise(r => setTimeout(r, 800));
-      login(form.email, form.password);
+      await login(form.email, form.password);
       toast.success('Connexion réussie ! Bienvenue 👋');
       router.push('/dashboard');
     } catch (err) {

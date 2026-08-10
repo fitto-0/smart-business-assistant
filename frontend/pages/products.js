@@ -1,8 +1,8 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import Layout from '../components/Layout';
-import { products as initialProducts } from '../data/mockData';
+import { apiGet, apiPost, apiPut, apiDelete } from '../lib/api';
 import toast from 'react-hot-toast';
-import { Plus, Search, Filter, Edit2, Trash2, Package, TrendingUp, TrendingDown, X, Save } from 'lucide-react';
+import { Plus, Search, Edit2, Trash2, Package, TrendingUp, TrendingDown, X, Save } from 'lucide-react';
 
 const fmt = (n) => new Intl.NumberFormat('fr-FR').format(n);
 
@@ -15,14 +15,30 @@ const STATUS_LABELS = {
 const CATEGORIES = ['Toutes', 'Électronique', 'Vêtements', 'Alimentation', 'Maison', 'Sport'];
 
 export default function ProductsPage() {
-  const [products, setProducts] = useState(initialProducts);
+  const [products, setProducts] = useState([]);
   const [search, setSearch] = useState('');
   const [catFilter, setCatFilter] = useState('Toutes');
   const [showModal, setShowModal] = useState(false);
   const [editProduct, setEditProduct] = useState(null);
   const [form, setForm] = useState({ name: '', category: 'Électronique', price: '', stock: '' });
+  const [loading, setLoading] = useState(true);
 
-  const filtered = products.filter(p => {
+  useEffect(() => {
+    const loadProducts = async () => {
+      try {
+        const data = await apiGet('/api/products');
+        setProducts(data.products || []);
+      } catch (error) {
+        toast.error(error.message || 'Impossible de charger les produits');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadProducts();
+  }, []);
+
+  const filtered = (products || []).filter(p => {
     const matchSearch = p.name.toLowerCase().includes(search.toLowerCase()) || p.category.toLowerCase().includes(search.toLowerCase());
     const matchCat = catFilter === 'Toutes' || p.category === catFilter;
     return matchSearch && matchCat;
@@ -40,25 +56,34 @@ export default function ProductsPage() {
     setShowModal(true);
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (!form.name || !form.price || form.stock === '') { toast.error('Veuillez remplir tous les champs'); return; }
-    const stock = parseInt(form.stock);
-    const status = stock === 0 ? 'rupture' : stock <= 10 ? 'stock_faible' : 'actif';
-    if (editProduct) {
-      setProducts(products.map(p => p.id === editProduct.id ? { ...p, ...form, price: parseFloat(form.price), stock, status } : p));
-      toast.success('Produit modifié avec succès');
-    } else {
-      const newP = { id: Date.now(), ...form, price: parseFloat(form.price), stock, sold: 0, revenue: 0, trend: 0, status };
-      setProducts([newP, ...products]);
-      toast.success('Produit ajouté avec succès');
+
+    try {
+      const payload = { name: form.name, category: form.category, price: parseFloat(form.price), stock: parseInt(form.stock, 10) };
+      if (editProduct) {
+        const updated = await apiPut(`/api/products/${editProduct.id}`, payload);
+        setProducts((current) => current.map((p) => p.id === updated.id ? updated : p));
+        toast.success('Produit modifié avec succès');
+      } else {
+        const created = await apiPost('/api/products', payload);
+        setProducts((current) => [created, ...current]);
+        toast.success('Produit ajouté avec succès');
+      }
+      setShowModal(false);
+    } catch (error) {
+      toast.error(error.message || 'Échec de l’enregistrement');
     }
-    setShowModal(false);
   };
 
-  const handleDelete = (id) => {
-    if (window.confirm('Supprimer ce produit ?')) {
-      setProducts(products.filter(p => p.id !== id));
+  const handleDelete = async (id) => {
+    if (!window.confirm('Supprimer ce produit ?')) return;
+    try {
+      await apiDelete(`/api/products/${id}`);
+      setProducts((current) => current.filter((p) => p.id !== id));
       toast.success('Produit supprimé');
+    } catch (error) {
+      toast.error(error.message || 'Échec de la suppression');
     }
   };
 
@@ -112,6 +137,8 @@ export default function ProductsPage() {
           </button>
         </div>
       </div>
+
+      {loading && <div className="card text-center py-8 text-slate-400">Chargement des produits…</div>}
 
       {/* Products Table */}
       <div className="card">

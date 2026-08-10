@@ -1,6 +1,6 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import Layout from '../components/Layout';
-import { recommendations as allRecs } from '../data/mockData';
+import { apiGet, apiPut } from '../lib/api';
 import toast from 'react-hot-toast';
 import { Lightbulb, CheckCircle, Package, Tag, Star, BarChart2, Filter } from 'lucide-react';
 
@@ -19,13 +19,33 @@ const CATEGORY_CONFIG = {
 };
 
 export default function RecommendationsPage() {
-  const [recs, setRecs] = useState(allRecs.map(r => ({ ...r, done: false })));
+  const [recs, setRecs] = useState([]);
   const [filter, setFilter] = useState('tous');
+  const [loading, setLoading] = useState(true);
 
-  const markDone = (id) => {
-    setRecs(recs.map(r => r.id === id ? { ...r, done: !r.done } : r));
-    const rec = recs.find(r => r.id === id);
-    toast.success(rec.done ? 'Action remise en attente' : 'Action marquée comme effectuée ! 🎉');
+  useEffect(() => {
+    const loadRecs = async () => {
+      try {
+        const data = await apiGet('/api/analysis/recommendations');
+        setRecs((data.recommendations || []).map(r => ({ ...r, done: Boolean(r.done) })));
+      } catch (error) {
+        toast.error(error.message || 'Impossible de charger les recommandations');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadRecs();
+  }, []);
+
+  const markDone = async (id) => {
+    try {
+      const updated = await apiPut(`/api/analysis/recommendations/${id}/toggle`);
+      setRecs((current) => current.map((r) => r.id === id ? { ...r, ...updated, done: Boolean(updated.done) } : r));
+      toast.success(updated.done ? 'Action marquée comme effectuée ! 🎉' : 'Action remise en attente');
+    } catch (error) {
+      toast.error(error.message || 'Échec de la mise à jour');
+    }
   };
 
   const filtered = filter === 'tous' ? recs : recs.filter(r =>
@@ -105,6 +125,8 @@ export default function RecommendationsPage() {
           ))}
         </div>
       </div>
+
+      {loading && <div className="card text-center py-12 text-slate-400">Chargement des recommandations…</div>}
 
       {/* Recommendations */}
       <div className="space-y-4">
