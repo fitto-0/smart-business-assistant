@@ -45,7 +45,7 @@ export default function AnomaliesPage() {
 
   const markResolved = async (id) => {
     try {
-      await apiPut(`/api/analysis/anomalies/${id}/resolve`);
+      await apiPut(`/analysis/anomalies/${id}/resolve`);
       setAnomalies((current) => current.map((a) => a.id === id ? { ...a, status: 'résolu' } : a));
       toast.success('Anomalie marquée comme résolue ✓');
     } catch (error) {
@@ -54,7 +54,7 @@ export default function AnomaliesPage() {
   };
   const markInProgress = async (id) => {
     try {
-      await apiPut(`/api/analysis/anomalies/${id}/in-progress`);
+      await apiPut(`/analysis/anomalies/${id}/in-progress`);
       setAnomalies((current) => current.map((a) => a.id === id ? { ...a, status: 'en_cours' } : a));
       toast.success('Anomalie mise en cours de traitement');
     } catch (error) {

@@ -26,7 +26,7 @@ export default function ProductsPage() {
   useEffect(() => {
     const loadProducts = async () => {
       try {
-        const data = await apiGet('/api/products');
+        const data = await apiGet('/products');
         setProducts(data.products || []);
       } catch (error) {
         toast.error(error.message || 'Impossible de charger les produits');
@@ -62,11 +62,11 @@ export default function ProductsPage() {
     try {
       const payload = { name: form.name, category: form.category, price: parseFloat(form.price), stock: parseInt(form.stock, 10) };
       if (editProduct) {
-        const updated = await apiPut(`/api/products/${editProduct.id}`, payload);
+        const updated = await apiPut(`/products/${editProduct.id}`, payload);
         setProducts((current) => current.map((p) => p.id === updated.id ? updated : p));
         toast.success('Produit modifié avec succès');
       } else {
-        const created = await apiPost('/api/products', payload);
+        const created = await apiPost('/products', payload);
         setProducts((current) => [created, ...current]);
         toast.success('Produit ajouté avec succès');
       }
@@ -79,7 +79,7 @@ export default function ProductsPage() {
   const handleDelete = async (id) => {
     if (!window.confirm('Supprimer ce produit ?')) return;
     try {
-      await apiDelete(`/api/products/${id}`);
+      await apiDelete(`/products/${id}`);
       setProducts((current) => current.filter((p) => p.id !== id));
       toast.success('Produit supprimé');
     } catch (error) {

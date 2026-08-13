@@ -33,8 +33,8 @@ export default function PredictionsPage() {
     const loadPredictions = async () => {
       try {
         const [pred, monthly] = await Promise.all([
-          apiGet('/api/analysis/predictions'),
-          apiGet('/api/sales/monthly')
+          apiGet('/analysis/predictions'),
+          apiGet('/sales/monthly')
         ]);
         setPredictions(pred?.predictions || []);
         setMonthlySales(monthly?.data || []);

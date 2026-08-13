@@ -32,8 +32,8 @@ export default function SalesPage() {
     const loadSales = async () => {
       try {
         const [monthly, top] = await Promise.all([
-          apiGet('/api/sales/monthly'),
-          apiGet('/api/sales/top-products', { limit: 5 })
+          apiGet('/sales/monthly'),
+          apiGet('/sales/top-products', { limit: 5 })
         ]);
         setMonthlySales(monthly?.data || []);
         setTopProducts(top?.data || []);

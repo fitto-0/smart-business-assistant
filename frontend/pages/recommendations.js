@@ -26,7 +26,7 @@ export default function RecommendationsPage() {
   useEffect(() => {
     const loadRecs = async () => {
       try {
-        const data = await apiGet('/api/analysis/recommendations');
+        const data = await apiGet('/analysis/recommendations');
         setRecs((data.recommendations || []).map(r => ({ ...r, done: Boolean(r.done) })));
       } catch (error) {
         toast.error(error.message || 'Impossible de charger les recommandations');
@@ -40,7 +40,7 @@ export default function RecommendationsPage() {
 
   const markDone = async (id) => {
     try {
-      const updated = await apiPut(`/api/analysis/recommendations/${id}/toggle`);
+      const updated = await apiPut(`/analysis/recommendations/${id}/toggle`);
       setRecs((current) => current.map((r) => r.id === id ? { ...r, ...updated, done: Boolean(updated.done) } : r));
       toast.success(updated.done ? 'Action marquée comme effectuée ! 🎉' : 'Action remise en attente');
     } catch (error) {
