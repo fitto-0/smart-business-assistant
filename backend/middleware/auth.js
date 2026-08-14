@@ -1,6 +1,9 @@
 const jwt = require("jsonwebtoken");
 
-const JWT_SECRET = process.env.JWT_SECRET || "sba_secret_key_2024";
+// ⚠️ MUST match the secret used in routes/auth.js (JWT signing).
+// Deterministic fallback so verification always succeeds even if .env is absent.
+const JWT_SECRET =
+  process.env.JWT_SECRET || "aR2vT9xK8mNpQ4sW7zE6hJ3cL5yB1uF0dG8iV2nA";
 
 module.exports = (req, res, next) => {
   try {

@@ -764,6 +764,74 @@ router.get("/recommendations", auth, async (req, res) => {
 });
 
 // =====================================================
+// GET /api/analysis/targets — objectifs mensuels (scopés)
+// =====================================================
+router.get("/targets", auth, async (req, res) => {
+  try {
+    const result = await query(
+      `
+      SELECT id, month, target, actual, year, month_num
+      FROM monthly_targets
+      WHERE user_id = $1
+      ORDER BY year, month_num
+      `,
+      [req.user.id],
+    );
+
+    return res.json({
+      targets: result.rows,
+    });
+  } catch (err) {
+    console.error("Erreur GET /targets:", err);
+
+    return res.status(500).json({
+      error: "Erreur serveur",
+    });
+  }
+});
+
+// =====================================================
+// PUT /api/analysis/targets/:month — modifier un objectif (scopé)
+// =====================================================
+router.put("/targets/:month", auth, async (req, res) => {
+  try {
+    const { month } = req.params;
+    const { target } = req.body;
+
+    if (!month || target === undefined || isNaN(parseFloat(target))) {
+      return res.status(400).json({
+        error: "month et target requis",
+      });
+    }
+
+    const result = await query(
+      `
+      UPDATE monthly_targets
+      SET target = $1
+      WHERE month = $2
+      AND user_id = $3
+      RETURNING id, month, target, actual, year, month_num
+      `,
+      [parseFloat(target), month, req.user.id],
+    );
+
+    if (result.rowCount === 0) {
+      return res.status(404).json({
+        error: "Objectif non trouvé",
+      });
+    }
+
+    return res.json(result.rows[0]);
+  } catch (err) {
+    console.error("Erreur PUT /targets/:month:", err);
+
+    return res.status(500).json({
+      error: "Erreur serveur",
+    });
+  }
+});
+
+// =====================================================
 // PUT /api/analysis/recommendations/:id/toggle
 // =====================================================
 router.put("/recommendations/:id/toggle", auth, async (req, res) => {

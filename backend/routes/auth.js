@@ -5,7 +5,9 @@ const pool = require("../config/db");
 
 const query = (text, params) => pool.query(text, params);
 
-const JWT_SECRET = process.env.JWT_SECRET || "sba_secret_key_2024";
+// ⚠️ MUST match the secret used in middleware/auth.js (JWT verification).
+const JWT_SECRET =
+  process.env.JWT_SECRET || "aR2vT9xK8mNpQ4sW7zE6hJ3cL5yB1uF0dG8iV2nA";
 
 const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || "24h";
 

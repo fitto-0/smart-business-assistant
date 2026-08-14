@@ -1,6 +1,6 @@
-
 -- ====================================================================
--- SMART BUSINESS ASSISTANT - Schéma PostgreSQL
+-- SMART BUSINESS ASSISTANT - Schéma PostgreSQL (multi-tenant)
+-- Chaque table métier est scopée par user_id (provenant du JWT).
 -- ====================================================================
 
 -- Nettoyage (à exécuter avec précaution en production)
@@ -12,6 +12,10 @@ DROP TABLE IF EXISTS products CASCADE;
 DROP TABLE IF EXISTS monthly_targets CASCADE;
 DROP TABLE IF EXISTS users CASCADE;
 DROP TABLE IF EXISTS predictions_cache CASCADE;
+DROP VIEW IF EXISTS v_product_performance;
+DROP VIEW IF EXISTS v_monthly_sales;
+DROP VIEW IF EXISTS v_global_kpis;
+DROP VIEW IF EXISTS v_sentiment_summary;
 
 -- ===================== Extensions =====================
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
@@ -35,6 +39,7 @@ CREATE INDEX idx_users_email ON users(email);
 -- ===================== TABLE PRODUCTS =====================
 CREATE TABLE products (
     id SERIAL PRIMARY KEY,
+    user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
     name VARCHAR(200) NOT NULL,
     category VARCHAR(50) NOT NULL CHECK (category IN ('Électronique', 'Vêtements', 'Alimentation', 'Maison', 'Sport', 'Autre')),
     price NUMERIC(10, 2) NOT NULL CHECK (price >= 0),
@@ -56,6 +61,7 @@ CREATE TABLE products (
     updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 
+CREATE INDEX idx_products_user ON products(user_id);
 CREATE INDEX idx_products_category ON products(category);
 CREATE INDEX idx_products_status ON products(status);
 CREATE INDEX idx_products_name ON products(name);
@@ -63,6 +69,7 @@ CREATE INDEX idx_products_name ON products(name);
 -- ===================== TABLE SALES =====================
 CREATE TABLE sales (
     id SERIAL PRIMARY KEY,
+    user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
     product_id INTEGER REFERENCES products(id) ON DELETE CASCADE,
     date DATE NOT NULL,
     quantity INTEGER NOT NULL CHECK (quantity > 0),
@@ -74,26 +81,30 @@ CREATE TABLE sales (
     created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
-CREATE INDEX idx_sales_date ON sales(date DESC);
-CREATE INDEX idx_sales_product ON sales(product_id);
---CREATE INDEX idx_sales_month ON sales(DATE_TRUNC('month', date));
+CREATE INDEX idx_sales_user ON sales(user_id);
+CREATE INDEX idx_sales_user_date ON sales(user_id, date DESC);
+CREATE INDEX idx_sales_user_product ON sales(user_id, product_id);
 
 -- ===================== TABLE MONTHLY_TARGETS =====================
 CREATE TABLE monthly_targets (
     id SERIAL PRIMARY KEY,
-    month VARCHAR(7) UNIQUE NOT NULL,
+    user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    month VARCHAR(7) NOT NULL,
     target NUMERIC(12, 2) NOT NULL,
     actual NUMERIC(12, 2) DEFAULT 0,
     year INTEGER NOT NULL,
     month_num INTEGER NOT NULL CHECK (month_num BETWEEN 1 AND 12),
-    created_at TIMESTAMPTZ DEFAULT NOW()
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    UNIQUE(user_id, month)
 );
 
-CREATE INDEX idx_targets_year_month ON monthly_targets(year, month_num);
+CREATE INDEX idx_targets_user ON monthly_targets(user_id);
+CREATE INDEX idx_targets_user_year_month ON monthly_targets(user_id, year, month_num);
 
 -- ===================== TABLE REVIEWS =====================
 CREATE TABLE reviews (
     id SERIAL PRIMARY KEY,
+    user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
     product_id INTEGER REFERENCES products(id) ON DELETE SET NULL,
     customer_name VARCHAR(150) NOT NULL,
     rating INTEGER NOT NULL CHECK (rating BETWEEN 1 AND 5),
@@ -104,13 +115,15 @@ CREATE TABLE reviews (
     created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
-CREATE INDEX idx_reviews_product ON reviews(product_id);
-CREATE INDEX idx_reviews_sentiment ON reviews(sentiment);
-CREATE INDEX idx_reviews_rating ON reviews(rating);
+CREATE INDEX idx_reviews_user ON reviews(user_id);
+CREATE INDEX idx_reviews_user_product ON reviews(user_id, product_id);
+CREATE INDEX idx_reviews_user_sentiment ON reviews(user_id, sentiment);
+CREATE INDEX idx_reviews_user_rating ON reviews(user_id, rating);
 
 -- ===================== TABLE ANOMALIES =====================
 CREATE TABLE anomalies (
     id SERIAL PRIMARY KEY,
+    user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
     product_id INTEGER REFERENCES products(id) ON DELETE SET NULL,
     type VARCHAR(30) NOT NULL CHECK (type IN ('baisse_ventes', 'rupture_stock', 'stock_faible', 'avis_négatifs', 'pic_ventes')),
     severity VARCHAR(20) NOT NULL CHECK (severity IN ('basse', 'moyenne', 'haute', 'critique')),
@@ -123,13 +136,15 @@ CREATE TABLE anomalies (
     created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
-CREATE INDEX idx_anomalies_status ON anomalies(status);
-CREATE INDEX idx_anomalies_severity ON anomalies(severity);
-CREATE INDEX idx_anomalies_type ON anomalies(type);
+CREATE INDEX idx_anomalies_user ON anomalies(user_id);
+CREATE INDEX idx_anomalies_user_status ON anomalies(user_id, status);
+CREATE INDEX idx_anomalies_user_severity ON anomalies(user_id, severity);
+CREATE INDEX idx_anomalies_user_type ON anomalies(user_id, type);
 
 -- ===================== TABLE RECOMMENDATIONS =====================
 CREATE TABLE recommendations (
     id SERIAL PRIMARY KEY,
+    user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
     priority VARCHAR(20) NOT NULL CHECK (priority IN ('basse', 'moyenne', 'haute', 'critique')),
     category VARCHAR(30) NOT NULL CHECK (category IN ('stock', 'promotion', 'service_client', 'analyse', 'marketing')),
     title VARCHAR(255) NOT NULL,
@@ -142,70 +157,31 @@ CREATE TABLE recommendations (
     created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
-CREATE INDEX idx_recommendations_priority ON recommendations(priority);
-CREATE INDEX idx_recommendations_done ON recommendations(done);
+CREATE INDEX idx_recommendations_user ON recommendations(user_id);
+CREATE INDEX idx_recommendations_user_priority ON recommendations(user_id, priority);
+CREATE INDEX idx_recommendations_user_done ON recommendations(user_id, done);
 
 -- ===================== TABLE PREDICTIONS_CACHE =====================
 CREATE TABLE predictions_cache (
     id SERIAL PRIMARY KEY,
+    user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
     horizon_months INTEGER NOT NULL,
     period VARCHAR(7) NOT NULL,
     predicted_value NUMERIC(12, 2) NOT NULL,
     confidence NUMERIC(3, 2),
     model_name VARCHAR(100) DEFAULT 'LinearRegression',
     created_at TIMESTAMPTZ DEFAULT NOW(),
-    UNIQUE(horizon_months, period)
+    UNIQUE(user_id, horizon_months, period)
 );
 
-CREATE INDEX idx_predictions_period ON predictions_cache(period);
+CREATE INDEX idx_predictions_user ON predictions_cache(user_id);
+CREATE INDEX idx_predictions_user_period ON predictions_cache(user_id, period);
 
--- ===================== VUES UTILES =====================
-CREATE OR REPLACE VIEW v_product_performance AS
-SELECT
-    p.id, p.name, p.category, p.price, p.stock, p.sold, p.revenue, p.trend, p.status,
-    COUNT(r.id) AS reviews_count,
-    COALESCE(AVG(r.rating), 0) AS avg_rating,
-    COALESCE(SUM(s.quantity), 0) AS total_qty_sold
-FROM products p
-LEFT JOIN reviews r ON r.product_id = p.id
-LEFT JOIN sales s ON s.product_id = p.id
-GROUP BY p.id, p.name, p.category, p.price, p.stock, p.sold, p.revenue, p.trend, p.status;
-
-CREATE OR REPLACE VIEW v_monthly_sales AS
-SELECT
-    DATE_TRUNC('month', date)::DATE AS month_start,
-    TO_CHAR(date, 'YYYY-MM') AS month,
-    EXTRACT(YEAR FROM date)::INT AS year,
-    EXTRACT(MONTH FROM date)::INT AS month_num,
-    COUNT(*) AS orders_count,
-    SUM(quantity) AS total_items,
-    SUM(total_amount) AS total_amount
-FROM sales
-GROUP BY
-    DATE_TRUNC('month', date),
-    TO_CHAR(date, 'YYYY-MM'),
-    EXTRACT(YEAR FROM date),
-    EXTRACT(MONTH FROM date)
-ORDER BY month DESC;
-
-CREATE OR REPLACE VIEW v_global_kpis AS
-SELECT
-    COALESCE(SUM(total_amount), 0) AS total_revenue,
-    COUNT(*) AS total_orders,
-    COALESCE(AVG(total_amount), 0) AS avg_order_value,
-    (SELECT COUNT(*) FROM reviews) AS total_reviews,
-    (SELECT COALESCE(AVG(rating), 0) FROM reviews) AS avg_rating
-FROM sales;
-
-CREATE OR REPLACE VIEW v_sentiment_summary AS
-SELECT
-    sentiment,
-    COUNT(*) AS review_count,
-    ROUND((COUNT(*)::DECIMAL / (SELECT COUNT(*) FROM reviews) * 100), 1) AS percentage,
-    AVG(score) AS avg_score
-FROM reviews
-WHERE sentiment IS NOT NULL
-GROUP BY sentiment;
+-- ===================== VUES =====================
+-- NOTE MULTI-TENANT :
+--   v_global_kpis a été SUPPRIMÉE (elle renvoyait des statistiques globales =
+--   fuite de données inter-utilisateurs). Tous les KPIs sont désormais des
+--   requêtes scopées par user_id directement dans les routes backend.
 
 -- ===================== FONCTIONS & TRIGGERS =====================
 CREATE OR REPLACE FUNCTION update_updated_at_column()
@@ -226,6 +202,9 @@ CREATE TRIGGER update_products_updated_at
     FOR EACH ROW
     EXECUTE FUNCTION update_updated_at_column();
 
+-- Met à jour les stats produit (sold, revenue, stock) après insertion d'une vente.
+-- Sécurisé multi-tenant : le produit n'est mis à jour que si la vente ET le
+-- produit appartiennent au même utilisateur.
 CREATE OR REPLACE FUNCTION update_product_stats()
 RETURNS TRIGGER AS $$
 BEGIN
@@ -233,7 +212,8 @@ BEGIN
     SET sold = sold + NEW.quantity,
         revenue = revenue + NEW.total_amount,
         stock = GREATEST(stock - NEW.quantity, 0)
-    WHERE id = NEW.product_id;
+    WHERE id = NEW.product_id
+      AND user_id = NEW.user_id;
     RETURN NEW;
 END;
 $$ LANGUAGE plpgsql;

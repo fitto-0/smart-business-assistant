@@ -51,6 +51,7 @@ export default function SalesPage() {
   const totalOrders = (monthlySales || []).reduce((s, m) => s + Number(m.orders || 0), 0);
   const avgMonthly = Math.round(totalSales / Math.max(monthlySales.length, 1));
   const bestMonth = (monthlySales || []).reduce((a, b) => (Number(a.actual || 0) > Number(b.actual || 0) ? a : b), { month: 'N/A', actual: 0 });
+  const bestMonthVentes = bestMonth.actual || 0;
 
   if (loading) {
     return <Layout title="Analyse des Ventes"><div className="card text-center py-16 text-slate-400">Chargement des ventes…</div></Layout>;
@@ -64,7 +65,7 @@ export default function SalesPage() {
           { label: 'CA Annuel Total', value: totalSales, suffix: ' DA', icon: DollarSign, color: 'from-primary-500 to-indigo-600', change: '+18.4%' },
           { label: 'Total Commandes', value: totalOrders, icon: ShoppingCart, color: 'from-cyan-500 to-blue-600', change: '+12.7%' },
           { label: 'Moyenne Mensuelle', value: avgMonthly, suffix: ' DA', icon: BarChart2, color: 'from-emerald-500 to-teal-600' },
-          { label: 'Meilleur Mois', value: bestMonth.month, icon: TrendingUp, color: 'from-amber-500 to-orange-600', sub: `${fmt(bestMonth.ventes)} DA` },
+          { label: 'Meilleur Mois', value: bestMonth.month, icon: TrendingUp, color: 'from-amber-500 to-orange-600', sub: `${fmt(bestMonthVentes)} DA` },
         ].map((kpi, i) => (
           <div key={i} className="card flex items-center gap-4">
             <div className={`w-11 h-11 rounded-xl bg-gradient-to-br ${kpi.color} flex items-center justify-center shadow-lg`}>
@@ -166,8 +167,10 @@ export default function SalesPage() {
             </thead>
             <tbody>
               {monthlySales.map((row) => {
-                const ecart = row.ventes - row.objectif;
-                const perf = ((row.ventes / row.objectif) * 100).toFixed(1);
+                const ventes = Number(row.actual || 0);
+                const objectif = Number(row.target || 0);
+                const ecart = ventes - objectif;
+                const perf = objectif ? ((ventes / objectif) * 100).toFixed(1) : '0.0';
                 return (
                   <tr key={row.month} className="hover:bg-slate-700/20 transition-colors">
                     <td className="table-cell font-semibold text-white">{row.month}</td>

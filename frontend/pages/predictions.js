@@ -51,7 +51,20 @@ export default function PredictionsPage() {
   const totalPredicted = (predictions || []).slice(0, 6).reduce((s, p) => s + Number(p.value || 0), 0);
   const lastYearTotal = (monthlySales || []).reduce((s, m) => s + Number(m.actual || 0), 0);
   const growth = lastYearTotal ? (((totalPredicted - lastYearTotal) / lastYearTotal) * 100).toFixed(1) : '0.0';
-  const displayData = (predictions || []).slice(0, 12 + horizon);
+
+  // Fusionner historique réel + prédictions pour le graphique
+  const displayData = [
+    ...(monthlySales || []).map((m) => ({
+      month: m.month,
+      historique: Number(m.actual || 0),
+      prediction: null,
+    })),
+    ...(predictions || []).map((p) => ({
+      month: p.month,
+      historique: null,
+      prediction: Number(p.value || 0),
+    })),
+  ].slice(-(12 + horizon));
 
   if (loading) {
     return <Layout title="Prédictions IA"><div className="card text-center py-16 text-slate-400">Chargement des prédictions…</div></Layout>;
@@ -176,7 +189,7 @@ export default function PredictionsPage() {
               </tr>
             </thead>
             <tbody>
-              {predictions.filter(p => p.prediction).slice(0, horizon).map((p, i) => {
+              {(predictions || []).slice(0, horizon).map((p, i) => {
                 const prev = monthlySales[i]?.actual || monthlySales[11]?.actual || 0;
                 const change = prev ? (((Number(p.value || 0) - prev) / prev) * 100).toFixed(1) : '0.0';
                 const confidence = 85 - i * 2;
