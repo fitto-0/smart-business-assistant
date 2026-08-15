@@ -95,3 +95,173 @@
   from { transform: translateY(20px); opacity: 0; }
   to { transform: translateY(0); opacity: 1; }
 }
+
+/* ================================================================
+   LANDING / AUTH — dark abstract design
+   ================================================================ */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Outlined / ghost headline effect */
+.text-ghost {
+  color: transparent;
+  -webkit-text-stroke: 1.5px rgba(255, 255, 255, 0.75);
+  transition: -webkit-text-stroke 0.3s ease, color 0.3s ease;
+}
+.text-ghost:hover {
+  -webkit-text-stroke: 1.5px rgba(255, 255, 255, 1);
+}
+
+/* Abstract fluid blob */
+.blob {
+  position: relative;
+  filter: blur(2px);
+}
+.blob::before,
+.blob::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  filter: blur(70px);
+  opacity: 0.85;
+}
+.blob::before {
+  background: radial-gradient(circle at 30% 30%, #ff5c39 0%, transparent 60%),
+    radial-gradient(circle at 70% 70%, #4f46e5 0%, transparent 60%);
+  animation: blobMorph 12s ease-in-out infinite alternate;
+}
+.blob::after {
+  background: radial-gradient(circle at 65% 35%, #ef4444 0%, transparent 55%),
+    radial-gradient(circle at 35% 70%, #6366f1 0%, transparent 60%);
+  animation: blobMorph 16s ease-in-out infinite alternate-reverse;
+}
+@keyframes blobMorph {
+  0% {
+    border-radius: 42% 58% 63% 37% / 44% 42% 58% 56%;
+    transform: rotate(0deg) scale(1);
+  }
+  50% {
+    border-radius: 61% 39% 36% 64% / 57% 60% 40% 43%;
+    transform: rotate(30deg) scale(1.05);
+  }
+  100% {
+    border-radius: 38% 62% 55% 45% / 52% 38% 62% 48%;
+    transform: rotate(-20deg) scale(0.98);
+  }
+}
+
+/* Slow floating animation for hero decorations */
+@keyframes floatY {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-14px); }
+}
+.animate-float {
+  animation: floatY 6s ease-in-out infinite;
+}
+.animate-float-delay {
+  animation: floatY 7s ease-in-out 1.2s infinite;
+}
+
+/* Gradient accent button (orange/red) */
+.btn-accent {
+  background: linear-gradient(135deg, #ff5c39 0%, #ef4444 50%, #dc2626 100%);
+  color: #fff;
+  font-weight: 700;
+  border-radius: 9999px;
+  padding: 0.8rem 1.75rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  box-shadow: 0 12px 32px -8px rgba(239, 68, 68, 0.55);
+  transition: all 0.25s ease;
+}
+.btn-accent:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 18px 40px -8px rgba(239, 68, 68, 0.7);
+}
+.btn-accent:active {
+  transform: translateY(0);
+}
+
+/* Outlined ghost button */
+.btn-ghost {
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  color: #fff;
+  font-weight: 600;
+  border-radius: 9999px;
+  padding: 0.8rem 1.75rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: all 0.25s ease;
+  background: transparent;
+}
+.btn-ghost:hover {
+  border-color: rgba(255, 255, 255, 0.6);
+  background: rgba(255, 255, 255, 0.06);
+}
+
+/* Landing nav */
+.landing-nav {
+  backdrop-filter: blur(14px);
+  background: rgba(2, 6, 23, 0.6);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+/* Benefits grid divider */
+.benefit-col {
+  border-left: 1px solid rgba(255, 255, 255, 0.08);
+}
+@media (max-width: 767px) {
+  .benefit-col {
+    border-left: none;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+  }
+}
+
+/* Auth pages shell */
+.auth-shell {
+  min-height: 100vh;
+  background: radial-gradient(1200px 600px at 85% -10%, rgba(79, 70, 229, 0.25), transparent 60%),
+    radial-gradient(1000px 600px at 0% 100%, rgba(255, 92, 57, 0.18), transparent 55%),
+    #020617;
+}
+.auth-card {
+  background: rgba(15, 23, 42, 0.75);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 1.5rem;
+  backdrop-filter: blur(20px);
+  box-shadow: 0 24px 64px -16px rgba(0, 0, 0, 0.7);
+}
+.text-gradient-warm {
+  background: linear-gradient(135deg, #ffb199 0%, #ff5c39 50%, #f97316 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* Grid pattern backdrop for landing */
+.grid-backdrop {
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.035) 1px, transparent 1px);
+  background-size: 64px 64px;
+  mask-image: radial-gradient(ellipse 80% 60% at 50% 20%, black 30%, transparent 75%);
+}
+
+/* Logo strip */
+.logo-strip {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 2.5rem;
+  opacity: 0.55;
+  filter: grayscale(1);
+  transition: opacity 0.3s ease;
+}
+.logo-strip:hover {
+  opacity: 0.9;
+}

@@ -28,7 +28,7 @@ export default function Layout({ children, title = 'Smart Business Assistant' })
   useEffect(() => {
     const loadUser = async () => {
       if (!isAuthenticated()) {
-        router.push('/');
+        router.push('/login');
         return;
       }
 
@@ -37,7 +37,7 @@ export default function Layout({ children, title = 'Smart Business Assistant' })
         setUser(currentUser);
       } catch (error) {
         logout();
-        router.push('/');
+        router.push('/login');
       }
     };
 

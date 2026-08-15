@@ -1,9 +1,9 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
-import { register } from '../lib/auth';
+import { login, isAuthenticated } from '../lib/auth';
 import toast from 'react-hot-toast';
-import { Eye, EyeOff, Zap, ArrowRight, CheckCircle, ShieldCheck, TrendingUp, Brain } from 'lucide-react';
+import { Eye, EyeOff, Zap, ArrowRight, ShieldCheck, TrendingUp, Brain } from 'lucide-react';
 
 const highlights = [
   { icon: TrendingUp, text: 'Analyse des ventes en temps réel' },
@@ -11,33 +11,25 @@ const highlights = [
   { icon: ShieldCheck, text: 'Détection d’anomalies automatique' },
 ];
 
-export default function RegisterPage() {
+export default function LoginPage() {
   const router = useRouter();
-  const [form, setForm] = useState({ name: '', email: '', company: '', password: '', confirm: '' });
+  const [form, setForm] = useState({ email: 'demo@smartbusiness.com', password: 'demo123' });
   const [showPwd, setShowPwd] = useState(false);
   const [loading, setLoading] = useState(false);
 
+  useEffect(() => {
+    if (isAuthenticated()) router.push('/dashboard');
+  }, [router]);
+
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!form.name || !form.email || !form.password) {
-      toast.error('Veuillez remplir tous les champs requis');
-      return;
-    }
-    if (form.password !== form.confirm) {
-      toast.error('Les mots de passe ne correspondent pas');
-      return;
-    }
-    if (form.password.length < 6) {
-      toast.error('Le mot de passe doit contenir au moins 6 caractères');
-      return;
-    }
     setLoading(true);
     try {
-      await register(form.name, form.email, form.password, form.company);
-      toast.success('Compte créé avec succès !');
+      await login(form.email, form.password);
+      toast.success('Connexion réussie ! Bienvenue 👋');
       router.push('/dashboard');
     } catch (err) {
-      toast.error(err.message || 'Erreur lors de la création du compte');
+      toast.error(err.message || 'Erreur de connexion');
     } finally {
       setLoading(false);
     }
@@ -64,10 +56,10 @@ export default function RegisterPage() {
 
           <div>
             <h2 className="text-3xl font-extrabold leading-tight mb-3">
-              Start growing with <span className="text-gradient-warm">AI-powered</span> insights
+              Welcome back to your <span className="text-gradient-warm">intelligent</span> dashboard
             </h2>
             <p className="text-white/50 text-sm leading-relaxed mb-8">
-              Create your free account. Your data stays private and isolated — only you can see it.
+              Sales analytics, AI predictions and anomaly detection — all in one secure place.
             </p>
             <div className="space-y-3">
               {highlights.map(({ icon: Icon, text }) => (
@@ -84,7 +76,7 @@ export default function RegisterPage() {
           <p className="text-xs text-white/35">© 2024 Smart Business Assistant</p>
         </div>
 
-        {/* Register card */}
+        {/* Login card */}
         <div className="auth-card p-8 sm:p-10 lg:rounded-l-none">
           {/* Mobile logo */}
           <div className="lg:hidden flex items-center gap-3 mb-8">
@@ -97,35 +89,20 @@ export default function RegisterPage() {
             </div>
           </div>
 
-          <h1 className="text-2xl sm:text-3xl font-extrabold mb-2">Créer un compte</h1>
-          <p className="text-white/50 text-sm mb-8">Commencez votre analyse commerciale intelligente</p>
+          <h1 className="text-2xl sm:text-3xl font-extrabold mb-2">Bon retour 👋</h1>
+          <p className="text-white/50 text-sm mb-8">Connectez-vous à votre tableau de bord</p>
 
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-white/80 mb-2">Nom complet</label>
-                <input
-                  type="text"
-                  value={form.name}
-                  onChange={(e) => setForm({ ...form, name: e.target.value })}
-                  className="input-field !bg-black/40 !border-white/10 focus:!ring-orange-500"
-                  placeholder="Jean Dupont"
-                  required
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-white/80 mb-2">Entreprise</label>
-                <input
-                  type="text"
-                  value={form.company}
-                  onChange={(e) => setForm({ ...form, company: e.target.value })}
-                  className="input-field !bg-black/40 !border-white/10 focus:!ring-orange-500"
-                  placeholder="Ma Boutique"
-                />
-              </div>
-            </div>
+          {/* Demo badge */}
+          <div className="flex items-center gap-2.5 rounded-xl border border-orange-400/25 bg-orange-400/10 px-4 py-3 mb-7">
+            <Zap size={14} className="text-orange-400 flex-shrink-0" />
+            <p className="text-xs text-orange-200/90">
+              <strong>Compte démo :</strong> demo@smartbusiness.com / demo123
+            </p>
+          </div>
+
+          <form onSubmit={handleSubmit} className="space-y-5">
             <div>
-              <label className="block text-sm font-medium text-white/80 mb-2">Email</label>
+              <label className="block text-sm font-medium text-white/80 mb-2">Adresse Email</label>
               <input
                 type="email"
                 value={form.email}
@@ -136,14 +113,14 @@ export default function RegisterPage() {
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-white/80 mb-2">Mot de passe</label>
+              <label className="block text-sm font-medium text-white/80 mb-2">Mot de Passe</label>
               <div className="relative">
                 <input
                   type={showPwd ? 'text' : 'password'}
                   value={form.password}
                   onChange={(e) => setForm({ ...form, password: e.target.value })}
                   className="input-field !bg-black/40 !border-white/10 focus:!ring-orange-500 pr-12"
-                  placeholder="Min. 6 caractères"
+                  placeholder="••••••••"
                   required
                 />
                 <button
@@ -156,35 +133,24 @@ export default function RegisterPage() {
                 </button>
               </div>
             </div>
-            <div>
-              <label className="block text-sm font-medium text-white/80 mb-2">Confirmer le mot de passe</label>
-              <input
-                type="password"
-                value={form.confirm}
-                onChange={(e) => setForm({ ...form, confirm: e.target.value })}
-                className="input-field !bg-black/40 !border-white/10 focus:!ring-orange-500"
-                placeholder="••••••••"
-                required
-              />
-            </div>
-            <button type="submit" disabled={loading} className="btn-accent w-full justify-center !py-3 text-base mt-2">
+            <button type="submit" disabled={loading} className="btn-accent w-full justify-center !py-3 text-base">
               {loading ? (
                 <>
                   <span className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent"></span>
-                  Création...
+                  Connexion...
                 </>
               ) : (
                 <>
-                  <CheckCircle size={18} /> Créer mon compte <ArrowRight size={16} />
+                  Se Connecter <ArrowRight size={16} />
                 </>
               )}
             </button>
           </form>
 
           <p className="mt-7 text-center text-sm text-white/50">
-            Déjà un compte ?{' '}
-            <Link href="/login" className="text-orange-400 hover:text-orange-300 font-semibold transition-colors">
-              Se connecter
+            Pas encore de compte ?{' '}
+            <Link href="/register" className="text-orange-400 hover:text-orange-300 font-semibold transition-colors">
+              Créer un compte
             </Link>
           </p>
         </div>
