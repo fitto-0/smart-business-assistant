@@ -1,4 +1,6 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600&display=swap');
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -9,6 +11,11 @@
   }
   * {
     @apply border-slate-700;
+  }
+  
+  /* Portal landing page styles */
+  .portal-landing {
+    @apply bg-ground text-ink;
   }
 }
 
@@ -38,7 +45,7 @@
     @apply bg-red-500/20 text-red-400 text-xs font-semibold px-2.5 py-1 rounded-full;
   }
   .badge-yellow {
-    @apply bg-amber-500/20 text-amber-400 text-xs font-semibold px-2.5 py-1 rounded-full;
+    @apply bg-yellow-500/20 text-yellow-400 text-xs font-semibold px-2.5 py-1 rounded-full;
   }
   .badge-blue {
     @apply bg-blue-500/20 text-blue-400 text-xs font-semibold px-2.5 py-1 rounded-full;
@@ -61,6 +68,42 @@
   }
   .table-cell {
     @apply py-3 px-4 text-sm text-slate-300 border-b border-slate-700/50;
+  }
+  
+  /* Portal landing components */
+  .portal-nav {
+    @apply fixed top-0 left-0 right-0 h-[58px] z-50;
+    background: rgba(10, 12, 14, 0.85);
+    backdrop-filter: blur(14px);
+    border-bottom: 1px solid rgba(237, 231, 220, 0.13);
+  }
+  
+  .portal-nav-link {
+    @apply text-[10.5px] uppercase tracking-label text-ink-secondary hover:text-amber transition-colors;
+  }
+  
+  .portal-pill-btn {
+    @apply px-4 py-1.5 rounded-full border border-amber/30 text-amber text-[10.5px] uppercase tracking-label hover:bg-amber/10 transition-colors;
+  }
+  
+  .hairline {
+    border-color: rgba(237, 231, 220, 0.13);
+  }
+  
+  .portal-wordmark {
+    @apply font-syne font-bold text-[15px] tracking-wordmark;
+  }
+  
+  .portal-heading {
+    @apply font-syne font-bold tracking-wordmark;
+  }
+  
+  .portal-label {
+    @apply font-sora text-[10.5px] uppercase tracking-label text-muted;
+  }
+  
+  .portal-text {
+    @apply font-sora text-sm leading-relaxed text-ink-secondary;
   }
 }
 
@@ -101,6 +144,377 @@
    ================================================================ */
 html {
   scroll-behavior: smooth;
+}
+
+/* ================================================================
+   PORTAL LANDING PAGE STYLES
+   ================================================================ */
+
+/* Portal hero stage */
+.portal-hero-stage {
+  position: relative;
+  height: 250vh;
+  overflow: hidden;
+  isolation: isolate;
+}
+
+.portal-sticky-stage {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  overflow: hidden;
+}
+
+/* Portal panels */
+.portal-panel {
+  position: absolute;
+  top: 0;
+  height: 100%;
+  width: 55%;
+  background: #0A0C0E;
+  z-index: 10;
+  transition: transform 0.1s linear;
+}
+
+.portal-panel-left {
+  left: 0;
+  transform: translateX(0);
+}
+
+.portal-panel-right {
+  right: 0;
+  transform: translateX(0);
+}
+
+/* Portal wordmark animation */
+.portal-wordmark-container {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.portal-wordmark-half {
+  font-family: 'Syne', sans-serif;
+  font-weight: 800;
+  font-size: clamp(2rem, 6vw, 5rem);
+  letter-spacing: -0.02em;
+  color: #EDE7DC;
+  transition: all 0.1s linear;
+  white-space: nowrap;
+}
+
+.portal-wordmark-left {
+  transform: translateX(0);
+}
+
+.portal-wordmark-right {
+  transform: translateX(0);
+}
+
+/* Accent dots */
+.portal-accent-dot {
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  z-index: 15;
+}
+
+.portal-accent-dot-left {
+  top: 50%;
+  left: calc(50% - 6px);
+  background: #E8913C;
+  box-shadow: 0 0 20px #E8913C, 0 0 40px rgba(232, 145, 60, 0.5);
+}
+
+.portal-accent-dot-right {
+  top: 50%;
+  right: calc(50% - 6px);
+  background: #2E6B72;
+  box-shadow: 0 0 20px #2E6B72, 0 0 40px rgba(46, 107, 114, 0.5);
+}
+
+/* Portal background layers */
+.portal-bg-image {
+  position: absolute;
+  inset: 0;
+  background-size: cover;
+  background-position: center;
+  transform: scale(1.1);
+  z-index: 1;
+}
+
+.portal-duotone-wash {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(232, 145, 60, 0.1) 0%, rgba(46, 107, 114, 0.1) 100%);
+  mix-blend-mode: overlay;
+  opacity: 0;
+  z-index: 2;
+}
+
+.portal-radial-veil {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at center, transparent 30%, rgba(10, 12, 14, 0.4) 100%);
+  z-index: 3;
+}
+
+/* Corner metadata */
+.portal-corner-pin {
+  position: absolute;
+  z-index: 25;
+  font-family: 'Sora', sans-serif;
+  font-size: 10.5px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: rgba(237, 231, 220, 0.5);
+}
+
+.portal-corner-top-left {
+  top: 2rem;
+  left: 2rem;
+}
+
+.portal-corner-bottom-right {
+  bottom: 2rem;
+  right: 2rem;
+}
+
+/* Statement fold */
+.portal-statement-fold {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  padding: 4rem 2rem;
+  position: relative;
+}
+
+.portal-statement-content {
+  max-width: 22ch;
+}
+
+.portal-statement-text {
+  font-family: 'Syne', sans-serif;
+  font-weight: 700;
+  font-size: clamp(1.5rem, 3.6vw, 3.25rem);
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+  color: #EDE7DC;
+}
+
+.portal-statement-accent {
+  color: #E8913C;
+}
+
+.portal-statement-index {
+  font-family: 'Syne', sans-serif;
+  font-weight: 800;
+  font-size: clamp(3rem, 8vw, 8rem);
+  color: transparent;
+  -webkit-text-stroke: 2px rgba(237, 231, 220, 0.3);
+  line-height: 1;
+}
+
+.portal-floating-image {
+  position: absolute;
+  right: -10%;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 40vh;
+  height: 40vh;
+  object-fit: cover;
+  opacity: 0.4;
+  border-radius: 50%;
+  filter: grayscale(100%);
+}
+
+/* Releases section - card deck */
+.portal-card-deck {
+  position: relative;
+  width: 100%;
+  max-width: 400px;
+  aspect-ratio: 1;
+  margin: 0 auto;
+}
+
+.portal-card {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  background: #101317;
+  border: 1px solid rgba(237, 231, 220, 0.13);
+  border-radius: 8px;
+  cursor: grab;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.portal-card:active {
+  cursor: grabbing;
+}
+
+.portal-card-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.portal-card-hint {
+  position: absolute;
+  bottom: 1rem;
+  left: 50%;
+  transform: translateX(-50%);
+  font-family: 'Sora', sans-serif;
+  font-size: 10.5px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: rgba(237, 231, 220, 0.4);
+  white-space: nowrap;
+}
+
+.portal-progress-dots {
+  position: absolute;
+  bottom: 2.5rem;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 0.5rem;
+}
+
+.portal-progress-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: rgba(237, 231, 220, 0.2);
+  transition: background 0.3s ease;
+}
+
+.portal-progress-dot.active {
+  background: #E8913C;
+}
+
+/* Roster section */
+.portal-roster-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.5rem 0;
+  border-bottom: 1px solid rgba(237, 231, 220, 0.13);
+}
+
+.portal-roster-label {
+  font-family: 'Sora', sans-serif;
+  font-size: 10.5px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #E8913C;
+}
+
+.portal-roster-name {
+  font-family: 'Syne', sans-serif;
+  font-weight: 700;
+  font-size: 1.5rem;
+  letter-spacing: -0.02em;
+  color: #EDE7DC;
+}
+
+.portal-roster-count {
+  font-family: 'Syne', sans-serif;
+  font-weight: 600;
+  font-size: 1rem;
+  color: rgba(237, 231, 220, 0.5);
+}
+
+/* Dates table */
+.portal-dates-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.portal-dates-header {
+  font-family: 'Sora', sans-serif;
+  font-size: 10.5px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: rgba(237, 231, 220, 0.5);
+  text-align: left;
+  padding: 1rem 0;
+  border-bottom: 1px solid rgba(237, 231, 220, 0.13);
+}
+
+.portal-dates-cell {
+  font-family: 'Sora', sans-serif;
+  font-size: 0.875rem;
+  color: rgba(237, 231, 220, 0.7);
+  padding: 1rem 0;
+  border-bottom: 1px solid rgba(237, 231, 220, 0.08);
+}
+
+.portal-dates-cell-primary {
+  font-family: 'Syne', sans-serif;
+  font-weight: 600;
+  font-size: 1rem;
+  color: #EDE7DC;
+}
+
+/* Close/footer section */
+.portal-close-wordmark {
+  font-family: 'Syne', sans-serif;
+  font-weight: 800;
+  font-size: clamp(3rem, 10vw, 12rem);
+  letter-spacing: -0.03em;
+  color: #EDE7DC;
+  transform: translateY(2rem);
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.portal-footer-strip {
+  border-top: 1px solid rgba(237, 231, 220, 0.13);
+  padding: 1rem 0;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .portal-panel {
+    width: 52%;
+  }
+  
+  .portal-wordmark-half {
+    font-size: clamp(1.5rem, 8vw, 3rem);
+  }
+  
+  .portal-floating-image {
+    width: 30vh;
+    height: 30vh;
+    right: -5%;
+  }
+  
+  .portal-roster-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+  
+  .portal-dates-table {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+  }
+  
+  .portal-dates-header,
+  .portal-dates-cell {
+    border-bottom: none;
+  }
 }
 
 /* Outlined / ghost headline effect */

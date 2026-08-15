@@ -1,152 +1,152 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
 import { isAuthenticated } from '../lib/auth';
-import {
-  Zap, Menu, X, ArrowRight, TrendingUp, Brain, ShieldCheck,
-  Package, LineChart, AlertTriangle, Lightbulb, Star, Lock,
-} from 'lucide-react';
+import { Menu, X, ArrowRight } from 'lucide-react';
 
 const NAV_LINKS = [
-  { href: '#features', label: 'Features' },
-  { href: '#benefits', label: 'Benefits' },
-  { href: '#security', label: 'Security' },
+  { href: '#statement', label: 'About' },
+  { href: '#releases', label: 'Features' },
+  { href: '#roster', label: 'Team' },
+  { href: '#dates', label: 'Events' },
 ];
 
 const FEATURES = [
   {
-    icon: LineChart,
     title: 'Sales Analytics',
     desc: 'Track revenue, orders and product performance in real time with beautiful dashboards.',
   },
   {
-    icon: Package,
     title: 'Stock Management',
     desc: 'Monitor inventory, low-stock warnings and restock alerts before they hurt sales.',
   },
   {
-    icon: Brain,
     title: 'AI Predictions',
     desc: 'Forecast future revenue with machine learning models trained on your history.',
   },
   {
-    icon: Star,
     title: 'Review Sentiment',
     desc: 'Understand what customers think with automatic NLP sentiment analysis.',
   },
   {
-    icon: AlertTriangle,
     title: 'Anomaly Detection',
     desc: 'Get alerted on stock ruptures and sales drops the moment they happen.',
   },
   {
-    icon: Lightbulb,
     title: 'Smart Recommendations',
     desc: 'Actionable AI suggestions to boost sales and optimize your inventory.',
   },
 ];
 
-const BENEFITS = [
-  {
-    title: 'Real-time Analytics & Monitoring',
-    points: [
-      'Instant visibility into sales, stock and revenue.',
-      'Custom dashboards tailored to your business.',
-      'Monthly targets vs actuals at a glance.',
-    ],
-  },
-  {
-    title: 'AI Predictions & Forecasting',
-    points: [
-      'Forecast sales and revenue with machine learning.',
-      'Smart recommendations to act first.',
-      'Confidence-scored predictions for every month.',
-    ],
-  },
-  {
-    title: 'Anomaly Detection & Alerts',
-    points: [
-      'Detect stock shortages and sales drops instantly.',
-      'Proactive alerts that protect your margins.',
-      'Categorize and resolve issues in one click.',
-    ],
-  },
+const ROSTER = [
+  { label: 'Analytics', name: 'Sales Intelligence', count: '12' },
+  { label: 'Inventory', name: 'Stock Management', count: '8' },
+  { label: 'Predictions', name: 'AI Forecasting', count: '6' },
+  { label: 'Security', name: 'Data Protection', count: '4' },
 ];
 
-const LOGOS = ['Auth', 'unity', 'Western Digital', 'Dropbox'];
-
-const STATS = [
-  { value: '+45%', label: 'avg. sales growth' },
-  { value: '+120k', label: 'predictions generated' },
-  { value: '+65k', label: 'insights delivered' },
+const DATES = [
+  { date: '2024-03-15', event: 'System Update', location: 'Global' },
+  { date: '2024-04-01', event: 'New Features', location: 'Platform' },
+  { date: '2024-05-15', event: 'AI Training', location: 'Cloud' },
+  { date: '2024-06-01', event: 'Security Audit', location: 'Systems' },
 ];
 
 export default function LandingPage() {
   const router = useRouter();
   const [menuOpen, setMenuOpen] = useState(false);
-  const [scrolled, setScrolled] = useState(false);
+  const [scrollProgress, setScrollProgress] = useState(0);
+  const [transitionProgress, setTransitionProgress] = useState(0);
+  const heroRef = useRef(null);
+  const transitionRef = useRef(null);
+  const statementRef = useRef(null);
 
   useEffect(() => {
     if (isAuthenticated()) router.push('/dashboard');
 
-    const onScroll = () => setScrolled(window.scrollY > 24);
-    window.addEventListener('scroll', onScroll);
-    return () => window.removeEventListener('scroll', onScroll);
+    const handleScroll = () => {
+      if (!heroRef.current || !transitionRef.current) return;
+      
+      const heroRect = heroRef.current.getBoundingClientRect();
+      const heroHeight = heroRef.current.offsetHeight;
+      const viewportHeight = window.innerHeight;
+      
+      // Calculate scroll progress through hero (0 to 1)
+      const progress = Math.min(1, Math.max(0, -heroRect.top / (heroHeight - viewportHeight)));
+      setScrollProgress(progress);
+
+      // Calculate transition section progress
+      const transitionRect = transitionRef.current.getBoundingClientRect();
+      const transitionProgress = Math.min(1, Math.max(0, -transitionRect.top / viewportHeight));
+      setTransitionProgress(transitionProgress);
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    handleScroll();
+    
+    return () => window.removeEventListener('scroll', handleScroll);
   }, [router]);
 
-  return (
-    <div className="min-h-screen bg-black text-white overflow-x-hidden">
-      <div className="grid-backdrop absolute inset-x-0 top-0 h-[110vh] pointer-events-none" />
+  const panelOffset = scrollProgress * 120; // Panels move outward
+  const wordmarkScale = 1 + (scrollProgress * 0.3); // Wordmark grows
+  const wordmarkSpacing = -0.02 - (scrollProgress * 0.01); // Tracking tightens
+  const wordmarkSeparation = scrollProgress * 200; // Halves separate
 
-      {/* ===================== NAV ===================== */}
-      <header className={`fixed inset-x-0 top-0 z-50 landing-nav transition-all ${scrolled ? 'py-3' : 'py-5'}`}>
-        <div className="max-w-7xl mx-auto px-5 sm:px-8 flex items-center justify-between">
-          {/* Left: menu + logo */}
+  // Transition section animations
+  const transitionImageX = transitionProgress * 40; // Image moves right
+  const transitionImageScale = 1 - (transitionProgress * 0.2); // Image shrinks slightly
+  const transitionTextOpacity = transitionProgress; // Text fades in
+  const transitionTextY = 50 - (transitionProgress * 50); // Text moves up
+
+  return (
+    <div className="portal-landing min-h-screen overflow-x-hidden">
+      {/* ===================== NAVIGATION ===================== */}
+      <nav className="portal-nav">
+        <div className="max-w-7xl mx-auto px-5 h-full flex items-center justify-between">
+          {/* Left: menu + wordmark */}
           <div className="flex items-center gap-4">
             <button
               onClick={() => setMenuOpen((v) => !v)}
-              className="lg:hidden p-2 rounded-xl border border-white/15 hover:bg-white/10 transition"
+              className="lg:hidden p-2 rounded-lg border hairline hover:bg-ground-secondary transition"
               aria-label="Menu"
             >
-              {menuOpen ? <X size={20} /> : <Menu size={20} />}
+              {menuOpen ? <X size={18} /> : <Menu size={18} />}
             </button>
-            <Link href="/" className="flex items-center gap-2.5">
-              <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-orange-500 to-red-600 flex items-center justify-center shadow-lg shadow-red-500/30">
-                <Zap size={18} className="text-white" />
-              </div>
-              <div className="leading-tight">
-                <p className="font-extrabold text-sm tracking-tight">Smart Business</p>
-                <p className="text-[10px] text-white/50 uppercase tracking-widest">Assistant IA</p>
-              </div>
+            <Link href="/" className="flex items-center gap-2">
+              <span className="portal-wordmark">
+                Smart Business<span className="text-amber">.</span>
+              </span>
             </Link>
           </div>
 
           {/* Center links (desktop) */}
-          <nav className="hidden lg:flex items-center gap-8 text-sm text-white/60">
+          <div className="hidden lg:flex items-center gap-8">
             {NAV_LINKS.map((link) => (
-              <a key={link.href} href={link.href} className="hover:text-white transition-colors">{link.label}</a>
+              <a key={link.href} href={link.href} className="portal-nav-link">
+                {link.label}
+              </a>
             ))}
-          </nav>
+          </div>
 
           {/* Right actions */}
           <div className="flex items-center gap-3">
-            <Link href="/login" className="btn-ghost !py-2 !px-5 text-sm">Login</Link>
-            <Link href="/register" className="btn-accent !py-2 !px-5 text-sm hidden sm:inline-flex">
-              Get started <ArrowRight size={15} />
+            <Link href="/login" className="portal-nav-link">Login</Link>
+            <Link href="/register" className="portal-pill-btn">
+              Get Started
             </Link>
           </div>
         </div>
 
         {/* Mobile menu */}
         {menuOpen && (
-          <div className="lg:hidden border-t border-white/10 mt-3 animate-fade-in">
+          <div className="lg:hidden border-t hairline bg-ground-secondary">
             <div className="px-5 py-4 flex flex-col gap-1">
-              {[...NAV_LINKS, { href: '/login', label: 'Login' }, { href: '/register', label: 'Get started' }].map((link) => (
+              {[...NAV_LINKS, { href: '/login', label: 'Login' }, { href: '/register', label: 'Get Started' }].map((link) => (
                 <a
                   key={link.label}
                   href={link.href}
                   onClick={() => setMenuOpen(false)}
-                  className="px-3 py-2.5 rounded-xl text-sm text-white/70 hover:bg-white/10 hover:text-white transition"
+                  className="px-3 py-2.5 rounded-lg portal-nav-link hover:bg-ground-secondary/50 transition"
                 >
                   {link.label}
                 </a>
@@ -154,201 +154,247 @@ export default function LandingPage() {
             </div>
           </div>
         )}
-      </header>
+      </nav>
 
-      {/* ===================== HERO ===================== */}
-      <section className="relative pt-36 pb-20 sm:pt-44 sm:pb-28">
-        <div className="max-w-7xl mx-auto px-5 sm:px-8">
-          <div className="flex flex-col lg:flex-row items-center gap-16 lg:gap-10">
-            {/* Left: copy */}
-            <div className="flex-1 text-center lg:text-left animate-slide-up">
-              <p className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-widest text-orange-400 border border-orange-400/30 bg-orange-400/10 rounded-full px-4 py-1.5 mb-7">
-                <Zap size={13} /> AI-powered business analytics
-              </p>
-              <h1 className="text-5xl sm:text-6xl xl:text-7xl font-extrabold leading-[1.02] tracking-tight">
-                grow your
-                <br />
-                <span className="text-ghost">business</span> with
-                <br />
-                <span className="text-gradient-warm">artificial</span> intelligence
-              </h1>
-              <p className="mt-6 text-white/60 text-base sm:text-lg max-w-xl mx-auto lg:mx-0 leading-relaxed">
-                Advanced sales analytics, revenue predictions and anomaly detection —
+      {/* ===================== PORTAL HERO ===================== */}
+      <section ref={heroRef} className="portal-hero-stage">
+        <div className="portal-sticky-stage">
+          {/* Background layers */}
+          <div 
+            className="portal-bg-image"
+            style={{
+              backgroundImage: 'url("https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=1920&q=80")',
+            }}
+          />
+          <div className="portal-duotone-wash" style={{ opacity: scrollProgress * 0.5 }} />
+          <div className="portal-radial-veil" />
+
+          {/* Parting panels */}
+          <div 
+            className="portal-panel portal-panel-left"
+            style={{ transform: `translateX(-${panelOffset}%)` }}
+          />
+          <div 
+            className="portal-panel portal-panel-right"
+            style={{ transform: `translateX(${panelOffset}%)` }}
+          />
+
+          {/* Accent dots */}
+          <div className="portal-accent-dot portal-accent-dot-left" />
+          <div className="portal-accent-dot portal-accent-dot-right" />
+
+          {/* Wordmark */}
+          <div className="portal-wordmark-container">
+            <span 
+              className="portal-wordmark-half portal-wordmark-left"
+              style={{ 
+                transform: `translateX(-${wordmarkSeparation}px) scale(${wordmarkScale})`,
+                letterSpacing: `${wordmarkSpacing}em`,
+              }}
+            >
+              Smart
+            </span>
+            <span 
+              className="portal-wordmark-half portal-wordmark-right text-amber"
+              style={{ 
+                transform: `translateX(${wordmarkSeparation}px) scale(${wordmarkScale})`,
+                letterSpacing: `${wordmarkSpacing}em`,
+              }}
+            >
+              Business
+            </span>
+          </div>
+
+          {/* Corner metadata */}
+          <div className="portal-corner-pin portal-corner-top-left">
+            EST. 2024
+          </div>
+        </div>
+      </section>
+
+      {/* ===================== TRANSITION SECTION ===================== */}
+      <section ref={transitionRef} className="min-h-screen relative overflow-hidden py-24 px-5">
+        <div className="max-w-7xl mx-auto h-full flex items-center">
+          <div className="grid lg:grid-cols-2 gap-12 items-center w-full">
+            {/* Left: Text content */}
+            <div 
+              className="relative z-10"
+              style={{
+                opacity: transitionTextOpacity,
+                transform: `translateY(${transitionTextY}px)`,
+              }}
+            >
+              <p className="portal-label mb-4">Welcome</p>
+              <h2 className="portal-heading text-4xl lg:text-5xl mb-6 leading-tight">
+                Transform your business with{' '}
+                <span className="text-amber">artificial intelligence</span>
+              </h2>
+              <p className="portal-text max-w-md mb-8">
+                Advanced sales analytics, revenue predictions and anomaly detection — 
                 an AI platform that protects and grows your business data.
               </p>
-              <div className="mt-9 flex flex-wrap items-center justify-center lg:justify-start gap-4">
-                <Link href="/register" className="btn-accent">
-                  Get started <ArrowRight size={16} />
+            </div>
+
+            {/* Right: Moving image */}
+            <div 
+              className="relative"
+              style={{
+                transform: `translateX(${transitionImageX}%) scale(${transitionImageScale})`,
+              }}
+            >
+              <img 
+                src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=800&q=80"
+                alt="Business Analytics"
+                className="w-full h-auto rounded-lg shadow-2xl"
+                style={{
+                  filter: `brightness(${1 - transitionProgress * 0.2})`,
+                }}
+              />
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ===================== STATEMENT FOLD ===================== */}
+      <section ref={statementRef} id="statement" className="portal-statement-fold">
+        <div className="max-w-7xl mx-auto w-full">
+          <div className="portal-statement-content">
+            <p className="portal-label mb-4">01 — About</p>
+            <p className="portal-statement-text mb-6">
+              Transform your business with{' '}
+              <span className="portal-statement-accent">artificial intelligence</span>
+              that protects and grows your data.
+            </p>
+            <p className="portal-statement-index">01</p>
+          </div>
+          <img 
+            src="https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=800&q=80"
+            alt="Analytics"
+            className="portal-floating-image"
+          />
+        </div>
+      </section>
+
+      {/* ===================== RELEASES / FEATURES ===================== */}
+      <section id="releases" className="py-24 px-5">
+        <div className="max-w-7xl mx-auto">
+          <div className="grid lg:grid-cols-2 gap-12 items-center">
+            {/* Left: content */}
+            <div>
+              <p className="portal-label mb-4">02 — Features</p>
+              <h2 className="portal-heading text-4xl mb-6">
+                Everything you need
+              </h2>
+              <p className="portal-text mb-8 max-w-md">
+                Advanced sales analytics, revenue predictions and anomaly detection — 
+                an AI platform that protects and grows your business data.
+              </p>
+              <div className="flex flex-wrap gap-4">
+                <Link href="/register" className="portal-pill-btn">
+                  Get Started <ArrowRight size={14} />
                 </Link>
-                <a href="#features" className="btn-ghost">Explore features</a>
-              </div>
-              <div className="mt-8 flex items-center justify-center lg:justify-start gap-5 text-xs text-white/40">
-                <span className="flex items-center gap-1.5"><Lock size={13} className="text-emerald-400" /> Multi-tenant secure</span>
-                <span className="flex items-center gap-1.5"><ShieldCheck size={13} className="text-orange-400" /> Your data stays private</span>
+                <Link href="/login" className="portal-nav-link">
+                  Learn More
+                </Link>
               </div>
             </div>
 
-            {/* Right: abstract blob graphic */}
-            <div className="flex-1 w-full max-w-lg lg:max-w-none relative">
-              <div className="relative aspect-square max-w-md mx-auto">
-                <div className="absolute inset-4 blob" />
-                <div className="absolute inset-8 rounded-full bg-black/70 backdrop-blur-sm border border-white/10" />
-
-                {/* Floating stat chips */}
-                <div className="absolute top-8 -left-2 sm:left-0 animate-float">
-                  <div className="glass-chip">
-                    <p className="text-2xl font-extrabold">{STATS[0].value}</p>
-                    <p className="text-[10px] uppercase tracking-wider text-white/50">{STATS[0].label}</p>
+            {/* Right: card deck */}
+            <div className="portal-card-deck">
+              {FEATURES.slice(0, 4).map((feature, index) => (
+                <div
+                  key={feature.title}
+                  className="portal-card"
+                  style={{
+                    transform: `translate(${index * 8}px, ${index * -4}px) rotate(${index * 2}deg) scale(${1 - index * 0.05})`,
+                    zIndex: 10 - index,
+                  }}
+                >
+                  <div className="p-6 text-center">
+                    <h3 className="portal-heading text-lg mb-2">{feature.title}</h3>
+                    <p className="portal-text text-xs">{feature.desc}</p>
                   </div>
                 </div>
-                <div className="absolute top-1/2 -right-2 sm:right-0 -translate-y-1/2 animate-float-delay">
-                  <div className="glass-chip">
-                    <p className="text-2xl font-extrabold text-emerald-400">{STATS[1].value}</p>
-                    <p className="text-[10px] uppercase tracking-wider text-white/50">{STATS[1].label}</p>
-                  </div>
-                </div>
-                <div className="absolute bottom-10 left-4 animate-float">
-                  <div className="glass-chip">
-                    <p className="text-2xl font-extrabold text-orange-400">{STATS[2].value}</p>
-                    <p className="text-[10px] uppercase tracking-wider text-white/50">{STATS[2].label}</p>
-                  </div>
-                </div>
-
-                {/* Center emblem */}
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <div className="w-24 h-24 rounded-3xl bg-gradient-to-br from-orange-500 via-red-500 to-indigo-600 flex items-center justify-center shadow-2xl shadow-red-500/40 rotate-6">
-                    <TrendingUp size={44} className="text-white" />
-                  </div>
-                </div>
+              ))}
+              <div className="portal-card-hint">Drag to explore</div>
+              <div className="portal-progress-dots">
+                {[0, 1, 2, 3].map((i) => (
+                  <div key={i} className={`portal-progress-dot ${i === 0 ? 'active' : ''}`} />
+                ))}
               </div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* ===================== LOGO STRIP ===================== */}
-      <section className="py-12 border-y border-white/5">
-        <p className="text-center text-xs uppercase tracking-widest text-white/35 mb-7">Trusted by modern teams</p>
-        <div className="logo-strip">
-          {LOGOS.map((logo) => (
-            <span key={logo} className="text-xl sm:text-2xl font-bold text-white/60 select-none">{logo}</span>
+      {/* ===================== ROSTER ===================== */}
+      <section id="roster" className="py-24 px-5 border-t hairline">
+        <div className="max-w-7xl mx-auto">
+          <p className="portal-label mb-8">03 — Capabilities</p>
+          {ROSTER.map((item) => (
+            <div key={item.name} className="portal-roster-row">
+              <span className="portal-roster-label">{item.label}</span>
+              <span className="portal-roster-name">{item.name}</span>
+              <span className="portal-roster-count">{item.count}</span>
+            </div>
           ))}
         </div>
       </section>
 
-      {/* ===================== FEATURES ===================== */}
-      <section id="features" className="py-24 sm:py-32">
-        <div className="max-w-7xl mx-auto px-5 sm:px-8">
-          <div className="text-center max-w-2xl mx-auto mb-16">
-            <p className="text-xs font-semibold uppercase tracking-widest text-orange-400 mb-4">Everything you need</p>
-            <h2 className="text-3xl sm:text-5xl font-extrabold tracking-tight">
-              One platform for your <span className="text-ghost">entire</span> business
-            </h2>
-          </div>
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
-            {FEATURES.map(({ icon: Icon, title, desc }) => (
-              <div key={title} className="group rounded-2xl border border-white/10 bg-white/[0.03] p-7 hover:bg-white/[0.06] hover:border-orange-400/40 transition-all duration-300 hover:-translate-y-1">
-                <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-orange-500/20 to-indigo-600/20 border border-white/10 flex items-center justify-center mb-5 group-hover:scale-110 transition-transform">
-                  <Icon size={22} className="text-orange-400" />
-                </div>
-                <h3 className="font-bold text-lg mb-2">{title}</h3>
-                <p className="text-sm text-white/55 leading-relaxed">{desc}</p>
-              </div>
-            ))}
-          </div>
+      {/* ===================== DATES TABLE ===================== */}
+      <section id="dates" className="py-24 px-5 border-t hairline">
+        <div className="max-w-7xl mx-auto">
+          <p className="portal-label mb-8">04 — Events</p>
+          <table className="portal-dates-table">
+            <thead>
+              <tr>
+                <th className="portal-dates-header">Date</th>
+                <th className="portal-dates-header">Event</th>
+                <th className="portal-dates-header">Location</th>
+              </tr>
+            </thead>
+            <tbody>
+              {DATES.map((item) => (
+                <tr key={item.date}>
+                  <td className="portal-dates-cell">{item.date}</td>
+                  <td className="portal-dates-cell portal-dates-cell-primary">{item.event}</td>
+                  <td className="portal-dates-cell">{item.location}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
       </section>
 
-      {/* ===================== CTA BAR ===================== */}
-      <section className="py-10">
-        <div className="max-w-7xl mx-auto px-5 sm:px-8">
-          <div className="rounded-3xl border border-white/10 bg-gradient-to-r from-orange-500/15 via-transparent to-indigo-600/15 p-8 sm:p-12 flex flex-col md:flex-row items-center justify-between gap-6 text-center md:text-left">
-            <p className="text-lg sm:text-2xl font-semibold leading-snug max-w-2xl">
-              Protecting your business data with advanced AI,{' '}
-              <span className="text-gradient-warm">encryption algorithms</span> and privacy-preserving techniques.
-            </p>
-            <Link href="/register" className="btn-ghost flex-shrink-0">
-              To Know <ArrowRight size={16} />
-            </Link>
-          </div>
-        </div>
-      </section>
-
-      {/* ===================== BENEFITS ===================== */}
-      <section id="benefits" className="py-24 sm:py-32">
-        <div className="max-w-6xl mx-auto px-5 sm:px-8">
-          <div className="text-center mb-16">
-            <p className="text-xs font-semibold uppercase tracking-widest text-orange-400 mb-4">Why choose us</p>
-            <h2 className="text-3xl sm:text-5xl font-extrabold tracking-tight">Our <span className="text-ghost">benefits</span></h2>
-          </div>
-          <div className="grid md:grid-cols-3">
-            {BENEFITS.map((benefit, i) => (
-              <div key={benefit.title} className={`${i > 0 ? 'benefit-col' : ''} p-8 sm:p-10`}>
-                <h3 className="font-bold text-lg mb-5 flex items-center gap-2.5">
-                  <span className="w-1.5 h-6 rounded-full bg-gradient-to-b from-orange-500 to-red-600 inline-block" />
-                  {benefit.title}
-                </h3>
-                <ul className="space-y-3 text-sm text-white/60 leading-relaxed">
-                  {benefit.points.map((point) => (
-                    <li key={point} className="flex items-start gap-2.5">
-                      <ArrowRight size={14} className="text-orange-400 mt-0.5 flex-shrink-0" />
-                      {point}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ===================== SECURITY / CTA ===================== */}
-      <section id="security" className="pb-28 px-5 sm:px-8">
-        <div className="max-w-4xl mx-auto text-center">
-          <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-orange-500 to-red-600 flex items-center justify-center mx-auto mb-6 shadow-xl shadow-red-500/30">
-            <ShieldCheck size={26} className="text-white" />
-          </div>
-          <h2 className="text-3xl sm:text-4xl font-extrabold tracking-tight mb-4">
-            Ready to <span className="text-gradient-warm">transform</span> your business?
+      {/* ===================== CLOSE / FOOTER ===================== */}
+      <section className="py-24 px-5 border-t hairline">
+        <div className="max-w-7xl mx-auto text-center">
+          <h2 className="portal-close-wordmark mb-8">
+            Smart Business
           </h2>
-          <p className="text-white/60 max-w-lg mx-auto mb-8">Create your free account and get AI-powered insights in minutes. No credit card required.</p>
-          <div className="flex flex-wrap justify-center gap-4">
-            <Link href="/register" className="btn-accent">
-              Create free account <ArrowRight size={16} />
+          <p className="portal-label mb-6">AI-Powered Business Intelligence</p>
+          <div className="flex flex-wrap justify-center gap-4 mb-12">
+            <Link href="/register" className="portal-pill-btn">
+              Get Started <ArrowRight size={14} />
             </Link>
-            <Link href="/login" className="btn-ghost">I already have an account</Link>
+            <Link href="/login" className="portal-nav-link">
+              Login
+            </Link>
           </div>
         </div>
       </section>
 
-      {/* ===================== FOOTER ===================== */}
-      <footer className="border-t border-white/5 py-10">
-        <div className="max-w-7xl mx-auto px-5 sm:px-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-sm text-white/40">
-          <div className="flex items-center gap-2">
-            <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-orange-500 to-red-600 flex items-center justify-center">
-              <Zap size={14} className="text-white" />
-            </div>
-            <span className="font-semibold text-white/70">Smart Business Assistant</span>
+      {/* ===================== FOOTER STRIP ===================== */}
+      <footer className="portal-footer-strip px-5">
+        <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
+          <p className="portal-label">© 2024 Smart Business Assistant</p>
+          <div className="flex gap-6">
+            <a href="#" className="portal-nav-link">Privacy</a>
+            <a href="#" className="portal-nav-link">Terms</a>
+            <a href="#" className="portal-nav-link">Contact</a>
           </div>
-          <p>© 2024 Smart Business Assistant — AI Powered</p>
         </div>
       </footer>
-
-      <style jsx>{`
-        .glass-chip {
-          background: rgba(255, 255, 255, 0.06);
-          border: 1px solid rgba(255, 255, 255, 0.12);
-          border-radius: 1rem;
-          padding: 0.75rem 1rem;
-          backdrop-filter: blur(12px);
-          box-shadow: 0 12px 32px -8px rgba(0, 0, 0, 0.6);
-          min-width: 128px;
-        }
-        @media (max-width: 480px) {
-          .glass-chip { min-width: 110px; padding: 0.6rem 0.8rem; }
-          .glass-chip p { font-size: 1.25rem; }
-        }
-      `}</style>
     </div>
   );
 }
