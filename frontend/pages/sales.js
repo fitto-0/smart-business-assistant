@@ -12,10 +12,10 @@ const fmt = (n) => new Intl.NumberFormat('fr-FR').format(n);
 const CustomTooltip = ({ active, payload, label }) => {
   if (!active || !payload?.length) return null;
   return (
-    <div className="bg-dark-800 border border-slate-700 rounded-xl p-3 shadow-xl">
-      <p className="text-xs text-slate-400 mb-2 font-semibold">{label}</p>
+    <div className="bg-ground-secondary border hairline rounded-xl p-3">
+      <p className="portal-label mb-2 font-semibold">{label}</p>
       {payload.map((p, i) => (
-        <p key={i} className="text-sm" style={{ color: p.color }}>
+        <p key={i} className="portal-text" style={{ color: p.color }}>
           {p.name}: <strong>{fmt(p.value)}</strong>
         </p>
       ))}
@@ -54,37 +54,37 @@ export default function SalesPage() {
   const bestMonthVentes = bestMonth.actual || 0;
 
   if (loading) {
-    return <Layout title="Analyse des Ventes"><div className="card text-center py-16 text-slate-400">Chargement des ventes…</div></Layout>;
+    return <Layout title="Sales Analytics"><div className="bg-ground-secondary border hairline rounded-xl text-center py-16 portal-text">Loading sales data…</div></Layout>;
   }
 
   return (
-    <Layout title="Analyse des Ventes">
+    <Layout title="Sales Analytics">
       {/* Summary KPIs */}
       <div className="grid grid-cols-2 xl:grid-cols-4 gap-4 mb-6">
         {[
-          { label: 'CA Annuel Total', value: totalSales, suffix: ' DA', icon: DollarSign, color: 'from-primary-500 to-indigo-600', change: '+18.4%' },
-          { label: 'Total Commandes', value: totalOrders, icon: ShoppingCart, color: 'from-cyan-500 to-blue-600', change: '+12.7%' },
-          { label: 'Moyenne Mensuelle', value: avgMonthly, suffix: ' DA', icon: BarChart2, color: 'from-emerald-500 to-teal-600' },
-          { label: 'Meilleur Mois', value: bestMonth.month, icon: TrendingUp, color: 'from-amber-500 to-orange-600', sub: `${fmt(bestMonthVentes)} DA` },
+          { label: 'Total Annual Revenue', value: totalSales, suffix: ' DA', icon: DollarSign, color: 'bg-amber', change: '+18.4%' },
+          { label: 'Total Orders', value: totalOrders, icon: ShoppingCart, color: 'bg-teal', change: '+12.7%' },
+          { label: 'Monthly Average', value: avgMonthly, suffix: ' DA', icon: BarChart2, color: 'bg-teal' },
+          { label: 'Best Month', value: bestMonth.month, icon: TrendingUp, color: 'bg-amber', sub: `${fmt(bestMonthVentes)} DA` },
         ].map((kpi, i) => (
-          <div key={i} className="card flex items-center gap-4">
-            <div className={`w-11 h-11 rounded-xl bg-gradient-to-br ${kpi.color} flex items-center justify-center shadow-lg`}>
-              <kpi.icon size={20} className="text-white" />
+          <div key={i} className="bg-ground-secondary border hairline rounded-xl p-4 flex items-center gap-4">
+            <div className={`w-11 h-11 rounded-xl ${kpi.color} flex items-center justify-center`}>
+              <kpi.icon size={20} className="text-ground" />
             </div>
             <div>
-              <p className="text-xs text-slate-400">{kpi.label}</p>
-              <p className="text-xl font-bold text-white">{typeof kpi.value === 'number' ? fmt(kpi.value) : kpi.value}{kpi.suffix || ''}</p>
-              {kpi.change && <p className="text-xs text-emerald-400 font-semibold">{kpi.change}</p>}
-              {kpi.sub && <p className="text-xs text-slate-400">{kpi.sub}</p>}
+              <p className="portal-label">{kpi.label}</p>
+              <p className="portal-heading text-xl">{typeof kpi.value === 'number' ? fmt(kpi.value) : kpi.value}{kpi.suffix || ''}</p>
+              {kpi.change && <p className="portal-label text-teal font-semibold">{kpi.change}</p>}
+              {kpi.sub && <p className="portal-label text-muted">{kpi.sub}</p>}
             </div>
           </div>
         ))}
       </div>
 
       {/* Sales vs Objective */}
-      <div className="card mb-6">
-        <h3 className="text-base font-bold text-white mb-1">Ventes vs Objectifs — 2024</h3>
-        <p className="text-xs text-slate-400 mb-5">Comparaison mensuelle des ventes réelles par rapport aux objectifs fixés</p>
+      <div className="bg-ground-secondary border hairline rounded-xl p-5 mb-6">
+        <h3 className="portal-heading text-base mb-1">Sales vs Targets — 2024</h3>
+        <p className="portal-label mb-5">Monthly comparison of actual sales against targets </p>
         <ResponsiveContainer width="100%" height={300}>
           <ComposedChart data={monthlySales}>
             <defs>
@@ -93,55 +93,55 @@ export default function SalesPage() {
                 <stop offset="95%" stopColor="#6366f1" stopOpacity={0} />
               </linearGradient>
             </defs>
-            <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
-            <XAxis dataKey="month" tick={{ fill: '#64748b', fontSize: 11 }} axisLine={false} tickLine={false} />
-            <YAxis tick={{ fill: '#64748b', fontSize: 11 }} axisLine={false} tickLine={false} tickFormatter={v => `${v / 1000}k`} />
+            <CartesianGrid strokeDasharray="3 3" stroke="rgba(237,231,220,0.13)" />
+            <XAxis dataKey="month" tick={{ fill: '#9EA5A8', fontSize: 11 }} axisLine={false} tickLine={false} />
+            <YAxis tick={{ fill: '#9EA5A8', fontSize: 11 }} axisLine={false} tickLine={false} tickFormatter={v => `${v / 1000}k`} />
             <Tooltip content={<CustomTooltip />} />
             <Legend wrapperStyle={{ fontSize: '12px', paddingTop: '16px' }} />
-            <Area type="monotone" dataKey="actual" name="Ventes (DA)" stroke="#6366f1" strokeWidth={2.5} fill="url(#sg)" />
-            <Line type="monotone" dataKey="target" name="Objectif (DA)" stroke="#06b6d4" strokeWidth={2} strokeDasharray="6 4" dot={false} />
+            <Area type="monotone" dataKey="actual" name="Sales (DA)" stroke="#E8913C" strokeWidth={2.5} fill="url(#sg)" />
+            <Line type="monotone" dataKey="target" name="Target (DA)" stroke="#2E6B72" strokeWidth={2} strokeDasharray="6 4" dot={false} />
           </ComposedChart>
         </ResponsiveContainer>
       </div>
 
       <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 mb-6">
         {/* Monthly Orders */}
-        <div className="card">
-          <h3 className="text-base font-bold text-white mb-1">Nombre de Commandes par Mois</h3>
-          <p className="text-xs text-slate-400 mb-5">Volume des commandes mensuelles</p>
+        <div className="bg-ground-secondary border hairline rounded-xl p-5">
+          <h3 className="portal-heading text-base mb-1">Monthly Orders</h3>
+          <p className="portal-label mb-5">Monthly order volume </p>
           <ResponsiveContainer width="100%" height={220}>
             <BarChart data={monthlySales} barSize={22}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" vertical={false} />
-              <XAxis dataKey="month" tick={{ fill: '#64748b', fontSize: 10 }} axisLine={false} tickLine={false} />
-              <YAxis tick={{ fill: '#64748b', fontSize: 11 }} axisLine={false} tickLine={false} />
+              <CartesianGrid strokeDasharray="3 3" stroke="rgba(237,231,220,0.13)" vertical={false} />
+              <XAxis dataKey="month" tick={{ fill: '#9EA5A8', fontSize: 10 }} axisLine={false} tickLine={false} />
+              <YAxis tick={{ fill: '#9EA5A8', fontSize: 11 }} axisLine={false} tickLine={false} />
               <Tooltip content={<CustomTooltip />} />
-              <Bar dataKey="orders" name="Commandes" fill="#06b6d4" radius={[5, 5, 0, 0]} />
+              <Bar dataKey="orders" name="Orders" fill="#2E6B72" radius={[5, 5, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>
         </div>
 
         {/* Top Products by Revenue */}
-        <div className="card">
-          <h3 className="text-base font-bold text-white mb-1">Top 5 Produits par Revenus</h3>
-          <p className="text-xs text-slate-400 mb-4">Produits les plus performants</p>
+        <div className="bg-ground-secondary border hairline rounded-xl p-5">
+          <h3 className="portal-heading text-base mb-1">Top 5 Products by Revenue</h3>
+          <p className="portal-label mb-4">Best performing products </p>
           <div className="space-y-3">
             {topProducts.map((p, i) => (
               <div key={p.id} className="flex items-center gap-3">
                 <span className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0
-                  ${i === 0 ? 'bg-amber-500 text-white' : i === 1 ? 'bg-slate-400 text-white' : i === 2 ? 'bg-orange-700 text-white' : 'bg-slate-700 text-slate-300'}`}>
+                  ${i === 0 ? 'bg-amber text-ground' : i === 1 ? 'bg-ink-secondary text-ground' : i === 2 ? 'bg-amber/70 text-ground' : 'bg-muted text-ink'}`}>
                   {i + 1}
                 </span>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center justify-between mb-1">
-                    <span className="text-xs font-semibold text-slate-200 truncate">{p.name}</span>
-                    <span className="text-xs font-bold text-white ml-2 flex-shrink-0">{fmt(p.revenue)} DA</span>
+                    <span className="portal-label font-semibold text-ink truncate">{p.name}</span>
+                    <span className="portal-label font-bold text-ink ml-2 flex-shrink-0">{fmt(p.revenue)} DA</span>
                   </div>
-                  <div className="w-full bg-dark-900 rounded-full h-1.5">
-                    <div className="h-1.5 rounded-full bg-gradient-to-r from-primary-500 to-cyan-500"
+                  <div className="w-full bg-ground rounded-full h-1.5">
+                    <div className="h-1.5 rounded-full bg-amber"
                       style={{ width: `${(p.revenue / topProducts[0].revenue) * 100}%` }} />
                   </div>
                 </div>
-                <span className={`text-xs font-semibold flex-shrink-0 ${p.trend >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
+                <span className={`portal-label font-semibold flex-shrink-0 ${p.trend >= 0 ? 'text-teal' : 'text-red-400'}`}>
                   {p.trend >= 0 ? '+' : ''}{p.trend}%
                 </span>
               </div>
@@ -151,18 +151,18 @@ export default function SalesPage() {
       </div>
 
       {/* Detailed Monthly Table */}
-      <div className="card">
-        <h3 className="text-base font-bold text-white mb-5">Récapitulatif Mensuel Détaillé</h3>
+      <div className="bg-ground-secondary border hairline rounded-xl p-5">
+        <h3 className="portal-heading text-base mb-5">Detailed Monthly Summary</h3>
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead>
-              <tr className="border-b border-slate-700">
-                <th className="table-header">Mois</th>
-                <th className="table-header">Ventes (DA)</th>
-                <th className="table-header">Objectif (DA)</th>
-                <th className="table-header">Commandes</th>
-                <th className="table-header">Écart</th>
-                <th className="table-header">Performance</th>
+              <tr className="border-b hairline">
+                <th className="portal-dates-header">Month</th>
+                <th className="portal-dates-header">Sales (DA)</th>
+                <th className="portal-dates-header">Target (DA)</th>
+                <th className="portal-dates-header">Orders</th>
+                <th className="portal-dates-header">Variance</th>
+                <th className="portal-dates-header">Performance</th>
               </tr>
             </thead>
             <tbody>
@@ -172,21 +172,21 @@ export default function SalesPage() {
                 const ecart = ventes - objectif;
                 const perf = objectif ? ((ventes / objectif) * 100).toFixed(1) : '0.0';
                 return (
-                  <tr key={row.month} className="hover:bg-slate-700/20 transition-colors">
-                    <td className="table-cell font-semibold text-white">{row.month}</td>
-                    <td className="table-cell font-semibold text-primary-300">{fmt(row.actual || 0)} DA</td>
-                    <td className="table-cell text-slate-400">{fmt(row.target || 0)} DA</td>
-                    <td className="table-cell text-cyan-300">{row.orders}</td>
-                    <td className={`table-cell font-semibold ${ecart >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
+                  <tr key={row.month} className="hover:bg-ground/50 transition-colors">
+                    <td className="portal-dates-cell portal-dates-cell-primary">{row.month}</td>
+                    <td className="portal-dates-cell font-semibold text-amber">{fmt(row.actual || 0)} DA</td>
+                    <td className="portal-dates-cell text-muted">{fmt(row.target || 0)} DA</td>
+                    <td className="portal-dates-cell text-teal">{row.orders}</td>
+                    <td className={`portal-dates-cell font-semibold ${ecart >= 0 ? 'text-teal' : 'text-red-400'}`}>
                       {ecart >= 0 ? '+' : ''}{fmt(ecart)} DA
                     </td>
-                    <td className="table-cell">
+                    <td className="portal-dates-cell">
                       <div className="flex items-center gap-2">
-                        <div className="w-16 bg-dark-900 rounded-full h-1.5">
-                          <div className={`h-1.5 rounded-full ${parseFloat(perf) >= 100 ? 'bg-emerald-500' : 'bg-amber-500'}`}
+                        <div className="w-16 bg-ground rounded-full h-1.5">
+                          <div className={`h-1.5 rounded-full ${parseFloat(perf) >= 100 ? 'bg-teal' : 'bg-amber'}`}
                             style={{ width: `${Math.min(parseFloat(perf), 100)}%` }} />
                         </div>
-                        <span className={`text-xs font-bold ${parseFloat(perf) >= 100 ? 'text-emerald-400' : 'text-amber-400'}`}>{perf}%</span>
+                        <span className={`portal-label font-bold ${parseFloat(perf) >= 100 ? 'text-teal' : 'text-amber'}`}>{perf}%</span>
                       </div>
                     </td>
                   </tr>

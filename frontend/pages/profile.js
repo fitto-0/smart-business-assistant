@@ -15,12 +15,12 @@ export default function ProfilePage() {
   }, []);
 
   const handleSave = async () => {
-    if (!form.name) { toast.error('Le nom est requis'); return; }
+    if (!form.name) { toast.error('Name is required'); return; }
     setLoading(true);
     try {
       const updated = await updateProfile({ name: form.name, company: form.company });
       setUser(updated);
-      toast.success('Profil mis à jour avec succès !');
+      toast.success('Profile updated successfully!');
     } catch (err) {
       toast.error(err.message);
     } finally {
@@ -31,101 +31,101 @@ export default function ProfilePage() {
   if (!user) return null;
 
   return (
-    <Layout title="Mon Profil">
+    <Layout title="My Profile">
       <div className="max-w-3xl mx-auto space-y-6">
         {/* Profile Header */}
-        <div className="card flex items-center gap-6">
-          <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-primary-500 to-purple-600 flex items-center justify-center text-white text-3xl font-bold shadow-xl">
+        <div className="bg-ground-secondary border hairline rounded-xl p-6 flex items-center gap-6">
+          <div className="w-20 h-20 rounded-2xl bg-amber flex items-center justify-center text-ground text-3xl font-bold">
             {user.name?.[0]?.toUpperCase()}
           </div>
           <div>
-            <h2 className="text-2xl font-bold text-white">{user.name}</h2>
-            <p className="text-slate-400">{user.email}</p>
-            {user.company && <p className="text-sm text-primary-400 mt-1 font-medium">{user.company}</p>}
+            <h2 className="portal-heading text-2xl">{user.name}</h2>
+            <p className="portal-text">{user.email}</p>
+            {user.company && <p className="portal-label text-amber mt-1 font-medium">{user.company}</p>}
             <div className="flex gap-2 mt-2">
-              <span className="badge-blue capitalize">{user.role}</span>
-              <span className="badge-green">Compte Actif</span>
+              <span className="portal-label bg-teal/10 text-teal px-2 py-1 rounded capitalize">{user.role}</span>
+              <span className="portal-label bg-teal/10 text-teal px-2 py-1 rounded">Active Account</span>
             </div>
           </div>
         </div>
 
         {/* Edit Form */}
-        <div className="card">
-          <h3 className="text-base font-bold text-white mb-5 flex items-center gap-2">
-            <User size={18} className="text-primary-400" /> Informations Personnelles
+        <div className="bg-ground-secondary border hairline rounded-xl p-5">
+          <h3 className="portal-heading text-base mb-5 flex items-center gap-2">
+            <User size={18} className="text-amber" /> Personal Information
           </h3>
           <div className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-slate-300 mb-2">Nom Complet</label>
+              <label className="block portal-label mb-2">Full Name</label>
               <div className="relative">
-                <User size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
+                <User size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted" />
                 <input type="text" value={form.name} onChange={e => setForm({ ...form, name: e.target.value })}
-                  className="input-field pl-10" placeholder="Votre nom" />
+                  className="w-full bg-ground border hairline rounded-xl px-4 py-2 pl-10 text-ink placeholder-muted focus:outline-none focus:border-amber transition-colors" placeholder="Your name" />
               </div>
             </div>
             <div>
-              <label className="block text-sm font-medium text-slate-300 mb-2">Adresse Email</label>
+              <label className="block portal-label mb-2">Email Address</label>
               <div className="relative">
-                <Mail size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
+                <Mail size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted" />
                 <input type="email" value={form.email} disabled
-                  className="input-field pl-10 opacity-50 cursor-not-allowed" />
+                  className="w-full bg-ground border hairline rounded-xl px-4 py-2 pl-10 text-ink opacity-50 cursor-not-allowed" />
               </div>
-              <p className="text-xs text-slate-500 mt-1">L'email ne peut pas être modifié</p>
+              <p className="portal-label text-muted mt-1">Email cannot be changed</p>
             </div>
             <div>
-              <label className="block text-sm font-medium text-slate-300 mb-2">Nom de l'Entreprise</label>
+              <label className="block portal-label mb-2">Company Name</label>
               <div className="relative">
-                <Building size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
+                <Building size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted" />
                 <input type="text" value={form.company} onChange={e => setForm({ ...form, company: e.target.value })}
-                  className="input-field pl-10" placeholder="Votre entreprise" />
+                  className="w-full bg-ground border hairline rounded-xl px-4 py-2 pl-10 text-ink placeholder-muted focus:outline-none focus:border-amber transition-colors" placeholder="Your company" />
               </div>
             </div>
-            <button onClick={handleSave} disabled={loading} className="btn-primary">
-              {loading ? <span className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent"></span> : <Save size={16} />}
-              Enregistrer les modifications
+            <button onClick={handleSave} disabled={loading} className="portal-pill-btn">
+              {loading ? <span className="animate-spin rounded-full h-4 w-4 border-2 border-amber border-t-transparent"></span> : <Save size={16} />}
+              Save Changes
             </button>
           </div>
         </div>
 
         {/* Security */}
-        <div className="card">
-          <h3 className="text-base font-bold text-white mb-5 flex items-center gap-2">
-            <Shield size={18} className="text-emerald-400" /> Sécurité & Confidentialité
+        <div className="bg-ground-secondary border hairline rounded-xl p-5">
+          <h3 className="portal-heading text-base mb-5 flex items-center gap-2">
+            <Shield size={18} className="text-teal" /> Security & Privacy
           </h3>
           <div className="space-y-3">
             {[
-              { icon: Lock, title: 'Changer le mot de passe', desc: 'Dernière modification il y a 30 jours', btn: 'Modifier' },
-              { icon: Bell, title: 'Notifications par email', desc: 'Recevoir les alertes et recommandations', btn: 'Configurer' },
-              { icon: Shield, title: 'Authentification à deux facteurs', desc: 'Sécurité supplémentaire non activée', btn: 'Activer' },
+              { icon: Lock, title: 'Change Password', desc: 'Last changed 30 days ago', btn: 'Change' },
+              { icon: Bell, title: 'Email Notifications', desc: 'Receive alerts and recommendations', btn: 'Configure' },
+              { icon: Shield, title: 'Two-Factor Authentication', desc: 'Additional security not enabled', btn: 'Enable' },
             ].map((item, i) => (
-              <div key={i} className="flex items-center justify-between p-4 rounded-xl bg-dark-900/50 border border-slate-700/40 hover:border-slate-600/60 transition-all">
+              <div key={i} className="flex items-center justify-between p-4 rounded-xl bg-ground/50 border hairline hover:border-amber/30 transition-all">
                 <div className="flex items-center gap-3">
-                  <div className="w-9 h-9 rounded-lg bg-slate-700/50 flex items-center justify-center">
-                    <item.icon size={16} className="text-slate-300" />
+                  <div className="w-9 h-9 rounded-lg bg-ground flex items-center justify-center">
+                    <item.icon size={16} className="text-muted" />
                   </div>
                   <div>
-                    <p className="text-sm font-semibold text-white">{item.title}</p>
-                    <p className="text-xs text-slate-500">{item.desc}</p>
+                    <p className="portal-label font-semibold text-ink">{item.title}</p>
+                    <p className="portal-label text-muted">{item.desc}</p>
                   </div>
                 </div>
-                <button className="btn-secondary py-1.5 px-3 text-xs">{item.btn}</button>
+                <button className="w-full bg-ground border hairline rounded-xl px-4 py-2 portal-label text-ink-secondary hover:bg-ground/50 transition-colors py-1.5 px-3 text-xs">{item.btn}</button>
               </div>
             ))}
           </div>
         </div>
 
         {/* Stats */}
-        <div className="card">
-          <h3 className="text-base font-bold text-white mb-4">Activité du Compte</h3>
+        <div className="bg-ground-secondary border hairline rounded-xl p-5">
+          <h3 className="portal-heading text-base mb-4">Account Activity</h3>
           <div className="grid grid-cols-3 gap-4 text-center">
             {[
-              { label: 'Connexions', value: '47' },
+              { label: 'Logins', value: '47' },
               { label: 'Analyses', value: '128' },
-              { label: 'Jours actifs', value: '23' },
+              { label: 'Active Days', value: '23' },
             ].map((s, i) => (
-              <div key={i} className="p-3 rounded-xl bg-dark-900/50 border border-slate-700/40">
-                <p className="text-2xl font-bold text-primary-400">{s.value}</p>
-                <p className="text-xs text-slate-400 mt-0.5">{s.label}</p>
+              <div key={i} className="p-3 rounded-xl bg-ground/50 border hairline">
+                <p className="portal-heading text-2xl text-amber">{s.value}</p>
+                <p className="portal-label mt-0.5">{s.label}</p>
               </div>
             ))}
           </div>

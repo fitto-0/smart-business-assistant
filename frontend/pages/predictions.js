@@ -12,10 +12,10 @@ const fmt = (n) => new Intl.NumberFormat('fr-FR').format(n);
 const CustomTooltip = ({ active, payload, label }) => {
   if (!active || !payload?.length) return null;
   return (
-    <div className="bg-dark-800 border border-slate-700 rounded-xl p-3 shadow-xl">
-      <p className="text-xs text-slate-400 mb-2 font-semibold">{label}</p>
+    <div className="bg-ground-secondary border hairline rounded-xl p-3">
+      <p className="portal-label mb-2 font-semibold">{label}</p>
       {payload.map((p, i) => p.value && (
-        <p key={i} className="text-sm font-semibold" style={{ color: p.color }}>
+        <p key={i} className="portal-text font-semibold" style={{ color: p.color }}>
           {p.name}: {fmt(p.value)} DA
         </p>
       ))}
@@ -67,27 +67,27 @@ export default function PredictionsPage() {
   ].slice(-(12 + horizon));
 
   if (loading) {
-    return <Layout title="Prédictions IA"><div className="card text-center py-16 text-slate-400">Chargement des prédictions…</div></Layout>;
+    return <Layout title="AI Predictions"><div className="bg-ground-secondary border hairline rounded-xl text-center py-16 portal-text">Loading predictions…</div></Layout>;
   }
 
   return (
-    <Layout title="Prédictions IA">
+    <Layout title="AI Predictions">
       {/* Header Banner */}
-      <div className="card mb-6 bg-gradient-to-r from-primary-900/50 via-dark-800 to-indigo-900/30 border-primary-700/30">
+      <div className="bg-ground-secondary border hairline rounded-xl p-5 mb-6">
         <div className="flex items-start gap-4">
-          <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-primary-500 to-cyan-500 flex items-center justify-center flex-shrink-0 shadow-lg">
-            <Brain size={24} className="text-white" />
+          <div className="w-12 h-12 rounded-xl bg-amber flex items-center justify-center flex-shrink-0">
+            <Brain size={24} className="text-ground" />
           </div>
           <div>
-            <h3 className="text-base font-bold text-white mb-1">Moteur de Prédiction IA — Modèle de Régression</h3>
-            <p className="text-sm text-slate-400 leading-relaxed">
-              Notre modèle utilise les données historiques des 12 derniers mois pour prédire les ventes futures.
-              L'algorithme intègre la saisonnalité, les tendances et les facteurs externes pour une précision optimale.
+            <h3 className="portal-heading text-base mb-1">AI Prediction Engine — Regression Model</h3>
+            <p className="portal-text leading-relaxed">
+              Our model uses historical data from the last 12 months to predict future sales.
+              The algorithm integrates seasonality, trends, and external factors for optimal accuracy.
             </p>
             <div className="flex flex-wrap gap-2 mt-3">
-              <span className="badge-blue">Scikit-learn LinearRegression</span>
-              <span className="badge-blue">Analyse de saisonnalité</span>
-              <span className="badge-blue">Intervalle de confiance 85%</span>
+              <span className="portal-label bg-teal/10 text-teal px-2 py-1 rounded">Scikit-learn LinearRegression</span>
+              <span className="portal-label bg-teal/10 text-teal px-2 py-1 rounded">Seasonality Analysis</span>
+              <span className="portal-label bg-teal/10 text-teal px-2 py-1 rounded">85% Confidence Interval</span>
             </div>
           </div>
         </div>
@@ -95,57 +95,57 @@ export default function PredictionsPage() {
 
       {/* KPIs */}
       <div className="grid grid-cols-2 xl:grid-cols-4 gap-4 mb-6">
-        <div className="card flex items-center gap-4">
-          <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-primary-500 to-indigo-600 flex items-center justify-center">
-            <Target size={20} className="text-white" />
+        <div className="bg-ground-secondary border hairline rounded-xl p-4 flex items-center gap-4">
+          <div className="w-11 h-11 rounded-xl bg-amber flex items-center justify-center">
+            <Target size={20} className="text-ground" />
           </div>
           <div>
-            <p className="text-xs text-slate-400">CA Prédit 6 mois</p>
-            <p className="text-xl font-bold text-white">{fmt(totalPredicted)} DA</p>
+            <p className="portal-label">6-Month Predicted Revenue</p>
+            <p className="portal-heading text-xl">{fmt(totalPredicted)} DA</p>
           </div>
         </div>
-        <div className="card flex items-center gap-4">
-          <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center">
-            <TrendingUp size={20} className="text-white" />
+        <div className="bg-ground-secondary border hairline rounded-xl p-4 flex items-center gap-4">
+          <div className="w-11 h-11 rounded-xl bg-teal flex items-center justify-center">
+            <TrendingUp size={20} className="text-ground" />
           </div>
           <div>
-            <p className="text-xs text-slate-400">Croissance Prédite</p>
-            <p className="text-xl font-bold text-emerald-400">+{growth}%</p>
+            <p className="portal-label">Predicted Growth</p>
+            <p className="portal-heading text-xl text-teal">+{growth}%</p>
           </div>
         </div>
-        <div className="card flex items-center gap-4">
-          <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center">
-            <Zap size={20} className="text-white" />
+        <div className="bg-ground-secondary border hairline rounded-xl p-4 flex items-center gap-4">
+          <div className="w-11 h-11 rounded-xl bg-amber flex items-center justify-center">
+            <Zap size={20} className="text-ground" />
           </div>
           <div>
-            <p className="text-xs text-slate-400">Précision du Modèle</p>
-            <p className="text-xl font-bold text-white">85.3%</p>
+            <p className="portal-label">Model Accuracy</p>
+            <p className="portal-heading text-xl">85.3%</p>
           </div>
         </div>
-        <div className="card flex items-center gap-4">
-          <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center">
-            <Brain size={20} className="text-white" />
+        <div className="bg-ground-secondary border hairline rounded-xl p-4 flex items-center gap-4">
+          <div className="w-11 h-11 rounded-xl bg-amber flex items-center justify-center">
+            <Brain size={20} className="text-ground" />
           </div>
           <div>
-            <p className="text-xs text-slate-400">Meilleur mois prédit</p>
-            <p className="text-xl font-bold text-white">Juin 2025</p>
+            <p className="portal-label">Best Predicted Month</p>
+            <p className="portal-heading text-xl">June 2025</p>
           </div>
         </div>
       </div>
 
       {/* Prediction Chart */}
-      <div className="card mb-6">
+      <div className="bg-ground-secondary border hairline rounded-xl p-5 mb-6">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-5">
           <div>
-            <h3 className="text-base font-bold text-white">Prédiction des Ventes</h3>
-            <p className="text-xs text-slate-400 mt-0.5">Historique 2024 + Prédictions IA</p>
+            <h3 className="portal-heading text-base">Sales Prediction</h3>
+            <p className="portal-label mt-0.5">2024 History + AI Predictions</p>
           </div>
           <div className="flex items-center gap-2">
-            <span className="text-xs text-slate-400">Horizon :</span>
+            <span className="portal-label">Horizon:</span>
             {[3, 6].map(h => (
               <button key={h} onClick={() => setHorizon(h)}
-                className={`text-xs px-3 py-1.5 rounded-lg font-medium transition-all ${horizon === h ? 'bg-primary-600 text-white' : 'bg-slate-700 text-slate-300 hover:bg-slate-600'}`}>
-                {h} mois
+                className={`portal-label px-3 py-1.5 rounded-lg font-medium transition-all ${horizon === h ? 'bg-amber text-ground' : 'bg-ground text-ink-secondary hover:bg-ground/50'}`}>
+                {h} months
               </button>
             ))}
           </div>
@@ -162,30 +162,30 @@ export default function PredictionsPage() {
                 <stop offset="95%" stopColor="#10b981" stopOpacity={0} />
               </linearGradient>
             </defs>
-            <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
-            <XAxis dataKey="month" tick={{ fill: '#64748b', fontSize: 10 }} axisLine={false} tickLine={false} />
-            <YAxis tick={{ fill: '#64748b', fontSize: 11 }} axisLine={false} tickLine={false} tickFormatter={v => `${v / 1000}k`} />
+            <CartesianGrid strokeDasharray="3 3" stroke="rgba(237,231,220,0.13)" />
+            <XAxis dataKey="month" tick={{ fill: '#9EA5A8', fontSize: 10 }} axisLine={false} tickLine={false} />
+            <YAxis tick={{ fill: '#9EA5A8', fontSize: 11 }} axisLine={false} tickLine={false} tickFormatter={v => `${v / 1000}k`} />
             <Tooltip content={<CustomTooltip />} />
             <Legend wrapperStyle={{ fontSize: '12px', paddingTop: '16px' }} />
-            <ReferenceLine x="Déc" stroke="#334155" strokeDasharray="4 4" label={{ value: 'Aujourd\'hui', fill: '#64748b', fontSize: 10 }} />
-            <Area type="monotone" dataKey="historique" name="Historique (DA)" stroke="#6366f1" strokeWidth={2.5} fill="url(#histGrad)" connectNulls={false} dot={false} />
-            <Area type="monotone" dataKey="prediction" name="Prédiction (DA)" stroke="#10b981" strokeWidth={2.5} strokeDasharray="6 3" fill="url(#predGrad)" connectNulls={false} dot={{ fill: '#10b981', r: 4 }} />
+            <ReferenceLine x="Dec" stroke="rgba(237,231,220,0.13)" strokeDasharray="4 4" label={{ value: 'Today', fill: '#9EA5A8', fontSize: 10 }} />
+            <Area type="monotone" dataKey="historique" name="History (DA)" stroke="#E8913C" strokeWidth={2.5} fill="url(#histGrad)" connectNulls={false} dot={false} />
+            <Area type="monotone" dataKey="prediction" name="Prediction (DA)" stroke="#2E6B72" strokeWidth={2.5} strokeDasharray="6 3" fill="url(#predGrad)" connectNulls={false} dot={{ fill: '#2E6B72', r: 4 }} />
           </ComposedChart>
         </ResponsiveContainer>
       </div>
 
       {/* Prediction Details Table */}
-      <div className="card">
-        <h3 className="text-base font-bold text-white mb-5">Détail des Prédictions Mensuelles</h3>
+      <div className="bg-ground-secondary border hairline rounded-xl p-5">
+        <h3 className="portal-heading text-base mb-5">Monthly Prediction Details</h3>
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead>
-              <tr className="border-b border-slate-700">
-                <th className="table-header">Période</th>
-                <th className="table-header">Type</th>
-                <th className="table-header">Ventes Prédites (DA)</th>
-                <th className="table-header">Croissance vs N-1</th>
-                <th className="table-header">Confiance</th>
+              <tr className="border-b hairline">
+                <th className="portal-dates-header">Period</th>
+                <th className="portal-dates-header">Type</th>
+                <th className="portal-dates-header">Predicted Sales (DA)</th>
+                <th className="portal-dates-header">Growth vs Y-1</th>
+                <th className="portal-dates-header">Confidence</th>
               </tr>
             </thead>
             <tbody>
@@ -194,20 +194,19 @@ export default function PredictionsPage() {
                 const change = prev ? (((Number(p.value || 0) - prev) / prev) * 100).toFixed(1) : '0.0';
                 const confidence = 85 - i * 2;
                 return (
-                  <tr key={p.month} className="hover:bg-slate-700/20 transition-colors">
-                    <td className="table-cell font-semibold text-white">{p.month}</td>
-                    <td className="table-cell"><span className="badge-blue">Prédiction IA</span></td>
-                    <td className="table-cell font-bold text-emerald-400">{fmt(Number(p.value || 0))} DA</td>
-                    <td className={`table-cell font-semibold ${parseFloat(change) >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
+                  <tr key={p.month} className="hover:bg-ground/50 transition-colors">
+                    <td className="portal-dates-cell portal-dates-cell-primary">{p.month}</td>
+                    <td className="portal-dates-cell"><span className="portal-label bg-teal/10 text-teal px-2 py-1 rounded">AI Prediction</span></td>
+                    <td className="portal-dates-cell font-bold text-teal">{fmt(Number(p.value || 0))} DA</td>
+                    <td className={`portal-dates-cell font-semibold ${parseFloat(change) >= 0 ? 'text-teal' : 'text-red-400'}`}>
                       {parseFloat(change) >= 0 ? '+' : ''}{change}%
                     </td>
-                    <td className="table-cell">
+                    <td className="portal-dates-cell">
                       <div className="flex items-center gap-2">
-                        <div className="w-16 bg-dark-900 rounded-full h-1.5">
-                          <div className="h-1.5 rounded-full bg-gradient-to-r from-emerald-500 to-teal-400"
-                            style={{ width: `${confidence}%` }} />
+                        <div className="w-16 bg-ground rounded-full h-1.5">
+                          <div className="h-1.5 rounded-full bg-teal" style={{ width: `${confidence}%` }} />
                         </div>
-                        <span className="text-xs text-emerald-400 font-semibold">{confidence}%</span>
+                        <span className="portal-label text-teal font-semibold">{confidence}%</span>
                       </div>
                     </td>
                   </tr>
@@ -216,10 +215,10 @@ export default function PredictionsPage() {
             </tbody>
           </table>
         </div>
-        <div className="mt-4 p-3 rounded-xl bg-slate-700/20 flex items-start gap-2 border border-slate-700/30">
-          <Info size={14} className="text-slate-400 flex-shrink-0 mt-0.5" />
-          <p className="text-xs text-slate-400">
-            Les prédictions sont générées par un modèle de régression linéaire entraîné sur les 12 derniers mois. La précision diminue naturellement sur des horizons plus longs. Utilisez ces données comme indicateur, non comme certitude absolue.
+        <div className="mt-4 p-3 rounded-xl bg-ground/50 flex items-start gap-2 border hairline">
+          <Info size={14} className="text-muted flex-shrink-0 mt-0.5" />
+          <p className="portal-label text-muted">
+            Predictions are generated by a linear regression model trained on the last 12 months. Accuracy naturally decreases over longer horizons. Use these data as an indicator, not as absolute certainty.
           </p>
         </div>
       </div>
