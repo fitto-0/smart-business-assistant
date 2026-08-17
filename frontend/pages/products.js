@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import Layout from '../components/Layout';
 import { apiGet, apiPost, apiPut, apiDelete } from '../lib/api';
 import toast from 'react-hot-toast';
-import { Plus, Search, Edit2, Trash2, Package, TrendingUp, TrendingDown, X, Save } from 'lucide-react';
+import { Plus, Search, Edit2, Trash2, Package, TrendingUp, TrendingDown, X, Save, Upload, FileText, Check } from 'lucide-react';
 
 const fmt = (n) => new Intl.NumberFormat('fr-FR').format(n);
 
@@ -22,6 +22,11 @@ export default function ProductsPage() {
   const [editProduct, setEditProduct] = useState(null);
   const [form, setForm] = useState({ name: '', category: 'Electronics', price: '', stock: '' });
   const [loading, setLoading] = useState(true);
+  const [showCsvModal, setShowCsvModal] = useState(false);
+  const [csvFile, setCsvFile] = useState(null);
+  const [csvAnalyzing, setCsvAnalyzing] = useState(false);
+  const [csvAnalysis, setCsvAnalysis] = useState(null);
+  const [csvUploading, setCsvUploading] = useState(false);
 
   useEffect(() => {
     const loadProducts = async () => {
@@ -87,6 +92,64 @@ export default function ProductsPage() {
     }
   };
 
+  const handleCsvFileChange = (e) => {
+    const file = e.target.files[0];
+    if (file && file.name.endsWith('.csv')) {
+      setCsvFile(file);
+      setCsvAnalysis(null);
+    } else {
+      toast.error('Please select a CSV file');
+    }
+  };
+
+  const analyzeCsv = async () => {
+    if (!csvFile) return;
+
+    setCsvAnalyzing(true);
+    const formData = new FormData();
+    formData.append('file', csvFile);
+
+    try {
+      const response = await apiPost('/csv/analyze', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      });
+      
+      if (response.success) {
+        setCsvAnalysis(response);
+        toast.success(`Analyzed ${response.total} products`);
+      } else {
+        toast.error(response.error || 'Failed to analyze CSV');
+      }
+    } catch (error) {
+      toast.error(error.message || 'Failed to analyze CSV');
+    } finally {
+      setCsvAnalyzing(false);
+    }
+  };
+
+  const importCsvProducts = async () => {
+    if (!csvAnalysis || !csvAnalysis.products) return;
+
+    setCsvUploading(true);
+    try {
+      for (const product of csvAnalysis.products) {
+        await apiPost('/products', product);
+      }
+      toast.success(`Imported ${csvAnalysis.products.length} products`);
+      setShowCsvModal(false);
+      setCsvFile(null);
+      setCsvAnalysis(null);
+      
+      // Reload products
+      const data = await apiGet('/products');
+      setProducts(data.products || []);
+    } catch (error) {
+      toast.error('Failed to import products');
+    } finally {
+      setCsvUploading(false);
+    }
+  };
+
   const totalProducts = products.length;
   const inStock = products.filter(p => p.status === 'actif').length;
   const lowStock = products.filter(p => p.status === 'stock_faible').length;
@@ -132,9 +195,14 @@ export default function ProductsPage() {
               ))}
             </div>
           </div>
-          <button onClick={openAdd} className="portal-pill-btn flex-shrink-0">
-            <Plus size={16} /> Add Product
-          </button>
+          <div className="flex gap-2 flex-shrink-0">
+            <button onClick={() => setShowCsvModal(true)} className="portal-pill-btn">
+              <Upload size={16} /> Import CSV
+            </button>
+            <button onClick={openAdd} className="portal-pill-btn">
+              <Plus size={16} /> Add Product
+            </button>
+          </div>
         </div>
       </div>
 
@@ -243,6 +311,85 @@ export default function ProductsPage() {
               <button onClick={handleSave} className="portal-pill-btn flex-1 justify-center">
                 <Save size={16} /> Save
               </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* CSV Import Modal */}
+      {showCsvModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+          <div className="bg-ground-secondary border hairline rounded-2xl p-6 w-full max-w-lg shadow-2xl animate-slide-up">
+            <div className="flex items-center justify-between mb-5">
+              <h3 className="portal-heading text-lg">Import Products from CSV</h3>
+              <button onClick={() => setShowCsvModal(false)} className="p-2 rounded-lg hover:bg-ground text-muted">
+                <X size={18} />
+              </button>
+            </div>
+            
+            <div className="space-y-4">
+              <div>
+                <label className="block portal-label mb-1.5">Select CSV File</label>
+                <div className="relative">
+                  <input
+                    type="file"
+                    accept=".csv"
+                    onChange={handleCsvFileChange}
+                    className="w-full bg-ground border hairline rounded-xl px-4 py-3 text-ink file:mr-4 file:py-1 file:px-3 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-amber file:text-ground hover:file:bg-amber/80"
+                  />
+                </div>
+                <p className="portal-label text-muted mt-2 text-xs">
+                  Required columns: name, category, price, stock. Optional: sold, revenue, description
+                </p>
+              </div>
+
+              {csvAnalysis && (
+                <div className="bg-ground border hairline rounded-xl p-4">
+                  <div className="flex items-center gap-2 mb-3">
+                    <Check size={18} className="text-teal" />
+                    <span className="portal-heading text-sm text-teal">Analysis Complete</span>
+                  </div>
+                  <div className="space-y-2 portal-text text-sm">
+                    <p><span className="text-muted">Total products:</span> {csvAnalysis.total}</p>
+                    <p><span className="text-muted">Detected columns:</span> {Object.keys(csvAnalysis.column_mapping).join(', ')}</p>
+                    {csvAnalysis.preview && csvAnalysis.preview.length > 0 && (
+                      <div className="mt-3">
+                        <p className="text-muted mb-2">Preview (first 3):</p>
+                        <div className="space-y-1">
+                          {csvAnalysis.preview.map((p, i) => (
+                            <div key={i} className="bg-ground-secondary p-2 rounded text-xs">
+                              {p.name} - {p.category} - {p.price} DA
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              <div className="flex gap-3 mt-6">
+                <button onClick={() => setShowCsvModal(false)} className="w-full bg-ground border hairline rounded-xl px-4 py-2 portal-label text-ink-secondary hover:bg-ground/50 transition-colors justify-center">
+                  Cancel
+                </button>
+                {!csvAnalysis ? (
+                  <button
+                    onClick={analyzeCsv}
+                    disabled={!csvFile || csvAnalyzing}
+                    className="portal-pill-btn flex-1 justify-center disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {csvAnalyzing ? 'Analyzing...' : <><FileText size={16} /> Analyze CSV</>}
+                  </button>
+                ) : (
+                  <button
+                    onClick={importCsvProducts}
+                    disabled={csvUploading}
+                    className="portal-pill-btn flex-1 justify-center disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {csvUploading ? 'Importing...' : <><Upload size={16} /> Import Products</>}
+                  </button>
+                )}
+              </div>
             </div>
           </div>
         </div>

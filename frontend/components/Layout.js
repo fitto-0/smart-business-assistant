@@ -7,6 +7,7 @@ import {
   Brain, AlertTriangle, Lightbulb, User, LogOut,
   Bell, Search, Menu, X, ChevronRight, Zap
 } from 'lucide-react';
+import Chatbot from './Chatbot';
 
 const navItems = [
   { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
@@ -182,6 +183,9 @@ export default function Layout({ children, title = 'Smart Business Assistant' })
           Smart Business Assistant © 2026 — AI Powered
         </footer>
       </div>
+
+      {/* AI Chatbot */}
+      <Chatbot />
     </div>
   );
 }

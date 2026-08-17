@@ -1,6 +1,6 @@
 """
 Smart Business Assistant - Module IA
-Flask API pour les analyses IA : prédictions, sentiment, anomalies
+Flask API pour les analyses IA : prédictions, sentiment, anomalies, chatbot, CSV analysis
 """
 from flask import Flask, request, jsonify
 from flask_cors import CORS
@@ -12,6 +12,7 @@ from sklearn.metrics import mean_absolute_error, r2_score
 import json
 import os
 from datetime import datetime
+import io
 
 app = Flask(__name__)
 CORS(app)
@@ -214,6 +215,39 @@ def full_analysis():
         'analyzed_at': datetime.now().isoformat()
     })
 
+@app.route('/chatbot', methods=['POST'])
+def chatbot_endpoint():
+    """Endpoint pour le chatbot IA sur les produits"""
+    data = request.get_json()
+    question = data.get('question', '')
+    products = data.get('products', [])
+    
+    if not question:
+        return jsonify({'error': 'Question is required'}), 400
+    
+    result = chatbot.answer_question(question, products)
+    return jsonify(result)
+
+@app.route('/analyze-csv', methods=['POST'])
+def analyze_csv_endpoint():
+    """Endpoint pour analyser un fichier CSV de produits"""
+    if 'file' not in request.files:
+        return jsonify({'error': 'No file provided'}), 400
+    
+    file = request.files['file']
+    if file.filename == '':
+        return jsonify({'error': 'No file selected'}), 400
+    
+    if not file.filename.endswith('.csv'):
+        return jsonify({'error': 'File must be a CSV'}), 400
+    
+    try:
+        csv_content = file.read().decode('utf-8')
+        result = csv_analyzer.analyze_csv(csv_content)
+        return jsonify(result)
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
 def generate_recommendations(stock_anomalies, sales_anomalies, sentiment_data):
     """Génère des recommandations basées sur l'analyse"""
     recs = []
@@ -230,6 +264,187 @@ def generate_recommendations(stock_anomalies, sales_anomalies, sentiment_data):
         if neg_pct > 20:
             recs.append({'priority': 'haute', 'type': 'service', 'message': f"{neg_pct}% d'avis négatifs détectés", 'action': 'Améliorer qualité produit et service client'})
     return recs
+
+# ===================== MODULE CHATBOT =====================
+class ProductChatbot:
+    """Chatbot IA pour répondre aux questions sur les produits"""
+    
+    def __init__(self):
+        self.products_context = []
+    
+    def set_products(self, products):
+        """Définit le contexte des produits pour le chatbot"""
+        self.products_context = products
+    
+    def answer_question(self, question, products=None):
+        """Répond à une question sur les produits"""
+        if products:
+            self.set_products(products)
+        
+        question_lower = question.lower()
+        
+        # Analyser la question et fournir une réponse basée sur les produits
+        if not self.products_context:
+            return {
+                'answer': "I don't have any product data available. Please provide product information first.",
+                'confidence': 0.0
+            }
+        
+        # Questions sur le stock
+        if 'stock' in question_lower or 'inventory' in question_lower:
+            low_stock = [p for p in self.products_context if p.get('stock', 0) <= 10]
+            out_of_stock = [p for p in self.products_context if p.get('stock', 0) == 0]
+            
+            if 'low' in question_lower or 'faible' in question_lower:
+                if low_stock:
+                    items = ', '.join([p['name'] for p in low_stock[:5]])
+                    return {
+                        'answer': f"Products with low stock: {items}. Total: {len(low_stock)} products.",
+                        'confidence': 0.9
+                    }
+            elif 'out' in question_lower or 'rupture' in question_lower:
+                if out_of_stock:
+                    items = ', '.join([p['name'] for p in out_of_stock[:5]])
+                    return {
+                        'answer': f"Products out of stock: {items}. Total: {len(out_of_stock)} products.",
+                        'confidence': 0.9
+                    }
+            else:
+                total_stock = sum(p.get('stock', 0) for p in self.products_context)
+                return {
+                    'answer': f"Total inventory: {total_stock} units across {len(self.products_context)} products. {len(low_stock)} products have low stock.",
+                    'confidence': 0.85
+                }
+        
+        # Questions sur les ventes/revenus
+        elif 'sales' in question_lower or 'revenue' in question_lower or 'ventes' in question_lower or 'revenu' in question_lower:
+            total_revenue = sum(p.get('revenue', 0) for p in self.products_context)
+            top_products = sorted(self.products_context, key=lambda x: x.get('revenue', 0), reverse=True)[:3]
+            top_names = ', '.join([p['name'] for p in top_products])
+            
+            return {
+                'answer': f"Total revenue: ${total_revenue:,.2f}. Top performing products: {top_names}.",
+                'confidence': 0.9
+            }
+        
+        # Questions sur les catégories
+        elif 'category' in question_lower or 'catégorie' in question_lower:
+            categories = {}
+            for p in self.products_context:
+                cat = p.get('category', 'Unknown')
+                categories[cat] = categories.get(cat, 0) + 1
+            
+            cat_str = ', '.join([f"{k}: {v}" for k, v in categories.items()])
+            return {
+                'answer': f"Products by category: {cat_str}.",
+                'confidence': 0.85
+            }
+        
+        # Questions sur les produits spécifiques
+        elif 'product' in question_lower or 'produit' in question_lower:
+            if len(self.products_context) <= 5:
+                names = ', '.join([p['name'] for p in self.products_context])
+                return {
+                    'answer': f"Available products: {names}.",
+                    'confidence': 0.9
+                }
+            else:
+                return {
+                    'answer': f"You have {len(self.products_context)} products in inventory. Ask about specific products, stock levels, sales, or categories.",
+                    'confidence': 0.8
+                }
+        
+        # Questions sur les tendances
+        elif 'trend' in question_lower or 'tendance' in question_lower:
+            trending_up = [p for p in self.products_context if p.get('trend', 0) > 0]
+            trending_down = [p for p in self.products_context if p.get('trend', 0) < 0]
+            
+            return {
+                'answer': f"Products with positive trend: {len(trending_up)}. Products with negative trend: {len(trending_down)}.",
+                'confidence': 0.85
+            }
+        
+        # Réponse par défaut
+        else:
+            return {
+                'answer': "I can help you with questions about your products, inventory, sales, categories, and trends. Try asking about stock levels, revenue, or specific products.",
+                'confidence': 0.5
+            }
+
+chatbot = ProductChatbot()
+
+# ===================== MODULE ANALYSE CSV =====================
+class CSVAnalyzer:
+    """Analyseur de CSV pour importer automatiquement des produits"""
+    
+    def analyze_csv(self, csv_content):
+        """Analyse un fichier CSV et mappe les colonnes aux champs produits"""
+        try:
+            df = pd.read_csv(io.StringIO(csv_content))
+            
+            # Colonnes attendues et leurs variations possibles
+            column_mapping = {
+                'name': ['name', 'product', 'product_name', 'nom', 'produit', 'title'],
+                'category': ['category', 'cat', 'categorie', 'type'],
+                'price': ['price', 'prix', 'cost', 'amount'],
+                'stock': ['stock', 'inventory', 'quantity', 'qty', 'quantité'],
+                'sold': ['sold', 'sales', 'ventes'],
+                'revenue': ['revenue', 'revenu', 'income'],
+                'description': ['description', 'desc', 'details']
+            }
+            
+            # Détecter les colonnes
+            detected_columns = {}
+            df_columns_lower = [col.lower().strip() for col in df.columns]
+            
+            for field, variations in column_mapping.items():
+                for i, col in enumerate(df_columns_lower):
+                    if any(var in col for var in variations):
+                        detected_columns[field] = df.columns[i]
+                        break
+            
+            # Valider les colonnes requises
+            required_fields = ['name', 'category', 'price', 'stock']
+            missing_fields = [f for f in required_fields if f not in detected_columns]
+            
+            if missing_fields:
+                return {
+                    'success': False,
+                    'error': f'Missing required columns: {", ".join(missing_fields)}',
+                    'detected_columns': detected_columns,
+                    'available_columns': list(df.columns)
+                }
+            
+            # Transformer les données
+            products = []
+            for _, row in df.iterrows():
+                product = {
+                    'name': str(row[detected_columns['name']]).strip(),
+                    'category': str(row[detected_columns['category']]).strip(),
+                    'price': float(row[detected_columns['price']]),
+                    'stock': int(row[detected_columns['stock']]),
+                    'sold': int(row.get(detected_columns.get('sold', ''), 0)) if 'sold' in detected_columns else 0,
+                    'revenue': float(row.get(detected_columns.get('revenue', ''), 0)) if 'revenue' in detected_columns else 0,
+                    'description': str(row[detected_columns['description']]).strip() if 'description' in detected_columns else None,
+                    'trend': 0.0
+                }
+                products.append(product)
+            
+            return {
+                'success': True,
+                'products': products,
+                'total': len(products),
+                'column_mapping': detected_columns,
+                'preview': products[:3]
+            }
+            
+        except Exception as e:
+            return {
+                'success': False,
+                'error': str(e)
+            }
+
+csv_analyzer = CSVAnalyzer()
 
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 8000))

@@ -74,10 +74,11 @@ export const apiGet = (path, params) =>
     params,
   });
 
-export const apiPost = (path, body) =>
+export const apiPost = (path, body, options = {}) =>
   apiRequest(path, {
     method: "POST",
     body,
+    ...options,
   });
 
 export const apiPut = (path, body) =>
