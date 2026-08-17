@@ -77,7 +77,7 @@ export default function RegisterPage() {
             </div>
           </div>
 
-          <p className="portal-label text-muted">© 2024 Smart Business Assistant</p>
+          <p className="portal-label text-muted">© 2026 Smart Business Assistant</p>
         </div>
 
         {/* Register card */}

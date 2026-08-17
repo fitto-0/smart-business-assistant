@@ -179,7 +179,7 @@ export default function Layout({ children, title = 'Smart Business Assistant' })
 
         {/* Footer */}
         <footer className="text-center py-4 portal-label border-t hairline text-muted">
-          Smart Business Assistant © 2024 — AI Powered
+          Smart Business Assistant © 2026 — AI Powered
         </footer>
       </div>
     </div>

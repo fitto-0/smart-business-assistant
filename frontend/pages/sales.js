@@ -83,7 +83,7 @@ export default function SalesPage() {
 
       {/* Sales vs Objective */}
       <div className="bg-ground-secondary border hairline rounded-xl p-5 mb-6">
-        <h3 className="portal-heading text-base mb-1">Sales vs Targets — 2024</h3>
+        <h3 className="portal-heading text-base mb-1">Sales vs Targets — 2026</h3>
         <p className="portal-label mb-5">Monthly comparison of actual sales against targets </p>
         <ResponsiveContainer width="100%" height={300}>
           <ComposedChart data={monthlySales}>

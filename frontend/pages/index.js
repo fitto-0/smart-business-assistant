@@ -46,10 +46,10 @@ const ROSTER = [
 ];
 
 const DATES = [
-  { date: '2024-03-15', event: 'System Update', location: 'Global' },
-  { date: '2024-04-01', event: 'New Features', location: 'Platform' },
-  { date: '2024-05-15', event: 'AI Training', location: 'Cloud' },
-  { date: '2024-06-01', event: 'Security Audit', location: 'Systems' },
+  { date: '2026-03-15', event: 'System Update', location: 'Global' },
+  { date: '2026-04-01', event: 'New Features', location: 'Platform' },
+  { date: '2026-05-15', event: 'AI Training', location: 'Cloud' },
+  { date: '2026-06-01', event: 'Security Audit', location: 'Systems' },
 ];
 
 export default function LandingPage() {
@@ -207,7 +207,7 @@ export default function LandingPage() {
 
           {/* Corner metadata */}
           <div className="portal-corner-pin portal-corner-top-left">
-            EST. 2024
+            EST. 2026
           </div>
         </div>
       </section>
@@ -387,7 +387,7 @@ export default function LandingPage() {
       {/* ===================== FOOTER STRIP ===================== */}
       <footer className="portal-footer-strip px-5">
         <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
-          <p className="portal-label">© 2024 Smart Business Assistant</p>
+          <p className="portal-label">© 2026 Smart Business Assistant</p>
           <div className="flex gap-6">
             <a href="#" className="portal-nav-link">Privacy</a>
             <a href="#" className="portal-nav-link">Terms</a>

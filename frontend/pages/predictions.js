@@ -138,7 +138,7 @@ export default function PredictionsPage() {
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-5">
           <div>
             <h3 className="portal-heading text-base">Sales Prediction</h3>
-            <p className="portal-label mt-0.5">2024 History + AI Predictions</p>
+            <p className="portal-label mt-0.5">2026 History + AI Predictions</p>
           </div>
           <div className="flex items-center gap-2">
             <span className="portal-label">Horizon:</span>

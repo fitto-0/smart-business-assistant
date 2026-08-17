@@ -69,7 +69,7 @@ export default function LoginPage() {
             </div>
           </div>
 
-          <p className="portal-label text-muted">© 2024 Smart Business Assistant</p>
+          <p className="portal-label text-muted">© 2026 Smart Business Assistant</p>
         </div>
 
         {/* Login card */}

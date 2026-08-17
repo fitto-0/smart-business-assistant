@@ -117,7 +117,7 @@ export default function Dashboard() {
           <div className="flex items-center justify-between mb-5">
             <div>
               <h3 className="portal-heading text-base">Sales Evolution</h3>
-              <p className="portal-label mt-0.5">Sales vs Targets 2024</p>
+              <p className="portal-label mt-0.5">Sales vs Targets 2026</p>
             </div>
             <Link href="/sales" className="portal-label text-amber hover:text-amber/80 flex items-center gap-1">
               View details <ArrowRight size={12} />
