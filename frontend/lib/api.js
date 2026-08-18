@@ -60,7 +60,14 @@ export const apiRequest = async (path, options = {}) => {
   };
 
   if (body !== undefined) {
-    requestInit.body = JSON.stringify(body);
+    // Don't stringify FormData - let the browser set the Content-Type with boundary
+    if (body instanceof FormData) {
+      requestInit.body = body;
+      // Remove Content-Type header for FormData to let browser set it with boundary
+      delete requestInit.headers['Content-Type'];
+    } else {
+      requestInit.body = JSON.stringify(body);
+    }
   }
 
   const response = await fetch(url.toString(), requestInit);

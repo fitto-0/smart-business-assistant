@@ -110,9 +110,7 @@ export default function ProductsPage() {
     formData.append('file', csvFile);
 
     try {
-      const response = await apiPost('/csv/analyze', formData, {
-        headers: { 'Content-Type': 'multipart/form-data' }
-      });
+      const response = await apiPost('/csv/analyze', formData);
       
       if (response.success) {
         setCsvAnalysis(response);

@@ -18,6 +18,13 @@ app.use('/api/sales', require('./routes/sales'));
 app.use('/api/analysis', require('./routes/analysis'));
 app.use('/api/csv', require('./routes/csv'));
 
+console.log('Routes loaded:');
+console.log('  /api/auth');
+console.log('  /api/products');
+console.log('  /api/sales');
+console.log('  /api/analysis');
+console.log('  /api/csv');
+
 // Health check
 app.get('/api/health', (req, res) => {
   res.json({ status: 'OK', timestamp: new Date().toISOString(), version: '1.0.0' });
