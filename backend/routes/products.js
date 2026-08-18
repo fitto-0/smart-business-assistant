@@ -198,12 +198,12 @@ router.post("/", auth, async (req, res) => {
     }
 
     const categories = [
-      "Électronique",
-      "Vêtements",
-      "Alimentation",
-      "Maison",
-      "Sport",
-      "Autre",
+      "Électronique", "Electronics",
+      "Vêtements", "Clothing",
+      "Alimentation", "Food",
+      "Maison", "Home",
+      "Sport", "Sports",
+      "Autre", "Other",
     ];
 
     if (!categories.includes(category)) {

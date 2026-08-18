@@ -41,7 +41,7 @@ CREATE TABLE products (
     id SERIAL PRIMARY KEY,
     user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
     name VARCHAR(200) NOT NULL,
-    category VARCHAR(50) NOT NULL CHECK (category IN ('Électronique', 'Vêtements', 'Alimentation', 'Maison', 'Sport', 'Autre')),
+    category VARCHAR(50) NOT NULL CHECK (category IN ('Électronique', 'Electronics', 'Vêtements', 'Clothing', 'Alimentation', 'Food', 'Maison', 'Home', 'Sport', 'Sports', 'Autre', 'Other')),
     price NUMERIC(10, 2) NOT NULL CHECK (price >= 0),
     stock INTEGER NOT NULL DEFAULT 0 CHECK (stock >= 0),
     sold INTEGER NOT NULL DEFAULT 0 CHECK (sold >= 0),
