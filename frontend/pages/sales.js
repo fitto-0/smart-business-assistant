@@ -1,12 +1,12 @@
 import { useEffect, useState } from 'react';
 import Layout from '../components/Layout';
-import { apiGet } from '../lib/api';
+import { apiGet, apiPost } from '../lib/api';
 import {
   AreaChart, Area, BarChart, Bar, LineChart, Line,
   XAxis, YAxis, CartesianGrid, Tooltip, Legend,
   ResponsiveContainer, ComposedChart
 } from 'recharts';
-import { TrendingUp, TrendingDown, ShoppingCart, DollarSign, BarChart2 } from 'lucide-react';
+import { TrendingUp, TrendingDown, ShoppingCart, DollarSign, BarChart2, Plus, X } from 'lucide-react';
 
 const fmt = (n) => new Intl.NumberFormat('fr-FR').format(n);
 const CustomTooltip = ({ active, payload, label }) => {
@@ -27,6 +27,18 @@ export default function SalesPage() {
   const [monthlySales, setMonthlySales] = useState([]);
   const [topProducts, setTopProducts] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [showSaleModal, setShowSaleModal] = useState(false);
+  const [products, setProducts] = useState([]);
+  const [saleForm, setSaleForm] = useState({
+    product_id: '',
+    quantity: 1,
+    unit_price: '',
+    customer_name: '',
+    payment_method: 'carte',
+    date: new Date().toISOString().split('T')[0],
+    notes: ''
+  });
+  const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
     const loadSales = async () => {
@@ -47,6 +59,69 @@ export default function SalesPage() {
     loadSales();
   }, []);
 
+  const loadProducts = async () => {
+    try {
+      const data = await apiGet('/products');
+      setProducts(data.products || []);
+    } catch (error) {
+      console.error('Failed to load products', error);
+    }
+  };
+
+  const openSaleModal = async () => {
+    await loadProducts();
+    setShowSaleModal(true);
+  };
+
+  const closeSaleModal = () => {
+    setShowSaleModal(false);
+    setSaleForm({
+      product_id: '',
+      quantity: 1,
+      unit_price: '',
+      customer_name: '',
+      payment_method: 'carte',
+      date: new Date().toISOString().split('T')[0],
+      notes: ''
+    });
+  };
+
+  const handleProductChange = (productId) => {
+    const product = products.find(p => p.id === parseInt(productId));
+    if (product) {
+      setSaleForm({
+        ...saleForm,
+        product_id: productId,
+        unit_price: product.price
+      });
+    }
+  };
+
+  const handleSubmitSale = async (e) => {
+    e.preventDefault();
+    setSubmitting(true);
+
+    try {
+      await apiPost('/sales', saleForm);
+      closeSaleModal();
+      
+      // Reload sales data
+      const [monthly, top] = await Promise.all([
+        apiGet('/sales/monthly'),
+        apiGet('/sales/top-products', { limit: 5 })
+      ]);
+      setMonthlySales(monthly?.data || []);
+      setTopProducts(top?.data || []);
+      
+      alert('Sale recorded successfully!');
+    } catch (error) {
+      console.error('Failed to record sale', error);
+      alert('Failed to record sale');
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
   const totalSales = (monthlySales || []).reduce((s, m) => s + Number(m.actual || 0), 0);
   const totalOrders = (monthlySales || []).reduce((s, m) => s + Number(m.orders || 0), 0);
   const avgMonthly = Math.round(totalSales / Math.max(monthlySales.length, 1));
@@ -59,6 +134,21 @@ export default function SalesPage() {
 
   return (
     <Layout title="Sales Analytics">
+      {/* Header with Add Sale Button */}
+      <div className="flex items-center justify-between mb-6">
+        <div>
+          <h2 className="portal-heading text-2xl">Sales Analytics</h2>
+          <p className="portal-label text-muted">Track and manage your sales</p>
+        </div>
+        <button
+          onClick={openSaleModal}
+          className="bg-amber text-ground px-4 py-2 rounded-xl portal-label font-semibold flex items-center gap-2 hover:bg-amber/90 transition-colors"
+        >
+          <Plus size={18} />
+          Record Sale
+        </button>
+      </div>
+
       {/* Summary KPIs */}
       <div className="grid grid-cols-2 xl:grid-cols-4 gap-4 mb-6">
         {[
@@ -196,6 +286,131 @@ export default function SalesPage() {
           </table>
         </div>
       </div>
+
+      {/* Sale Modal */}
+      {showSaleModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-ground border hairline rounded-xl p-6 w-full max-w-md">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="portal-heading text-xl">Record Sale</h3>
+              <button onClick={closeSaleModal} className="text-muted hover:text-ink">
+                <X size={20} />
+              </button>
+            </div>
+
+            <form onSubmit={handleSubmitSale} className="space-y-4">
+              <div>
+                <label className="portal-label block mb-1">Product *</label>
+                <select
+                  value={saleForm.product_id}
+                  onChange={(e) => handleProductChange(e.target.value)}
+                  className="w-full bg-ground-secondary border hairline rounded-lg px-3 py-2 portal-text"
+                  required
+                >
+                  <option value="">Select a product</option>
+                  {products.map((p) => (
+                    <option key={p.id} value={p.id}>
+                      {p.name} - {fmt(p.price)} DA (Stock: {p.stock})
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="portal-label block mb-1">Quantity *</label>
+                  <input
+                    type="number"
+                    min="1"
+                    value={saleForm.quantity}
+                    onChange={(e) => setSaleForm({ ...saleForm, quantity: parseInt(e.target.value) })}
+                    className="w-full bg-ground-secondary border hairline rounded-lg px-3 py-2 portal-text"
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label className="portal-label block mb-1">Unit Price (DA) *</label>
+                  <input
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    value={saleForm.unit_price}
+                    onChange={(e) => setSaleForm({ ...saleForm, unit_price: parseFloat(e.target.value) })}
+                    className="w-full bg-ground-secondary border hairline rounded-lg px-3 py-2 portal-text"
+                    required
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="portal-label block mb-1">Date *</label>
+                <input
+                  type="date"
+                  value={saleForm.date}
+                  onChange={(e) => setSaleForm({ ...saleForm, date: e.target.value })}
+                  className="w-full bg-ground-secondary border hairline rounded-lg px-3 py-2 portal-text"
+                  required
+                />
+              </div>
+
+              <div>
+                <label className="portal-label block mb-1">Customer Name</label>
+                <input
+                  type="text"
+                  value={saleForm.customer_name}
+                  onChange={(e) => setSaleForm({ ...saleForm, customer_name: e.target.value })}
+                  className="w-full bg-ground-secondary border hairline rounded-lg px-3 py-2 portal-text"
+                  placeholder="Optional"
+                />
+              </div>
+
+              <div>
+                <label className="portal-label block mb-1">Payment Method</label>
+                <select
+                  value={saleForm.payment_method}
+                  onChange={(e) => setSaleForm({ ...saleForm, payment_method: e.target.value })}
+                  className="w-full bg-ground-secondary border hairline rounded-lg px-3 py-2 portal-text"
+                >
+                  <option value="carte">Card</option>
+                  <option value="espèces">Cash</option>
+                  <option value="virement">Transfer</option>
+                  <option value="chèque">Check</option>
+                  <option value="autre">Other</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="portal-label block mb-1">Notes</label>
+                <textarea
+                  value={saleForm.notes}
+                  onChange={(e) => setSaleForm({ ...saleForm, notes: e.target.value })}
+                  className="w-full bg-ground-secondary border hairline rounded-lg px-3 py-2 portal-text"
+                  rows="2"
+                  placeholder="Optional notes"
+                />
+              </div>
+
+              <div className="flex gap-3 pt-2">
+                <button
+                  type="button"
+                  onClick={closeSaleModal}
+                  className="flex-1 bg-ground-secondary border hairline rounded-lg px-4 py-2 portal-label font-semibold hover:bg-ground/50 transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={submitting}
+                  className="flex-1 bg-amber text-ground rounded-lg px-4 py-2 portal-label font-semibold hover:bg-amber/90 transition-colors disabled:opacity-50"
+                >
+                  {submitting ? 'Recording...' : 'Record Sale'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </Layout>
   );
 }
