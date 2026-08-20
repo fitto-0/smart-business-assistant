@@ -517,6 +517,135 @@ html {
   }
 }
 
+@media (max-width: 767px) {
+  .portal-eyebrow {
+    top: 28%;
+    font-size: 9px;
+  }
+
+  .portal-subtitle {
+    top: 55%;
+    font-size: 0.875rem;
+    max-width: 300px;
+  }
+
+  .portal-ctas {
+    top: 65%;
+    flex-direction: column;
+    gap: 0.75rem;
+    width: 100%;
+    max-width: 280px;
+  }
+
+  .portal-cta-primary,
+  .portal-cta-secondary {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .portal-dashboard-ui {
+    display: none;
+  }
+
+  .portal-feature-card {
+    padding: 1.25rem;
+  }
+
+  .portal-intelligence-item {
+    padding: 1.25rem;
+  }
+
+  .portal-intelligence-number {
+    font-size: 1.5rem;
+  }
+
+  .portal-how-it-works-item {
+    padding: 1rem;
+  }
+
+  .portal-product-ui-mockup {
+    padding: 1rem;
+    max-width: 100%;
+  }
+
+  .portal-ui-revenue-amount {
+    font-size: 1.5rem;
+  }
+
+  .portal-ai-assistant {
+    bottom: 1.5rem;
+    right: 1.5rem;
+    width: 48px;
+    height: 48px;
+  }
+
+  .portal-statement-text {
+    font-size: clamp(1.25rem, 5vw, 2rem);
+  }
+
+  .portal-statement-description {
+    font-size: 0.875rem;
+    max-width: 100%;
+  }
+
+  .portal-feature-card,
+  .portal-intelligence-item,
+  .portal-how-it-works-item {
+    border-right: none;
+  }
+
+  /* Mobile grid layouts */
+  @media (max-width: 767px) {
+    .grid.md\:grid-cols-2 {
+      grid-template-columns: 1fr;
+    }
+
+    .grid.lg\:grid-cols-4 {
+      grid-template-columns: 1fr;
+    }
+
+    .grid.lg\:grid-cols-12 {
+      grid-template-columns: 1fr;
+    }
+
+    .lg\:col-span-8,
+    .lg\:col-span-4,
+    .lg\:col-span-7,
+    .lg\:col-span-5 {
+      grid-column: span 1;
+    }
+  }
+
+  .py-32 {
+    padding-top: 4rem;
+    padding-bottom: 4rem;
+  }
+
+  .p-12.lg\:p-16 {
+    padding: 1.5rem;
+  }
+
+  .p-12.lg\:p-20 {
+    padding: 1.5rem;
+  }
+
+  .text-6xl {
+    font-size: 2.5rem;
+  }
+
+  .text-4xl.lg\:text-5xl {
+    font-size: 1.75rem;
+  }
+
+  .text-2xl.lg\:text-3xl {
+    font-size: 1.25rem;
+  }
+
+  .cursor-none {
+    cursor: auto;
+  }
+}
+
 /* Outlined / ghost headline effect */
 .text-ghost {
   color: transparent;
