@@ -6,9 +6,10 @@ import { Menu, X, ArrowRight } from 'lucide-react';
 
 const NAV_LINKS = [
   { href: '#statement', label: 'About' },
-  { href: '#releases', label: 'Features' },
-  { href: '#roster', label: 'Team' },
-  { href: '#dates', label: 'Events' },
+  { href: '#intelligence', label: 'Intelligence' },
+  { href: '#how-it-works', label: 'How It Works' },
+  { href: '/docs', label: 'Docs' },
+  { href: '/contact', label: 'Contact' },
 ];
 
 const FEATURES = [
@@ -389,9 +390,9 @@ export default function LandingPage() {
         <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
           <p className="portal-label">© 2026 Smart Business Assistant</p>
           <div className="flex gap-6">
-            <a href="#" className="portal-nav-link">Privacy</a>
-            <a href="#" className="portal-nav-link">Terms</a>
-            <a href="#" className="portal-nav-link">Contact</a>
+            <Link href="/privacy" className="portal-nav-link">Privacy</Link>
+            <Link href="/terms" className="portal-nav-link">Terms</Link>
+            <Link href="/contact" className="portal-nav-link">Contact</Link>
           </div>
         </div>
       </footer>
