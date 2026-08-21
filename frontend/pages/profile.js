@@ -8,10 +8,29 @@ export default function ProfilePage() {
   const [user, setUser] = useState(null);
   const [form, setForm] = useState({ name: '', company: '', email: '' });
   const [loading, setLoading] = useState(false);
+  const [stats, setStats] = useState({ logins: 0, analyses: 0, activeDays: 0 });
 
   useEffect(() => {
     const u = getUser();
     if (u) { setUser(u); setForm({ name: u.name, company: u.company || '', email: u.email }); }
+    
+    // Fetch user stats
+    const fetchStats = async () => {
+      try {
+        const token = localStorage.getItem('token');
+        const response = await fetch('http://localhost:5000/api/auth/stats', {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (response.ok) {
+          const data = await response.json();
+          setStats(data);
+        }
+      } catch (err) {
+        console.error('Failed to fetch stats:', err);
+      }
+    };
+    
+    fetchStats();
   }, []);
 
   const handleSave = async () => {
@@ -118,16 +137,18 @@ export default function ProfilePage() {
         <div className="bg-ground-secondary border hairline rounded-xl p-5">
           <h3 className="portal-heading text-base mb-4">Account Activity</h3>
           <div className="grid grid-cols-3 gap-4 text-center">
-            {[
-              { label: 'Logins', value: '47' },
-              { label: 'Analyses', value: '128' },
-              { label: 'Active Days', value: '23' },
-            ].map((s, i) => (
-              <div key={i} className="p-3 rounded-xl bg-ground/50 border hairline">
-                <p className="portal-heading text-2xl text-amber">{s.value}</p>
-                <p className="portal-label mt-0.5">{s.label}</p>
-              </div>
-            ))}
+            <div className="p-3 rounded-xl bg-ground/50 border hairline">
+              <p className="portal-heading text-2xl text-amber">{stats.logins}</p>
+              <p className="portal-label mt-0.5">Logins</p>
+            </div>
+            <div className="p-3 rounded-xl bg-ground/50 border hairline">
+              <p className="portal-heading text-2xl text-amber">{stats.analyses}</p>
+              <p className="portal-label mt-0.5">Analyses</p>
+            </div>
+            <div className="p-3 rounded-xl bg-ground/50 border hairline">
+              <p className="portal-heading text-2xl text-amber">{stats.activeDays}</p>
+              <p className="portal-label mt-0.5">Active Days</p>
+            </div>
           </div>
         </div>
       </div>
