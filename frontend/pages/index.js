@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
 import { isAuthenticated } from '../lib/auth';
-import { Menu, X, ArrowRight } from 'lucide-react';
+import { Menu, X, ArrowRight, BarChart3, Package, Brain, Heart, AlertTriangle, Lightbulb } from 'lucide-react';
 
 const NAV_LINKS = [
   { href: '#statement', label: 'About' },
@@ -14,37 +14,37 @@ const NAV_LINKS = [
 
 const FEATURES = [
   {
-    icon: '✦',
+    icon: BarChart3,
     title: 'Sales Analytics',
     subtitle: 'Revenue & KPIs',
     desc: 'Track revenue, orders and product performance in real time with beautiful dashboards.',
   },
   {
-    icon: '◉',
+    icon: Package,
     title: 'Stock Management',
     subtitle: 'Inventory alerts',
     desc: 'Monitor inventory, low-stock warnings and restock alerts before they hurt sales.',
   },
   {
-    icon: '↗',
+    icon: Brain,
     title: 'AI Predictions',
     subtitle: 'Forecast revenue',
     desc: 'Forecast future revenue with machine learning models trained on your history.',
   },
   {
-    icon: '♡',
+    icon: Heart,
     title: 'Review Sentiment',
     subtitle: 'Understand users',
     desc: 'Understand what customers think with automatic NLP sentiment analysis.',
   },
   {
-    icon: '⚡',
+    icon: AlertTriangle,
     title: 'Anomaly Detection',
     subtitle: 'Detect problems',
     desc: 'Get alerted on stock ruptures and sales drops the moment they happen.',
   },
   {
-    icon: '✦',
+    icon: Lightbulb,
     title: 'Smart Recommendations',
     subtitle: 'Grow your sales',
     desc: 'Actionable AI suggestions to boost sales and optimize your inventory.',
@@ -70,34 +70,10 @@ export default function LandingPage() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [scrollProgress, setScrollProgress] = useState(0);
   const [transitionProgress, setTransitionProgress] = useState(0);
-  const [cursorPosition, setCursorPosition] = useState({ x: 0, y: 0 });
-  const [isHovering, setIsHovering] = useState(false);
   const heroRef = useRef(null);
   const transitionRef = useRef(null);
   const statementRef = useRef(null);
 
-  // Custom cursor effect
-  useEffect(() => {
-    const handleMouseMove = (e) => {
-      setCursorPosition({ x: e.clientX, y: e.clientY });
-    };
-
-    const handleMouseOver = (e) => {
-      if (e.target.tagName === 'A' || e.target.tagName === 'BUTTON' || e.target.closest('a') || e.target.closest('button')) {
-        setIsHovering(true);
-      } else {
-        setIsHovering(false);
-      }
-    };
-
-    window.addEventListener('mousemove', handleMouseMove);
-    window.addEventListener('mouseover', handleMouseOver);
-
-    return () => {
-      window.removeEventListener('mousemove', handleMouseMove);
-      window.removeEventListener('mouseover', handleMouseOver);
-    };
-  }, []);
 
   useEffect(() => {
     if (isAuthenticated()) router.push('/dashboard');
@@ -125,39 +101,28 @@ export default function LandingPage() {
     return () => window.removeEventListener('scroll', handleScroll);
   }, [router]);
 
+  // Calculate animation values based on scroll position (repeating)
+  const scrollY = typeof window !== 'undefined' ? window.scrollY : 0;
+  const animationPhase = (scrollY / 100) % 1; // Creates a repeating 0-1 cycle every 100px
+  const smoothAnimation = Math.sin(animationPhase * Math.PI); // Smooth sine wave
+  
+  const smartTranslateX = smoothAnimation * 30;
+  const smartScale = 1 + (smoothAnimation * 0.02);
+  const smartTranslateY = smoothAnimation * -15;
+
   const panelOffset = scrollProgress * 120; // Panels move outward
   const wordmarkScale = 1 + (scrollProgress * 0.3); // Wordmark grows
   const wordmarkSpacing = -0.02 - (scrollProgress * 0.01); // Tracking tightens
   const wordmarkSeparation = scrollProgress * 200; // Halves separate
 
   // Transition section animations
-  const transitionImageX = transitionProgress * 40; // Image moves right
-  const transitionImageScale = 1 - (transitionProgress * 0.2); // Image shrinks slightly
+  const transitionImageX = transitionProgress * 20; // Image moves right
+  const transitionImageScale = 1 - (transitionProgress * 0.1); // Image shrinks slightly
   const transitionTextOpacity = transitionProgress; // Text fades in
-  const transitionTextY = 50 - (transitionProgress * 50); // Text moves up
+  const transitionTextY = 30 - (transitionProgress * 30); // Text moves up
 
   return (
-    <div className="portal-landing min-h-screen overflow-x-hidden cursor-none">
-      {/* Custom Cursor */}
-      <div 
-        className="fixed pointer-events-none z-50 hidden lg:block"
-        style={{
-          left: cursorPosition.x,
-          top: cursorPosition.y,
-          transform: 'translate(-50%, -50%)',
-        }}
-      >
-        <div 
-          className={`w-4 h-4 rounded-full bg-[#F5A623] transition-all duration-300 ${
-            isHovering ? 'scale-150 bg-white' : ''
-          }`}
-        />
-        <div 
-          className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-12 h-12 rounded-full border border-[#F5A623]/30 transition-all duration-300 ${
-            isHovering ? 'scale-150 border-white/50' : ''
-          }`}
-        />
-      </div>
+    <div className="portal-landing min-h-screen overflow-x-hidden">
       {/* ===================== NAVIGATION ===================== */}
       <nav className="portal-nav">
         <div className="max-w-7xl mx-auto px-5 h-full flex items-center justify-between">
@@ -216,10 +181,7 @@ export default function LandingPage() {
 
       {/* ===================== HERO SECTION ===================== */}
       <section ref={heroRef} className="relative min-h-screen overflow-hidden bg-[#080808]">
-        {/* Grain overlay */}
-        <div className="absolute inset-0 opacity-30" style={{
-          backgroundImage: 'url("data:image/svg+xml,%3Csvg viewBox=%220 0 200 200%22 xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22noise%22%3E%3CfeTurbulence type=%22fractalNoise%22 baseFrequency=%220.65%22 numOctaves=%223%22 stitchTiles=%22stitch%22/%3E%3C/filter%3E%3Crect width=%22100%25%22 height=%22100%25%22 filter=%22url(%23noise)%22/%3E%3C/svg%3E")',
-        }} />
+        
 
         {/* Content */}
         <div className="relative z-10 max-w-7xl mx-auto px-5 min-h-screen flex flex-col justify-center pt-20">
@@ -230,8 +192,7 @@ export default function LandingPage() {
               <p 
                 className="portal-label text-[#F5A623] tracking-[0.3em]"
                 style={{
-                  opacity: 1 - scrollProgress * 2,
-                  transform: `translateY(${scrollProgress * -30}px)`,
+                  transform: `translateY(${smoothAnimation * -10}px)`,
                 }}
               >
                 AI-POWERED BUSINESS INTELLIGENCE
@@ -241,14 +202,14 @@ export default function LandingPage() {
                 className="font-syne font-extrabold text-[clamp(3rem,12vw,10rem)] leading-[0.85] tracking-tight"
                 style={{
                   color: '#F5F5F5',
-                  transform: `translateY(${scrollProgress * -50}px) scale(${1 + scrollProgress * 0.05})`,
+                  transform: `translateY(${smartTranslateY}px) scale(${smartScale})`,
                   transition: 'transform 0.1s linear',
                 }}
               >
                 <span 
                   className="block"
                   style={{
-                    transform: `translateX(${-scrollProgress * 100}px)`,
+                    transform: `translateX(${-smartTranslateX}px)`,
                     transition: 'transform 0.1s linear',
                   }}
                 >
@@ -257,7 +218,7 @@ export default function LandingPage() {
                 <span 
                   className="block text-[#F5A623]"
                   style={{
-                    transform: `translateX(${scrollProgress * 100}px)`,
+                    transform: `translateX(${smartTranslateX}px)`,
                     transition: 'transform 0.1s linear',
                   }}
                 >
@@ -268,55 +229,17 @@ export default function LandingPage() {
               <p 
                 className="font-sora text-xl lg:text-2xl text-[#8A8A8A] max-w-2xl leading-relaxed"
                 style={{
-                  opacity: 1 - scrollProgress * 1.5,
-                  transform: `translateY(${scrollProgress * -40}px)`,
+                  transform: `translateY(${smoothAnimation * -15}px)`,
                 }}
               >
                 Turn your business data into your next decision.
               </p>
             </div>
-
-            {/* Right - CTAs and metadata */}
-            <div className="lg:col-span-4 space-y-6 pb-8"
-              style={{
-                opacity: 1 - scrollProgress * 2,
-                transform: `translateY(${scrollProgress * -30}px)`,
-              }}
-            >
-              <div className="space-y-4">
-                <Link href="/register" className="group block">
-                  <div className="bg-[#F5A623] text-[#080808] px-8 py-4 rounded-sm font-sora font-semibold text-sm tracking-wider uppercase transition-all duration-300 hover:bg-[#E8913C] hover:translate-x-2">
-                    Get Started <ArrowRight size={16} className="inline ml-2 group-hover:translate-x-1 transition-transform" />
-                  </div>
-                </Link>
-                <Link href="/login" className="group block">
-                  <div className="border border-white/20 text-white px-8 py-4 rounded-sm font-sora font-semibold text-sm tracking-wider uppercase transition-all duration-300 hover:bg-white/5 hover:border-white/40">
-                    Explore Platform
-                  </div>
-                </Link>
-              </div>
-
-              <div className="pt-8 border-t border-white/10">
-                <p className="portal-label mb-2">EST. 2026</p>
-                <p className="font-sora text-sm text-[#8A8A8A]">
-                  AI-Powered Business Intelligence Platform
-                </p>
-              </div>
-            </div>
+            
           </div>
 
           {/* Scroll indicator */}
-          <div 
-            className="absolute bottom-8 left-1/2 -translate-x-1/2"
-            style={{
-              opacity: 1 - scrollProgress * 3,
-              transform: `translateY(${scrollProgress * -20}px)`,
-            }}
-          >
-            <div className="w-6 h-10 border-2 border-white/30 rounded-full flex justify-center pt-2">
-              <div className="w-1 h-2 bg-[#F5A623] rounded-full animate-bounce" />
-            </div>
-          </div>
+          
         </div>
       </section>
 
@@ -329,7 +252,7 @@ export default function LandingPage() {
             <h2 
               className="font-syne font-extrabold text-[clamp(2.5rem,8vw,6rem)] leading-[0.9] tracking-tight"
               style={{
-                color: '#F5F5F5',
+                color: '#fffff',
                 opacity: transitionTextOpacity,
                 transform: `translateY(${transitionTextY}px)`,
               }}
@@ -353,8 +276,8 @@ export default function LandingPage() {
                 
                 {/* Content */}
                 <div className="relative z-10">
-                  <div className="text-6xl mb-6 text-[#F5A623] group-hover:scale-110 transition-transform duration-500">
-                    {feature.icon}
+                  <div className="mb-6 text-[#F5A623] group-hover:scale-110 transition-transform duration-500">
+                    <feature.icon size={48} />
                   </div>
                   <h3 className="font-syne font-bold text-2xl lg:text-3xl text-[#F5F5F5] mb-3 group-hover:translate-x-2 transition-transform duration-300">
                     {feature.title}
@@ -400,7 +323,7 @@ export default function LandingPage() {
                 <p className="font-syne font-extrabold text-[clamp(4rem,15vw,12rem)] leading-none text-transparent" style={{
                   WebkitTextStroke: '2px rgba(245, 166, 35, 0.2)',
                 }}>
-                  01
+                  Ready?
                 </p>
               </div>
             </div>
@@ -521,12 +444,6 @@ export default function LandingPage() {
           </div>
         </div>
       </footer>
-
-      {/* ===================== FLOATING AI ASSISTANT ===================== */}
-      <div className="portal-ai-assistant">
-        <span className="portal-ai-assistant-icon">✦</span>
-        <span className="portal-ai-assistant-label">Ask Smart AI</span>
-      </div>
     </div>
   );
 }
