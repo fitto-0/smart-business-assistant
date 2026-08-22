@@ -3,14 +3,20 @@ services:
     image: postgres:15-alpine
     container_name: smart-business-db
     restart: unless-stopped
-    env_file:
-      - .env
+
+    environment:
+      POSTGRES_DB: ${DB_NAME}
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+
     ports:
       - "5432:5432"
+
     volumes:
       - postgres_data:/var/lib/postgresql/data
+
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${DB_USER}"]
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_NAME}"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -19,31 +25,41 @@ services:
     build:
       context: ./backend
       dockerfile: Dockerfile
+
     container_name: smart-business-backend
     restart: unless-stopped
+
     ports:
       - "5000:5000"
+
     env_file:
       - .env
+
     environment:
       NODE_ENV: production
       DB_HOST: postgres
+
     depends_on:
       postgres:
         condition: service_healthy
+
     volumes:
       - ./backend:/app
       - /app/node_modules
+
     command: sh -c "sleep 5 && npm run init-db && node server.js"
 
   ai:
     build:
       context: ./ai
       dockerfile: Dockerfile
+
     container_name: smart-business-ai
     restart: unless-stopped
+
     ports:
       - "8000:8000"
+
     environment:
       PORT: 8000
 
@@ -51,14 +67,19 @@ services:
     build:
       context: ./frontend
       dockerfile: Dockerfile
+
     container_name: smart-business-frontend
     restart: unless-stopped
+
     ports:
       - "3000:3000"
+
     env_file:
       - .env
+
     environment:
       NODE_ENV: production
+
     depends_on:
       - backend
 

@@ -127,7 +127,7 @@ export default function ProfilePage() {
                     <p className="portal-label text-muted">{item.desc}</p>
                   </div>
                 </div>
-                <button className="w-full bg-ground border hairline rounded-xl px-4 py-2 portal-label text-ink-secondary hover:bg-ground/50 transition-colors py-1.5 px-3 text-xs">{item.btn}</button>
+                <button className="w-full bg-ground border hairline rounded-xl px-3 py-1.5 portal-label text-ink-secondary hover:bg-ground/50 transition-colors text-xs">{item.btn}</button>
               </div>
             ))}
           </div>

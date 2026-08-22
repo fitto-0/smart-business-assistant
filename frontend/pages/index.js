@@ -3,6 +3,7 @@ import { useRouter } from 'next/router';
 import Link from 'next/link';
 import { isAuthenticated } from '../lib/auth';
 import { Menu, X, ArrowRight, BarChart3, Package, Brain, Heart, AlertTriangle, Lightbulb } from 'lucide-react';
+import GradientWaves from '../components/GradientWaves';
 
 const NAV_LINKS = [
   { href: '#statement', label: 'About' },
@@ -181,7 +182,31 @@ export default function LandingPage() {
 
       {/* ===================== HERO SECTION ===================== */}
       <section ref={heroRef} className="relative min-h-screen overflow-hidden bg-[#080808]">
-        
+        {/* GradientWaves Background */}
+        <div className="absolute inset-0 z-0">
+          <GradientWaves
+            horizonColor="#080808"
+            waveColor="#F5A623"
+            crestColor="#FF7210"
+            speed={0.4}
+            amplitude={2.5}
+            waveScale={0.6}
+            waveRatio={0.9}
+            swell={35}
+            turbulence={20}
+            tilt={1.11}
+            zoom={1.0}
+            height={5.5}
+            fogDepth={15}
+            detail="medium"
+            brightness={1.0}
+            opacity={1.0}
+            mouseInteraction={true}
+            parallaxStrength={0.5}
+            grain={true}
+            grainIntensity={0.05}
+          />
+        </div>
 
         {/* Content */}
         <div className="relative z-10 max-w-7xl mx-auto px-5 min-h-screen flex flex-col justify-center pt-20">
