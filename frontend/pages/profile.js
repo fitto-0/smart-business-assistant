@@ -1,16 +1,28 @@
 import { useState, useEffect } from 'react';
 import Layout from '../components/Layout';
-import { getUser, updateProfile } from '../lib/auth';
+import { getUser, updateProfile, changePassword, toggleEmailNotifications, toggleTwoFactorAuth } from '../lib/auth';
 import { apiGet } from '../lib/api';
 import Cookies from 'js-cookie';
 import toast from 'react-hot-toast';
-import { User, Mail, Building, Save, Shield, Bell, Lock } from 'lucide-react';
+import { User, Mail, Building, Save, Shield, Bell, Lock, X } from 'lucide-react';
 
 export default function ProfilePage() {
   const [user, setUser] = useState(null);
   const [form, setForm] = useState({ name: '', company: '', email: '' });
   const [loading, setLoading] = useState(false);
   const [stats, setStats] = useState({ logins: 0, analyses: 0, activeDays: 0 });
+  const [security, setSecurity] = useState({
+    daysSincePasswordChange: 0,
+    emailNotificationsEnabled: true,
+    twoFactorEnabled: false
+  });
+  const [showPasswordModal, setShowPasswordModal] = useState(false);
+  const [passwordForm, setPasswordForm] = useState({
+    oldPassword: '',
+    newPassword: '',
+    confirmPassword: ''
+  });
+  const [passwordLoading, setPasswordLoading] = useState(false);
 
   useEffect(() => {
     const u = getUser();
@@ -32,7 +44,19 @@ export default function ProfilePage() {
       }
     };
 
+    // Fetch security info
+    const fetchSecurity = async () => {
+      try {
+        const data = await apiGet('/auth/security');
+        console.log('Security received:', data);
+        setSecurity(data);
+      } catch (err) {
+        console.error('Failed to fetch security:', err);
+      }
+    };
+
     fetchStats();
+    fetchSecurity();
   }, []);
 
   const handleSave = async () => {
@@ -46,6 +70,58 @@ export default function ProfilePage() {
       toast.error(err.message);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handlePasswordChange = async () => {
+    if (!passwordForm.oldPassword || !passwordForm.newPassword || !passwordForm.confirmPassword) {
+      toast.error('All fields are required');
+      return;
+    }
+
+    if (passwordForm.newPassword !== passwordForm.confirmPassword) {
+      toast.error('New passwords do not match');
+      return;
+    }
+
+    if (passwordForm.newPassword.length < 6) {
+      toast.error('Password must be at least 6 characters');
+      return;
+    }
+
+    setPasswordLoading(true);
+    try {
+      await changePassword(passwordForm.oldPassword, passwordForm.newPassword);
+      toast.success('Password changed successfully!');
+      setShowPasswordModal(false);
+      setPasswordForm({ oldPassword: '', newPassword: '', confirmPassword: '' });
+      // Refresh security data
+      const securityData = await apiGet('/auth/security');
+      setSecurity(securityData);
+    } catch (err) {
+      toast.error(err.message || 'Failed to change password');
+    } finally {
+      setPasswordLoading(false);
+    }
+  };
+
+  const handleToggleNotifications = async () => {
+    try {
+      const response = await toggleEmailNotifications(!security.emailNotificationsEnabled);
+      setSecurity({ ...security, emailNotificationsEnabled: response.emailNotificationsEnabled });
+      toast.success(response.message);
+    } catch (err) {
+      toast.error(err.message || 'Failed to toggle notifications');
+    }
+  };
+
+  const handleToggle2FA = async () => {
+    try {
+      const response = await toggleTwoFactorAuth(!security.twoFactorEnabled);
+      setSecurity({ ...security, twoFactorEnabled: response.twoFactorEnabled });
+      toast.success(response.message);
+    } catch (err) {
+      toast.error(err.message || 'Failed to toggle 2FA');
     }
   };
 
@@ -114,24 +190,52 @@ export default function ProfilePage() {
             <Shield size={18} className="text-teal" /> Security & Privacy
           </h3>
           <div className="space-y-3">
-            {[
-              { icon: Lock, title: 'Change Password', desc: 'Last changed 30 days ago', btn: 'Change' },
-              { icon: Bell, title: 'Email Notifications', desc: 'Receive alerts and recommendations', btn: 'Configure' },
-              { icon: Shield, title: 'Two-Factor Authentication', desc: 'Additional security not enabled', btn: 'Enable' },
-            ].map((item, i) => (
-              <div key={i} className="flex items-center justify-between p-4 rounded-xl bg-ground/50 border hairline hover:border-amber/30 transition-all">
-                <div className="flex items-center gap-3">
-                  <div className="w-9 h-9 rounded-lg bg-ground flex items-center justify-center">
-                    <item.icon size={16} className="text-muted" />
-                  </div>
-                  <div>
-                    <p className="portal-label font-semibold text-ink">{item.title}</p>
-                    <p className="portal-label text-muted">{item.desc}</p>
-                  </div>
+            <div className="flex items-center justify-between p-4 rounded-xl bg-ground/50 border hairline hover:border-amber/30 transition-all">
+              <div className="flex items-center gap-3">
+                <div className="w-9 h-9 rounded-lg bg-ground flex items-center justify-center">
+                  <Lock size={16} className="text-muted" />
                 </div>
-                <button className="w-full bg-ground border hairline rounded-xl px-3 py-1.5 portal-label text-ink-secondary hover:bg-ground/50 transition-colors text-xs">{item.btn}</button>
+                <div>
+                  <p className="portal-label font-semibold text-ink">Change Password</p>
+                  <p className="portal-label text-muted">
+                    Last changed {security.daysSincePasswordChange === 0 ? 'today' : `${security.daysSincePasswordChange} days ago`}
+                  </p>
+                </div>
               </div>
-            ))}
+              <button onClick={() => setShowPasswordModal(true)} className="w-full bg-ground border hairline rounded-xl px-3 py-1.5 portal-label text-ink-secondary hover:bg-ground/50 transition-colors text-xs">Change</button>
+            </div>
+            <div className="flex items-center justify-between p-4 rounded-xl bg-ground/50 border hairline hover:border-amber/30 transition-all">
+              <div className="flex items-center gap-3">
+                <div className="w-9 h-9 rounded-lg bg-ground flex items-center justify-center">
+                  <Bell size={16} className="text-muted" />
+                </div>
+                <div>
+                  <p className="portal-label font-semibold text-ink">Email Notifications</p>
+                  <p className="portal-label text-muted">
+                    {security.emailNotificationsEnabled ? 'Enabled' : 'Disabled'}
+                  </p>
+                </div>
+              </div>
+              <button onClick={handleToggleNotifications} className="w-full bg-ground border hairline rounded-xl px-3 py-1.5 portal-label text-ink-secondary hover:bg-ground/50 transition-colors text-xs">
+                {security.emailNotificationsEnabled ? 'Disable' : 'Enable'}
+              </button>
+            </div>
+            <div className="flex items-center justify-between p-4 rounded-xl bg-ground/50 border hairline hover:border-amber/30 transition-all">
+              <div className="flex items-center gap-3">
+                <div className="w-9 h-9 rounded-lg bg-ground flex items-center justify-center">
+                  <Shield size={16} className="text-muted" />
+                </div>
+                <div>
+                  <p className="portal-label font-semibold text-ink">Two-Factor Authentication</p>
+                  <p className="portal-label text-muted">
+                    {security.twoFactorEnabled ? 'Enabled' : 'Not enabled'}
+                  </p>
+                </div>
+              </div>
+              <button onClick={handleToggle2FA} className="w-full bg-ground border hairline rounded-xl px-3 py-1.5 portal-label text-ink-secondary hover:bg-ground/50 transition-colors text-xs">
+                {security.twoFactorEnabled ? 'Disable' : 'Enable'}
+              </button>
+            </div>
           </div>
         </div>
 
@@ -153,6 +257,71 @@ export default function ProfilePage() {
             </div>
           </div>
         </div>
+
+        {/* Password Change Modal */}
+        {showPasswordModal && (
+          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+            <div className="bg-ground-secondary border hairline rounded-xl p-6 w-full max-w-md mx-4">
+              <div className="flex items-center justify-between mb-5">
+                <h3 className="portal-heading text-lg">Change Password</h3>
+                <button onClick={() => setShowPasswordModal(false)} className="text-muted hover:text-ink">
+                  <X size={20} />
+                </button>
+              </div>
+              <div className="space-y-4">
+                <div>
+                  <label className="block portal-label mb-2">Old Password</label>
+                  <input
+                    type="password"
+                    value={passwordForm.oldPassword}
+                    onChange={(e) => setPasswordForm({ ...passwordForm, oldPassword: e.target.value })}
+                    className="w-full bg-ground border hairline rounded-xl px-4 py-2 text-ink placeholder-muted focus:outline-none focus:border-amber transition-colors"
+                    placeholder="Enter old password"
+                  />
+                </div>
+                <div>
+                  <label className="block portal-label mb-2">New Password</label>
+                  <input
+                    type="password"
+                    value={passwordForm.newPassword}
+                    onChange={(e) => setPasswordForm({ ...passwordForm, newPassword: e.target.value })}
+                    className="w-full bg-ground border hairline rounded-xl px-4 py-2 text-ink placeholder-muted focus:outline-none focus:border-amber transition-colors"
+                    placeholder="Enter new password"
+                  />
+                </div>
+                <div>
+                  <label className="block portal-label mb-2">Confirm New Password</label>
+                  <input
+                    type="password"
+                    value={passwordForm.confirmPassword}
+                    onChange={(e) => setPasswordForm({ ...passwordForm, confirmPassword: e.target.value })}
+                    className="w-full bg-ground border hairline rounded-xl px-4 py-2 text-ink placeholder-muted focus:outline-none focus:border-amber transition-colors"
+                    placeholder="Confirm new password"
+                  />
+                </div>
+                <div className="flex gap-3 pt-2">
+                  <button
+                    onClick={() => setShowPasswordModal(false)}
+                    className="flex-1 bg-ground border hairline rounded-xl px-4 py-2 portal-label text-ink hover:bg-ground/50 transition-colors"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={handlePasswordChange}
+                    disabled={passwordLoading}
+                    className="flex-1 portal-pill-btn"
+                  >
+                    {passwordLoading ? (
+                      <span className="animate-spin rounded-full h-4 w-4 border-2 border-amber border-t-transparent"></span>
+                    ) : (
+                      'Change Password'
+                    )}
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </Layout>
   );

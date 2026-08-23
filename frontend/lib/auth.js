@@ -93,3 +93,24 @@ export const updateProfile = async (updates) => {
 
   return updatedUser;
 };
+
+export const changePassword = async (oldPassword, newPassword) => {
+  const response = await apiPost("/auth/change-password", {
+    oldPassword,
+    newPassword,
+  });
+
+  return response;
+};
+
+export const toggleEmailNotifications = async (enabled) => {
+  const response = await apiPut("/auth/toggle-notifications", { enabled });
+
+  return response;
+};
+
+export const toggleTwoFactorAuth = async (enabled) => {
+  const response = await apiPut("/auth/toggle-2fa", { enabled });
+
+  return response;
+};

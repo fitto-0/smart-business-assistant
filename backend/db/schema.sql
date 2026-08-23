@@ -30,6 +30,10 @@ CREATE TABLE users (
     company VARCHAR(150),
     role VARCHAR(20) DEFAULT 'user' CHECK (role IN ('user', 'admin', 'manager')),
     avatar_url TEXT,
+    password_last_changed TIMESTAMPTZ DEFAULT NOW(),
+    email_notifications_enabled BOOLEAN DEFAULT true,
+    two_factor_enabled BOOLEAN DEFAULT false,
+    two_factor_secret VARCHAR(255),
     created_at TIMESTAMPTZ DEFAULT NOW(),
     updated_at TIMESTAMPTZ DEFAULT NOW()
 );
