@@ -7,17 +7,22 @@ const TOKEN_KEY = "sba_token";
 
 const getToken = () => {
   if (typeof window === "undefined") return null;
-  return Cookies.get(TOKEN_KEY);
+  const token = Cookies.get(TOKEN_KEY);
+  console.log('Token retrieved:', token ? 'exists' : 'missing');
+  return token;
 };
 
 const getHeaders = (headers = {}) => {
   const token = getToken();
 
-  return {
+  const authHeaders = {
     "Content-Type": "application/json",
     ...(token ? { Authorization: `Bearer ${token}` } : {}),
     ...headers,
   };
+
+  console.log('Request headers:', authHeaders.Authorization ? 'Auth header present' : 'Auth header missing');
+  return authHeaders;
 };
 
 const parseResponse = async (response) => {
@@ -33,6 +38,7 @@ const parseResponse = async (response) => {
         ? payload?.error || payload?.message
         : payload;
 
+    console.error(`API Error: ${response.status} - ${message}`);
     throw new Error(message || "Request failed");
   }
 
@@ -69,6 +75,9 @@ export const apiRequest = async (path, options = {}) => {
       requestInit.body = JSON.stringify(body);
     }
   }
+
+  console.log(`API Request: ${method} ${url.toString()}`);
+  console.log('Headers:', requestInit.headers);
 
   const response = await fetch(url.toString(), requestInit);
 

@@ -130,6 +130,16 @@ router.post("/login", async (req, res) => {
       });
     }
 
+    // Record successful login
+    const ipAddress = req.ip || req.connection.remoteAddress || null;
+    const userAgent = req.headers['user-agent'] || null;
+
+    await query(
+      `INSERT INTO login_log (user_id, ip_address, user_agent, success)
+       VALUES ($1, $2, $3, true)`,
+      [user.id, ipAddress, userAgent]
+    );
+
     const token = generateToken(user);
 
     return res.json({
@@ -238,14 +248,11 @@ router.get("/stats", require("../middleware/auth"), async (req, res) => {
   try {
     const userId = req.user.id;
 
-    // Get user creation date for active days calculation
-    const userResult = await query(
-      `SELECT created_at FROM users WHERE id = $1`,
+    // Count logins from login_log table
+    const loginsResult = await query(
+      `SELECT COUNT(*) as total_logins FROM login_log WHERE user_id = $1 AND success = true`,
       [userId]
     );
-    
-    const createdAt = userResult.rows[0]?.created_at || new Date();
-    const activeDays = Math.ceil((new Date() - new Date(createdAt)) / (1000 * 60 * 60 * 24));
 
     // Count analyses (reviews, anomalies, recommendations)
     const analysesResult = await query(
@@ -256,14 +263,18 @@ router.get("/stats", require("../middleware/auth"), async (req, res) => {
       [userId]
     );
 
-    // For logins, we'll use a simple count based on a proxy or return 0 if not tracked
-    // In a real implementation, you'd have a login_log table
-    const logins = analysesResult.rows[0].total_analyses; // Using analyses as proxy for now
+    // Count active days (days with at least one login)
+    const activeDaysResult = await query(
+      `SELECT COUNT(DISTINCT DATE(login_time)) as active_days
+       FROM login_log
+       WHERE user_id = $1 AND success = true`,
+      [userId]
+    );
 
     return res.json({
-      logins: logins || 0,
+      logins: parseInt(loginsResult.rows[0].total_logins) || 0,
       analyses: parseInt(analysesResult.rows[0].total_analyses) || 0,
-      activeDays: activeDays || 0,
+      activeDays: parseInt(activeDaysResult.rows[0].active_days) || 0,
     });
   } catch (err) {
     console.error("Erreur /stats:", err);

@@ -38,6 +38,7 @@ services:
     environment:
       NODE_ENV: production
       DB_HOST: postgres
+      PORT: 5000
 
     depends_on:
       postgres:
@@ -47,7 +48,7 @@ services:
       - ./backend:/app
       - /app/node_modules
 
-    command: sh -c "sleep 5 && npm run init-db && node server.js"
+    command: sh -c "node server.js"
 
   ai:
     build:

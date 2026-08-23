@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react';
 import Layout from '../components/Layout';
 import { getUser, updateProfile } from '../lib/auth';
+import { apiGet } from '../lib/api';
+import Cookies from 'js-cookie';
 import toast from 'react-hot-toast';
 import { User, Mail, Building, Save, Shield, Bell, Lock } from 'lucide-react';
 
@@ -17,19 +19,19 @@ export default function ProfilePage() {
     // Fetch user stats
     const fetchStats = async () => {
       try {
-        const token = localStorage.getItem('token');
-        const response = await fetch('http://localhost:5000/api/auth/stats', {
-          headers: { 'Authorization': `Bearer ${token}` }
-        });
-        if (response.ok) {
-          const data = await response.json();
-          setStats(data);
-        }
+        console.log('Fetching stats...');
+        console.log('Current cookies:', document.cookie);
+        const token = Cookies.get('sba_token');
+        console.log('Direct token check:', token ? 'exists' : 'missing');
+
+        const data = await apiGet('/auth/stats');
+        console.log('Stats received:', data);
+        setStats(data);
       } catch (err) {
         console.error('Failed to fetch stats:', err);
       }
     };
-    
+
     fetchStats();
   }, []);
 

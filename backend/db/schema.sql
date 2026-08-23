@@ -36,6 +36,19 @@ CREATE TABLE users (
 
 CREATE INDEX idx_users_email ON users(email);
 
+-- ===================== TABLE LOGIN_LOG =====================
+CREATE TABLE login_log (
+    id SERIAL PRIMARY KEY,
+    user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    login_time TIMESTAMPTZ DEFAULT NOW(),
+    ip_address VARCHAR(45),
+    user_agent TEXT,
+    success BOOLEAN DEFAULT TRUE
+);
+
+CREATE INDEX idx_login_log_user ON login_log(user_id);
+CREATE INDEX idx_login_log_user_time ON login_log(user_id, login_time DESC);
+
 -- ===================== TABLE PRODUCTS =====================
 CREATE TABLE products (
     id SERIAL PRIMARY KEY,
