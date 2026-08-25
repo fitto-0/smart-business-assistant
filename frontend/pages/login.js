@@ -16,6 +16,8 @@ export default function LoginPage() {
   const [form, setForm] = useState({ email: 'demo@smartbusiness.com', password: 'demo123' });
   const [showPwd, setShowPwd] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [requires2FA, setRequires2FA] = useState(false);
+  const [totpCode, setTotpCode] = useState('');
 
   useEffect(() => {
     if (isAuthenticated()) router.push('/dashboard');
@@ -25,9 +27,26 @@ export default function LoginPage() {
     e.preventDefault();
     setLoading(true);
     try {
-      await login(form.email, form.password);
-      toast.success('Login successful! Welcome 👋');
-      router.push('/dashboard');
+      if (requires2FA) {
+        // Submit with TOTP code
+        await login(form.email, form.password, totpCode);
+        toast.success('Login successful! Welcome');
+        router.push('/dashboard');
+      } else {
+        // First attempt - check if 2FA is required
+        try {
+          await login(form.email, form.password);
+          toast.success('Login successful! Welcome');
+          router.push('/dashboard');
+        } catch (err) {
+          if (err.message === 'Code 2FA requis' || err.requires2FA) {
+            setRequires2FA(true);
+            toast('Two-factor authentication required');
+          } else {
+            throw err;
+          }
+        }
+      }
     } catch (err) {
       toast.error(err.message || 'Login error');
     } finally {
@@ -85,7 +104,7 @@ export default function LoginPage() {
             </div>
           </div>
 
-          <h1 className="portal-heading text-2xl sm:text-3xl mb-2">Welcome back 👋</h1>
+          <h1 className="portal-heading text-2xl sm:text-3xl mb-2">Welcome back</h1>
           <p className="portal-text mb-8">Sign in to your dashboard</p>
 
           {/* Demo badge */}
@@ -129,15 +148,29 @@ export default function LoginPage() {
                 </button>
               </div>
             </div>
+            {requires2FA && (
+              <div>
+                <label className="block portal-label mb-2">Two-Factor Authentication Code</label>
+                <input
+                  type="text"
+                  value={totpCode}
+                  onChange={(e) => setTotpCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
+                  className="w-full bg-ground-secondary border hairline rounded-xl px-4 py-3 text-ink text-center text-2xl tracking-widest placeholder-muted focus:outline-none focus:border-amber transition-colors"
+                  placeholder="000000"
+                  maxLength={6}
+                  required
+                />
+              </div>
+            )}
             <button type="submit" disabled={loading} className="portal-pill-btn w-full justify-center !py-3 text-base">
               {loading ? (
                 <>
                   <span className="animate-spin rounded-full h-4 w-4 border-2 border-amber border-t-transparent"></span>
-                  Signing in...
+                  {requires2FA ? 'Verifying...' : 'Signing in...'}
                 </>
               ) : (
                 <>
-                  Sign In <ArrowRight size={16} />
+                  {requires2FA ? 'Verify & Sign In' : 'Sign In'} <ArrowRight size={16} />
                 </>
               )}
             </button>

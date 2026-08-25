@@ -247,7 +247,7 @@ export default function LandingPage() {
                     transition: 'transform 0.1s linear',
                   }}
                 >
-                  Business
+                  Business assistant
                 </span>
               </h1>
 

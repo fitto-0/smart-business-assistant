@@ -1,9 +1,11 @@
-const router = require("express").Router();
+const express = require("express");
+const router = express.Router();
+const { body, validationResult } = require("express-validator");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
-const pool = require("../config/db");
-
-const query = (text, params) => pool.query(text, params);
+const speakeasy = require("speakeasy");
+const QRCode = require("qrcode");
+const { query } = require("../db/pool");
 
 // ⚠️ MUST match the secret used in middleware/auth.js (JWT verification).
 const JWT_SECRET =
@@ -91,7 +93,7 @@ router.post("/register", async (req, res) => {
 // LOGIN
 router.post("/login", async (req, res) => {
   try {
-    const { email, password } = req.body;
+    const { email, password, totpCode } = req.body;
 
     if (!email || !password) {
       return res.status(400).json({
@@ -108,7 +110,9 @@ router.post("/login", async (req, res) => {
         email,
         password_hash,
         company,
-        role
+        role,
+        two_factor_enabled,
+        two_factor_secret
        FROM users
        WHERE email = $1`,
       [normalizedEmail],
@@ -128,6 +132,32 @@ router.post("/login", async (req, res) => {
       return res.status(401).json({
         error: "Email ou mot de passe incorrect",
       });
+    }
+
+    // Check if 2FA is enabled
+    const twoFactorEnabled = user.two_factor_enabled || false;
+
+    if (twoFactorEnabled) {
+      if (!totpCode) {
+        return res.status(400).json({
+          error: "Code 2FA requis",
+          requires2FA: true,
+        });
+      }
+
+      // Verify TOTP code
+      const verified = speakeasy.totp.verify({
+        secret: user.two_factor_secret,
+        encoding: "base32",
+        token: totpCode,
+      });
+
+      if (!verified) {
+        return res.status(401).json({
+          error: "Code 2FA invalide",
+          requires2FA: true,
+        });
+      }
     }
 
     // Record successful login
@@ -474,6 +504,186 @@ router.put("/toggle-2fa", require("../middleware/auth"), async (req, res) => {
     });
   } catch (err) {
     console.error("Erreur toggle-2fa:", err);
+    return res.status(500).json({
+      error: "Erreur serveur",
+    });
+  }
+});
+
+// SETUP 2FA - Generate secret and QR code
+router.post("/setup-2fa", require("../middleware/auth"), async (req, res) => {
+  try {
+    const userId = req.user.id;
+
+    // Get user email for the TOTP issuer
+    const userResult = await query(
+      `SELECT email, name FROM users WHERE id = $1`,
+      [userId]
+    );
+
+    if (userResult.rowCount === 0) {
+      return res.status(404).json({
+        error: "Utilisateur non trouvé",
+      });
+    }
+
+    const user = userResult.rows[0];
+
+    // Generate TOTP secret
+    const secret = speakeasy.generateSecret({
+      name: `Smart Business Assistant (${user.email})`,
+      issuer: "Smart Business Assistant",
+    });
+
+    // Generate QR code as data URL
+    const qrCodeUrl = await QRCode.toDataURL(secret.otpauth_url);
+
+    // Store the secret temporarily (not yet enabled)
+    try {
+      await query(
+        `UPDATE users
+         SET two_factor_secret = $1
+         WHERE id = $2`,
+        [secret.base32, userId]
+      );
+    } catch (err) {
+      console.log("two_factor_secret column not available");
+    }
+
+    return res.json({
+      secret: secret.base32,
+      qrCode: qrCodeUrl,
+      message: "Scan the QR code with your authenticator app",
+    });
+  } catch (err) {
+    console.error("Erreur setup-2fa:", err);
+    return res.status(500).json({
+      error: "Erreur serveur",
+    });
+  }
+});
+
+// VERIFY 2FA - Verify TOTP code and enable 2FA
+router.post("/verify-2fa", require("../middleware/auth"), async (req, res) => {
+  try {
+    const { token } = req.body;
+    const userId = req.user.id;
+
+    if (!token) {
+      return res.status(400).json({
+        error: "Token requis",
+      });
+    }
+
+    // Get user's 2FA secret
+    const userResult = await query(
+      `SELECT two_factor_secret FROM users WHERE id = $1`,
+      [userId]
+    );
+
+    if (userResult.rowCount === 0) {
+      return res.status(404).json({
+        error: "Utilisateur non trouvé",
+      });
+    }
+
+    const user = userResult.rows[0];
+
+    if (!user.two_factor_secret) {
+      return res.status(400).json({
+        error: "2FA non configuré. Veuillez d'abord configurer 2FA.",
+      });
+    }
+
+    // Verify TOTP token
+    const verified = speakeasy.totp.verify({
+      secret: user.two_factor_secret,
+      encoding: "base32",
+      token: token,
+    });
+
+    if (!verified) {
+      return res.status(401).json({
+        error: "Token invalide",
+      });
+    }
+
+    // Enable 2FA
+    try {
+      await query(
+        `UPDATE users
+         SET two_factor_enabled = true
+         WHERE id = $1`,
+        [userId]
+      );
+    } catch (err) {
+      console.log("two_factor_enabled column not available");
+    }
+
+    return res.json({
+      message: "2FA activé avec succès",
+      twoFactorEnabled: true,
+    });
+  } catch (err) {
+    console.error("Erreur verify-2fa:", err);
+    return res.status(500).json({
+      error: "Erreur serveur",
+    });
+  }
+});
+
+// DISABLE 2FA - Require password to disable
+router.post("/disable-2fa", require("../middleware/auth"), async (req, res) => {
+  try {
+    const { password } = req.body;
+    const userId = req.user.id;
+
+    if (!password) {
+      return res.status(400).json({
+        error: "Mot de passe requis",
+      });
+    }
+
+    // Get user's password hash
+    const userResult = await query(
+      `SELECT password_hash FROM users WHERE id = $1`,
+      [userId]
+    );
+
+    if (userResult.rowCount === 0) {
+      return res.status(404).json({
+        error: "Utilisateur non trouvé",
+      });
+    }
+
+    // Verify password
+    const valid = await bcrypt.compare(password, userResult.rows[0].password_hash);
+
+    if (!valid) {
+      return res.status(401).json({
+        error: "Mot de passe incorrect",
+      });
+    }
+
+    // Disable 2FA and clear secret
+    try {
+      await query(
+        `UPDATE users
+         SET two_factor_enabled = false,
+             two_factor_secret = NULL
+         WHERE id = $1`,
+        [userId]
+      );
+    } catch (err) {
+      console.log("2FA columns not available");
+    }
+
+    return res.json({
+      message: "2FA désactivé avec succès",
+      twoFactorEnabled: false,
+    });
+  } catch (err) {
+    console.error("Erreur disable-2fa:", err);
     return res.status(500).json({
       error: "Erreur serveur",
     });

@@ -44,11 +44,7 @@ services:
       postgres:
         condition: service_healthy
 
-    volumes:
-      - ./backend:/app
-      - /app/node_modules
-
-    command: sh -c "node server.js"
+    command: sh -c "node db/migrate.js && node server.js"
 
   ai:
     build:

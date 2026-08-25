@@ -22,24 +22,21 @@ export const register = async (name, email, password, company) => {
   return response;
 };
 
-export const login = async (email, password) => {
+export const login = async (email, password, totpCode) => {
   const response = await apiPost("/auth/login", {
     email,
     password,
+    ...(totpCode && { totpCode }),
   });
 
-  if (!response?.token) {
-    throw new Error("Token non reçu du serveur");
-  }
+  const token = response.token;
+  const user = response.user;
 
-  Cookies.set(TOKEN_KEY, response.token, {
-    expires: 1,
-    sameSite: "lax",
-  });
+  Cookies.set(TOKEN_KEY, token, { expires: 7 });
 
-  localStorage.setItem(USER_KEY, JSON.stringify(response.user));
+  localStorage.setItem(USER_KEY, JSON.stringify(user));
 
-  return response;
+  return user;
 };
 
 export const logout = () => {
@@ -111,6 +108,24 @@ export const toggleEmailNotifications = async (enabled) => {
 
 export const toggleTwoFactorAuth = async (enabled) => {
   const response = await apiPut("/auth/toggle-2fa", { enabled });
+
+  return response;
+};
+
+export const setupTwoFactorAuth = async () => {
+  const response = await apiPost("/auth/setup-2fa");
+
+  return response;
+};
+
+export const verifyTwoFactorAuth = async (token) => {
+  const response = await apiPost("/auth/verify-2fa", { token });
+
+  return response;
+};
+
+export const disableTwoFactorAuth = async (password) => {
+  const response = await apiPost("/auth/disable-2fa", { password });
 
   return response;
 };

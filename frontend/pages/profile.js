@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import Layout from '../components/Layout';
-import { getUser, updateProfile, changePassword, toggleEmailNotifications, toggleTwoFactorAuth } from '../lib/auth';
+import { getUser, updateProfile, changePassword, toggleEmailNotifications, toggleTwoFactorAuth, setupTwoFactorAuth, verifyTwoFactorAuth, disableTwoFactorAuth } from '../lib/auth';
 import { apiGet } from '../lib/api';
 import Cookies from 'js-cookie';
 import toast from 'react-hot-toast';
@@ -23,6 +23,13 @@ export default function ProfilePage() {
     confirmPassword: ''
   });
   const [passwordLoading, setPasswordLoading] = useState(false);
+  const [show2FAModal, setShow2FAModal] = useState(false);
+  const [twoFactorStep, setTwoFactorStep] = useState('setup'); // 'setup' or 'verify'
+  const [qrCode, setQrCode] = useState(null);
+  const [twoFactorToken, setTwoFactorToken] = useState('');
+  const [twoFactorLoading, setTwoFactorLoading] = useState(false);
+  const [showDisable2FAModal, setShowDisable2FAModal] = useState(false);
+  const [disable2FAPassword, setDisable2FAPassword] = useState('');
 
   useEffect(() => {
     const u = getUser();
@@ -116,12 +123,59 @@ export default function ProfilePage() {
   };
 
   const handleToggle2FA = async () => {
+    if (security.twoFactorEnabled) {
+      // Show disable modal
+      setShowDisable2FAModal(true);
+    } else {
+      // Start setup flow
+      setTwoFactorStep('setup');
+      setShow2FAModal(true);
+      setQrCode(null);
+      setTwoFactorToken('');
+      try {
+        const response = await setupTwoFactorAuth();
+        setQrCode(response.qrCode);
+      } catch (err) {
+        toast.error(err.message || 'Failed to setup 2FA');
+        setShow2FAModal(false);
+      }
+    }
+  };
+
+  const handleVerify2FA = async () => {
+    if (!twoFactorToken || twoFactorToken.length !== 6) {
+      toast.error('Please enter a valid 6-digit code');
+      return;
+    }
+
+    setTwoFactorLoading(true);
     try {
-      const response = await toggleTwoFactorAuth(!security.twoFactorEnabled);
-      setSecurity({ ...security, twoFactorEnabled: response.twoFactorEnabled });
+      const response = await verifyTwoFactorAuth(twoFactorToken);
       toast.success(response.message);
+      setShow2FAModal(false);
+      setSecurity({ ...security, twoFactorEnabled: true });
+      setTwoFactorToken('');
     } catch (err) {
-      toast.error(err.message || 'Failed to toggle 2FA');
+      toast.error(err.message || 'Invalid code');
+    } finally {
+      setTwoFactorLoading(false);
+    }
+  };
+
+  const handleDisable2FA = async () => {
+    if (!disable2FAPassword) {
+      toast.error('Password is required');
+      return;
+    }
+
+    try {
+      const response = await disableTwoFactorAuth(disable2FAPassword);
+      toast.success(response.message);
+      setShowDisable2FAModal(false);
+      setSecurity({ ...security, twoFactorEnabled: false });
+      setDisable2FAPassword('');
+    } catch (err) {
+      toast.error(err.message || 'Failed to disable 2FA');
     }
   };
 
@@ -316,6 +370,113 @@ export default function ProfilePage() {
                     ) : (
                       'Change Password'
                     )}
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* 2FA Setup Modal */}
+        {show2FAModal && (
+          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+            <div className="bg-ground-secondary border hairline rounded-xl p-6 w-full max-w-md mx-4">
+              <div className="flex items-center justify-between mb-5">
+                <h3 className="portal-heading text-lg">Setup Two-Factor Authentication</h3>
+                <button onClick={() => setShow2FAModal(false)} className="text-muted hover:text-ink">
+                  <X size={20} />
+                </button>
+              </div>
+              <div className="space-y-4">
+                {twoFactorStep === 'setup' && qrCode && (
+                  <>
+                    <div className="text-center">
+                      <p className="portal-label mb-4">Scan this QR code with your authenticator app (Google Authenticator, Authy, etc.)</p>
+                      <div className="inline-block p-4 bg-white rounded-xl">
+                        <img src={qrCode} alt="QR Code" className="w-48 h-48" />
+                      </div>
+                    </div>
+                    <button
+                      onClick={() => setTwoFactorStep('verify')}
+                      className="w-full portal-pill-btn"
+                    >
+                      I've scanned the QR code
+                    </button>
+                  </>
+                )}
+                {twoFactorStep === 'verify' && (
+                  <>
+                    <p className="portal-label text-center">Enter the 6-digit code from your authenticator app</p>
+                    <div>
+                      <input
+                        type="text"
+                        value={twoFactorToken}
+                        onChange={(e) => setTwoFactorToken(e.target.value.replace(/\D/g, '').slice(0, 6))}
+                        className="w-full bg-ground border hairline rounded-xl px-4 py-3 text-ink text-center text-2xl tracking-widest placeholder-muted focus:outline-none focus:border-amber transition-colors"
+                        placeholder="000000"
+                        maxLength={6}
+                      />
+                    </div>
+                    <div className="flex gap-3 pt-2">
+                      <button
+                        onClick={() => setTwoFactorStep('setup')}
+                        className="flex-1 bg-ground border hairline rounded-xl px-4 py-2 portal-label text-ink hover:bg-ground/50 transition-colors"
+                      >
+                        Back
+                      </button>
+                      <button
+                        onClick={handleVerify2FA}
+                        disabled={twoFactorLoading}
+                        className="flex-1 portal-pill-btn"
+                      >
+                        {twoFactorLoading ? (
+                          <span className="animate-spin rounded-full h-4 w-4 border-2 border-amber border-t-transparent"></span>
+                        ) : (
+                          'Verify'
+                        )}
+                      </button>
+                    </div>
+                  </>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Disable 2FA Modal */}
+        {showDisable2FAModal && (
+          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+            <div className="bg-ground-secondary border hairline rounded-xl p-6 w-full max-w-md mx-4">
+              <div className="flex items-center justify-between mb-5">
+                <h3 className="portal-heading text-lg">Disable Two-Factor Authentication</h3>
+                <button onClick={() => setShowDisable2FAModal(false)} className="text-muted hover:text-ink">
+                  <X size={20} />
+                </button>
+              </div>
+              <div className="space-y-4">
+                <p className="portal-label text-muted">Enter your password to disable 2FA</p>
+                <div>
+                  <label className="block portal-label mb-2">Password</label>
+                  <input
+                    type="password"
+                    value={disable2FAPassword}
+                    onChange={(e) => setDisable2FAPassword(e.target.value)}
+                    className="w-full bg-ground border hairline rounded-xl px-4 py-2 text-ink placeholder-muted focus:outline-none focus:border-amber transition-colors"
+                    placeholder="Enter your password"
+                  />
+                </div>
+                <div className="flex gap-3 pt-2">
+                  <button
+                    onClick={() => setShowDisable2FAModal(false)}
+                    className="flex-1 bg-ground border hairline rounded-xl px-4 py-2 portal-label text-ink hover:bg-ground/50 transition-colors"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={handleDisable2FA}
+                    className="flex-1 portal-pill-btn"
+                  >
+                    Disable 2FA
                   </button>
                 </div>
               </div>
