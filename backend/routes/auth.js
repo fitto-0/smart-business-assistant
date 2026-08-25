@@ -162,12 +162,12 @@ router.post("/login", async (req, res) => {
 
     // Record successful login
     const ipAddress = req.ip || req.connection.remoteAddress || null;
-    const userAgent = req.headers['user-agent'] || null;
+    const userAgent = req.headers["user-agent"] || null;
 
     await query(
       `INSERT INTO login_log (user_id, ip_address, user_agent, success)
        VALUES ($1, $2, $3, true)`,
-      [user.id, ipAddress, userAgent]
+      [user.id, ipAddress, userAgent],
     );
 
     const token = generateToken(user);
@@ -281,7 +281,7 @@ router.get("/stats", require("../middleware/auth"), async (req, res) => {
     // Count logins from login_log table
     const loginsResult = await query(
       `SELECT COUNT(*) as total_logins FROM login_log WHERE user_id = $1 AND success = true`,
-      [userId]
+      [userId],
     );
 
     // Count analyses (reviews, anomalies, recommendations)
@@ -290,7 +290,7 @@ router.get("/stats", require("../middleware/auth"), async (req, res) => {
         (SELECT COUNT(*) FROM reviews WHERE user_id = $1) +
         (SELECT COUNT(*) FROM anomalies WHERE user_id = $1) +
         (SELECT COUNT(*) FROM recommendations WHERE user_id = $1) as total_analyses`,
-      [userId]
+      [userId],
     );
 
     // Count active days (days with at least one login)
@@ -298,7 +298,7 @@ router.get("/stats", require("../middleware/auth"), async (req, res) => {
       `SELECT COUNT(DISTINCT DATE(login_time)) as active_days
        FROM login_log
        WHERE user_id = $1 AND success = true`,
-      [userId]
+      [userId],
     );
 
     return res.json({
@@ -322,7 +322,7 @@ router.get("/security", require("../middleware/auth"), async (req, res) => {
     // First check if columns exist by trying to get basic user info
     const userResult = await query(
       `SELECT id, created_at FROM users WHERE id = $1`,
-      [userId]
+      [userId],
     );
 
     if (userResult.rowCount === 0) {
@@ -344,12 +344,13 @@ router.get("/security", require("../middleware/auth"), async (req, res) => {
           COALESCE(two_factor_enabled, false) as two_factor_enabled
          FROM users
          WHERE id = $1`,
-        [userId]
+        [userId],
       );
 
       if (securityResult.rowCount > 0) {
         passwordLastChanged = securityResult.rows[0].password_last_changed;
-        emailNotificationsEnabled = securityResult.rows[0].email_notifications_enabled;
+        emailNotificationsEnabled =
+          securityResult.rows[0].email_notifications_enabled;
         twoFactorEnabled = securityResult.rows[0].two_factor_enabled;
       }
     } catch (err) {
@@ -359,7 +360,7 @@ router.get("/security", require("../middleware/auth"), async (req, res) => {
 
     // Calculate days since password change
     const daysSincePasswordChange = Math.floor(
-      (new Date() - new Date(passwordLastChanged)) / (1000 * 60 * 60 * 24)
+      (new Date() - new Date(passwordLastChanged)) / (1000 * 60 * 60 * 24),
     );
 
     return res.json({
@@ -377,102 +378,115 @@ router.get("/security", require("../middleware/auth"), async (req, res) => {
 });
 
 // CHANGE PASSWORD
-router.post("/change-password", require("../middleware/auth"), async (req, res) => {
-  try {
-    const { oldPassword, newPassword } = req.body;
-    const userId = req.user.id;
+router.post(
+  "/change-password",
+  require("../middleware/auth"),
+  async (req, res) => {
+    try {
+      const { oldPassword, newPassword } = req.body;
+      const userId = req.user.id;
 
-    if (!oldPassword || !newPassword) {
-      return res.status(400).json({
-        error: "Ancien mot de passe et nouveau mot de passe requis",
-      });
-    }
+      if (!oldPassword || !newPassword) {
+        return res.status(400).json({
+          error: "Ancien mot de passe et nouveau mot de passe requis",
+        });
+      }
 
-    if (newPassword.length < 6) {
-      return res.status(400).json({
-        error: "Le nouveau mot de passe doit contenir au moins 6 caractères",
-      });
-    }
+      if (newPassword.length < 6) {
+        return res.status(400).json({
+          error: "Le nouveau mot de passe doit contenir au moins 6 caractères",
+        });
+      }
 
-    // Get current password hash
-    const result = await query(
-      `SELECT password_hash FROM users WHERE id = $1`,
-      [userId]
-    );
+      // Get current password hash
+      const result = await query(
+        `SELECT password_hash FROM users WHERE id = $1`,
+        [userId],
+      );
 
-    if (result.rowCount === 0) {
-      return res.status(404).json({
-        error: "Utilisateur non trouvé",
-      });
-    }
+      if (result.rowCount === 0) {
+        return res.status(404).json({
+          error: "Utilisateur non trouvé",
+        });
+      }
 
-    // Verify old password
-    const valid = await bcrypt.compare(oldPassword, result.rows[0].password_hash);
+      // Verify old password
+      const valid = await bcrypt.compare(
+        oldPassword,
+        result.rows[0].password_hash,
+      );
 
-    if (!valid) {
-      return res.status(401).json({
-        error: "Ancien mot de passe incorrect",
-      });
-    }
+      if (!valid) {
+        return res.status(401).json({
+          error: "Ancien mot de passe incorrect",
+        });
+      }
 
-    // Hash new password
-    const hashedPassword = await bcrypt.hash(newPassword, 10);
+      // Hash new password
+      const hashedPassword = await bcrypt.hash(newPassword, 10);
 
-    // Update password and password_last_changed
-    await query(
-      `UPDATE users
+      // Update password and password_last_changed
+      await query(
+        `UPDATE users
          SET password_hash = $1,
              password_last_changed = NOW()
          WHERE id = $2`,
-      [hashedPassword, userId]
-    );
+        [hashedPassword, userId],
+      );
 
-    return res.json({
-      message: "Mot de passe changé avec succès",
-    });
-  } catch (err) {
-    console.error("Erreur change-password:", err);
-    return res.status(500).json({
-      error: "Erreur serveur",
-    });
-  }
-});
-
-// TOGGLE EMAIL NOTIFICATIONS
-router.put("/toggle-notifications", require("../middleware/auth"), async (req, res) => {
-  try {
-    const { enabled } = req.body;
-    const userId = req.user.id;
-
-    if (typeof enabled !== 'boolean') {
-      return res.status(400).json({
-        error: "Le paramètre 'enabled' doit être un booléen",
+      return res.json({
+        message: "Mot de passe changé avec succès",
+      });
+    } catch (err) {
+      console.error("Erreur change-password:", err);
+      return res.status(500).json({
+        error: "Erreur serveur",
       });
     }
+  },
+);
 
+// TOGGLE EMAIL NOTIFICATIONS
+router.put(
+  "/toggle-notifications",
+  require("../middleware/auth"),
+  async (req, res) => {
     try {
-      await query(
-        `UPDATE users
+      const { enabled } = req.body;
+      const userId = req.user.id;
+
+      if (typeof enabled !== "boolean") {
+        return res.status(400).json({
+          error: "Le paramètre 'enabled' doit être un booléen",
+        });
+      }
+
+      try {
+        await query(
+          `UPDATE users
          SET email_notifications_enabled = $1
          WHERE id = $2`,
-        [enabled, userId]
-      );
-    } catch (err) {
-      // Column doesn't exist, just ignore
-      console.log("email_notifications_enabled column not available");
-    }
+          [enabled, userId],
+        );
+      } catch (err) {
+        // Column doesn't exist, just ignore
+        console.log("email_notifications_enabled column not available");
+      }
 
-    return res.json({
-      message: enabled ? "Notifications activées" : "Notifications désactivées",
-      emailNotificationsEnabled: enabled,
-    });
-  } catch (err) {
-    console.error("Erreur toggle-notifications:", err);
-    return res.status(500).json({
-      error: "Erreur serveur",
-    });
-  }
-});
+      return res.json({
+        message: enabled
+          ? "Notifications activées"
+          : "Notifications désactivées",
+        emailNotificationsEnabled: enabled,
+      });
+    } catch (err) {
+      console.error("Erreur toggle-notifications:", err);
+      return res.status(500).json({
+        error: "Erreur serveur",
+      });
+    }
+  },
+);
 
 // TOGGLE TWO-FACTOR AUTHENTICATION
 router.put("/toggle-2fa", require("../middleware/auth"), async (req, res) => {
@@ -480,7 +494,7 @@ router.put("/toggle-2fa", require("../middleware/auth"), async (req, res) => {
     const { enabled } = req.body;
     const userId = req.user.id;
 
-    if (typeof enabled !== 'boolean') {
+    if (typeof enabled !== "boolean") {
       return res.status(400).json({
         error: "Le paramètre 'enabled' doit être un booléen",
       });
@@ -491,7 +505,7 @@ router.put("/toggle-2fa", require("../middleware/auth"), async (req, res) => {
         `UPDATE users
          SET two_factor_enabled = $1
          WHERE id = $2`,
-        [enabled, userId]
+        [enabled, userId],
       );
     } catch (err) {
       // Column doesn't exist, just ignore
@@ -518,7 +532,7 @@ router.post("/setup-2fa", require("../middleware/auth"), async (req, res) => {
     // Get user email for the TOTP issuer
     const userResult = await query(
       `SELECT email, name FROM users WHERE id = $1`,
-      [userId]
+      [userId],
     );
 
     if (userResult.rowCount === 0) {
@@ -544,7 +558,7 @@ router.post("/setup-2fa", require("../middleware/auth"), async (req, res) => {
         `UPDATE users
          SET two_factor_secret = $1
          WHERE id = $2`,
-        [secret.base32, userId]
+        [secret.base32, userId],
       );
     } catch (err) {
       console.log("two_factor_secret column not available");
@@ -578,7 +592,7 @@ router.post("/verify-2fa", require("../middleware/auth"), async (req, res) => {
     // Get user's 2FA secret
     const userResult = await query(
       `SELECT two_factor_secret FROM users WHERE id = $1`,
-      [userId]
+      [userId],
     );
 
     if (userResult.rowCount === 0) {
@@ -614,7 +628,7 @@ router.post("/verify-2fa", require("../middleware/auth"), async (req, res) => {
         `UPDATE users
          SET two_factor_enabled = true
          WHERE id = $1`,
-        [userId]
+        [userId],
       );
     } catch (err) {
       console.log("two_factor_enabled column not available");
@@ -647,7 +661,7 @@ router.post("/disable-2fa", require("../middleware/auth"), async (req, res) => {
     // Get user's password hash
     const userResult = await query(
       `SELECT password_hash FROM users WHERE id = $1`,
-      [userId]
+      [userId],
     );
 
     if (userResult.rowCount === 0) {
@@ -657,7 +671,10 @@ router.post("/disable-2fa", require("../middleware/auth"), async (req, res) => {
     }
 
     // Verify password
-    const valid = await bcrypt.compare(password, userResult.rows[0].password_hash);
+    const valid = await bcrypt.compare(
+      password,
+      userResult.rows[0].password_hash,
+    );
 
     if (!valid) {
       return res.status(401).json({
@@ -672,7 +689,7 @@ router.post("/disable-2fa", require("../middleware/auth"), async (req, res) => {
          SET two_factor_enabled = false,
              two_factor_secret = NULL
          WHERE id = $1`,
-        [userId]
+        [userId],
       );
     } catch (err) {
       console.log("2FA columns not available");
