@@ -4,9 +4,18 @@
 
 const router = require("express").Router();
 const auth = require("../middleware/auth");
+const axios = require("axios");
 const pool = require("../config/db");
 
 const query = (text, params) => pool.query(text, params);
+const AI_SERVICE_URL = process.env.AI_SERVICE_URL || "http://ai:8000";
+
+const runAiAnalysis = async (data) => {
+  const response = await axios.post(`${AI_SERVICE_URL}/analyze`, data, {
+    timeout: 10000,
+  });
+  return response.data;
+};
 
 // =====================================================
 // SENTIMENT LOCAL
@@ -114,6 +123,25 @@ router.get("/predictions", auth, async (req, res) => {
     );
 
     const monthlyValues = result.rows.map((r) => Number(r.total || 0));
+
+    try {
+      const aiResult = await axios.post(
+        `${AI_SERVICE_URL}/predict?horizon=6`,
+        { sales: monthlyValues },
+        { timeout: 10000 },
+      );
+
+      return res.json({
+        predictions: aiResult.data.predictions.map((prediction, index) => ({
+          month: labels[(new Date().getMonth() + index + 1) % 12],
+          value: prediction.value ?? prediction,
+        })),
+        model_metrics: aiResult.data.model_metrics,
+        source: "ai-service",
+      });
+    } catch (aiError) {
+      console.error("AI prediction unavailable, using local fallback:", aiError.message);
+    }
 
     const labels = [
       "Jan",
@@ -301,14 +329,27 @@ router.post("/sentiment", auth, async (req, res) => {
     const { text, reviews: inputReviews } = req.body;
 
     if (text) {
-      return res.json(analyzeSentimentLocal(text));
+      try {
+        const aiResult = await runAiAnalysis({ reviews: [{ comment: text }] });
+        return res.json(aiResult.sentiment || analyzeSentimentLocal(text));
+      } catch (aiError) {
+        console.error("AI sentiment unavailable, using local fallback:", aiError.message);
+        return res.json(analyzeSentimentLocal(text));
+      }
     }
 
     if (inputReviews) {
+      try {
+        const aiResult = await runAiAnalysis({ reviews: inputReviews });
+        return res.json(aiResult.sentiment || aiResult);
+      } catch (aiError) {
+        console.error("AI sentiment unavailable, using local fallback:", aiError.message);
+      }
+
       const results = inputReviews.map((review) => ({
-        id: review.id,
-        ...analyzeSentimentLocal(review.comment),
-      }));
+          id: review.id,
+          ...analyzeSentimentLocal(review.comment),
+        }));
 
       const stats = {
         positif: 0,
@@ -591,6 +632,105 @@ router.post("/detect-anomalies", auth, async (req, res) => {
   try {
     const userId = req.user.id;
     const newAnomalies = [];
+
+    // Run the current user's complete dataset through the Python AI engine.
+    try {
+      const [sales, products, reviews] = await Promise.all([
+        query(
+          `SELECT DATE_TRUNC('month', date)::DATE AS month, SUM(total_amount) AS total
+           FROM sales WHERE user_id = $1
+           GROUP BY DATE_TRUNC('month', date) ORDER BY month`,
+          [userId],
+        ),
+        query(
+          `SELECT id, name, stock, revenue, category FROM products WHERE user_id = $1`,
+          [userId],
+        ),
+        query(
+          `SELECT id, comment FROM reviews WHERE user_id = $1 ORDER BY date DESC LIMIT 100`,
+          [userId],
+        ),
+      ]);
+
+      const aiResult = await runAiAnalysis({
+        sales: sales.rows.map((row) => Number(row.total || 0)),
+        products: products.rows,
+        reviews: reviews.rows,
+      });
+
+      const aiAnomalies = [
+        ...(aiResult.anomalies?.sales || []).map((anomaly) => ({
+          type: anomaly.type === "pic_anormal" ? "pic_ventes" : "baisse_ventes",
+          severity: "haute",
+          product_name: null,
+          description: `Anomalie IA : ${anomaly.month} (${anomaly.deviation_pct}%)`,
+          product_id: null,
+        })),
+        ...(aiResult.anomalies?.stock || []).map((anomaly) => ({
+          type: anomaly.type === "rupture" ? "rupture_stock" : "stock_faible",
+          severity: anomaly.severity === "critique" ? "critique" : "moyenne",
+          product_name: anomaly.product,
+          description: `Anomalie IA : ${anomaly.product} (${anomaly.stock} unités)`,
+          product_id: products.rows.find((product) => product.name === anomaly.product)?.id || null,
+        })),
+      ];
+
+      for (const anomaly of aiAnomalies) {
+        const existing = await query(
+          `SELECT id FROM anomalies
+           WHERE user_id = $1 AND type = $2
+           AND COALESCE(product_id, 0) = COALESCE($3, 0)
+           AND status != 'résolu' LIMIT 1`,
+          [userId, anomaly.type, anomaly.product_id],
+        );
+
+        if (existing.rowCount === 0) {
+          const inserted = await query(
+            `INSERT INTO anomalies
+             (type, severity, product_name, description, product_id, user_id)
+             VALUES ($1, $2, $3, $4, $5, $6) RETURNING *`,
+            [
+              anomaly.type,
+              anomaly.severity,
+              anomaly.product_name,
+              anomaly.description,
+              anomaly.product_id,
+              userId,
+            ],
+          );
+          newAnomalies.push(inserted.rows[0]);
+        }
+      }
+
+      for (const recommendation of aiResult.recommendations || []) {
+        const title = recommendation.message || "Recommandation IA";
+        const existing = await query(
+          `SELECT id FROM recommendations
+           WHERE user_id = $1 AND title = $2 AND done = false LIMIT 1`,
+          [userId, title],
+        );
+
+        if (existing.rowCount === 0) {
+          await query(
+            `INSERT INTO recommendations
+             (priority, category, title, description, action, impact, user_id)
+             VALUES ($1, $2, $3, $4, $5, $6, $7)`,
+            [
+              recommendation.priority || "moyenne",
+              recommendation.type === "stock" ? "stock" :
+                recommendation.type === "service" ? "service_client" : "analyse",
+              title,
+              "Recommandation générée par le moteur IA à partir de vos données.",
+              recommendation.action || "Analyser la situation",
+              "Améliorer la performance opérationnelle",
+              userId,
+            ],
+          );
+        }
+      }
+    } catch (aiError) {
+      console.error("AI anomaly analysis unavailable, using local rules:", aiError.message);
+    }
 
     // -------------------------
     // Rupture stock

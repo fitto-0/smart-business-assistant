@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import Layout from '../components/Layout';
-import { apiGet, apiPut } from '../lib/api';
+import { apiGet, apiPost, apiPut } from '../lib/api';
 import toast from 'react-hot-toast';
 import { Lightbulb, CheckCircle, Package, Tag, Star, BarChart2, Filter } from 'lucide-react';
 
@@ -26,6 +26,7 @@ export default function RecommendationsPage() {
   useEffect(() => {
     const loadRecs = async () => {
       try {
+        await apiPost('/analysis/detect-anomalies', {});
         const data = await apiGet('/analysis/recommendations');
         setRecs((data.recommendations || []).map(r => ({ ...r, done: Boolean(r.done) })));
       } catch (error) {

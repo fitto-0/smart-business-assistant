@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import Layout from '../components/Layout';
-import { apiGet, apiPut } from '../lib/api';
+import { apiGet, apiPost, apiPut } from '../lib/api';
 import toast from 'react-hot-toast';
 import { AlertTriangle, CheckCircle, Clock, XCircle, TrendingDown, Package, Star } from 'lucide-react';
 
@@ -31,6 +31,7 @@ export default function AnomaliesPage() {
   useEffect(() => {
     const loadAnomalies = async () => {
       try {
+        await apiPost('/analysis/detect-anomalies', {});
         const data = await apiGet('/analysis/anomalies');
         setAnomalies(data.anomalies || []);
       } catch (error) {
