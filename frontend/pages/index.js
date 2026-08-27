@@ -1,69 +1,99 @@
-import { useState, useEffect, useRef } from 'react';
-import { useRouter } from 'next/router';
-import Link from 'next/link';
-import { isAuthenticated } from '../lib/auth';
-import { Menu, X, ArrowRight, BarChart3, Package, Brain, Heart, AlertTriangle, Lightbulb } from 'lucide-react';
-import GradientWaves from '../components/GradientWaves';
+import { useState, useEffect, useRef } from "react";
+import { useRouter } from "next/router";
+import Link from "next/link";
+import { isAuthenticated } from "../lib/auth";
+import {
+  Menu,
+  X,
+  ArrowRight,
+  BarChart3,
+  Package,
+  Brain,
+  Heart,
+  AlertTriangle,
+  Lightbulb,
+} from "lucide-react";
+import GradientWaves from "../components/GradientWaves";
 
 const NAV_LINKS = [
-  { href: '#statement', label: 'About' },
-  { href: '#intelligence', label: 'Intelligence' },
-  { href: '#how-it-works', label: 'How It Works' },
-  { href: '/docs', label: 'Docs' },
-  { href: '/contact', label: 'Contact' },
+  { href: "#statement", label: "About" },
+  { href: "#intelligence", label: "Intelligence" },
+  { href: "#how-it-works", label: "How It Works" },
+  { href: "/docs", label: "Docs" },
+  { href: "/contact", label: "Contact" },
 ];
 
 const FEATURES = [
   {
     icon: BarChart3,
-    title: 'Sales Analytics',
-    subtitle: 'Revenue & KPIs',
-    desc: 'Track revenue, orders and product performance in real time with beautiful dashboards.',
+    title: "Sales Analytics",
+    subtitle: "Revenue & KPIs",
+    desc: "Track revenue, orders and product performance in real time with beautiful dashboards.",
   },
   {
     icon: Package,
-    title: 'Stock Management',
-    subtitle: 'Inventory alerts',
-    desc: 'Monitor inventory, low-stock warnings and restock alerts before they hurt sales.',
+    title: "Stock Management",
+    subtitle: "Inventory alerts",
+    desc: "Monitor inventory, low-stock warnings and restock alerts before they hurt sales.",
   },
   {
     icon: Brain,
-    title: 'AI Predictions',
-    subtitle: 'Forecast revenue',
-    desc: 'Forecast future revenue with machine learning models trained on your history.',
+    title: "AI Predictions",
+    subtitle: "Forecast revenue",
+    desc: "Forecast future revenue with machine learning models trained on your history.",
   },
   {
     icon: Heart,
-    title: 'Review Sentiment',
-    subtitle: 'Understand users',
-    desc: 'Understand what customers think with automatic NLP sentiment analysis.',
+    title: "Review Sentiment",
+    subtitle: "Understand users",
+    desc: "Understand what customers think with automatic NLP sentiment analysis.",
   },
   {
     icon: AlertTriangle,
-    title: 'Anomaly Detection',
-    subtitle: 'Detect problems',
-    desc: 'Get alerted on stock ruptures and sales drops the moment they happen.',
+    title: "Anomaly Detection",
+    subtitle: "Detect problems",
+    desc: "Get alerted on stock ruptures and sales drops the moment they happen.",
   },
   {
     icon: Lightbulb,
-    title: 'Smart Recommendations',
-    subtitle: 'Grow your sales',
-    desc: 'Actionable AI suggestions to boost sales and optimize your inventory.',
+    title: "Smart Recommendations",
+    subtitle: "Grow your sales",
+    desc: "Actionable AI suggestions to boost sales and optimize your inventory.",
   },
 ];
 
 const INTELLIGENCE = [
-  { number: '01', title: 'Sales Intelligence', desc: 'Understand your revenue' },
-  { number: '02', title: 'Predictive Analytics', desc: 'Know what happens next' },
-  { number: '03', title: 'Customer Sentiment', desc: 'Understand your customers' },
-  { number: '04', title: 'Business Alerts', desc: 'Detect problems instantly' },
+  {
+    number: "01",
+    title: "Sales Intelligence",
+    desc: "Understand your revenue",
+  },
+  {
+    number: "02",
+    title: "Predictive Analytics",
+    desc: "Know what happens next",
+  },
+  {
+    number: "03",
+    title: "Customer Sentiment",
+    desc: "Understand your customers",
+  },
+  { number: "04", title: "Business Alerts", desc: "Detect problems instantly" },
 ];
 
 const HOW_IT_WORKS = [
-  { number: '01', title: 'Upload your data', desc: 'Import your sales CSV' },
-  { number: '02', title: 'Let AI analyze', desc: 'Automatically detect patterns' },
-  { number: '03', title: 'Get insights', desc: 'Predictions, anomalies & sentiment' },
-  { number: '04', title: 'Take action', desc: 'Follow AI recommendations' },
+  { number: "01", title: "Upload your data", desc: "Import your sales CSV" },
+  {
+    number: "02",
+    title: "Let AI analyze",
+    desc: "Automatically detect patterns",
+  },
+  {
+    number: "03",
+    title: "Get insights",
+    desc: "Predictions, anomalies & sentiment",
+  },
+  { number: "04", title: "Take action", desc: "Follow AI recommendations" },
 ];
 
 export default function LandingPage() {
@@ -75,52 +105,57 @@ export default function LandingPage() {
   const transitionRef = useRef(null);
   const statementRef = useRef(null);
 
-
   useEffect(() => {
-    if (isAuthenticated()) router.push('/dashboard');
+    if (isAuthenticated()) router.push("/dashboard");
 
     const handleScroll = () => {
       if (!heroRef.current || !transitionRef.current) return;
-      
+
       const heroRect = heroRef.current.getBoundingClientRect();
       const heroHeight = heroRef.current.offsetHeight;
       const viewportHeight = window.innerHeight;
-      
+
       // Calculate scroll progress through hero (0 to 1)
-      const progress = Math.min(1, Math.max(0, -heroRect.top / (heroHeight - viewportHeight)));
+      const progress = Math.min(
+        1,
+        Math.max(0, -heroRect.top / (heroHeight - viewportHeight)),
+      );
       setScrollProgress(progress);
 
       // Calculate transition section progress
       const transitionRect = transitionRef.current.getBoundingClientRect();
-      const transitionProgress = Math.min(1, Math.max(0, -transitionRect.top / viewportHeight));
+      const transitionProgress = Math.min(
+        1,
+        Math.max(0, -transitionRect.top / viewportHeight),
+      );
       setTransitionProgress(transitionProgress);
     };
 
-    window.addEventListener('scroll', handleScroll, { passive: true });
+    window.addEventListener("scroll", handleScroll, { passive: true });
     handleScroll();
-    
-    return () => window.removeEventListener('scroll', handleScroll);
+
+    return () => window.removeEventListener("scroll", handleScroll);
   }, [router]);
 
   // Calculate animation values based on scroll position (repeating)
-  const scrollY = typeof window !== 'undefined' ? window.scrollY : 0;
+  const scrollY = typeof window !== "undefined" ? window.scrollY : 0;
   const animationPhase = (scrollY / 100) % 1; // Creates a repeating 0-1 cycle every 100px
   const smoothAnimation = Math.sin(animationPhase * Math.PI); // Smooth sine wave
-  
+
   const smartTranslateX = smoothAnimation * 30;
-  const smartScale = 1 + (smoothAnimation * 0.02);
+  const smartScale = 1 + smoothAnimation * 0.02;
   const smartTranslateY = smoothAnimation * -15;
 
   const panelOffset = scrollProgress * 120; // Panels move outward
-  const wordmarkScale = 1 + (scrollProgress * 0.3); // Wordmark grows
-  const wordmarkSpacing = -0.02 - (scrollProgress * 0.01); // Tracking tightens
+  const wordmarkScale = 1 + scrollProgress * 0.3; // Wordmark grows
+  const wordmarkSpacing = -0.02 - scrollProgress * 0.01; // Tracking tightens
   const wordmarkSeparation = scrollProgress * 200; // Halves separate
 
   // Transition section animations
   const transitionImageX = transitionProgress * 20; // Image moves right
-  const transitionImageScale = 1 - (transitionProgress * 0.1); // Image shrinks slightly
+  const transitionImageScale = 1 - transitionProgress * 0.1; // Image shrinks slightly
   const transitionTextOpacity = transitionProgress; // Text fades in
-  const transitionTextY = 30 - (transitionProgress * 30); // Text moves up
+  const transitionTextY = 30 - transitionProgress * 30; // Text moves up
 
   return (
     <div className="portal-landing min-h-screen overflow-x-hidden">
@@ -154,7 +189,9 @@ export default function LandingPage() {
 
           {/* Right actions */}
           <div className="flex items-center gap-3">
-            <Link href="/login" className="portal-nav-link">Login</Link>
+            <Link href="/login" className="portal-nav-link">
+              Login
+            </Link>
             <Link href="/register" className="portal-pill-btn">
               Get Started
             </Link>
@@ -165,7 +202,11 @@ export default function LandingPage() {
         {menuOpen && (
           <div className="lg:hidden border-t hairline bg-ground-secondary">
             <div className="px-5 py-4 flex flex-col gap-1">
-              {[...NAV_LINKS, { href: '/login', label: 'Login' }, { href: '/register', label: 'Get Started' }].map((link) => (
+              {[
+                ...NAV_LINKS,
+                { href: "/login", label: "Login" },
+                { href: "/register", label: "Get Started" },
+              ].map((link) => (
                 <a
                   key={link.label}
                   href={link.href}
@@ -181,7 +222,10 @@ export default function LandingPage() {
       </nav>
 
       {/* ===================== HERO SECTION ===================== */}
-      <section ref={heroRef} className="relative min-h-screen overflow-hidden bg-[#080808]">
+      <section
+        ref={heroRef}
+        className="relative min-h-screen overflow-hidden bg-[#080808]"
+      >
         {/* GradientWaves Background */}
         <div className="absolute inset-0 z-0">
           <GradientWaves
@@ -214,7 +258,7 @@ export default function LandingPage() {
           <div className="grid lg:grid-cols-12 gap-8 items-end">
             {/* Left - Oversized typography */}
             <div className="lg:col-span-8 space-y-4">
-              <p 
+              <p
                 className="portal-label text-[#F5A623] tracking-[0.3em]"
                 style={{
                   transform: `translateY(${smoothAnimation * -10}px)`,
@@ -222,36 +266,36 @@ export default function LandingPage() {
               >
                 AI-POWERED BUSINESS INTELLIGENCE
               </p>
-              
-              <h1 
+
+              <h1
                 className="font-syne font-extrabold text-[clamp(3rem,12vw,10rem)] leading-[0.85] tracking-tight"
                 style={{
-                  color: '#F5F5F5',
+                  color: "#F5F5F5",
                   transform: `translateY(${smartTranslateY}px) scale(${smartScale})`,
-                  transition: 'transform 0.1s linear',
+                  transition: "transform 0.1s linear",
                 }}
               >
-                <span 
+                <span
                   className="block"
                   style={{
                     transform: `translateX(${-smartTranslateX}px)`,
-                    transition: 'transform 0.1s linear',
+                    transition: "transform 0.1s linear",
                   }}
                 >
                   Smart
                 </span>
-                <span 
+                <span
                   className="block text-[#F5A623]"
                   style={{
                     transform: `translateX(${smartTranslateX}px)`,
-                    transition: 'transform 0.1s linear',
+                    transition: "transform 0.1s linear",
                   }}
                 >
-                  Business assistant
+                  Business
                 </span>
               </h1>
 
-              <p 
+              <p
                 className="font-sora text-xl lg:text-2xl text-[#8A8A8A] max-w-2xl leading-relaxed"
                 style={{
                   transform: `translateY(${smoothAnimation * -15}px)`,
@@ -260,24 +304,27 @@ export default function LandingPage() {
                 Turn your business data into your next decision.
               </p>
             </div>
-            
           </div>
 
           {/* Scroll indicator */}
-          
         </div>
       </section>
 
       {/* ===================== IMMERSIVE FEATURE SECTION ===================== */}
-      <section ref={transitionRef} className="min-h-screen relative overflow-hidden py-32 px-5">
+      <section
+        ref={transitionRef}
+        className="min-h-screen relative overflow-hidden py-32 px-5"
+      >
         <div className="max-w-7xl mx-auto">
           {/* Large editorial heading */}
           <div className="mb-24">
-            <p className="portal-label text-[#F5A623] mb-4">01 — Intelligence</p>
-            <h2 
+            <p className="portal-label text-[#F5A623] mb-4">
+              01 — Intelligence
+            </p>
+            <h2
               className="font-syne font-extrabold text-[clamp(2.5rem,8vw,6rem)] leading-[0.9] tracking-tight"
               style={{
-                color: '#fffff',
+                color: "#fffff",
                 opacity: transitionTextOpacity,
                 transform: `translateY(${transitionTextY}px)`,
               }}
@@ -298,7 +345,7 @@ export default function LandingPage() {
               >
                 {/* Background gradient on hover */}
                 <div className="absolute inset-0 bg-gradient-to-br from-[#F5A623]/0 to-[#F5A623]/0 group-hover:from-[#F5A623]/5 group-hover:to-[#F5A623]/0 transition-all duration-500" />
-                
+
                 {/* Content */}
                 <div className="relative z-10">
                   <div className="mb-6 text-[#F5A623] group-hover:scale-110 transition-transform duration-500">
@@ -324,30 +371,37 @@ export default function LandingPage() {
       </section>
 
       {/* ===================== DRAMATIC STATEMENT SECTION ===================== */}
-      <section ref={statementRef} id="statement" className="min-h-screen relative overflow-hidden py-32 px-5">
+      <section
+        ref={statementRef}
+        id="statement"
+        className="min-h-screen relative overflow-hidden py-32 px-5"
+      >
         <div className="max-w-7xl mx-auto">
           <div className="grid lg:grid-cols-12 gap-16 items-center">
             {/* Left - Large editorial text */}
             <div className="lg:col-span-7">
               <p className="portal-label text-[#F5A623] mb-8">02 — About</p>
-              <h2 
+              <h2
                 className="font-syne font-extrabold text-[clamp(2rem,6vw,5rem)] leading-[0.95] tracking-tight"
                 style={{
-                  color: '#F5F5F5',
+                  color: "#F5F5F5",
                 }}
               >
                 Business data shouldn't just tell you what happened.
                 <br />
                 <br />
-                <span style={{ color: '#F5A623' }}>
+                <span style={{ color: "#F5A623" }}>
                   It should tell you what happens next.
                 </span>
               </h2>
-              
+
               <div className="mt-12">
-                <p className="font-syne font-extrabold text-[clamp(4rem,15vw,12rem)] leading-none text-transparent" style={{
-                  WebkitTextStroke: '2px rgba(245, 166, 35, 0.2)',
-                }}>
+                <p
+                  className="font-syne font-extrabold text-[clamp(4rem,15vw,12rem)] leading-none text-transparent"
+                  style={{
+                    WebkitTextStroke: "2px rgba(245, 166, 35, 0.2)",
+                  }}
+                >
                   Ready?
                 </p>
               </div>
@@ -357,21 +411,28 @@ export default function LandingPage() {
             <div className="lg:col-span-5 lg:pl-16">
               <div className="border-l-2 border-[#F5A623]/30 pl-8">
                 <p className="font-sora text-xl lg:text-2xl text-[#8A8A8A] leading-relaxed">
-                  Smart Business Assistant transforms sales, inventory and customer data into actionable decisions.
+                  Smart Business Assistant transforms sales, inventory and
+                  customer data into actionable decisions.
                 </p>
-                
+
                 <div className="mt-8 space-y-4">
                   <div className="flex items-center gap-4">
                     <div className="w-2 h-2 bg-[#F5A623]" />
-                    <p className="font-sora text-[#8A8A8A]">Real-time analytics</p>
+                    <p className="font-sora text-[#8A8A8A]">
+                      Real-time analytics
+                    </p>
                   </div>
                   <div className="flex items-center gap-4">
                     <div className="w-2 h-2 bg-[#F5A623]" />
-                    <p className="font-sora text-[#8A8A8A]">AI-powered predictions</p>
+                    <p className="font-sora text-[#8A8A8A]">
+                      AI-powered predictions
+                    </p>
                   </div>
                   <div className="flex items-center gap-4">
                     <div className="w-2 h-2 bg-[#F5A623]" />
-                    <p className="font-sora text-[#8A8A8A]">Actionable insights</p>
+                    <p className="font-sora text-[#8A8A8A]">
+                      Actionable insights
+                    </p>
                   </div>
                 </div>
               </div>
@@ -381,10 +442,13 @@ export default function LandingPage() {
       </section>
 
       {/* ===================== INTELLIGENCE SECTION ===================== */}
-      <section id="intelligence" className="min-h-screen relative overflow-hidden py-32 px-5 border-t border-white/10">
+      <section
+        id="intelligence"
+        className="min-h-screen relative overflow-hidden py-32 px-5 border-t border-white/10"
+      >
         <div className="max-w-7xl mx-auto">
           <p className="portal-label text-[#F5A623] mb-8">03 — Intelligence</p>
-          
+
           <div className="grid md:grid-cols-2 gap-0">
             {INTELLIGENCE.map((item, index) => (
               <div
@@ -412,10 +476,13 @@ export default function LandingPage() {
       </section>
 
       {/* ===================== HOW IT WORKS SECTION ===================== */}
-      <section id="how-it-works" className="min-h-screen relative overflow-hidden py-32 px-5 border-t border-white/10">
+      <section
+        id="how-it-works"
+        className="min-h-screen relative overflow-hidden py-32 px-5 border-t border-white/10"
+      >
         <div className="max-w-7xl mx-auto">
           <p className="portal-label text-[#F5A623] mb-8">04 — How It Works</p>
-          
+
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-0">
             {HOW_IT_WORKS.map((item, index) => (
               <div
@@ -445,13 +512,24 @@ export default function LandingPage() {
             Ready to transform your business?
           </h2>
           <p className="font-sora text-xl text-[#8A8A8A] mb-12 max-w-2xl mx-auto">
-            Start using AI-powered business intelligence today and make data-driven decisions that grow your business.
+            Start using AI-powered business intelligence today and make
+            data-driven decisions that grow your business.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link href="/register" className="group inline-flex items-center justify-center gap-2 bg-[#F5A623] text-[#080808] px-10 py-4 rounded-sm font-sora font-semibold text-sm tracking-wider uppercase transition-all duration-300 hover:bg-[#E8913C] hover:translate-x-2">
-              Get Started <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />
+            <Link
+              href="/register"
+              className="group inline-flex items-center justify-center gap-2 bg-[#F5A623] text-[#080808] px-10 py-4 rounded-sm font-sora font-semibold text-sm tracking-wider uppercase transition-all duration-300 hover:bg-[#E8913C] hover:translate-x-2"
+            >
+              Get Started{" "}
+              <ArrowRight
+                size={16}
+                className="group-hover:translate-x-1 transition-transform"
+              />
             </Link>
-            <Link href="/login" className="inline-flex items-center justify-center border border-white/20 text-white px-10 py-4 rounded-sm font-sora font-semibold text-sm tracking-wider uppercase transition-all duration-300 hover:bg-white/5 hover:border-white/40">
+            <Link
+              href="/login"
+              className="inline-flex items-center justify-center border border-white/20 text-white px-10 py-4 rounded-sm font-sora font-semibold text-sm tracking-wider uppercase transition-all duration-300 hover:bg-white/5 hover:border-white/40"
+            >
               Login
             </Link>
           </div>
@@ -461,11 +539,19 @@ export default function LandingPage() {
       {/* ===================== FOOTER STRIP ===================== */}
       <footer className="portal-footer-strip px-5">
         <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
-          <p className="portal-label">© {new Date().getFullYear()} Smart Business Assistant</p>
+          <p className="portal-label">
+            © {new Date().getFullYear()} Smart Business Assistant
+          </p>
           <div className="flex gap-6">
-            <Link href="/privacy" className="portal-nav-link">Privacy</Link>
-            <Link href="/terms" className="portal-nav-link">Terms</Link>
-            <Link href="/contact" className="portal-nav-link">Contact</Link>
+            <Link href="/privacy" className="portal-nav-link">
+              Privacy
+            </Link>
+            <Link href="/terms" className="portal-nav-link">
+              Terms
+            </Link>
+            <Link href="/contact" className="portal-nav-link">
+              Contact
+            </Link>
           </div>
         </div>
       </footer>

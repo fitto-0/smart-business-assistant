@@ -38,7 +38,8 @@ export default function Chatbot() {
   const handleSend = async () => {
     if (!input.trim()) return;
 
-    const userMessage = { role: 'user', text: input };
+    const question = input.trim();
+    const userMessage = { role: 'user', text: question };
     setMessages(prev => [...prev, userMessage]);
     setInput('');
     setLoading(true);
@@ -48,13 +49,18 @@ export default function Chatbot() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          question: input,
-          products: products
+          question,
+          products,
+          history: messages.slice(-8).map(message => ({
+            role: message.role === 'bot' ? 'assistant' : message.role,
+            content: message.text,
+          })),
         })
       });
 
       const data = await response.json();
-      const botMessage = { role: 'bot', text: data.answer || 'Sorry, I could not process your question.' };
+      if (!response.ok) throw new Error(data.error || 'The AI service rejected the request.');
+      const botMessage = { role: 'bot', text: data.answer || 'I could not find enough information to answer that.' };
       setMessages(prev => [...prev, botMessage]);
     } catch (error) {
       console.error('Chatbot error:', error);

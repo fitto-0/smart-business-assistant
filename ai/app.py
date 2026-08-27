@@ -29,7 +29,6 @@ class SalesPredictionModel:
         self.is_trained = False
 
     def train(self, sales_data: list) -> dict:
-        """Entraîne le modèle sur les données historiques"""
         X = np.array(range(len(sales_data))).reshape(-1, 1)
         y = np.array(sales_data)
         X_poly = self.poly.fit_transform(X)
@@ -38,102 +37,69 @@ class SalesPredictionModel:
         y_pred = self.model.predict(X_poly)
         mae = mean_absolute_error(y, y_pred)
         r2 = r2_score(y, y_pred)
-        return { 'mae': round(mae, 2), 'r2': round(r2, 4), 'accuracy': round(r2 * 100, 1) }
+        return {'mae': round(mae, 2), 'r2': round(r2, 4), 'accuracy': round(r2 * 100, 1)}
 
     def predict(self, n_periods: int = 6) -> list:
-        """Prédit les N prochaines périodes"""
         if not self.is_trained:
             self.train(HISTORICAL_SALES)
         n_hist = len(HISTORICAL_SALES)
         predictions = []
         for i in range(n_periods):
-            idx = np.array([[n_hist + i]])
-            idx_poly = self.poly.transform(idx)
+            idx_poly = self.poly.transform(np.array([[n_hist + i]]))
             pred = self.model.predict(idx_poly)[0]
-            # Ajouter variabilité saisonnière
             seasonal_factor = 1 + 0.05 * np.sin((n_hist + i) * np.pi / 6)
-            pred = max(pred * seasonal_factor, 0)
-            predictions.append(round(pred))
+            predictions.append(round(max(pred * seasonal_factor, 0)))
         return predictions
 
 predictor = SalesPredictionModel()
 metrics = predictor.train(HISTORICAL_SALES)
 
-# ===================== MODULE ANALYSE SENTIMENT =====================
 class SentimentAnalyzer:
-    """Analyseur de sentiment simple basé sur des mots-clés français"""
-    POSITIVE_WORDS = ['excellent', 'parfait', 'magnifique', 'incroyable', 'rapide', 'satisfait',
-                      'super', 'bon', 'bien', 'qualité', 'recommande', 'efficace', 'confortable', 'top']
-    NEGATIVE_WORDS = ['déçu', 'mauvais', 'terrible', 'problème', 'cassé', 'défaite', 'incorrect',
-                      'insatisfait', 'nul', 'horrible', 'retard', 'inexistant', 'défaut', 'périme']
+    POSITIVE_WORDS = ['excellent', 'parfait', 'magnifique', 'incroyable', 'rapide', 'satisfait', 'super', 'bon', 'bien', 'qualité', 'recommande', 'efficace', 'confortable', 'top']
+    NEGATIVE_WORDS = ['déçu', 'mauvais', 'terrible', 'problème', 'cassé', 'défaite', 'incorrect', 'insatisfait', 'nul', 'horrible', 'retard', 'inexistant', 'défaut', 'périme']
 
     def analyze(self, text: str) -> dict:
-        text_lower = text.lower()
-        pos_count = sum(1 for w in self.POSITIVE_WORDS if w in text_lower)
-        neg_count = sum(1 for w in self.NEGATIVE_WORDS if w in text_lower)
-        total = pos_count + neg_count
-        if total == 0:
-            score = 0.5
-            sentiment = 'neutre'
-        else:
-            score = pos_count / total
-            if score >= 0.65:
-                sentiment = 'positif'
-            elif score <= 0.35:
-                sentiment = 'négatif'
-            else:
-                sentiment = 'neutre'
-        return {
-            'sentiment': sentiment,
-            'score': round(score, 3),
-            'positive_words': pos_count,
-            'negative_words': neg_count,
-            'confidence': round(abs(score - 0.5) * 2, 3)
-        }
+        lower = text.lower()
+        positive = sum(1 for word in self.POSITIVE_WORDS if word in lower)
+        negative = sum(1 for word in self.NEGATIVE_WORDS if word in lower)
+        total = positive + negative
+        score = 0.5 if total == 0 else positive / total
+        sentiment = 'positif' if score >= 0.65 else 'négatif' if score <= 0.35 else 'neutre'
+        return {'sentiment': sentiment, 'score': round(score, 3), 'positive_words': positive, 'negative_words': negative, 'confidence': round(abs(score - 0.5) * 2, 3)}
 
     def analyze_batch(self, reviews: list) -> dict:
-        results = [self.analyze(r.get('comment', '')) for r in reviews]
+        results = [self.analyze(review.get('comment', '')) for review in reviews]
         stats = {'positif': 0, 'neutre': 0, 'négatif': 0}
-        for r in results:
-            stats[r['sentiment']] += 1
-        total = len(results)
-        return {
-            'results': results,
-            'summary': {k: {'count': v, 'percentage': round(v / total * 100, 1)} for k, v in stats.items()},
-            'average_score': round(sum(r['score'] for r in results) / total, 3)
-        }
+        for result in results:
+            stats[result['sentiment']] += 1
+        total = len(results) or 1
+        return {'results': results, 'summary': {key: {'count': value, 'percentage': round(value / total * 100, 1)} for key, value in stats.items()}, 'average_score': round(sum(result['score'] for result in results) / total, 3)}
 
 analyzer = SentimentAnalyzer()
 
-# ===================== MODULE DÉTECTION D'ANOMALIES =====================
 class AnomalyDetector:
     def detect_sales_anomalies(self, sales: list, threshold: float = 1.5) -> list:
-        """Détecte les anomalies dans les ventes par méthode IQR"""
+        if not sales:
+            return []
         arr = np.array(sales)
         mean = np.mean(arr)
         std = np.std(arr)
-        z_scores = np.abs((arr - mean) / std)
+        if std == 0:
+            return []
         anomalies = []
-        for i, (val, z) in enumerate(zip(sales, z_scores)):
-            if z > threshold:
-                anomalies.append({
-                    'index': i,
-                    'month': MONTHS[i] if i < len(MONTHS) else f'Mois {i+1}',
-                    'value': val,
-                    'z_score': round(float(z), 3),
-                    'deviation_pct': round(float((val - mean) / mean * 100), 1),
-                    'type': 'baisse_anormale' if val < mean else 'pic_anormal'
-                })
+        for i, (value, z_score) in enumerate(zip(sales, np.abs((arr - mean) / std))):
+            if z_score > threshold:
+                anomalies.append({'index': i, 'month': MONTHS[i] if i < len(MONTHS) else f'Mois {i + 1}', 'value': value, 'z_score': round(float(z_score), 3), 'deviation_pct': round(float((value - mean) / mean * 100), 1), 'type': 'baisse_anormale' if value < mean else 'pic_anormal'})
         return anomalies
 
     def detect_stock_anomalies(self, products: list) -> list:
         anomalies = []
-        for p in products:
-            stock = p.get('stock', 0)
+        for product in products:
+            stock = float(product.get('stock', 0) or 0)
             if stock == 0:
-                anomalies.append({'product': p['name'], 'type': 'rupture', 'severity': 'critique', 'stock': 0})
+                anomalies.append({'product': product['name'], 'type': 'rupture', 'severity': 'critique', 'stock': 0})
             elif stock <= 10:
-                anomalies.append({'product': p['name'], 'type': 'stock_faible', 'severity': 'haute', 'stock': stock})
+                anomalies.append({'product': product['name'], 'type': 'stock_faible', 'severity': 'haute', 'stock': stock})
         return anomalies
 
 detector = AnomalyDetector()
@@ -221,11 +187,12 @@ def chatbot_endpoint():
     data = request.get_json()
     question = data.get('question', '')
     products = data.get('products', [])
+    history = data.get('history', [])
     
     if not question:
         return jsonify({'error': 'Question is required'}), 400
     
-    result = chatbot.answer_question(question, products)
+    result = chatbot.answer_question(question, products, history)
     return jsonify(result)
 
 @app.route('/analyze-csv', methods=['POST'])
@@ -275,13 +242,102 @@ class ProductChatbot:
     def set_products(self, products):
         """Définit le contexte des produits pour le chatbot"""
         self.products_context = products
-    
-    def answer_question(self, question, products=None):
-        """Répond à une question sur les produits"""
-        if products:
-            self.set_products(products)
-        
+
+    @staticmethod
+    def _number(value):
+        try:
+            return float(value or 0)
+        except (TypeError, ValueError):
+            return 0.0
+
+    def _money(self, value):
+        return f"{self._number(value):,.0f} DA"
+
+    def _find_product(self, question):
         question_lower = question.lower()
+        matches = [
+            product for product in self.products_context
+            if product.get('name') and product['name'].lower() in question_lower
+        ]
+        return max(matches, key=lambda product: len(product['name'])) if matches else None
+
+    @staticmethod
+    def _is_french(question):
+        french_words = ('bonjour', 'combien', 'quel', 'quelle', 'stock', 'ventes', 'produit', 'merci')
+        return any(word in question.lower() for word in french_words)
+    
+    def answer_question(self, question, products=None, history=None):
+        """Répond à une question sur les produits"""
+        if products is not None:
+            self.set_products(products)
+
+        question = (question or '').strip()
+        question_lower = question.lower()
+        history = history or []
+        language = 'fr' if self._is_french(question) else 'en'
+
+        if not question:
+            return {'answer': 'Tell me what you would like to check.', 'confidence': 0.2}
+
+        products_context = self.products_context
+        if any(word in question_lower for word in ('hello', 'hi', 'bonjour', 'salut', 'hey')):
+            answer = ('Bonjour ! Je peux vous aider avec vos produits, stocks et ventes. Que souhaitez-vous regarder ?'
+                      if language == 'fr' else
+                      'Hello! I can help you explore your products, stock, and sales. What would you like to look at?')
+            return {'answer': answer, 'confidence': 0.99}
+
+        if products_context:
+            product = self._find_product(question)
+            asks_stock = any(word in question_lower for word in ('stock', 'inventory', 'inventaire', 'disponib', 'rupture'))
+            asks_sales = any(word in question_lower for word in ('sales', 'revenue', 'ventes', 'revenu', 'chiffre'))
+            asks_top = any(word in question_lower for word in ('top', 'best', 'meilleur', 'meilleure', 'perform'))
+
+            if product and asks_stock:
+                stock = int(self._number(product.get('stock')))
+                answer = (f"{product['name']} a actuellement {stock} unités en stock."
+                          if language == 'fr' else
+                          f"{product['name']} currently has {stock} units in stock.")
+                if stock == 0:
+                    answer += (' Il faut prévoir un réapprovisionnement rapidement.' if language == 'fr'
+                               else ' It would be worth planning a replenishment soon.')
+                return {'answer': answer, 'confidence': 0.98}
+
+            if product and asks_sales:
+                sold = int(self._number(product.get('sold')))
+                answer = (f"{product['name']} a généré {self._money(product.get('revenue'))} et {sold} unités ont été vendues."
+                          if language == 'fr' else
+                          f"{product['name']} has generated {self._money(product.get('revenue'))} and sold {sold} units.")
+                return {'answer': answer, 'confidence': 0.98}
+
+            if asks_stock:
+                low_stock = [p for p in products_context if self._number(p.get('stock')) <= 10]
+                out_of_stock = [p for p in products_context if self._number(p.get('stock')) == 0]
+                if any(word in question_lower for word in ('out', 'empty', 'zero', 'rupture', 'épuis')):
+                    names = ', '.join(p['name'] for p in out_of_stock[:5]) or ('aucun' if language == 'fr' else 'none')
+                    answer = f"Produits en rupture : {names}." if language == 'fr' else f"Out-of-stock products: {names}."
+                elif any(word in question_lower for word in ('low', 'faible', 'basse', 'alert')):
+                    names = ', '.join(f"{p['name']} ({int(self._number(p.get('stock')))})" for p in low_stock[:5]) or ('aucun' if language == 'fr' else 'none')
+                    answer = f"Stock faible : {names}." if language == 'fr' else f"Low-stock products: {names}."
+                else:
+                    total = int(sum(self._number(p.get('stock')) for p in products_context))
+                    answer = (f"Vous avez {total} unités sur {len(products_context)} produits, dont {len(low_stock)} sous le seuil de 10 unités."
+                              if language == 'fr' else
+                              f"You have {total} units across {len(products_context)} products; {len(low_stock)} are at or below the 10-unit alert threshold.")
+                return {'answer': answer, 'confidence': 0.95}
+
+            if asks_sales or asks_top:
+                top_products = sorted(products_context, key=lambda item: self._number(item.get('revenue')), reverse=True)[:3]
+                names = ', '.join(f"{item['name']} ({self._money(item.get('revenue'))})" for item in top_products)
+                total = sum(self._number(item.get('revenue')) for item in products_context)
+                answer = (f"Votre chiffre d’affaires produit est de {self._money(total)}. Les meilleurs résultats sont : {names}."
+                          if language == 'fr' else
+                          f"Your product revenue totals {self._money(total)}. The strongest performers are {names}.")
+                return {'answer': answer, 'confidence': 0.94}
+
+        if history:
+            return {'answer': ('Je peux poursuivre, mais j’ai besoin d’un produit ou d’une mesure précise. Voulez-vous parler du stock ou des ventes ?'
+                               if language == 'fr' else
+                               'I can keep going, but I need a product or metric to focus on. Would you like to look at stock or sales?'), 'confidence': 0.55}
         
         # Analyser la question et fournir une réponse basée sur les produits
         if not self.products_context:
