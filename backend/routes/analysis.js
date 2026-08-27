@@ -140,7 +140,10 @@ router.get("/predictions", auth, async (req, res) => {
         source: "ai-service",
       });
     } catch (aiError) {
-      console.error("AI prediction unavailable, using local fallback:", aiError.message);
+      console.error(
+        "AI prediction unavailable, using local fallback:",
+        aiError.message,
+      );
     }
 
     const labels = [
@@ -333,7 +336,10 @@ router.post("/sentiment", auth, async (req, res) => {
         const aiResult = await runAiAnalysis({ reviews: [{ comment: text }] });
         return res.json(aiResult.sentiment || analyzeSentimentLocal(text));
       } catch (aiError) {
-        console.error("AI sentiment unavailable, using local fallback:", aiError.message);
+        console.error(
+          "AI sentiment unavailable, using local fallback:",
+          aiError.message,
+        );
         return res.json(analyzeSentimentLocal(text));
       }
     }
@@ -343,13 +349,16 @@ router.post("/sentiment", auth, async (req, res) => {
         const aiResult = await runAiAnalysis({ reviews: inputReviews });
         return res.json(aiResult.sentiment || aiResult);
       } catch (aiError) {
-        console.error("AI sentiment unavailable, using local fallback:", aiError.message);
+        console.error(
+          "AI sentiment unavailable, using local fallback:",
+          aiError.message,
+        );
       }
 
       const results = inputReviews.map((review) => ({
-          id: review.id,
-          ...analyzeSentimentLocal(review.comment),
-        }));
+        id: review.id,
+        ...analyzeSentimentLocal(review.comment),
+      }));
 
       const stats = {
         positif: 0,
@@ -671,7 +680,9 @@ router.post("/detect-anomalies", auth, async (req, res) => {
           severity: anomaly.severity === "critique" ? "critique" : "moyenne",
           product_name: anomaly.product,
           description: `Anomalie IA : ${anomaly.product} (${anomaly.stock} unités)`,
-          product_id: products.rows.find((product) => product.name === anomaly.product)?.id || null,
+          product_id:
+            products.rows.find((product) => product.name === anomaly.product)
+              ?.id || null,
         })),
       ];
 
@@ -717,8 +728,11 @@ router.post("/detect-anomalies", auth, async (req, res) => {
              VALUES ($1, $2, $3, $4, $5, $6, $7)`,
             [
               recommendation.priority || "moyenne",
-              recommendation.type === "stock" ? "stock" :
-                recommendation.type === "service" ? "service_client" : "analyse",
+              recommendation.type === "stock"
+                ? "stock"
+                : recommendation.type === "service"
+                  ? "service_client"
+                  : "analyse",
               title,
               "Recommandation générée par le moteur IA à partir de vos données.",
               recommendation.action || "Analyser la situation",
@@ -729,7 +743,10 @@ router.post("/detect-anomalies", auth, async (req, res) => {
         }
       }
     } catch (aiError) {
-      console.error("AI anomaly analysis unavailable, using local rules:", aiError.message);
+      console.error(
+        "AI anomaly analysis unavailable, using local rules:",
+        aiError.message,
+      );
     }
 
     // -------------------------

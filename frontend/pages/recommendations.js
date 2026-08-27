@@ -1,36 +1,53 @@
-import { useEffect, useState } from 'react';
-import Layout from '../components/Layout';
-import { apiGet, apiPost, apiPut } from '../lib/api';
-import toast from 'react-hot-toast';
-import { Lightbulb, CheckCircle, Package, Tag, Star, BarChart2, Filter } from 'lucide-react';
+import { useEffect, useState } from "react";
+import Layout from "../components/Layout";
+import { apiGet, apiPost, apiPut } from "../lib/api";
+import toast from "react-hot-toast";
+import {
+  Lightbulb,
+  CheckCircle,
+  Package,
+  Tag,
+  Star,
+  BarChart2,
+  Filter,
+} from "lucide-react";
 
 const PRIORITY_CONFIG = {
-  critique: { label: 'Critical', cls: 'text-red-400', border: 'hairline bg-red-400/5' },
-  haute: { label: 'High', cls: 'text-amber', border: 'hairline bg-amber/5' },
-  moyenne: { label: 'Medium', cls: 'text-teal', border: 'hairline bg-teal/5' },
-  basse: { label: 'Low', cls: 'portal-label text-muted', border: 'hairline' },
+  critique: {
+    label: "Critical",
+    cls: "text-red-400",
+    border: "hairline bg-red-400/5",
+  },
+  haute: { label: "High", cls: "text-amber", border: "hairline bg-amber/5" },
+  moyenne: { label: "Medium", cls: "text-teal", border: "hairline bg-teal/5" },
+  basse: { label: "Low", cls: "portal-label text-muted", border: "hairline" },
 };
 
 const CATEGORY_CONFIG = {
-  stock: { icon: Package, color: 'bg-amber/20 text-amber' },
-  promotion: { icon: Tag, color: 'bg-teal/20 text-teal' },
-  service_client: { icon: Star, color: 'bg-amber/20 text-amber' },
-  analyse: { icon: BarChart2, color: 'bg-teal/20 text-teal' },
+  stock: { icon: Package, color: "bg-amber/20 text-amber" },
+  promotion: { icon: Tag, color: "bg-teal/20 text-teal" },
+  service_client: { icon: Star, color: "bg-amber/20 text-amber" },
+  analyse: { icon: BarChart2, color: "bg-teal/20 text-teal" },
 };
 
 export default function RecommendationsPage() {
   const [recs, setRecs] = useState([]);
-  const [filter, setFilter] = useState('tous');
+  const [filter, setFilter] = useState("tous");
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const loadRecs = async () => {
       try {
-        await apiPost('/analysis/detect-anomalies', {});
-        const data = await apiGet('/analysis/recommendations');
-        setRecs((data.recommendations || []).map(r => ({ ...r, done: Boolean(r.done) })));
+        await apiPost("/analysis/detect-anomalies", {});
+        const data = await apiGet("/analysis/recommendations");
+        setRecs(
+          (data.recommendations || []).map((r) => ({
+            ...r,
+            done: Boolean(r.done),
+          })),
+        );
       } catch (error) {
-        toast.error(error.message || 'Failed to load recommendations');
+        toast.error(error.message || "Failed to load recommendations");
       } finally {
         setLoading(false);
       }
@@ -42,20 +59,35 @@ export default function RecommendationsPage() {
   const markDone = async (id) => {
     try {
       const updated = await apiPut(`/analysis/recommendations/${id}/toggle`);
-      setRecs((current) => current.map((r) => r.id === id ? { ...r, ...updated, done: Boolean(updated.done) } : r));
-      toast.success(updated.done ? 'Action marked as done! 🎉' : 'Action marked as pending');
+      setRecs((current) =>
+        current.map((r) =>
+          r.id === id ? { ...r, ...updated, done: Boolean(updated.done) } : r,
+        ),
+      );
+      toast.success(
+        updated.done ? "Action marked as done! 🎉" : "Action marked as pending",
+      );
     } catch (error) {
-      toast.error(error.message || 'Failed to update');
+      toast.error(error.message || "Failed to update");
     }
   };
 
-  const filtered = filter === 'tous' ? recs : recs.filter(r =>
-    filter === 'done' ? r.done : filter === 'pending' ? !r.done : r.category === filter || r.priority === filter
-  );
+  const filtered =
+    filter === "tous"
+      ? recs
+      : recs.filter((r) =>
+          filter === "done"
+            ? r.done
+            : filter === "pending"
+              ? !r.done
+              : r.category === filter || r.priority === filter,
+        );
 
-  const done = recs.filter(r => r.done).length;
-  const critiques = recs.filter(r => r.priority === 'critique' && !r.done).length;
-  const hautes = recs.filter(r => r.priority === 'haute' && !r.done).length;
+  const done = recs.filter((r) => r.done).length;
+  const critiques = recs.filter(
+    (r) => r.priority === "critique" && !r.done,
+  ).length;
+  const hautes = recs.filter((r) => r.priority === "haute" && !r.done).length;
 
   return (
     <Layout title="AI Recommendations">
@@ -66,18 +98,26 @@ export default function RecommendationsPage() {
             <Lightbulb size={24} className="text-ground" />
           </div>
           <div>
-            <h3 className="portal-heading text-base mb-1">AI-Generated Recommendations</h3>
+            <h3 className="portal-heading text-base mb-1">
+              AI-Generated Recommendations
+            </h3>
             <p className="portal-text leading-relaxed">
-              These recommendations are automatically generated by analyzing your sales, stock, and customer review data.
-              Follow them to optimize your business performance.
+              These recommendations are automatically generated by analyzing
+              your sales, stock, and customer review data. Follow them to
+              optimize your business performance.
             </p>
             <div className="flex items-center gap-3 mt-3">
               <div className="flex items-center gap-1.5">
                 <div className="w-2 h-2 rounded-full bg-teal" />
-                <span className="portal-label">{done}/{recs.length} actions completed</span>
+                <span className="portal-label">
+                  {done}/{recs.length} actions completed
+                </span>
               </div>
               <div className="flex-1 max-w-32 bg-ground rounded-full h-2">
-                <div className="h-2 rounded-full bg-teal transition-all" style={{ width: `${(done / recs.length) * 100}%` }} />
+                <div
+                  className="h-2 rounded-full bg-teal transition-all"
+                  style={{ width: `${(done / recs.length) * 100}%` }}
+                />
               </div>
             </div>
           </div>
@@ -87,13 +127,22 @@ export default function RecommendationsPage() {
       {/* Stats */}
       <div className="grid grid-cols-2 xl:grid-cols-4 gap-4 mb-6">
         {[
-          { label: 'Total Recommendations', value: recs.length, color: 'bg-amber' },
-          { label: 'Critical Pending', value: critiques, color: 'bg-red-400' },
-          { label: 'High Priority', value: hautes, color: 'bg-amber' },
-          { label: 'Actions Completed', value: done, color: 'bg-teal' },
+          {
+            label: "Total Recommendations",
+            value: recs.length,
+            color: "bg-amber",
+          },
+          { label: "Critical Pending", value: critiques, color: "bg-red-400" },
+          { label: "High Priority", value: hautes, color: "bg-amber" },
+          { label: "Actions Completed", value: done, color: "bg-teal" },
         ].map((s, i) => (
-          <div key={i} className="bg-ground-secondary border hairline rounded-xl p-4 flex items-center gap-4">
-            <div className={`w-11 h-11 rounded-xl ${s.color} flex items-center justify-center`}>
+          <div
+            key={i}
+            className="bg-ground-secondary border hairline rounded-xl p-4 flex items-center gap-4"
+          >
+            <div
+              className={`w-11 h-11 rounded-xl ${s.color} flex items-center justify-center`}
+            >
               <Lightbulb size={20} className="text-ground" />
             </div>
             <div>
@@ -109,70 +158,93 @@ export default function RecommendationsPage() {
         <div className="flex items-center gap-2 flex-wrap">
           <Filter size={14} className="text-muted" />
           {[
-            { key: 'tous', label: 'All' },
-            { key: 'critique', label: '🔴 Critical' },
-            { key: 'haute', label: '🟡 High' },
-            { key: 'stock', label: '📦 Stock' },
-            { key: 'promotion', label: '🏷️ Promotion' },
-            { key: 'service_client', label: '⭐ Customer Service' },
-            { key: 'pending', label: 'Pending' },
-            { key: 'done', label: '✅ Completed' },
-          ].map(f => (
-            <button key={f.key} onClick={() => setFilter(f.key)}
-              className={`portal-label px-3 py-1.5 rounded-lg font-medium transition-all ${filter === f.key ? 'bg-amber text-ground' : 'bg-ground text-ink-secondary hover:bg-ground/50'}`}>
+            { key: "tous", label: "All" },
+            { key: "critique", label: "🔴 Critical" },
+            { key: "haute", label: "🟡 High" },
+            { key: "stock", label: "📦 Stock" },
+            { key: "promotion", label: "🏷️ Promotion" },
+            { key: "service_client", label: "⭐ Customer Service" },
+            { key: "pending", label: "Pending" },
+            { key: "done", label: "✅ Completed" },
+          ].map((f) => (
+            <button
+              key={f.key}
+              onClick={() => setFilter(f.key)}
+              className={`portal-label px-3 py-1.5 rounded-lg font-medium transition-all ${filter === f.key ? "bg-amber text-ground" : "bg-ground text-ink-secondary hover:bg-ground/50"}`}
+            >
               {f.label}
             </button>
           ))}
         </div>
       </div>
 
-      {loading && <div className="bg-ground-secondary border hairline rounded-xl text-center py-12 portal-text">Loading recommendations…</div>}
+      {loading && (
+        <div className="bg-ground-secondary border hairline rounded-xl text-center py-12 portal-text">
+          Loading recommendations…
+        </div>
+      )}
 
       {/* Recommendations */}
       <div className="space-y-4">
-        {filtered.map(rec => {
+        {filtered.map((rec) => {
           const prio = PRIORITY_CONFIG[rec.priority];
           const cat = CATEGORY_CONFIG[rec.category];
           const CatIcon = cat?.icon || Lightbulb;
           return (
-            <div key={rec.id}
-              className={`bg-ground-secondary border transition-all duration-300 rounded-xl p-4 ${rec.done ? 'opacity-60 hairline' : prio.border} hover:shadow-lg animate-slide-up`}>
+            <div
+              key={rec.id}
+              className={`bg-ground-secondary border transition-all duration-300 rounded-xl p-4 ${rec.done ? "opacity-60 hairline" : prio.border} hover:shadow-lg animate-slide-up`}
+            >
               <div className="flex flex-col sm:flex-row gap-4">
                 <div className="flex items-start gap-4 flex-1">
                   <span className="text-3xl flex-shrink-0">{rec.icon}</span>
                   <div className="flex-1">
                     <div className="flex flex-wrap items-center gap-2 mb-2">
-                      <h3 className={`portal-label font-bold ${rec.done ? 'line-through text-muted' : 'text-ink'}`}>
+                      <h3
+                        className={`portal-label font-bold ${rec.done ? "line-through text-muted" : "text-ink"}`}
+                      >
                         {rec.title}
                       </h3>
                       <span className={prio.cls}>{prio.label}</span>
-                      <div className={`flex items-center gap-1 portal-label px-2 py-0.5 rounded-full ${cat?.color}`}>
+                      <div
+                        className={`flex items-center gap-1 portal-label px-2 py-0.5 rounded-full ${cat?.color}`}
+                      >
                         <CatIcon size={11} />
-                        <span className="capitalize">{rec.category.replace('_', ' ')}</span>
+                        <span className="capitalize">
+                          {rec.category.replace("_", " ")}
+                        </span>
                       </div>
                     </div>
-                    <p className="portal-text mb-3 leading-relaxed">{rec.description}</p>
+                    <p className="portal-text mb-3 leading-relaxed">
+                      {rec.description}
+                    </p>
                     <div className="flex flex-wrap gap-3">
                       <div className="flex items-center gap-2 p-2.5 rounded-xl bg-ground/60 border hairline">
                         <span className="portal-label text-muted">Action:</span>
-                        <span className="portal-label font-medium text-ink">{rec.action}</span>
+                        <span className="portal-label font-medium text-ink">
+                          {rec.action}
+                        </span>
                       </div>
                       <div className="flex items-center gap-2 p-2.5 rounded-xl bg-teal/10 border hairline">
                         <span className="portal-label text-muted">Impact:</span>
-                        <span className="portal-label font-bold text-teal">{rec.impact}</span>
+                        <span className="portal-label font-bold text-teal">
+                          {rec.impact}
+                        </span>
                       </div>
                     </div>
                   </div>
                 </div>
                 <div className="flex-shrink-0">
-                  <button onClick={() => markDone(rec.id)}
+                  <button
+                    onClick={() => markDone(rec.id)}
                     className={`flex items-center gap-2 portal-label px-4 py-2 rounded-xl font-semibold transition-all ${
                       rec.done
-                        ? 'bg-teal/20 text-teal hover:bg-red-400/20 hover:text-red-400'
-                        : 'bg-ground text-ink-secondary hover:bg-teal/20 hover:text-teal'
-                    }`}>
+                        ? "bg-teal/20 text-teal hover:bg-red-400/20 hover:text-red-400"
+                        : "bg-ground text-ink-secondary hover:bg-teal/20 hover:text-teal"
+                    }`}
+                  >
                     <CheckCircle size={14} />
-                    {rec.done ? 'Done ✓' : 'Mark Done'}
+                    {rec.done ? "Done ✓" : "Mark Done"}
                   </button>
                 </div>
               </div>
@@ -181,8 +253,13 @@ export default function RecommendationsPage() {
         })}
         {filtered.length === 0 && (
           <div className="bg-ground-secondary border hairline rounded-xl text-center py-16">
-            <CheckCircle size={48} className="mx-auto mb-3 text-teal opacity-60" />
-            <p className="portal-label font-semibold text-ink">No recommendations in this category</p>
+            <CheckCircle
+              size={48}
+              className="mx-auto mb-3 text-teal opacity-60"
+            />
+            <p className="portal-label font-semibold text-ink">
+              No recommendations in this category
+            </p>
           </div>
         )}
       </div>
