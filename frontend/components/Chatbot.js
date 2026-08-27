@@ -1,13 +1,16 @@
-import { useState, useEffect, useRef } from 'react';
-import { MessageSquare, X, Send, Bot, User } from 'lucide-react';
-import { apiGet, apiPost } from '../lib/api';
+import { useState, useEffect, useRef } from "react";
+import { MessageSquare, X, Send, Bot, User } from "lucide-react";
+import { apiGet, apiPost } from "../lib/api";
 
 export default function Chatbot() {
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState([
-    { role: 'bot', text: 'Hello! I can help you with questions about your products, inventory, sales, and trends. What would you like to know?' }
+    {
+      role: "bot",
+      text: "Hello! I can help you with questions about your products, inventory, sales, and trends. What would you like to know?",
+    },
   ]);
-  const [input, setInput] = useState('');
+  const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const [products, setProducts] = useState([]);
   const messagesEndRef = useRef(null);
@@ -23,15 +26,15 @@ export default function Chatbot() {
   }, [messages]);
 
   const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
 
   const loadProducts = async () => {
     try {
-      const data = await apiGet('/products');
+      const data = await apiGet("/products");
       setProducts(data.products || []);
     } catch (error) {
-      console.error('Failed to load products:', error);
+      console.error("Failed to load products:", error);
     }
   };
 
@@ -39,39 +42,50 @@ export default function Chatbot() {
     if (!input.trim()) return;
 
     const question = input.trim();
-    const userMessage = { role: 'user', text: question };
-    setMessages(prev => [...prev, userMessage]);
-    setInput('');
+    const userMessage = { role: "user", text: question };
+    setMessages((prev) => [...prev, userMessage]);
+    setInput("");
     setLoading(true);
 
     try {
-      const response = await fetch('http://localhost:8000/chatbot', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+      const response = await fetch("http://localhost:8000/chatbot", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           question,
           products,
-          history: messages.slice(-8).map(message => ({
-            role: message.role === 'bot' ? 'assistant' : message.role,
+          history: messages.slice(-8).map((message) => ({
+            role: message.role === "bot" ? "assistant" : message.role,
             content: message.text,
           })),
-        })
+        }),
       });
 
       const data = await response.json();
-      if (!response.ok) throw new Error(data.error || 'The AI service rejected the request.');
-      const botMessage = { role: 'bot', text: data.answer || 'I could not find enough information to answer that.' };
-      setMessages(prev => [...prev, botMessage]);
+      if (!response.ok)
+        throw new Error(data.error || "The AI service rejected the request.");
+      const botMessage = {
+        role: "bot",
+        text:
+          data.answer || "I could not find enough information to answer that.",
+      };
+      setMessages((prev) => [...prev, botMessage]);
     } catch (error) {
-      console.error('Chatbot error:', error);
-      setMessages(prev => [...prev, { role: 'bot', text: 'Sorry, there was an error connecting to the AI service.' }]);
+      console.error("Chatbot error:", error);
+      setMessages((prev) => [
+        ...prev,
+        {
+          role: "bot",
+          text: "Sorry, there was an error connecting to the AI service.",
+        },
+      ]);
     } finally {
       setLoading(false);
     }
   };
 
   const handleKeyPress = (e) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
+    if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
       handleSend();
     }
@@ -99,7 +113,9 @@ export default function Chatbot() {
           </div>
           <div>
             <h3 className="portal-heading text-sm">AI Assistant</h3>
-            <p className="portal-label text-muted text-xs">Powered by Smart Business AI</p>
+            <p className="portal-label text-muted text-xs">
+              Powered by Smart Business AI
+            </p>
           </div>
         </div>
         <button
@@ -115,23 +131,23 @@ export default function Chatbot() {
         {messages.map((msg, i) => (
           <div
             key={i}
-            className={`flex gap-3 ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
+            className={`flex gap-3 ${msg.role === "user" ? "justify-end" : "justify-start"}`}
           >
-            {msg.role === 'bot' && (
+            {msg.role === "bot" && (
               <div className="w-8 h-8 bg-amber rounded-lg flex items-center justify-center flex-shrink-0">
                 <Bot size={16} className="text-ground" />
               </div>
             )}
             <div
               className={`max-w-[80%] p-3 rounded-xl ${
-                msg.role === 'user'
-                  ? 'bg-amber text-ground portal-text'
-                  : 'bg-ground border hairline portal-text'
+                msg.role === "user"
+                  ? "bg-amber text-ground portal-text"
+                  : "bg-ground border hairline portal-text"
               }`}
             >
               {msg.text}
             </div>
-            {msg.role === 'user' && (
+            {msg.role === "user" && (
               <div className="w-8 h-8 bg-teal rounded-lg flex items-center justify-center flex-shrink-0">
                 <User size={16} className="text-ground" />
               </div>
