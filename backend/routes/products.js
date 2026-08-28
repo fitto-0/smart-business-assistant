@@ -197,21 +197,6 @@ router.post("/", auth, async (req, res) => {
       });
     }
 
-    const categories = [
-      "Électronique", "Electronics",
-      "Vêtements", "Clothing",
-      "Alimentation", "Food",
-      "Maison", "Home",
-      "Sport", "Sports",
-      "Autre", "Other",
-    ];
-
-    if (!categories.includes(category)) {
-      return res.status(400).json({
-        error: "Catégorie invalide",
-      });
-    }
-
     const result = await query(
       `
       INSERT INTO products

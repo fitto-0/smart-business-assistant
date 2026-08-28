@@ -287,12 +287,14 @@ router.get("/categories", auth, async (req, res) => {
       `
       SELECT
         p.category AS name,
-        COALESCE(SUM(s.total_amount), 0)::numeric AS amount
+        COALESCE(SUM(s.total_amount), 0)::numeric AS amount,
+        COALESCE(c.color, '#64748b') AS color
       FROM sales s
       LEFT JOIN products p ON p.id = s.product_id AND p.user_id = s.user_id
+      LEFT JOIN categories c ON c.user_id = s.user_id AND c.name = p.category
       WHERE s.user_id = $1
         AND p.category IS NOT NULL
-      GROUP BY p.category
+      GROUP BY p.category, c.color
       ORDER BY amount DESC
       `,
       [userId],
@@ -300,25 +302,54 @@ router.get("/categories", auth, async (req, res) => {
 
     const total = result.rows.reduce((sum, r) => sum + parseFloat(r.amount), 0) || 1;
 
-    const colors = {
-      "Électronique": "#6366f1",
-      "Vêtements": "#f59e0b",
-      "Alimentation": "#10b981",
-      "Maison": "#06b6d4",
-      "Sport": "#ef4444",
-      "Autre": "#8b5cf6",
-    };
-
     return res.json({
       data: result.rows.map((r) => ({
         name: r.name,
         amount: parseFloat(r.amount),
         value: Math.round((parseFloat(r.amount) / total) * 1000) / 10,
-        color: colors[r.name] || "#64748b",
+        color: r.color,
       })),
     });
   } catch (err) {
     console.error("Erreur GET /sales/categories:", err);
+    return res.status(500).json({ error: "Erreur serveur" });
+  }
+});
+
+// =====================================================
+// GET /api/sales/weekly — daily revenue for the current week
+// =====================================================
+router.get("/weekly", auth, async (req, res) => {
+  try {
+    const result = await query(
+      `
+      SELECT
+        days.day::date AS date,
+        COALESCE(SUM(s.total_amount), 0)::numeric AS revenue,
+        COUNT(s.id)::int AS orders
+      FROM generate_series(
+        CURRENT_DATE - INTERVAL '6 days',
+        CURRENT_DATE,
+        INTERVAL '1 day'
+      ) AS days(day)
+      LEFT JOIN sales s
+        ON s.user_id = $1
+       AND s.date = days.day::date
+      GROUP BY days.day
+      ORDER BY days.day
+      `,
+      [req.user.id],
+    );
+
+    return res.json({
+      data: result.rows.map((row) => ({
+        date: row.date,
+        revenue: Number(row.revenue),
+        orders: Number(row.orders),
+      })),
+    });
+  } catch (err) {
+    console.error("Erreur GET /sales/weekly:", err);
     return res.status(500).json({ error: "Erreur serveur" });
   }
 });

@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import Layout from '../components/Layout';
 import { apiGet, apiPost, apiPut, apiDelete } from '../lib/api';
 import toast from 'react-hot-toast';
-import { Plus, Search, Edit2, Trash2, Package, TrendingUp, TrendingDown, X, Save, Upload, FileText, Check } from 'lucide-react';
+import { Plus, Search, Edit2, Trash2, Package, TrendingUp, TrendingDown, X, Save, Upload, FileText, Check, Palette } from 'lucide-react';
 
 const fmt = (n) => new Intl.NumberFormat('fr-FR').format(n);
 
@@ -12,15 +12,16 @@ const STATUS_LABELS = {
   rupture: { label: 'Out of Stock', cls: 'text-red-400' },
 };
 
-const CATEGORIES = ['All', 'Electronics', 'Clothing', 'Food', 'Home', 'Sports'];
-
 export default function ProductsPage() {
   const [products, setProducts] = useState([]);
+  const [categories, setCategories] = useState([]);
+  const [newCategory, setNewCategory] = useState('');
+  const [newCategoryColor, setNewCategoryColor] = useState('#E8913C');
   const [search, setSearch] = useState('');
   const [catFilter, setCatFilter] = useState('All');
   const [showModal, setShowModal] = useState(false);
   const [editProduct, setEditProduct] = useState(null);
-  const [form, setForm] = useState({ name: '', category: 'Electronics', price: '', stock: '' });
+  const [form, setForm] = useState({ name: '', category: '', price: '', stock: '' });
   const [loading, setLoading] = useState(true);
   const [showCsvModal, setShowCsvModal] = useState(false);
   const [csvFile, setCsvFile] = useState(null);
@@ -31,8 +32,12 @@ export default function ProductsPage() {
   useEffect(() => {
     const loadProducts = async () => {
       try {
-        const data = await apiGet('/products');
-        setProducts(data.products || []);
+        const [productData, categoryData] = await Promise.all([
+          apiGet('/products'),
+          apiGet('/categories'),
+        ]);
+        setProducts(productData.products || []);
+        setCategories(categoryData.categories || []);
       } catch (error) {
         toast.error(error.message || 'Failed to load products');
       } finally {
@@ -43,6 +48,35 @@ export default function ProductsPage() {
     loadProducts();
   }, []);
 
+  const categoryNames = categories.map(category => category.name);
+  const categoryOptions = categoryNames;
+
+  const addCategory = async () => {
+    if (!newCategory.trim()) return;
+    try {
+      const category = await apiPost('/categories', {
+        name: newCategory.trim(),
+        color: newCategoryColor,
+      });
+      setCategories(current => [...current, category].sort((a, b) => a.name.localeCompare(b.name)));
+      setNewCategory('');
+      toast.success('Category added');
+    } catch (error) {
+      toast.error(error.message || 'Failed to add category');
+    }
+  };
+
+  const deleteCategory = async (category) => {
+    try {
+      await apiDelete(`/categories/${category.id}`);
+      setCategories(current => current.filter(item => item.id !== category.id));
+      if (catFilter === category.name) setCatFilter('All');
+      toast.success('Category deleted');
+    } catch (error) {
+      toast.error(error.message || 'Move products out of this category first');
+    }
+  };
+
   const filtered = (products || []).filter(p => {
     const matchSearch = p.name.toLowerCase().includes(search.toLowerCase()) || p.category.toLowerCase().includes(search.toLowerCase());
     const matchCat = catFilter === 'All' || p.category === catFilter;
@@ -51,7 +85,7 @@ export default function ProductsPage() {
 
   const openAdd = () => {
     setEditProduct(null);
-    setForm({ name: '', category: 'Electronics', price: '', stock: '' });
+    setForm({ name: '', category: categoryOptions[0] || '', price: '', stock: '' });
     setShowModal(true);
   };
 
@@ -185,7 +219,7 @@ export default function ProductsPage() {
                 placeholder="Search product..." className="w-full bg-ground border hairline rounded-xl px-4 py-2 pl-9 text-ink placeholder-muted focus:outline-none focus:border-amber transition-colors" />
             </div>
             <div className="flex gap-2 flex-wrap">
-              {CATEGORIES.map(c => (
+              {['All', ...categoryNames].map(c => (
                 <button key={c} onClick={() => setCatFilter(c)}
                   className={`portal-label px-3 py-1.5 rounded-lg font-medium transition-all ${catFilter === c ? 'bg-amber text-ground' : 'bg-ground text-ink-secondary hover:bg-ground/50'}`}>
                   {c}
@@ -201,6 +235,49 @@ export default function ProductsPage() {
               <Plus size={16} /> Add Product
             </button>
           </div>
+        </div>
+      </div>
+
+      <div className="bg-ground-secondary border hairline rounded-xl p-4 mb-6">
+        <div className="flex flex-col lg:flex-row lg:items-center gap-3">
+          <div className="flex items-center gap-2">
+            <Palette size={16} className="text-amber" />
+            <span className="portal-heading text-sm">Manage Categories</span>
+          </div>
+          <div className="flex flex-1 flex-col sm:flex-row gap-2">
+            <input
+              value={newCategory}
+              onChange={e => setNewCategory(e.target.value)}
+              onKeyDown={e => e.key === 'Enter' && addCategory()}
+              placeholder="New category name"
+              className="flex-1 bg-ground border hairline rounded-xl px-3 py-2 portal-text text-ink placeholder-muted focus:outline-none focus:border-amber"
+            />
+            <input
+              type="color"
+              value={newCategoryColor}
+              onChange={e => setNewCategoryColor(e.target.value)}
+              title="Choose category color"
+              className="h-10 w-12 bg-ground border hairline rounded-xl p-1 cursor-pointer"
+            />
+            <button onClick={addCategory} className="portal-pill-btn justify-center">
+              <Plus size={15} /> Add category
+            </button>
+          </div>
+        </div>
+        <div className="flex flex-wrap gap-2 mt-3">
+          {categories.map(category => (
+            <div key={category.id} className="flex items-center gap-2 bg-ground border hairline rounded-lg px-2.5 py-1.5">
+              <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: category.color }} />
+              <span className="portal-label">{category.name}</span>
+              <button
+                onClick={() => deleteCategory(category)}
+                title="Delete category"
+                className="text-muted hover:text-red-400 transition-colors"
+              >
+                <X size={13} />
+              </button>
+            </div>
+          ))}
         </div>
       </div>
 
@@ -288,7 +365,8 @@ export default function ProductsPage() {
               <div>
                 <label className="block portal-label mb-1.5">Category</label>
                 <select value={form.category} onChange={e => setForm({ ...form, category: e.target.value })} className="w-full bg-ground border hairline rounded-xl px-4 py-2 text-ink focus:outline-none focus:border-amber transition-colors">
-                  {CATEGORIES.slice(1).map(c => <option key={c} value={c}>{c}</option>)}
+                  <option value="">Select a category</option>
+                  {categoryOptions.map(c => <option key={c} value={c}>{c}</option>)}
                 </select>
               </div>
               <div className="grid grid-cols-2 gap-3">

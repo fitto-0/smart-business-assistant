@@ -56,14 +56,28 @@ export default function Dashboard() {
   useEffect(() => {
     const loadData = async () => {
       try {
-        const [salesKpis, monthly, categories, weekly, anomalyData, recData] = await Promise.all([
+        const responses = await Promise.allSettled([
           apiGet('/sales/kpis'),
           apiGet('/sales/monthly'),
           apiGet('/sales/categories'),
-          apiGet('/sales/recent', { limit: 7 }),
+          apiGet('/sales/weekly'),
           apiGet('/analysis/anomalies'),
           apiGet('/analysis/recommendations')
         ]);
+
+        const getResponse = (index, fallback) => {
+          const response = responses[index];
+          if (response.status === 'fulfilled') return response.value;
+          console.error('Dashboard request failed', response.reason);
+          return fallback;
+        };
+
+        const salesKpis = getResponse(0, {});
+        const monthly = getResponse(1, { data: [] });
+        const categories = getResponse(2, { data: [] });
+        const weekly = getResponse(3, { data: [] });
+        const anomalyData = getResponse(4, { anomalies: [], stats: {} });
+        const recData = getResponse(5, { recommendations: [] });
 
         const derivedKpis = {
           ...salesKpis,
@@ -73,9 +87,9 @@ export default function Dashboard() {
         setKpis(derivedKpis);
         setMonthlySales(monthly?.data || []);
         setCategoryData(categories?.data || []);
-        setWeeklyRevenue((weekly?.data || []).slice(0, 7).map((item) => ({
+        setWeeklyRevenue((weekly?.data || []).map((item) => ({
           jour: new Date(item.date).toLocaleDateString('fr-FR', { weekday: 'short' }),
-          revenus: Number(item.total_amount || 0),
+          revenus: Number(item.revenue || 0),
         })));
         setAnomalies(anomalyData?.anomalies || []);
         setRecommendations(recData?.recommendations || []);

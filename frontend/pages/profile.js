@@ -391,7 +391,7 @@ export default function ProfilePage() {
                 {twoFactorStep === 'setup' && qrCode && (
                   <>
                     <div className="text-center">
-                      <p className="portal-label mb-4">Scan this QR code with your authenticator app (Google Authenticator, Authy, etc.)</p>
+                      <p className="portal-label mb-4">Scan this QR code with your authenticator app (Verceel Vault, Google Authenticator, Authy, etc.)</p>
                       <div className="inline-block p-4 bg-white rounded-xl">
                         <img src={qrCode} alt="QR Code" className="w-48 h-48" />
                       </div>
