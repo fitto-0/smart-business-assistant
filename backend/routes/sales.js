@@ -74,7 +74,11 @@ router.get("/", auth, async (req, res) => {
       LIMIT $${idx}
       OFFSET $${idx + 1}
       `,
-      [...params, Math.max(1, parseInt(limit) || 100), Math.max(0, parseInt(offset) || 0)],
+      [
+        ...params,
+        Math.max(1, parseInt(limit) || 100),
+        Math.max(0, parseInt(offset) || 0),
+      ],
     );
 
     const countResult = await query(
@@ -140,7 +144,9 @@ router.get("/kpis", auth, async (req, res) => {
     const previousRevenue = parseFloat(growthResult.rows[0].previous_revenue);
     const revenueGrowth =
       previousRevenue > 0
-        ? Math.round(((currentRevenue - previousRevenue) / previousRevenue) * 1000) / 10
+        ? Math.round(
+            ((currentRevenue - previousRevenue) / previousRevenue) * 1000,
+          ) / 10
         : 0;
 
     // Satisfaction client + nombre d'avis (scopés)
@@ -179,11 +185,17 @@ router.get("/kpis", auth, async (req, res) => {
       [userId],
     );
 
-    const currentRating = parseFloat(satisfactionGrowthResult.rows[0].current_rating);
-    const previousRating = parseFloat(satisfactionGrowthResult.rows[0].previous_rating);
+    const currentRating = parseFloat(
+      satisfactionGrowthResult.rows[0].current_rating,
+    );
+    const previousRating = parseFloat(
+      satisfactionGrowthResult.rows[0].previous_rating,
+    );
     const satisfactionGrowth =
       previousRating > 0
-        ? Math.round(((currentRating - previousRating) / previousRating) * 1000) / 10
+        ? Math.round(
+            ((currentRating - previousRating) / previousRating) * 1000,
+          ) / 10
         : 0;
 
     // Croissance des commandes vs mois précédent
@@ -212,7 +224,9 @@ router.get("/kpis", auth, async (req, res) => {
     const previousOrders = ordersGrowthResult.rows[0].previous_orders;
     const ordersGrowth =
       previousOrders > 0
-        ? Math.round(((currentOrders - previousOrders) / previousOrders) * 1000) / 10
+        ? Math.round(
+            ((currentOrders - previousOrders) / previousOrders) * 1000,
+          ) / 10
         : 0;
 
     return res.json({
@@ -221,7 +235,9 @@ router.get("/kpis", auth, async (req, res) => {
       avgOrderValue: parseFloat(kpiResult.rows[0].avg_order_value),
       revenueGrowth,
       ordersGrowth,
-      customerSatisfaction: parseFloat(reviewResult.rows[0].avg_rating).toFixed(2),
+      customerSatisfaction: parseFloat(reviewResult.rows[0].avg_rating).toFixed(
+        2,
+      ),
       satisfactionGrowth,
       totalReviews: reviewResult.rows[0].total_reviews,
     });
@@ -300,7 +316,8 @@ router.get("/categories", auth, async (req, res) => {
       [userId],
     );
 
-    const total = result.rows.reduce((sum, r) => sum + parseFloat(r.amount), 0) || 1;
+    const total =
+      result.rows.reduce((sum, r) => sum + parseFloat(r.amount), 0) || 1;
 
     return res.json({
       data: result.rows.map((r) => ({
@@ -435,7 +452,15 @@ router.get("/top-products", auth, async (req, res) => {
 // =====================================================
 router.post("/", auth, async (req, res) => {
   try {
-    const { product_id, date, quantity, unit_price, customer_name, payment_method, notes } = req.body;
+    const {
+      product_id,
+      date,
+      quantity,
+      unit_price,
+      customer_name,
+      payment_method,
+      notes,
+    } = req.body;
 
     if (!product_id || !date || !quantity || unit_price === undefined) {
       return res.status(400).json({
@@ -447,11 +472,15 @@ router.post("/", auth, async (req, res) => {
     const price = parseFloat(unit_price);
 
     if (!qty || qty < 1 || !isFinite(price) || price < 0) {
-      return res.status(400).json({ error: "quantité > 0 et prix valide requis" });
+      return res
+        .status(400)
+        .json({ error: "quantité > 0 et prix valide requis" });
     }
 
     const validMethods = ["carte", "espèces", "virement", "chèque", "autre"];
-    const method = validMethods.includes(payment_method) ? payment_method : "carte";
+    const method = validMethods.includes(payment_method)
+      ? payment_method
+      : "carte";
 
     // ⛔ Vérification d'appartenance : le produit doit appartenir à req.user.id
     const product = await query(

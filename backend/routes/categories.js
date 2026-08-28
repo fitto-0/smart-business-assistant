@@ -3,7 +3,16 @@ const auth = require("../middleware/auth");
 const pool = require("../config/db");
 
 const query = (text, params) => pool.query(text, params);
-const fallbackColors = ["#E8913C", "#2E6B72", "#6366F1", "#EF4444", "#10B981", "#D946EF", "#F59E0B", "#06B6D4"];
+const fallbackColors = [
+  "#E8913C",
+  "#2E6B72",
+  "#6366F1",
+  "#EF4444",
+  "#10B981",
+  "#D946EF",
+  "#F59E0B",
+  "#06B6D4",
+];
 
 router.get("/", auth, async (req, res) => {
   const result = await query(
@@ -25,7 +34,11 @@ router.post("/", auth, async (req, res) => {
     : fallbackColors[Math.floor(Math.random() * fallbackColors.length)];
 
   if (!name || name.length > 80) {
-    return res.status(400).json({ error: "Category name is required and must be 80 characters or fewer" });
+    return res
+      .status(400)
+      .json({
+        error: "Category name is required and must be 80 characters or fewer",
+      });
   }
 
   try {
@@ -35,7 +48,8 @@ router.post("/", auth, async (req, res) => {
     );
     return res.status(201).json(result.rows[0]);
   } catch (error) {
-    if (error.code === "23505") return res.status(409).json({ error: "Category already exists" });
+    if (error.code === "23505")
+      return res.status(409).json({ error: "Category already exists" });
     throw error;
   }
 });
@@ -56,7 +70,9 @@ router.delete("/:id", auth, async (req, res) => {
       [Number.parseInt(req.params.id, 10), req.user.id],
     );
     return res.status(used.rowCount ? 409 : 404).json({
-      error: used.rowCount ? "Move or delete products in this category first" : "Category not found",
+      error: used.rowCount
+        ? "Move or delete products in this category first"
+        : "Category not found",
     });
   }
   return res.json({ message: "Category deleted" });
