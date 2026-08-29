@@ -502,6 +502,108 @@ class CSVAnalyzer:
 
 csv_analyzer = CSVAnalyzer()
 
+# ===================== MODULE ANALYSE CSV AVIS =====================
+class ReviewCSVAnalyzer:
+    """Analyseur de CSV pour importer automatiquement des avis clients"""
+    
+    def analyze_reviews_csv(self, csv_content):
+        """Analyse un fichier CSV d'avis et mappe les colonnes"""
+        try:
+            df = pd.read_csv(io.StringIO(csv_content))
+            
+            # Colonnes attendues et leurs variations possibles
+            column_mapping = {
+                'product_id': ['product_id', 'productId', 'product'],
+                'customer_name': ['customer_name', 'customerName', 'name', 'customer'],
+                'rating': ['rating', 'stars', 'score', 'note'],
+                'comment': ['comment', 'review', 'text', 'feedback', 'avis'],
+                'date': ['date', 'review_date', 'reviewDate']
+            }
+            
+            # Détecter les colonnes
+            detected_columns = {}
+            df_columns_lower = [col.lower().strip() for col in df.columns]
+            
+            for field, variations in column_mapping.items():
+                for i, col in enumerate(df_columns_lower):
+                    if any(var in col for var in variations):
+                        detected_columns[field] = df.columns[i]
+                        break
+            
+            # Valider les colonnes requises
+            required_fields = ['product_id', 'customer_name', 'rating', 'comment']
+            missing_fields = [f for f in required_fields if f not in detected_columns]
+            
+            if missing_fields:
+                return {
+                    'success': False,
+                    'error': f'Missing required columns: {", ".join(missing_fields)}',
+                    'detected_columns': detected_columns,
+                    'available_columns': list(df.columns)
+                }
+            
+            # Transformer les données
+            reviews = []
+            for _, row in df.iterrows():
+                try:
+                    review = {
+                        'product_id': int(row[detected_columns['product_id']]),
+                        'customer_name': str(row[detected_columns['customer_name']]).strip(),
+                        'rating': int(row[detected_columns['rating']]),
+                        'comment': str(row[detected_columns['comment']]).strip(),
+                        'date': str(row[detected_columns.get('date', '')]).strip() if 'date' in detected_columns else None
+                    }
+                    
+                    # Valider rating
+                    if review['rating'] < 1 or review['rating'] > 5:
+                        continue
+                    
+                    # Analyser sentiment
+                    sentiment = analyzer.analyze(review['comment'])
+                    review['sentiment'] = sentiment['sentiment']
+                    review['score'] = sentiment['score']
+                    
+                    reviews.append(review)
+                except Exception as e:
+                    continue
+            
+            return {
+                'success': True,
+                'reviews': reviews,
+                'total': len(reviews),
+                'column_mapping': detected_columns,
+                'preview': reviews[:3]
+            }
+            
+        except Exception as e:
+            return {
+                'success': False,
+                'error': str(e)
+            }
+
+review_csv_analyzer = ReviewCSVAnalyzer()
+
+# ===================== ROUTE ANALYSE CSV AVIS =====================
+@app.route('/analyze-reviews-csv', methods=['POST'])
+def analyze_reviews_csv_endpoint():
+    """Endpoint pour analyser un fichier CSV d'avis clients"""
+    if 'file' not in request.files:
+        return jsonify({'error': 'No file provided'}), 400
+    
+    file = request.files['file']
+    if file.filename == '':
+        return jsonify({'error': 'No file selected'}), 400
+    
+    if not file.filename.endswith('.csv'):
+        return jsonify({'error': 'File must be a CSV'}), 400
+    
+    try:
+        csv_content = file.read().decode('utf-8')
+        result = review_csv_analyzer.analyze_reviews_csv(csv_content)
+        return jsonify(result)
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 8000))
     print(f"🤖 Smart Business Assistant AI Engine starting on port {port}")

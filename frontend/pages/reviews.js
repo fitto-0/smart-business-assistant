@@ -1,8 +1,10 @@
 import { useEffect, useState } from "react";
 import Layout from "../components/Layout";
-import { apiGet } from "../lib/api";
+import { apiGet, apiPost } from "../lib/api";
 import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from "recharts";
-import { Star, ThumbsUp, ThumbsDown, Minus, MessageSquare } from "lucide-react";
+import { Star, ThumbsUp, ThumbsDown, Minus, MessageSquare, Plus, Upload } from "lucide-react";
+import ReviewForm from "../components/ReviewForm";
+import toast from "react-hot-toast";
 
 const SentimentIcon = ({ s }) => {
   if (s === "positif") return <ThumbsUp size={14} className="text-teal" />;
@@ -42,8 +44,34 @@ export default function ReviewsPage() {
   const [averageRating, setAverageRating] = useState(0);
   const [totalReviews, setTotalReviews] = useState(0);
   const [loading, setLoading] = useState(true);
+  const [showReviewForm, setShowReviewForm] = useState(false);
+  const [products, setProducts] = useState([]);
+  const [csvFile, setCsvFile] = useState(null);
+  const [uploading, setUploading] = useState(false);
 
   useEffect(() => {
+    const loadData = async () => {
+      try {
+        const [reviewsData, productsData] = await Promise.all([
+          apiGet("/analysis/sentiment"),
+          apiGet("/products")
+        ]);
+        setReviews(reviewsData.reviews || []);
+        setStats(reviewsData.stats || []);
+        setAverageRating(Number(reviewsData.averageRating || 0));
+        setTotalReviews(Number(reviewsData.totalReviews || 0));
+        setProducts(productsData.products || []);
+      } catch (error) {
+        console.error("Failed to load data", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadData();
+  }, []);
+
+  const handleReviewAdded = () => {
     const loadReviews = async () => {
       try {
         const data = await apiGet("/analysis/sentiment");
@@ -52,14 +80,50 @@ export default function ReviewsPage() {
         setAverageRating(Number(data.averageRating || 0));
         setTotalReviews(Number(data.totalReviews || 0));
       } catch (error) {
-        console.error("Failed to load reviews", error);
-      } finally {
-        setLoading(false);
+        console.error("Failed to reload reviews", error);
       }
     };
-
     loadReviews();
-  }, []);
+  };
+
+  const handleCSVUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    if (!file.name.endsWith('.csv')) {
+      toast.error('Please upload a CSV file');
+      return;
+    }
+
+    setCsvFile(file);
+  };
+
+  const handleCSVImport = async () => {
+    if (!csvFile) {
+      toast.error('Please select a CSV file first');
+      return;
+    }
+
+    setUploading(true);
+    try {
+      const formData = new FormData();
+      formData.append('file', csvFile);
+
+      const response = await apiPost('/analysis/reviews/import', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        }
+      });
+
+      toast.success(`Successfully imported ${response.imported || 0} reviews`);
+      setCsvFile(null);
+      handleReviewAdded();
+    } catch (error) {
+      toast.error(error.response?.data?.error || 'Failed to import reviews');
+    } finally {
+      setUploading(false);
+    }
+  };
 
   const pieData = [
     {
@@ -105,6 +169,52 @@ export default function ReviewsPage() {
 
   return (
     <Layout title="Customer Reviews">
+      {/* Action Buttons */}
+      <div className="flex gap-3 mb-6">
+        <button
+          onClick={() => setShowReviewForm(true)}
+          className="flex items-center gap-2 px-4 py-2.5 bg-amber text-ground rounded-lg portal-label font-semibold hover:bg-amber/90 transition-colors"
+        >
+          <Plus size={18} />
+          Add Review
+        </button>
+        <div className="flex-1" />
+        <div className="flex items-center gap-3">
+          <input
+            type="file"
+            accept=".csv"
+            onChange={handleCSVUpload}
+            className="hidden"
+            id="csv-upload"
+          />
+          <label
+            htmlFor="csv-upload"
+            className="flex items-center gap-2 px-4 py-2.5 border hairline rounded-lg portal-label hover:border-amber/50 transition-colors cursor-pointer"
+          >
+            <Upload size={18} />
+            {csvFile ? csvFile.name : "Import CSV"}
+          </label>
+          {csvFile && (
+            <button
+              onClick={handleCSVImport}
+              disabled={uploading}
+              className="px-4 py-2.5 bg-teal text-ground rounded-lg portal-label font-semibold hover:bg-teal/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {uploading ? "Importing..." : "Import"}
+            </button>
+          )}
+        </div>
+      </div>
+
+      {/* Review Form Modal */}
+      {showReviewForm && (
+        <ReviewForm
+          products={products}
+          onClose={() => setShowReviewForm(false)}
+          onSuccess={handleReviewAdded}
+        />
+      )}
+
       {/* Stats Row */}
       <div className="grid grid-cols-2 xl:grid-cols-4 gap-4 mb-6">
         <div className="bg-ground-secondary border hairline rounded-xl p-4 flex items-center gap-4">

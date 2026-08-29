@@ -4,10 +4,16 @@
 
 const router = require("express").Router();
 const auth = require("../middleware/auth");
-const axios = require("axios");
 const pool = require("../config/db");
+const multer = require("multer");
+const csvParser = require("csv-parser");
+const { Readable } = require("stream");
+const axios = require("axios");
 
 const query = (text, params) => pool.query(text, params);
+
+// Configure multer for file upload
+const upload = multer({ storage: multer.memoryStorage() });
 const AI_SERVICE_URL = process.env.AI_SERVICE_URL || "http://ai:8000";
 
 const runAiAnalysis = async (data) => {
@@ -1027,6 +1033,135 @@ router.put("/recommendations/:id/toggle", auth, async (req, res) => {
 
     return res.status(500).json({
       error: "Erreur serveur",
+    });
+  }
+});
+
+// =====================================================
+// POST /api/analysis/reviews/import
+// Import reviews from CSV file
+// =====================================================
+router.post("/reviews/import", auth, upload.single("file"), async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({
+        error: "No file provided",
+      });
+    }
+
+    const userId = req.user.id;
+    const reviews = [];
+    const errors = [];
+
+    // Parse CSV from buffer
+    const readable = Readable.from(req.file.buffer.toString("utf-8"));
+
+    for await (const row of readable.pipe(csvParser())) {
+      try {
+        // Map CSV columns to review fields
+        const review = {
+          product_id: parseInt(row.product_id || row.productId || row.product),
+          customer_name: row.customer_name || row.customerName || row.name,
+          rating: parseInt(row.rating || row.stars),
+          comment: row.comment || row.review || row.text,
+          date: row.date || new Date().toISOString().split("T")[0],
+        };
+
+        // Validate required fields
+        if (!review.product_id || !review.customer_name || !review.rating || !review.comment) {
+          errors.push({
+            row,
+            error: "Missing required fields (product_id, customer_name, rating, comment)",
+          });
+          continue;
+        }
+
+        // Validate rating range
+        if (review.rating < 1 || review.rating > 5) {
+          errors.push({
+            row,
+            error: "Rating must be between 1 and 5",
+          });
+          continue;
+        }
+
+        // Verify product belongs to user
+        const product = await query(
+          `SELECT id FROM products WHERE id = $1 AND user_id = $2`,
+          [review.product_id, userId]
+        );
+
+        if (product.rowCount === 0) {
+          errors.push({
+            row,
+            error: `Product ${review.product_id} not found or does not belong to user`,
+          });
+          continue;
+        }
+
+        // Analyze sentiment
+        const sentiment = analyzeSentimentLocal(review.comment);
+
+        reviews.push({
+          ...review,
+          sentiment: sentiment.sentiment,
+          score: sentiment.score,
+          user_id: userId,
+        });
+      } catch (error) {
+        errors.push({
+          row,
+          error: error.message,
+        });
+      }
+    }
+
+    if (reviews.length === 0) {
+      return res.status(400).json({
+        error: "No valid reviews found in CSV",
+        errors,
+      });
+    }
+
+    // Insert reviews in batch
+    const insertedReviews = [];
+    for (const review of reviews) {
+      try {
+        const result = await query(
+          `INSERT INTO reviews (user_id, product_id, customer_name, rating, comment, sentiment, score, date)
+           VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+           RETURNING *`,
+          [
+            review.user_id,
+            review.product_id,
+            review.customer_name,
+            review.rating,
+            review.comment,
+            review.sentiment,
+            review.score,
+            review.date,
+          ]
+        );
+        insertedReviews.push(result.rows[0]);
+      } catch (error) {
+        errors.push({
+          review,
+          error: error.message,
+        });
+      }
+    }
+
+    return res.json({
+      message: `Successfully imported ${insertedReviews.length} reviews`,
+      imported: insertedReviews.length,
+      failed: errors.length,
+      errors: errors.slice(0, 10), // Return first 10 errors
+      reviews: insertedReviews,
+    });
+  } catch (err) {
+    console.error("Erreur import reviews:", err);
+    return res.status(500).json({
+      error: "Erreur serveur lors de l'import",
     });
   }
 });
