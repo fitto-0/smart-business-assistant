@@ -5,6 +5,7 @@ import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from "recharts";
 import { Star, ThumbsUp, ThumbsDown, Minus, MessageSquare, Plus, Upload } from "lucide-react";
 import ReviewForm from "../components/ReviewForm";
 import toast from "react-hot-toast";
+import { format } from "date-fns";
 
 const SentimentIcon = ({ s }) => {
   if (s === "positif") return <ThumbsUp size={14} className="text-teal" />;
@@ -400,7 +401,7 @@ export default function ReviewsPage() {
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2 portal-label text-muted">
                   <SentimentIcon s={review.sentiment} />
-                  <span>{review.date}</span>
+                  <span>{review.date ? format(new Date(review.date), 'yyyy-MM-dd') : 'N/A'}</span>
                 </div>
                 <div className="w-40">
                   <p className="portal-label text-muted mb-1">
