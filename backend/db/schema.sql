@@ -34,6 +34,7 @@ CREATE TABLE users (
     email_notifications_enabled BOOLEAN DEFAULT true,
     two_factor_enabled BOOLEAN DEFAULT false,
     two_factor_secret VARCHAR(255),
+    language VARCHAR(5) DEFAULT 'en' CHECK (language IN ('en', 'fr', 'ar')),
     created_at TIMESTAMPTZ DEFAULT NOW(),
     updated_at TIMESTAMPTZ DEFAULT NOW()
 );

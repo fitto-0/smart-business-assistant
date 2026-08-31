@@ -2,22 +2,24 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
 import { login, isAuthenticated } from '../lib/auth';
+import { useLanguage } from '../lib/LanguageContext';
 import toast from 'react-hot-toast';
 import { Eye, EyeOff, Zap, ArrowRight, ShieldCheck, TrendingUp, Brain } from 'lucide-react';
 
-const highlights = [
-  { icon: TrendingUp, text: 'Real-time sales analytics' },
-  { icon: Brain, text: 'Advanced AI predictions' },
-  { icon: ShieldCheck, text: 'Automatic anomaly detection' },
-];
-
 export default function LoginPage() {
+  const { t } = useLanguage();
   const router = useRouter();
   const [form, setForm] = useState({ email: 'demo@smartbusiness.com', password: 'demo123' });
   const [showPwd, setShowPwd] = useState(false);
   const [loading, setLoading] = useState(false);
   const [requires2FA, setRequires2FA] = useState(false);
   const [totpCode, setTotpCode] = useState('');
+
+  const highlights = [
+    { icon: TrendingUp, text: t('login.realTimeAnalytics') },
+    { icon: Brain, text: t('login.aiPredictions') },
+    { icon: ShieldCheck, text: t('login.anomalyDetection') },
+  ];
 
   useEffect(() => {
     if (isAuthenticated()) router.push('/dashboard');
@@ -30,25 +32,25 @@ export default function LoginPage() {
       if (requires2FA) {
         // Submit with TOTP code
         await login(form.email, form.password, totpCode);
-        toast.success('Login successful! Welcome');
+        toast.success(t('login.loginSuccess'));
         router.push('/dashboard');
       } else {
         // First attempt - check if 2FA is required
         try {
           await login(form.email, form.password);
-          toast.success('Login successful! Welcome');
+          toast.success(t('login.loginSuccess'));
           router.push('/dashboard');
         } catch (err) {
           if (err.message === 'Code 2FA requis' || err.requires2FA) {
             setRequires2FA(true);
-            toast('Two-factor authentication required');
+            toast(t('login.twoFactorRequired'));
           } else {
             throw err;
           }
         }
       }
     } catch (err) {
-      toast.error(err.message || 'Login error');
+      toast.error(err.message || t('login.loginError'));
     } finally {
       setLoading(false);
     }
@@ -71,10 +73,10 @@ export default function LoginPage() {
 
           <div>
             <h2 className="portal-heading text-3xl leading-tight mb-3">
-              Welcome back to your <span className="text-amber">intelligent</span> dashboard
+              {t('login.welcomeBack')} to your <span className="text-amber">intelligent</span> dashboard
             </h2>
             <p className="portal-text mb-8">
-              Sales analytics, AI predictions and anomaly detection — all in one secure place.
+              {t('login.salesDescription')}
             </p>
             <div className="space-y-3">
               {highlights.map(({ icon: Icon, text }) => (
@@ -104,20 +106,20 @@ export default function LoginPage() {
             </div>
           </div>
 
-          <h1 className="portal-heading text-2xl sm:text-3xl mb-2">Welcome back</h1>
-          <p className="portal-text mb-8">Sign in to your dashboard</p>
+          <h1 className="portal-heading text-2xl sm:text-3xl mb-2">{t('login.welcomeBack')}</h1>
+          <p className="portal-text mb-8">{t('login.signInToDashboard')}</p>
 
           {/* Demo badge */}
           <div className="flex items-center gap-2.5 rounded-xl border hairline bg-amber/10 px-4 py-3 mb-7">
             <Zap size={14} className="text-amber flex-shrink-0" />
             <p className="portal-label text-ink-secondary">
-              <strong>Demo account:</strong> demo@smartbusiness.com / demo123
+              <strong>{t('login.demoAccount')}</strong> {t('login.demoCredentials')}
             </p>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-5">
             <div>
-              <label className="block portal-label mb-2">Email Address</label>
+              <label className="block portal-label mb-2">{t('login.emailAddress')}</label>
               <input
                 type="email"
                 value={form.email}
@@ -128,7 +130,7 @@ export default function LoginPage() {
               />
             </div>
             <div>
-              <label className="block portal-label mb-2">Password</label>
+              <label className="block portal-label mb-2">{t('login.password')}</label>
               <div className="relative">
                 <input
                   type={showPwd ? 'text' : 'password'}
@@ -150,7 +152,7 @@ export default function LoginPage() {
             </div>
             {requires2FA && (
               <div>
-                <label className="block portal-label mb-2">Two-Factor Authentication Code</label>
+                <label className="block portal-label mb-2">{t('login.twoFactorCode')}</label>
                 <input
                   type="text"
                   value={totpCode}
@@ -166,20 +168,20 @@ export default function LoginPage() {
               {loading ? (
                 <>
                   <span className="animate-spin rounded-full h-4 w-4 border-2 border-amber border-t-transparent"></span>
-                  {requires2FA ? 'Verifying...' : 'Signing in...'}
+                  {requires2FA ? t('login.verifying') : t('login.signingIn')}
                 </>
               ) : (
                 <>
-                  {requires2FA ? 'Verify & Sign In' : 'Sign In'} <ArrowRight size={16} />
+                  {requires2FA ? t('login.verifySignIn') : t('login.signIn')} <ArrowRight size={16} />
                 </>
               )}
             </button>
           </form>
 
           <p className="mt-7 text-center portal-text">
-            Don't have an account?{' '}
+            {t('login.noAccount')}{' '}
             <Link href="/register" className="text-amber hover:text-amber/80 font-semibold transition-colors">
-              Create an account
+              {t('login.createAccount')}
             </Link>
           </p>
         </div>

@@ -223,6 +223,7 @@ router.get("/me", require("../middleware/auth"), async (req, res) => {
       company: u.company,
       role: u.role,
       avatar_url: u.avatar_url,
+      language: u.language || 'en',
       createdAt: u.created_at,
     });
   } catch (err) {
@@ -237,7 +238,7 @@ router.get("/me", require("../middleware/auth"), async (req, res) => {
 // UPDATE PROFILE
 router.put("/profile", require("../middleware/auth"), async (req, res) => {
   try {
-    const { name, company } = req.body;
+    const { name, company, language } = req.body;
 
     if (!name) {
       return res.status(400).json({
@@ -245,13 +246,21 @@ router.put("/profile", require("../middleware/auth"), async (req, res) => {
       });
     }
 
+    // Validate language if provided
+    if (language && !['en', 'fr', 'ar'].includes(language)) {
+      return res.status(400).json({
+        error: "Langue invalide. Valeurs acceptées: en, fr, ar",
+      });
+    }
+
     const result = await query(
       `UPDATE users
          SET name = $1,
-             company = $2
-         WHERE id = $3
-         RETURNING id, name, email, company, role`,
-      [name, company || "", req.user.id],
+             company = $2,
+             language = COALESCE($3, language)
+         WHERE id = $4
+         RETURNING id, name, email, company, role, language`,
+      [name, company || "", language || null, req.user.id],
     );
 
     if (result.rowCount === 0) {

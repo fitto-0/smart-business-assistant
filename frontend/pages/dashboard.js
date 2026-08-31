@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import Layout from "../components/Layout";
 import { apiGet } from "../lib/api";
+import { useLanguage } from "../lib/LanguageContext";
 import {
   AreaChart,
   Area,
@@ -91,6 +92,7 @@ const CustomTooltip = ({ active, payload, label }) => {
 };
 
 export default function Dashboard() {
+  const { t } = useLanguage();
   const [kpis, setKpis] = useState({
     totalRevenue: 0,
     revenueGrowth: 0,
@@ -170,21 +172,21 @@ export default function Dashboard() {
 
   if (loading) {
     return (
-      <Layout title="Dashboard">
+      <Layout title={t('dashboard.title')}>
         <div className="bg-ground-secondary border hairline rounded-xl text-center py-16 portal-text">
-          Loading data…
+          {t('dashboard.loading')}
         </div>
       </Layout>
     );
   }
 
   return (
-    <Layout title="Dashboard">
+    <Layout title={t('dashboard.title')}>
       {/* KPI Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 mb-6">
         <StatCard
           icon={TrendingUp}
-          label="Total Revenue"
+          label={t('dashboard.kpis.totalRevenue')}
           value={kpis.totalRevenue}
           change={kpis.revenueGrowth}
           color="bg-amber"
@@ -192,14 +194,14 @@ export default function Dashboard() {
         />
         <StatCard
           icon={ShoppingCart}
-          label="Total Orders"
+          label={t('dashboard.kpis.totalOrders')}
           value={kpis.totalOrders}
           change={kpis.ordersGrowth}
           color="bg-teal"
         />
         <StatCard
           icon={Star}
-          label="Customer Satisfaction"
+          label={t('dashboard.kpis.customerSatisfaction')}
           value={kpis.customerSatisfaction}
           change={kpis.satisfactionGrowth}
           color="bg-amber"
@@ -207,7 +209,7 @@ export default function Dashboard() {
         />
         <StatCard
           icon={Package}
-          label="Stock Alerts"
+          label={t('dashboard.kpis.stockAlerts')}
           value={kpis.stockAlerts}
           color="bg-red-400"
           suffix=" alerts"
@@ -220,14 +222,14 @@ export default function Dashboard() {
         <div className="bg-ground-secondary border hairline rounded-xl p-5 xl:col-span-2">
           <div className="flex items-center justify-between mb-5">
             <div>
-              <h3 className="portal-heading text-base">Sales Evolution</h3>
-              <p className="portal-label mt-0.5">Sales vs Targets 2026</p>
+              <h3 className="portal-heading text-base">{t('dashboard.charts.salesEvolution')}</h3>
+              <p className="portal-label mt-0.5">{t('dashboard.charts.salesVsTargets')}</p>
             </div>
             <Link
               href="/sales"
               className="portal-label text-amber hover:text-amber/80 flex items-center gap-1"
             >
-              View details <ArrowRight size={12} />
+              {t('dashboard.charts.viewDetails')} <ArrowRight size={12} />
             </Link>
           </div>
           <ResponsiveContainer width="100%" height={240}>
@@ -285,8 +287,8 @@ export default function Dashboard() {
         <div className="bg-ground-secondary border hairline rounded-xl p-5">
           <div className="flex items-center justify-between mb-5">
             <div>
-              <h3 className="portal-heading text-base">Sales by Category</h3>
-              <p className="portal-label mt-0.5">Revenue distribution</p>
+              <h3 className="portal-heading text-base">{t('dashboard.charts.salesByCategory')}</h3>
+              <p className="portal-label mt-0.5">{t('dashboard.charts.revenueDistribution')}</p>
             </div>
           </div>
           <ResponsiveContainer width="100%" height={160}>
@@ -342,8 +344,8 @@ export default function Dashboard() {
         <div className="bg-ground-secondary border hairline rounded-xl p-5">
           <div className="flex items-center justify-between mb-5">
             <div>
-              <h3 className="portal-heading text-base">Weekly Revenue</h3>
-              <p className="portal-label mt-0.5">This week</p>
+              <h3 className="portal-heading text-base">{t('dashboard.charts.weeklyRevenue')}</h3>
+              <p className="portal-label mt-0.5">{t('dashboard.charts.thisWeek')}</p>
             </div>
           </div>
           <ResponsiveContainer width="100%" height={180}>
@@ -380,14 +382,13 @@ export default function Dashboard() {
         <div className="bg-ground-secondary border hairline rounded-xl p-5">
           <div className="flex items-center justify-between mb-4">
             <h3 className="portal-heading text-base flex items-center gap-2">
-              <AlertTriangle size={16} className="text-red-400" /> Detected
-              Anomalies
+              <AlertTriangle size={16} className="text-red-400" /> {t('dashboard.anomalies.detectedAnomalies')}
             </h3>
             <Link
               href="/anomalies"
               className="portal-label text-amber hover:text-amber/80 flex items-center gap-1"
             >
-              View all <ArrowRight size={12} />
+              {t('dashboard.anomalies.viewAll')} <ArrowRight size={12} />
             </Link>
           </div>
           <div className="space-y-2.5">
@@ -421,13 +422,13 @@ export default function Dashboard() {
         <div className="bg-ground-secondary border hairline rounded-xl p-5">
           <div className="flex items-center justify-between mb-4">
             <h3 className="portal-heading text-base flex items-center gap-2">
-              <Lightbulb size={16} className="text-amber" /> AI Recommendations
+              <Lightbulb size={16} className="text-amber" /> {t('dashboard.recommendations.aiRecommendations')}
             </h3>
             <Link
               href="/recommendations"
               className="portal-label text-amber hover:text-amber/80 flex items-center gap-1"
             >
-              View all <ArrowRight size={12} />
+              {t('dashboard.recommendations.viewAll')} <ArrowRight size={12} />
             </Link>
           </div>
           <div className="space-y-2.5">

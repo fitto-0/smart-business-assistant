@@ -2,42 +2,44 @@ import { useState } from 'react';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
 import { register } from '../lib/auth';
+import { useLanguage } from '../lib/LanguageContext';
 import toast from 'react-hot-toast';
 import { Eye, EyeOff, Zap, ArrowRight, CheckCircle, ShieldCheck, TrendingUp, Brain } from 'lucide-react';
 
-const highlights = [
-  { icon: TrendingUp, text: 'Real-time sales analytics' },
-  { icon: Brain, text: 'Advanced AI predictions' },
-  { icon: ShieldCheck, text: 'Automatic anomaly detection' },
-];
-
 export default function RegisterPage() {
+  const { t } = useLanguage();
   const router = useRouter();
   const [form, setForm] = useState({ name: '', email: '', company: '', password: '', confirm: '' });
   const [showPwd, setShowPwd] = useState(false);
   const [loading, setLoading] = useState(false);
 
+  const highlights = [
+    { icon: TrendingUp, text: t('register.realTimeAnalytics') || t('login.realTimeAnalytics') },
+    { icon: Brain, text: t('register.aiPredictions') || t('login.aiPredictions') },
+    { icon: ShieldCheck, text: t('register.anomalyDetection') || t('login.anomalyDetection') },
+  ];
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!form.name || !form.email || !form.password) {
-      toast.error('Please fill in all required fields');
+      toast.error(t('register.fillRequiredFields'));
       return;
     }
     if (form.password !== form.confirm) {
-      toast.error('Passwords do not match');
+      toast.error(t('register.passwordsDoNotMatch'));
       return;
     }
     if (form.password.length < 6) {
-      toast.error('Password must be at least 6 characters');
+      toast.error(t('register.passwordMinLength'));
       return;
     }
     setLoading(true);
     try {
       await register(form.name, form.email, form.password, form.company);
-      toast.success('Account created successfully!');
+      toast.success(t('register.accountCreated'));
       router.push('/dashboard');
     } catch (err) {
-      toast.error(err.message || 'Error creating account');
+      toast.error(err.message || t('register.accountCreateError'));
     } finally {
       setLoading(false);
     }
@@ -60,10 +62,10 @@ export default function RegisterPage() {
 
           <div>
             <h2 className="portal-heading text-3xl leading-tight mb-3">
-              Start growing with <span className="text-amber">AI-powered</span> insights
+              {t('register.startGrowing')}
             </h2>
             <p className="portal-text mb-8">
-              Create your free account. Your data stays private and isolated — only you can see it.
+              {t('register.dataPrivate')}
             </p>
             <div className="space-y-3">
               {highlights.map(({ icon: Icon, text }) => (
@@ -93,13 +95,13 @@ export default function RegisterPage() {
             </div>
           </div>
 
-          <h1 className="portal-heading text-2xl sm:text-3xl mb-2">Create an account</h1>
-          <p className="portal-text mb-8">Start your intelligent business analytics</p>
+          <h1 className="portal-heading text-2xl sm:text-3xl mb-2">{t('register.createAccount')}</h1>
+          <p className="portal-text mb-8">{t('register.startIntelligentAnalytics')}</p>
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="block portal-label mb-2">Full Name</label>
+                <label className="block portal-label mb-2">{t('register.fullName')}</label>
                 <input
                   type="text"
                   value={form.name}
@@ -110,7 +112,7 @@ export default function RegisterPage() {
                 />
               </div>
               <div>
-                <label className="block portal-label mb-2">Company</label>
+                <label className="block portal-label mb-2">{t('register.company')}</label>
                 <input
                   type="text"
                   value={form.company}
@@ -121,7 +123,7 @@ export default function RegisterPage() {
               </div>
             </div>
             <div>
-              <label className="block portal-label mb-2">Email</label>
+              <label className="block portal-label mb-2">{t('register.email')}</label>
               <input
                 type="email"
                 value={form.email}
@@ -132,7 +134,7 @@ export default function RegisterPage() {
               />
             </div>
             <div>
-              <label className="block portal-label mb-2">Password</label>
+              <label className="block portal-label mb-2">{t('register.password')}</label>
               <div className="relative">
                 <input
                   type={showPwd ? 'text' : 'password'}
@@ -153,7 +155,7 @@ export default function RegisterPage() {
               </div>
             </div>
             <div>
-              <label className="block portal-label mb-2">Confirm Password</label>
+              <label className="block portal-label mb-2">{t('register.confirmPassword')}</label>
               <input
                 type="password"
                 value={form.confirm}
@@ -167,20 +169,20 @@ export default function RegisterPage() {
               {loading ? (
                 <>
                   <span className="animate-spin rounded-full h-4 w-4 border-2 border-amber border-t-transparent"></span>
-                  Creating...
+                  {t('register.creating')}
                 </>
               ) : (
                 <>
-                  <CheckCircle size={18} /> Create Account <ArrowRight size={16} />
+                  <CheckCircle size={18} /> {t('register.createAccountBtn')} <ArrowRight size={16} />
                 </>
               )}
             </button>
           </form>
 
           <p className="mt-7 text-center portal-text">
-            Already have an account?{' '}
+            {t('register.haveAccount')}{' '}
             <Link href="/login" className="text-amber hover:text-amber/80 font-semibold transition-colors">
-              Sign in
+              {t('register.signIn')}
             </Link>
           </p>
         </div>

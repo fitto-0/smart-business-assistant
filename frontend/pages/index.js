@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/router";
 import Link from "next/link";
 import { isAuthenticated } from "../lib/auth";
+import { useLanguage } from "../lib/LanguageContext";
 import {
   Menu,
   X,
@@ -12,93 +13,108 @@ import {
   Heart,
   AlertTriangle,
   Lightbulb,
+  Globe,
 } from "lucide-react";
 import GradientWaves from "../components/GradientWaves";
 
 const NAV_LINKS = [
-  { href: "#statement", label: "About" },
-  { href: "#intelligence", label: "Intelligence" },
-  { href: "#how-it-works", label: "How It Works" },
-  { href: "/docs", label: "Docs" },
-  { href: "/contact", label: "Contact" },
+  { href: "#statement", key: "landing.nav.about" },
+  { href: "#intelligence", key: "landing.nav.intelligence" },
+  { href: "#how-it-works", key: "landing.nav.howItWorks" },
+  { href: "/docs", key: "landing.nav.docs" },
+  { href: "/contact", key: "landing.nav.contact" },
 ];
 
 const FEATURES = [
   {
     icon: BarChart3,
-    title: "Sales Analytics",
-    subtitle: "Revenue & KPIs",
-    desc: "Track revenue, orders and product performance in real time with beautiful dashboards.",
+    titleKey: "landing.features.salesAnalytics",
+    subtitleKey: "landing.features.salesAnalyticsSubtitle",
+    descKey: "landing.features.salesAnalyticsDesc",
   },
   {
     icon: Package,
-    title: "Stock Management",
-    subtitle: "Inventory alerts",
-    desc: "Monitor inventory, low-stock warnings and restock alerts before they hurt sales.",
+    titleKey: "landing.features.stockManagement",
+    subtitleKey: "landing.features.stockManagementSubtitle",
+    descKey: "landing.features.stockManagementDesc",
   },
   {
     icon: Brain,
-    title: "AI Predictions",
-    subtitle: "Forecast revenue",
-    desc: "Forecast future revenue with machine learning models trained on your history.",
+    titleKey: "landing.features.aiPredictions",
+    subtitleKey: "landing.features.aiPredictionsSubtitle",
+    descKey: "landing.features.aiPredictionsDesc",
   },
   {
     icon: Heart,
-    title: "Review Sentiment",
-    subtitle: "Understand users",
-    desc: "Understand what customers think with automatic NLP sentiment analysis.",
+    titleKey: "landing.features.reviewSentiment",
+    subtitleKey: "landing.features.reviewSentimentSubtitle",
+    descKey: "landing.features.reviewSentimentDesc",
   },
   {
     icon: AlertTriangle,
-    title: "Anomaly Detection",
-    subtitle: "Detect problems",
-    desc: "Get alerted on stock ruptures and sales drops the moment they happen.",
+    titleKey: "landing.features.anomalyDetection",
+    subtitleKey: "landing.features.anomalyDetectionSubtitle",
+    descKey: "landing.features.anomalyDetectionDesc",
   },
   {
     icon: Lightbulb,
-    title: "Smart Recommendations",
-    subtitle: "Grow your sales",
-    desc: "Actionable AI suggestions to boost sales and optimize your inventory.",
+    titleKey: "landing.features.smartRecommendations",
+    subtitleKey: "landing.features.smartRecommendationsSubtitle",
+    descKey: "landing.features.smartRecommendationsDesc",
   },
 ];
 
 const INTELLIGENCE = [
   {
     number: "01",
-    title: "Sales Intelligence",
-    desc: "Understand your revenue",
+    titleKey: "landing.intelligence.salesIntelligence",
+    descKey: "landing.intelligence.salesIntelligenceDesc",
   },
   {
     number: "02",
-    title: "Predictive Analytics",
-    desc: "Know what happens next",
+    titleKey: "landing.intelligence.predictiveAnalytics",
+    descKey: "landing.intelligence.predictiveAnalyticsDesc",
   },
   {
     number: "03",
-    title: "Customer Sentiment",
-    desc: "Understand your customers",
+    titleKey: "landing.intelligence.customerSentiment",
+    descKey: "landing.intelligence.customerSentimentDesc",
   },
-  { number: "04", title: "Business Alerts", desc: "Detect problems instantly" },
+  { 
+    number: "04", 
+    titleKey: "landing.intelligence.businessAlerts", 
+    descKey: "landing.intelligence.businessAlertsDesc" 
+  },
 ];
 
 const HOW_IT_WORKS = [
-  { number: "01", title: "Upload your data", desc: "Import your sales CSV" },
+  { 
+    number: "01", 
+    titleKey: "landing.howItWorks.uploadData", 
+    descKey: "landing.howItWorks.uploadDataDesc" 
+  },
   {
     number: "02",
-    title: "Let AI analyze",
-    desc: "Automatically detect patterns",
+    titleKey: "landing.howItWorks.letAIAnalyze",
+    descKey: "landing.howItWorks.letAIAnalyzeDesc",
   },
   {
     number: "03",
-    title: "Get insights",
-    desc: "Predictions, anomalies & sentiment",
+    titleKey: "landing.howItWorks.getInsights",
+    descKey: "landing.howItWorks.getInsightsDesc",
   },
-  { number: "04", title: "Take action", desc: "Follow AI recommendations" },
+  { 
+    number: "04", 
+    titleKey: "landing.howItWorks.takeAction", 
+    descKey: "landing.howItWorks.takeActionDesc" 
+  },
 ];
 
 export default function LandingPage() {
   const router = useRouter();
+  const { language, setLanguage, t } = useLanguage();
   const [menuOpen, setMenuOpen] = useState(false);
+  const [showLanguageMenu, setShowLanguageMenu] = useState(false);
   const [scrollProgress, setScrollProgress] = useState(0);
   const [transitionProgress, setTransitionProgress] = useState(0);
   const heroRef = useRef(null);
@@ -182,18 +198,55 @@ export default function LandingPage() {
           <div className="hidden lg:flex items-center gap-8">
             {NAV_LINKS.map((link) => (
               <a key={link.href} href={link.href} className="portal-nav-link">
-                {link.label}
+                {t(link.key)}
               </a>
             ))}
           </div>
 
           {/* Right actions */}
           <div className="flex items-center gap-3">
+            {/* Language Selector */}
+            <div className="relative">
+              <button
+                onClick={() => setShowLanguageMenu(!showLanguageMenu)}
+                className="p-2 rounded-lg border hairline hover:bg-ground-secondary transition-colors flex items-center gap-2"
+              >
+                <Globe size={18} />
+                <span className="hidden sm:inline text-sm">{language.toUpperCase()}</span>
+              </button>
+              
+              {showLanguageMenu && (
+                <div className="absolute right-0 top-full mt-2 bg-ground-secondary border hairline rounded-lg shadow-xl py-2 min-w-[140px] z-50">
+                  <button
+                    onClick={() => { setLanguage('en'); setShowLanguageMenu(false); }}
+                    className={`w-full px-4 py-2 text-left text-sm hover:bg-ground transition-colors flex items-center gap-2 ${language === 'en' ? 'text-amber' : 'text-[#8A8A8A]'}`}
+                  >
+                    <span>🇬🇧</span>
+                    <span>English</span>
+                  </button>
+                  <button
+                    onClick={() => { setLanguage('fr'); setShowLanguageMenu(false); }}
+                    className={`w-full px-4 py-2 text-left text-sm hover:bg-ground transition-colors flex items-center gap-2 ${language === 'fr' ? 'text-amber' : 'text-[#8A8A8A]'}`}
+                  >
+                    <span>🇫🇷</span>
+                    <span>Français</span>
+                  </button>
+                  <button
+                    onClick={() => { setLanguage('ar'); setShowLanguageMenu(false); }}
+                    className={`w-full px-4 py-2 text-left text-sm hover:bg-ground transition-colors flex items-center gap-2 ${language === 'ar' ? 'text-amber' : 'text-[#8A8A8A]'}`}
+                  >
+                    <span>🇸🇦</span>
+                    <span>العربية</span>
+                  </button>
+                </div>
+              )}
+            </div>
+            
             <Link href="/login" className="portal-nav-link">
-              Login
+              {t('landing.nav.login')}
             </Link>
             <Link href="/register" className="portal-pill-btn">
-              Get Started
+              {t('landing.nav.getStarted')}
             </Link>
           </div>
         </div>
@@ -204,16 +257,16 @@ export default function LandingPage() {
             <div className="px-5 py-4 flex flex-col gap-1">
               {[
                 ...NAV_LINKS,
-                { href: "/login", label: "Login" },
-                { href: "/register", label: "Get Started" },
+                { href: "/login", key: "landing.nav.login" },
+                { href: "/register", key: "landing.nav.getStarted" },
               ].map((link) => (
                 <a
-                  key={link.label}
+                  key={link.key || link.href}
                   href={link.href}
                   onClick={() => setMenuOpen(false)}
                   className="px-3 py-2.5 rounded-lg portal-nav-link hover:bg-ground-secondary/50 transition"
                 >
-                  {link.label}
+                  {t(link.key || link.href)}
                 </a>
               ))}
             </div>
@@ -264,7 +317,7 @@ export default function LandingPage() {
                   transform: `translateY(${smoothAnimation * -10}px)`,
                 }}
               >
-                AI-POWERED BUSINESS INTELLIGENCE
+                {t('landing.hero.subtitle')}
               </p>
 
               <h1
@@ -301,7 +354,7 @@ export default function LandingPage() {
                   transform: `translateY(${smoothAnimation * -15}px)`,
                 }}
               >
-                Turn your business data into your next decision.
+                {t('landing.hero.tagline')}
               </p>
             </div>
           </div>
@@ -352,13 +405,13 @@ export default function LandingPage() {
                     <feature.icon size={48} />
                   </div>
                   <h3 className="font-syne font-bold text-2xl lg:text-3xl text-[#F5F5F5] mb-3 group-hover:translate-x-2 transition-transform duration-300">
-                    {feature.title}
+                    {t(feature.titleKey)}
                   </h3>
                   <p className="font-sora text-sm text-[#F5A623] uppercase tracking-wider mb-4">
-                    {feature.subtitle}
+                    {t(feature.subtitleKey)}
                   </p>
                   <p className="font-sora text-[#8A8A8A] leading-relaxed max-w-md">
-                    {feature.desc}
+                    {t(feature.descKey)}
                   </p>
                 </div>
 
@@ -387,11 +440,11 @@ export default function LandingPage() {
                   color: "#F5F5F5",
                 }}
               >
-                Business data shouldn't just tell you what happened.
+                {t('landing.about.heading')}
                 <br />
                 <br />
                 <span style={{ color: "#F5A623" }}>
-                  It should tell you what happens next.
+                  {t('landing.about.subheading')}
                 </span>
               </h2>
 
@@ -402,7 +455,7 @@ export default function LandingPage() {
                     WebkitTextStroke: "2px rgba(245, 166, 35, 0.2)",
                   }}
                 >
-                  Ready?
+                  {t('landing.about.ready')}
                 </p>
               </div>
             </div>
@@ -411,27 +464,26 @@ export default function LandingPage() {
             <div className="lg:col-span-5 lg:pl-16">
               <div className="border-l-2 border-[#F5A623]/30 pl-8">
                 <p className="font-sora text-xl lg:text-2xl text-[#8A8A8A] leading-relaxed">
-                  Smart Business Assistant transforms sales, inventory and
-                  customer data into actionable decisions.
+                  {t('landing.about.description')}
                 </p>
 
                 <div className="mt-8 space-y-4">
                   <div className="flex items-center gap-4">
                     <div className="w-2 h-2 bg-[#F5A623]" />
                     <p className="font-sora text-[#8A8A8A]">
-                      Real-time analytics
+                      {t('landing.about.realTimeAnalytics')}
                     </p>
                   </div>
                   <div className="flex items-center gap-4">
                     <div className="w-2 h-2 bg-[#F5A623]" />
                     <p className="font-sora text-[#8A8A8A]">
-                      AI-powered predictions
+                      {t('landing.about.aiPoweredPredictions')}
                     </p>
                   </div>
                   <div className="flex items-center gap-4">
                     <div className="w-2 h-2 bg-[#F5A623]" />
                     <p className="font-sora text-[#8A8A8A]">
-                      Actionable insights
+                      {t('landing.about.actionableInsights')}
                     </p>
                   </div>
                 </div>
@@ -461,10 +513,10 @@ export default function LandingPage() {
                   </p>
                   <div>
                     <h3 className="font-syne font-bold text-2xl lg:text-3xl text-[#F5F5F5] mb-3 group-hover:translate-x-2 transition-transform duration-300">
-                      {item.title}
+                      {t(item.titleKey)}
                     </h3>
                     <p className="font-sora text-[#8A8A8A] leading-relaxed">
-                      {item.desc}
+                      {t(item.descKey)}
                     </p>
                   </div>
                 </div>
@@ -493,10 +545,10 @@ export default function LandingPage() {
                   {item.number}
                 </p>
                 <h3 className="font-syne font-bold text-xl lg:text-2xl text-[#F5F5F5] mb-3 group-hover:translate-x-2 transition-transform duration-300">
-                  {item.title}
+                  {t(item.titleKey)}
                 </h3>
                 <p className="font-sora text-[#8A8A8A] leading-relaxed">
-                  {item.desc}
+                  {t(item.descKey)}
                 </p>
                 <div className="absolute bottom-0 left-0 h-0.5 bg-[#F5A623] w-0 group-hover:w-full transition-all duration-500" />
               </div>
@@ -509,18 +561,17 @@ export default function LandingPage() {
       <section className="py-32 px-5 border-t border-white/10">
         <div className="max-w-4xl mx-auto text-center">
           <h2 className="font-syne font-extrabold text-[clamp(2rem,6vw,5rem)] leading-[0.9] tracking-tight text-[#F5F5F5] mb-8">
-            Ready to transform your business?
+            {t('landing.cta.heading')}
           </h2>
           <p className="font-sora text-xl text-[#8A8A8A] mb-12 max-w-2xl mx-auto">
-            Start using AI-powered business intelligence today and make
-            data-driven decisions that grow your business.
+            {t('landing.cta.description')}
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link
               href="/register"
               className="group inline-flex items-center justify-center gap-2 bg-[#F5A623] text-[#080808] px-10 py-4 rounded-sm font-sora font-semibold text-sm tracking-wider uppercase transition-all duration-300 hover:bg-[#E8913C] hover:translate-x-2"
             >
-              Get Started{" "}
+              {t('landing.cta.getStarted')}{" "}
               <ArrowRight
                 size={16}
                 className="group-hover:translate-x-1 transition-transform"
@@ -530,7 +581,7 @@ export default function LandingPage() {
               href="/login"
               className="inline-flex items-center justify-center border border-white/20 text-white px-10 py-4 rounded-sm font-sora font-semibold text-sm tracking-wider uppercase transition-all duration-300 hover:bg-white/5 hover:border-white/40"
             >
-              Login
+              {t('landing.cta.login')}
             </Link>
           </div>
         </div>
@@ -540,17 +591,17 @@ export default function LandingPage() {
       <footer className="portal-footer-strip px-5">
         <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
           <p className="portal-label">
-            © {new Date().getFullYear()} Smart Business Assistant
+            {t('landing.footer.copyright').replace('{year}', new Date().getFullYear())}
           </p>
           <div className="flex gap-6">
             <Link href="/privacy" className="portal-nav-link">
-              Privacy
+              {t('landing.footer.privacy')}
             </Link>
             <Link href="/terms" className="portal-nav-link">
-              Terms
+              {t('landing.footer.terms')}
             </Link>
             <Link href="/contact" className="portal-nav-link">
-              Contact
+              {t('landing.footer.contact')}
             </Link>
           </div>
         </div>

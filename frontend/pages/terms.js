@@ -1,7 +1,12 @@
 import Head from 'next/head';
 import Link from 'next/link';
+import { useState } from 'react';
+import { useLanguage } from '../lib/LanguageContext';
+import { Globe } from 'lucide-react';
 
 export default function TermsPage() {
+  const { t, language, setLanguage } = useLanguage();
+  const [showLanguageMenu, setShowLanguageMenu] = useState(false);
   return (
     <>
       <Head>
@@ -17,11 +22,47 @@ export default function TermsPage() {
               Smart Business
             </Link>
             <div className="flex items-center gap-6">
+              {/* Language Selector */}
+              <div className="relative">
+                <button
+                  onClick={() => setShowLanguageMenu(!showLanguageMenu)}
+                  className="p-2 rounded-lg border hairline hover:bg-ground-secondary transition-colors flex items-center gap-2"
+                >
+                  <Globe size={18} />
+                  <span className="hidden sm:inline text-sm">{language.toUpperCase()}</span>
+                </button>
+                
+                {showLanguageMenu && (
+                  <div className="absolute right-0 top-full mt-2 bg-ground-secondary border hairline rounded-lg shadow-xl py-2 min-w-[140px] z-50">
+                    <button
+                      onClick={() => { setLanguage('en'); setShowLanguageMenu(false); }}
+                      className={`w-full px-4 py-2 text-left text-sm hover:bg-ground transition-colors flex items-center gap-2 ${language === 'en' ? 'text-amber' : 'text-[#8A8A8A]'}`}
+                    >
+                      <span>🇬🇧</span>
+                      <span>English</span>
+                    </button>
+                    <button
+                      onClick={() => { setLanguage('fr'); setShowLanguageMenu(false); }}
+                      className={`w-full px-4 py-2 text-left text-sm hover:bg-ground transition-colors flex items-center gap-2 ${language === 'fr' ? 'text-amber' : 'text-[#8A8A8A]'}`}
+                    >
+                      <span>🇫🇷</span>
+                      <span>Français</span>
+                    </button>
+                    <button
+                      onClick={() => { setLanguage('ar'); setShowLanguageMenu(false); }}
+                      className={`w-full px-4 py-2 text-left text-sm hover:bg-ground transition-colors flex items-center gap-2 ${language === 'ar' ? 'text-amber' : 'text-[#8A8A8A]'}`}
+                    >
+                      <span>🇸🇦</span>
+                      <span>العربية</span>
+                    </button>
+                  </div>
+                )}
+              </div>
               <Link href="/" className="portal-nav-link">
-                Home
+                {t('contact.home')}
               </Link>
               <Link href="/login" className="portal-pill-btn">
-                Login
+                {t('contact.login')}
               </Link>
             </div>
           </div>

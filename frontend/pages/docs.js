@@ -1,78 +1,79 @@
 import Head from 'next/head';
 import Link from 'next/link';
 import { useState } from 'react';
-import { ArrowRight, Book, Zap, Shield, Database, Cpu, BarChart3, ChevronRight, Search } from 'lucide-react';
+import { useLanguage } from '../lib/LanguageContext';
+import { ArrowRight, Book, Zap, Shield, Database, Cpu, BarChart3, ChevronRight, Search, Globe } from 'lucide-react';
 
 export default function DocsPage() {
+  const { t, language, setLanguage } = useLanguage();
   const [activeSection, setActiveSection] = useState('getting-started');
   const [searchQuery, setSearchQuery] = useState('');
+  const [showLanguageMenu, setShowLanguageMenu] = useState(false);
 
   const sections = [
-    { id: 'getting-started', title: 'Getting Started', icon: Book },
-    { id: 'features', title: 'Features', icon: Zap },
-    { id: 'sales', title: 'Sales Analytics', icon: BarChart3 },
-    { id: 'inventory', title: 'Inventory Management', icon: Database },
-    { id: 'ai', title: 'AI Features', icon: Cpu },
-    { id: 'security', title: 'Security', icon: Shield },
+    { id: 'getting-started', title: t('docs.gettingStarted'), icon: Book },
+    { id: 'features', title: t('docs.features'), icon: Zap },
+    { id: 'sales', title: t('docs.salesAnalytics'), icon: BarChart3 },
+    { id: 'inventory', title: t('docs.inventory'), icon: Database },
+    { id: 'ai', title: t('docs.aiFeatures'), icon: Cpu },
+    { id: 'security', title: t('docs.security'), icon: Shield },
   ];
 
   const content = {
     'getting-started': {
-      title: 'Getting Started',
+      title: t('docs.gettingStarted'),
       content: (
         <div className="space-y-8">
           <div>
-            <h3 className="portal-heading text-xl mb-4">Welcome to Smart Business Assistant</h3>
+            <h3 className="portal-heading text-xl mb-4">{t('docs.welcome')}</h3>
             <p className="portal-text">
-              Smart Business Assistant is an AI-powered platform that helps you manage your business data, 
-              analyze sales trends, and make data-driven decisions. This guide will help you get started 
-              with the platform.
+              {t('docs.welcomeDescription')}
             </p>
           </div>
 
           <div>
-            <h4 className="portal-heading text-lg mb-3">Creating an Account</h4>
+            <h4 className="portal-heading text-lg mb-3">{t('docs.creatingAccount')}</h4>
             <ol className="space-y-3 portal-text">
               <li className="flex gap-3">
                 <span className="text-[#F5A623] font-bold">1.</span>
-                <span>Click the "Get Started" button on the landing page</span>
+                <span>{t('docs.step1')}</span>
               </li>
               <li className="flex gap-3">
                 <span className="text-[#F5A623] font-bold">2.</span>
-                <span>Fill in your email, name, and create a password</span>
+                <span>{t('docs.step2')}</span>
               </li>
               <li className="flex gap-3">
                 <span className="text-[#F5A623] font-bold">3.</span>
-                <span>Verify your email address</span>
+                <span>{t('docs.step3')}</span>
               </li>
               <li className="flex gap-3">
                 <span className="text-[#F5A623] font-bold">4.</span>
-                <span>Log in to access your dashboard</span>
+                <span>{t('docs.step4')}</span>
               </li>
             </ol>
           </div>
 
           <div>
-            <h4 className="portal-heading text-lg mb-3">Dashboard Overview</h4>
+            <h4 className="portal-heading text-lg mb-3">{t('docs.dashboardOverview')}</h4>
             <p className="portal-text mb-4">
-              After logging in, you'll see the main dashboard with:
+              {t('docs.dashboardDescription')}
             </p>
             <ul className="space-y-2 portal-text">
               <li className="flex items-start gap-2">
                 <ChevronRight size={16} className="text-[#F5A623] mt-0.5 flex-shrink-0" />
-                <span><strong>Sales Analytics:</strong> Revenue charts and KPIs</span>
+                <span><strong>{t('docs.salesAnalyticsFeature')}</strong></span>
               </li>
               <li className="flex items-start gap-2">
                 <ChevronRight size={16} className="text-[#F5A623] mt-0.5 flex-shrink-0" />
-                <span><strong>Products:</strong> Inventory management and stock levels</span>
+                <span><strong>{t('docs.productsFeature')}</strong></span>
               </li>
               <li className="flex items-start gap-2">
                 <ChevronRight size={16} className="text-[#F5A623] mt-0.5 flex-shrink-0" />
-                <span><strong>AI Chatbot:</strong> Ask questions about your business data</span>
+                <span><strong>{t('docs.aiChatbot')}</strong></span>
               </li>
               <li className="flex items-start gap-2">
                 <ChevronRight size={16} className="text-[#F5A623] mt-0.5 flex-shrink-0" />
-                <span><strong>CSV Import:</strong> Bulk import products from CSV files</span>
+                <span><strong>{t('docs.csvImport')}</strong></span>
               </li>
             </ul>
           </div>
@@ -80,62 +81,56 @@ export default function DocsPage() {
       ),
     },
     'features': {
-      title: 'Features',
+      title: t('docs.features'),
       content: (
         <div className="space-y-8">
           <div>
-            <h3 className="portal-heading text-xl mb-4">Platform Features</h3>
+            <h3 className="portal-heading text-xl mb-4">{t('docs.platformFeatures')}</h3>
             <p className="portal-text">
-              Smart Business Assistant offers a comprehensive suite of tools to help you manage 
-              and grow your business.
+              {t('docs.featuresDescription')}
             </p>
           </div>
 
           <div className="grid gap-6">
             <div className="bg-[#111111] border border-white/10 rounded-lg p-6">
-              <h4 className="portal-heading text-lg mb-2">Sales Analytics</h4>
+              <h4 className="portal-heading text-lg mb-2">{t('docs.salesAnalytics')}</h4>
               <p className="portal-text">
-                Track revenue, orders, and product performance in real-time with beautiful dashboards 
-                and interactive charts.
+                {t('docs.salesAnalyticsDesc')}
               </p>
             </div>
 
             <div className="bg-[#111111] border border-white/10 rounded-lg p-6">
-              <h4 className="portal-heading text-lg mb-2">Stock Management</h4>
+              <h4 className="portal-heading text-lg mb-2">{t('docs.stockManagement')}</h4>
               <p className="portal-text">
-                Monitor inventory levels, receive low-stock warnings, and get restock alerts before 
-                they impact your sales.
+                {t('docs.stockManagementDesc')}
               </p>
             </div>
 
             <div className="bg-[#111111] border border-white/10 rounded-lg p-6">
-              <h4 className="portal-heading text-lg mb-2">AI Predictions</h4>
+              <h4 className="portal-heading text-lg mb-2">{t('docs.aiPredictionsFeature')}</h4>
               <p className="portal-text">
-                Forecast future revenue with machine learning models trained on your historical data.
+                {t('docs.aiPredictionsDesc')}
               </p>
             </div>
 
             <div className="bg-[#111111] border border-white/10 rounded-lg p-6">
-              <h4 className="portal-heading text-lg mb-2">Review Sentiment</h4>
+              <h4 className="portal-heading text-lg mb-2">{t('docs.reviewSentiment')}</h4>
               <p className="portal-text">
-                Understand what customers think with automatic NLP sentiment analysis of reviews 
-                and feedback.
+                {t('docs.reviewSentimentDesc')}
               </p>
             </div>
 
             <div className="bg-[#111111] border border-white/10 rounded-lg p-6">
-              <h4 className="portal-heading text-lg mb-2">Anomaly Detection</h4>
+              <h4 className="portal-heading text-lg mb-2">{t('docs.anomalyDetectionFeature')}</h4>
               <p className="portal-text">
-                Get alerted on stock ruptures and sales drops the moment they happen with real-time 
-                monitoring.
+                {t('docs.anomalyDetectionDesc')}
               </p>
             </div>
 
             <div className="bg-[#111111] border border-white/10 rounded-lg p-6">
-              <h4 className="portal-heading text-lg mb-2">Smart Recommendations</h4>
+              <h4 className="portal-heading text-lg mb-2">{t('docs.smartRecommendations')}</h4>
               <p className="portal-text">
-                Receive actionable AI suggestions to boost sales and optimize your inventory based 
-                on data patterns.
+                {t('docs.smartRecommendationsDesc')}
               </p>
             </div>
           </div>
@@ -143,85 +138,85 @@ export default function DocsPage() {
       ),
     },
     'sales': {
-      title: 'Sales Analytics',
+      title: t('docs.salesAnalytics'),
       content: (
         <div className="space-y-8">
           <div>
-            <h3 className="portal-heading text-xl mb-4">Sales Analytics</h3>
+            <h3 className="portal-heading text-xl mb-4">{t('docs.salesAnalytics')}</h3>
             <p className="portal-text">
-              The Sales Analytics dashboard provides comprehensive insights into your business performance.
+              {t('docs.salesAnalyticsDesc')}
             </p>
           </div>
 
           <div>
-            <h4 className="portal-heading text-lg mb-3">Key Metrics</h4>
+            <h4 className="portal-heading text-lg mb-3">{t('docs.keyMetrics')}</h4>
             <ul className="space-y-2 portal-text">
               <li className="flex items-start gap-2">
                 <ChevronRight size={16} className="text-[#F5A623] mt-0.5 flex-shrink-0" />
-                <span><strong>Total Revenue:</strong> Overall sales revenue for selected period</span>
+                <span><strong>{t('docs.totalRevenue')}</strong></span>
               </li>
               <li className="flex items-start gap-2">
                 <ChevronRight size={16} className="text-[#F5A623] mt-0.5 flex-shrink-0" />
-                <span><strong>Total Orders:</strong> Number of orders processed</span>
+                <span><strong>{t('docs.totalOrders')}</strong></span>
               </li>
               <li className="flex items-start gap-2">
                 <ChevronRight size={16} className="text-[#F5A623] mt-0.5 flex-shrink-0" />
-                <span><strong>Average Order Value:</strong> Average revenue per order</span>
+                <span><strong>{t('docs.avgOrderValue')}</strong></span>
               </li>
               <li className="flex items-start gap-2">
                 <ChevronRight size={16} className="text-[#F5A623] mt-0.5 flex-shrink-0" />
-                <span><strong>Top Products:</strong> Best-selling products by revenue</span>
+                <span><strong>{t('docs.topProducts')}</strong></span>
               </li>
             </ul>
           </div>
 
           <div>
-            <h4 className="portal-heading text-lg mb-3">Recording Sales</h4>
+            <h4 className="portal-heading text-lg mb-3">{t('docs.recordingSales')}</h4>
             <ol className="space-y-3 portal-text">
               <li className="flex gap-3">
                 <span className="text-[#F5A623] font-bold">1.</span>
-                <span>Navigate to the Sales page</span>
+                <span>{t('docs.navigateSales')}</span>
               </li>
               <li className="flex gap-3">
                 <span className="text-[#F5A623] font-bold">2.</span>
-                <span>Click "Record Sale" button</span>
+                <span>{t('docs.clickRecordSale')}</span>
               </li>
               <li className="flex gap-3">
                 <span className="text-[#F5A623] font-bold">3.</span>
-                <span>Select product from inventory</span>
+                <span>{t('docs.selectProduct')}</span>
               </li>
               <li className="flex gap-3">
                 <span className="text-[#F5A623] font-bold">4.</span>
-                <span>Enter quantity, price, and date</span>
+                <span>{t('docs.enterDetails')}</span>
               </li>
               <li className="flex gap-3">
                 <span className="text-[#F5A623] font-bold">5.</span>
-                <span>Click "Save" to record the transaction</span>
+                <span>{t('docs.clickSave')}</span>
               </li>
             </ol>
           </div>
 
           <div>
-            <h4 className="portal-heading text-lg mb-3">Time Periods</h4>
+            <h4 className="portal-heading text-lg mb-3">{t('docs.timePeriods')}</h4>
             <p className="portal-text mb-4">
-              Filter your sales data by different time periods:
+              {t('docs.filterPeriods')}
             </p>
             <ul className="space-y-2 portal-text">
               <li className="flex items-start gap-2">
                 <ChevronRight size={16} className="text-[#F5A623] mt-0.5 flex-shrink-0" />
-                <span><strong>Last 7 days:</strong> Recent sales trends</span>
+                <span><strong>{t('docs.last7Days')}</strong></span>
               </li>
               <li className="flex items-start gap-2">
                 <ChevronRight size={16} className="text-[#F5A623] mt-0.5 flex-shrink-0" />
-                <span><strong>Last 30 days:</strong> Monthly performance</span>
+                <span><strong>{t('docs.last30Days')}</strong></span>
               </li>
               <li className="flex items-start gap-2">
                 <ChevronRight size={16} className="text-[#F5A623] mt-0.5 flex-shrink-0" />
-                <span><strong>Last 90 days:</strong> Quarterly overview</span>
+                <span><strong>{t('docs.last90Days')}</strong></span>
               </li>
               <li className="flex items-start gap-2">
                 <ChevronRight size={16} className="text-[#F5A623] mt-0.5 flex-shrink-0" />
-                <span><strong>Custom range:</strong> Select specific dates</span>
+                <span><strong>{t('docs.customRange')}</strong></span>
               </li>
             </ul>
           </div>
@@ -229,22 +224,22 @@ export default function DocsPage() {
       ),
     },
     'inventory': {
-      title: 'Inventory Management',
+      title: t('docs.inventory'),
       content: (
         <div className="space-y-8">
           <div>
-            <h3 className="portal-heading text-xl mb-4">Inventory Management</h3>
+            <h3 className="portal-heading text-xl mb-4">{t('docs.inventoryManagement')}</h3>
             <p className="portal-text">
-              Manage your product inventory efficiently with our comprehensive inventory system.
+              {t('docs.inventoryDescription')}
             </p>
           </div>
 
           <div>
-            <h4 className="portal-heading text-lg mb-3">Adding Products</h4>
+            <h4 className="portal-heading text-lg mb-3">{t('docs.addingProducts')}</h4>
             <ol className="space-y-3 portal-text">
               <li className="flex gap-3">
                 <span className="text-[#F5A623] font-bold">1.</span>
-                <span>Go to the Products page</span>
+                <span>{t('docs.goToProducts')}</span>
               </li>
               <li className="flex gap-3">
                 <span className="text-[#F5A623] font-bold">2.</span>
@@ -252,221 +247,199 @@ export default function DocsPage() {
               </li>
               <li className="flex gap-3">
                 <span className="text-[#F5A623] font-bold">3.</span>
-                <span>Fill in product details (name, category, price, stock)</span>
+                <span>Fill in product details (name, price, stock, category)</span>
               </li>
               <li className="flex gap-3">
                 <span className="text-[#F5A623] font-bold">4.</span>
-                <span>Click "Save" to add to inventory</span>
+                <span>Click "Save" to add the product</span>
               </li>
             </ol>
           </div>
 
           <div>
-            <h4 className="portal-heading text-lg mb-3">CSV Import</h4>
+            <h4 className="portal-heading text-lg mb-3">{t('docs.csvImport')}</h4>
             <p className="portal-text mb-4">
-              Bulk import products from CSV files to save time:
+              {t('docs.csvImportDesc')}:
             </p>
             <ol className="space-y-3 portal-text">
               <li className="flex gap-3">
                 <span className="text-[#F5A623] font-bold">1.</span>
-                <span>Prepare CSV with columns: name, category, price, stock</span>
+                <span>{t('docs.csvStep1')}</span>
               </li>
               <li className="flex gap-3">
                 <span className="text-[#F5A623] font-bold">2.</span>
-                <span>Click "Import CSV" on Products page</span>
+                <span>{t('docs.csvStep2')}</span>
               </li>
               <li className="flex gap-3">
                 <span className="text-[#F5A623] font-bold">3.</span>
-                <span>Select your CSV file</span>
+                <span>{t('docs.csvStep3')}</span>
               </li>
               <li className="flex gap-3">
                 <span className="text-[#F5A623] font-bold">4.</span>
-                <span>Review AI analysis and import suggestions</span>
+                <span>{t('docs.csvStep4')}</span>
               </li>
               <li className="flex gap-3">
                 <span className="text-[#F5A623] font-bold">5.</span>
-                <span>Confirm import to add products</span>
+                <span>{t('docs.csvStep5')}</span>
               </li>
             </ol>
           </div>
 
           <div>
-            <h4 className="portal-heading text-lg mb-3">Product Categories</h4>
-            <p className="portal-text mb-4">
-              Supported product categories:
-            </p>
-            <div className="grid grid-cols-2 gap-3">
-              {['Electronics', 'Clothing', 'Food', 'Home', 'Sports', 'Other'].map((cat) => (
-                <div key={cat} className="bg-[#111111] border border-white/10 rounded px-3 py-2 text-sm text-gray-400">
-                  {cat}
-                </div>
-              ))}
-            </div>
-          </div>
-
-          <div>
-            <h4 className="portal-heading text-lg mb-3">Stock Alerts</h4>
+            <h4 className="portal-heading text-lg mb-3">{t('docs.stockAlerts')}</h4>
             <p className="portal-text">
-              The system automatically alerts you when products are running low on stock. 
-              Set minimum stock levels for each product to receive timely notifications.
+              {t('docs.stockAlertsDesc')}
             </p>
           </div>
         </div>
       ),
     },
     'ai': {
-      title: 'AI Features',
+      title: t('docs.aiFeatures'),
       content: (
         <div className="space-y-8">
           <div>
-            <h3 className="portal-heading text-xl mb-4">AI-Powered Features</h3>
+            <h3 className="portal-heading text-xl mb-4">{t('docs.aiPoweredFeatures')}</h3>
             <p className="portal-text">
-              Leverage artificial intelligence to gain deeper insights into your business data.
+              {t('docs.aiIntro')}
             </p>
           </div>
 
           <div>
-            <h4 className="portal-heading text-lg mb-3">AI Chatbot</h4>
+            <h4 className="portal-heading text-lg mb-3">{t('docs.aiChatbot')}</h4>
             <p className="portal-text mb-4">
-              Ask questions about your business data in natural language:
+              {t('docs.aiChatbotDesc')}:
             </p>
             <ul className="space-y-2 portal-text">
               <li className="flex items-start gap-2">
                 <ChevronRight size={16} className="text-[#F5A623] mt-0.5 flex-shrink-0" />
-                <span>"What are my top-selling products?"</span>
+                <span>"{t('docs.example1')}"</span>
               </li>
               <li className="flex items-start gap-2">
                 <ChevronRight size={16} className="text-[#F5A623] mt-0.5 flex-shrink-0" />
-                <span>"How much revenue did I make last month?"</span>
+                <span>"{t('docs.example2')}"</span>
               </li>
               <li className="flex items-start gap-2">
                 <ChevronRight size={16} className="text-[#F5A623] mt-0.5 flex-shrink-0" />
-                <span>"Which products are low on stock?"</span>
+                <span>"{t('docs.example3')}"</span>
               </li>
               <li className="flex items-start gap-2">
                 <ChevronRight size={16} className="text-[#F5A623] mt-0.5 flex-shrink-0" />
-                <span>"Predict next month's revenue"</span>
+                <span>"{t('docs.example4')}"</span>
               </li>
             </ul>
           </div>
 
           <div>
-            <h4 className="portal-heading text-lg mb-3">CSV Analysis</h4>
+            <h4 className="portal-heading text-lg mb-3">{t('docs.csvAnalysis')}</h4>
             <p className="portal-text mb-4">
-              When importing CSV files, our AI analyzes the data and provides:
+              {t('docs.csvAnalysisDesc')}:
             </p>
             <ul className="space-y-2 portal-text">
               <li className="flex items-start gap-2">
                 <ChevronRight size={16} className="text-[#F5A623] mt-0.5 flex-shrink-0" />
-                <span>Data quality assessment</span>
+                <span>{t('docs.dataQuality')}</span>
               </li>
               <li className="flex items-start gap-2">
                 <ChevronRight size={16} className="text-[#F5A623] mt-0.5 flex-shrink-0" />
-                <span>Category suggestions</span>
+                <span>{t('docs.categorySuggestions')}</span>
               </li>
               <li className="flex items-start gap-2">
                 <ChevronRight size={16} className="text-[#F5A623] mt-0.5 flex-shrink-0" />
-                <span>Price recommendations</span>
+                <span>{t('docs.priceRecommendations')}</span>
               </li>
               <li className="flex items-start gap-2">
                 <ChevronRight size={16} className="text-[#F5A623] mt-0.5 flex-shrink-0" />
-                <span>Anomaly detection</span>
+                <span>{t('docs.anomalyDetection')}</span>
               </li>
             </ul>
           </div>
 
           <div>
-            <h4 className="portal-heading text-lg mb-3">Revenue Predictions</h4>
+            <h4 className="portal-heading text-lg mb-3">{t('docs.revenuePredictions')}</h4>
             <p className="portal-text">
-              Our machine learning models analyze your historical sales data to forecast 
-              future revenue trends. These predictions help you make informed business 
-              decisions and plan accordingly.
+              {t('docs.revenuePredictionsDesc')}
             </p>
           </div>
 
           <div>
-            <h4 className="portal-heading text-lg mb-3">Sentiment Analysis</h4>
+            <h4 className="portal-heading text-lg mb-3">{t('docs.sentimentAnalysis')}</h4>
             <p className="portal-text">
-              Automatically analyze customer reviews and feedback to understand sentiment 
-              trends. Identify areas for improvement and track customer satisfaction over time.
+              {t('docs.sentimentAnalysisDesc')}
             </p>
           </div>
         </div>
       ),
     },
     'security': {
-      title: 'Security',
+      title: t('docs.security'),
       content: (
         <div className="space-y-8">
           <div>
-            <h3 className="portal-heading text-xl mb-4">Security & Privacy</h3>
+            <h3 className="portal-heading text-xl mb-4">{t('docs.securityPrivacy')}</h3>
             <p className="portal-text">
-              Your data security is our top priority. Learn about our security measures 
-              and how we protect your information.
+              {t('docs.securityIntro')}
             </p>
           </div>
 
           <div>
-            <h4 className="portal-heading text-lg mb-3">Data Protection</h4>
+            <h4 className="portal-heading text-lg mb-3">{t('docs.dataProtection')}</h4>
             <ul className="space-y-2 portal-text">
               <li className="flex items-start gap-2">
                 <ChevronRight size={16} className="text-[#F5A623] mt-0.5 flex-shrink-0" />
-                <span><strong>Encryption:</strong> All data is encrypted at rest and in transit</span>
+                <span><strong>{t('docs.encryption')}:</strong> {t('docs.encryptionDesc')}</span>
               </li>
               <li className="flex items-start gap-2">
                 <ChevronRight size={16} className="text-[#F5A623] mt-0.5 flex-shrink-0" />
-                <span><strong>Authentication:</strong> JWT-based secure authentication</span>
+                <span><strong>{t('docs.authentication')}:</strong> {t('docs.authenticationDesc')}</span>
               </li>
               <li className="flex items-start gap-2">
                 <ChevronRight size={16} className="text-[#F5A623] mt-0.5 flex-shrink-0" />
-                <span><strong>User Isolation:</strong> Each user's data is completely isolated</span>
+                <span><strong>{t('docs.userIsolation')}:</strong> {t('docs.userIsolationDesc')}</span>
               </li>
               <li className="flex items-start gap-2">
                 <ChevronRight size={16} className="text-[#F5A623] mt-0.5 flex-shrink-0" />
-                <span><strong>Secure APIs:</strong> All API endpoints are protected</span>
+                <span><strong>{t('docs.secureApis')}:</strong> {t('docs.secureApisDesc')}</span>
               </li>
             </ul>
           </div>
 
           <div>
-            <h4 className="portal-heading text-lg mb-3">Account Security</h4>
+            <h4 className="portal-heading text-lg mb-3">{t('docs.accountSecurity')}</h4>
             <p className="portal-text mb-4">
-              Best practices for keeping your account secure:
+              {t('docs.accountSecurityDesc')}:
             </p>
             <ul className="space-y-2 portal-text">
               <li className="flex items-start gap-2">
                 <ChevronRight size={16} className="text-[#F5A623] mt-0.5 flex-shrink-0" />
-                <span>Use a strong, unique password</span>
+                <span>{t('docs.securityTip1')}</span>
               </li>
               <li className="flex items-start gap-2">
                 <ChevronRight size={16} className="text-[#F5A623] mt-0.5 flex-shrink-0" />
-                <span>Don't share your login credentials</span>
+                <span>{t('docs.securityTip2')}</span>
               </li>
               <li className="flex items-start gap-2">
                 <ChevronRight size={16} className="text-[#F5A623] mt-0.5 flex-shrink-0" />
-                <span>Log out after each session</span>
+                <span>{t('docs.securityTip3')}</span>
               </li>
               <li className="flex items-start gap-2">
                 <ChevronRight size={16} className="text-[#F5A623] mt-0.5 flex-shrink-0" />
-                <span>Keep your browser updated</span>
+                <span>{t('docs.securityTip4')}</span>
               </li>
             </ul>
           </div>
 
           <div>
-            <h4 className="portal-heading text-lg mb-3">Privacy Policy</h4>
+            <h4 className="portal-heading text-lg mb-3">{t('docs.privacyPolicy')}</h4>
             <p className="portal-text">
-              We do not sell or share your data with third parties. Your business data 
-              remains yours alone. We only use data to provide and improve our services.
+              {t('docs.privacyPolicyDesc')}
             </p>
           </div>
 
           <div>
-            <h4 className="portal-heading text-lg mb-3">Data Retention</h4>
+            <h4 className="portal-heading text-lg mb-3">{t('docs.dataRetention')}</h4>
             <p className="portal-text">
-              You can delete your account and all associated data at any time through 
-              the profile settings. Upon deletion, all data is permanently removed 
-              from our systems.
+              {t('docs.dataRetentionDesc')}
             </p>
           </div>
         </div>
@@ -481,8 +454,8 @@ export default function DocsPage() {
   return (
     <>
       <Head>
-        <title>Documentation - Smart Business Assistant</title>
-        <meta name="description" content="Documentation for Smart Business Assistant" />
+        <title>{t('docs.title')} - Smart Business Assistant</title>
+        <meta name="description" content={t('docs.title')} />
       </Head>
 
       <div className="min-h-screen bg-[#080808]">
@@ -493,11 +466,47 @@ export default function DocsPage() {
               Smart Business
             </Link>
             <div className="flex items-center gap-6">
+              {/* Language Selector */}
+              <div className="relative">
+                <button
+                  onClick={() => setShowLanguageMenu(!showLanguageMenu)}
+                  className="p-2 rounded-lg border hairline hover:bg-ground-secondary transition-colors flex items-center gap-2"
+                >
+                  <Globe size={18} />
+                  <span className="hidden sm:inline text-sm">{language.toUpperCase()}</span>
+                </button>
+                
+                {showLanguageMenu && (
+                  <div className="absolute right-0 top-full mt-2 bg-ground-secondary border hairline rounded-lg shadow-xl py-2 min-w-[140px] z-50">
+                    <button
+                      onClick={() => { setLanguage('en'); setShowLanguageMenu(false); }}
+                      className={`w-full px-4 py-2 text-left text-sm hover:bg-ground transition-colors flex items-center gap-2 ${language === 'en' ? 'text-amber' : 'text-[#8A8A8A]'}`}
+                    >
+                      <span>🇬🇧</span>
+                      <span>English</span>
+                    </button>
+                    <button
+                      onClick={() => { setLanguage('fr'); setShowLanguageMenu(false); }}
+                      className={`w-full px-4 py-2 text-left text-sm hover:bg-ground transition-colors flex items-center gap-2 ${language === 'fr' ? 'text-amber' : 'text-[#8A8A8A]'}`}
+                    >
+                      <span>🇫🇷</span>
+                      <span>Français</span>
+                    </button>
+                    <button
+                      onClick={() => { setLanguage('ar'); setShowLanguageMenu(false); }}
+                      className={`w-full px-4 py-2 text-left text-sm hover:bg-ground transition-colors flex items-center gap-2 ${language === 'ar' ? 'text-amber' : 'text-[#8A8A8A]'}`}
+                    >
+                      <span>🇸🇦</span>
+                      <span>العربية</span>
+                    </button>
+                  </div>
+                )}
+              </div>
               <Link href="/" className="portal-nav-link">
-                Home
+                {t('contact.home')}
               </Link>
               <Link href="/login" className="portal-pill-btn">
-                Login
+                {t('contact.login')}
               </Link>
             </div>
           </div>
@@ -506,26 +515,28 @@ export default function DocsPage() {
         {/* Hero Section */}
         <section className="pt-32 pb-16 px-5">
           <div className="max-w-7xl mx-auto">
-            <p className="portal-label mb-4">Documentation</p>
+            <p className="portal-label mb-4">{t('docs.title')}</p>
             <h1 className="portal-heading text-5xl lg:text-6xl mb-6">
-              Learn how to use Smart Business Assistant
+              {t('docs.title')}
             </h1>
             <p className="portal-text max-w-2xl">
-              Comprehensive guides to help you get the most out of our platform.
+              {t('docs.welcomeDescription')}
             </p>
+          </div>
+        </section>
 
-            {/* Search */}
-            <div className="mt-8 max-w-md">
-              <div className="relative">
-                <Search size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
-                <input
-                  type="text"
-                  placeholder="Search documentation..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full bg-[#111111] border border-white/10 rounded-lg pl-12 pr-4 py-3 text-white focus:outline-none focus:border-[#F5A623] transition-colors"
-                />
-              </div>
+        {/* Search */}
+        <section className="px-5 pb-8">
+          <div className="max-w-7xl mx-auto">
+            <div className="relative">
+              <Search size={20} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
+              <input
+                type="text"
+                placeholder={t('docs.searchDocs')}
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full bg-[#111111] border border-white/10 rounded-lg pl-12 pr-4 py-3 text-white placeholder-gray-400 focus:outline-none focus:border-[#F5A623] transition-colors"
+              />
             </div>
           </div>
         </section>
@@ -571,11 +582,11 @@ export default function DocsPage() {
         {/* Footer */}
         <footer className="portal-footer-strip px-5 mt-16">
           <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
-            <p className="portal-label"> 2026 Smart Business Assistant</p>
+            <p className="portal-label">© 2026 Smart Business Assistant</p>
             <div className="flex gap-6">
-              <Link href="/privacy" className="portal-nav-link">Privacy</Link>
-              <Link href="/terms" className="portal-nav-link">Terms</Link>
-              <Link href="/contact" className="portal-nav-link">Contact</Link>
+              <Link href="/privacy" className="portal-nav-link">{t('contact.privacy')}</Link>
+              <Link href="/terms" className="portal-nav-link">{t('contact.terms')}</Link>
+              <Link href="/contact" className="portal-nav-link">{t('contact.title')}</Link>
             </div>
           </div>
         </footer>

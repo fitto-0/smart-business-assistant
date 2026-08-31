@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import Layout from "../components/Layout";
 import { apiGet, apiPost } from "../lib/api";
+import { useLanguage } from "../lib/LanguageContext";
 import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from "recharts";
 import { Star, ThumbsUp, ThumbsDown, Minus, MessageSquare, Plus, Upload } from "lucide-react";
 import ReviewForm from "../components/ReviewForm";
@@ -40,6 +41,7 @@ const ScoreBar = ({ score }) => {
 };
 
 export default function ReviewsPage() {
+  const { t } = useLanguage();
   const [reviews, setReviews] = useState([]);
   const [stats, setStats] = useState([]);
   const [averageRating, setAverageRating] = useState(0);
@@ -92,7 +94,7 @@ export default function ReviewsPage() {
     if (!file) return;
 
     if (!file.name.endsWith('.csv')) {
-      toast.error('Please upload a CSV file');
+      toast.error(t('reviews.uploadCSVError'));
       return;
     }
 
@@ -101,7 +103,7 @@ export default function ReviewsPage() {
 
   const handleCSVImport = async () => {
     if (!csvFile) {
-      toast.error('Please select a CSV file first');
+      toast.error(t('reviews.selectCSVError'));
       return;
     }
 
@@ -116,11 +118,11 @@ export default function ReviewsPage() {
         }
       });
 
-      toast.success(`Successfully imported ${response.imported || 0} reviews`);
+      toast.success(t('reviews.importSuccess').replace('{count}', response.imported || 0));
       setCsvFile(null);
       handleReviewAdded();
     } catch (error) {
-      toast.error(error.response?.data?.error || 'Failed to import reviews');
+      toast.error(error.response?.data?.error || t('reviews.importError'));
     } finally {
       setUploading(false);
     }
@@ -160,16 +162,16 @@ export default function ReviewsPage() {
 
   if (loading) {
     return (
-      <Layout title="Customer Reviews">
+      <Layout title={t('reviews.title')}>
         <div className="bg-ground-secondary border hairline rounded-xl text-center py-16 portal-text">
-          Loading reviews…
+          {t('reviews.loading')}
         </div>
       </Layout>
     );
   }
 
   return (
-    <Layout title="Customer Reviews">
+    <Layout title={t('reviews.title')}>
       {/* Action Buttons */}
       <div className="flex gap-3 mb-6">
         <button
@@ -177,7 +179,7 @@ export default function ReviewsPage() {
           className="flex items-center gap-2 px-4 py-2.5 bg-amber text-ground rounded-lg portal-label font-semibold hover:bg-amber/90 transition-colors"
         >
           <Plus size={18} />
-          Add Review
+          {t('reviews.addReview')}
         </button>
         <div className="flex-1" />
         <div className="flex items-center gap-3">
@@ -193,7 +195,7 @@ export default function ReviewsPage() {
             className="flex items-center gap-2 px-4 py-2.5 border hairline rounded-lg portal-label hover:border-amber/50 transition-colors cursor-pointer"
           >
             <Upload size={18} />
-            {csvFile ? csvFile.name : "Import CSV"}
+            {csvFile ? csvFile.name : t('reviews.importCSV')}
           </label>
           {csvFile && (
             <button
@@ -201,7 +203,7 @@ export default function ReviewsPage() {
               disabled={uploading}
               className="px-4 py-2.5 bg-teal text-ground rounded-lg portal-label font-semibold hover:bg-teal/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {uploading ? "Importing..." : "Import"}
+              {uploading ? t('reviews.importing') : t('reviews.import')}
             </button>
           )}
         </div>
@@ -223,7 +225,7 @@ export default function ReviewsPage() {
             <Star size={20} className="text-ground" />
           </div>
           <div>
-            <p className="portal-label">Average Rating</p>
+            <p className="portal-label">{t('reviews.averageRating')}</p>
             <p className="portal-heading text-2xl">
               {averageRating.toFixed(1)}
               <span className="portal-label">/5</span>
@@ -235,7 +237,7 @@ export default function ReviewsPage() {
             <ThumbsUp size={20} className="text-ground" />
           </div>
           <div>
-            <p className="portal-label">Positive Reviews</p>
+            <p className="portal-label">{t('reviews.positiveReviews')}</p>
             <p className="portal-heading text-2xl">
               {stats.find((s) => s.sentiment === "positif")?.count || 0}{" "}
               <span className="portal-label text-teal">
@@ -250,7 +252,7 @@ export default function ReviewsPage() {
             <ThumbsDown size={20} className="text-ground" />
           </div>
           <div>
-            <p className="portal-label">Negative Reviews</p>
+            <p className="portal-label">{t('reviews.negativeReviews')}</p>
             <p className="portal-heading text-2xl">
               {stats.find((s) => s.sentiment === "négatif")?.count || 0}{" "}
               <span className="portal-label text-red-400">
@@ -278,7 +280,7 @@ export default function ReviewsPage() {
         {/* Sentiment Pie */}
         <div className="bg-ground-secondary border hairline rounded-xl p-5 flex flex-col items-center">
           <h3 className="portal-heading text-base mb-1 self-start">
-            Sentiment Distribution
+            {t('reviews.sentimentDistribution')}
           </h3>
           <p className="portal-label mb-4 self-start">
             Automatic NLP analysis
@@ -323,10 +325,10 @@ export default function ReviewsPage() {
         {/* Rating Distribution */}
         <div className="bg-ground-secondary border hairline rounded-xl p-5 xl:col-span-2">
           <h3 className="portal-heading text-base mb-1">
-            Rating Distribution
+            {t('reviews.ratingDistribution')}
           </h3>
           <p className="portal-label mb-5">
-            Customer rating breakdown
+            {t('reviews.customerRatingBreakdown')}
           </p>
           <div className="space-y-3">
             {[5, 4, 3, 2, 1].map((star) => {
@@ -358,10 +360,10 @@ export default function ReviewsPage() {
             <Star size={20} className="text-amber fill-amber flex-shrink-0" />
             <div>
               <p className="portal-heading text-sm">
-                Overall rating: {averageRating.toFixed(1)}/5
+                {t('reviews.overallRating').replace('{rating}', averageRating.toFixed(1))}
               </p>
               <p className="portal-label">
-                Based on {totalReviews} customer reviews
+                {t('reviews.basedOnReviews').replace('{count}', totalReviews)}
               </p>
             </div>
           </div>
@@ -371,7 +373,7 @@ export default function ReviewsPage() {
       {/* Reviews List */}
       <div className="bg-ground-secondary border hairline rounded-xl p-5">
         <h3 className="portal-heading text-base mb-5">
-          All Customer Reviews
+          {t('reviews.allReviews')}
         </h3>
         <div className="space-y-4">
           {reviews.map((review) => (
@@ -386,7 +388,7 @@ export default function ReviewsPage() {
                       {review.customer_name}
                     </p>
                     <p className="portal-label text-muted">
-                      {review.product_name || "Product"}
+                      {review.product_name || t('reviews.product')}
                     </p>
                   </div>
                 </div>
