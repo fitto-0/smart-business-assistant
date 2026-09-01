@@ -4,6 +4,7 @@
 -- ====================================================================
 
 -- Nettoyage (à exécuter avec précaution en production)
+DROP TABLE IF EXISTS notifications CASCADE;
 DROP TABLE IF EXISTS recommendations CASCADE;
 DROP TABLE IF EXISTS anomalies CASCADE;
 DROP TABLE IF EXISTS reviews CASCADE;
@@ -40,6 +41,22 @@ CREATE TABLE users (
 );
 
 CREATE INDEX idx_users_email ON users(email);
+
+-- ===================== TABLE NOTIFICATIONS =====================
+CREATE TABLE notifications (
+    id SERIAL PRIMARY KEY,
+    user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    type VARCHAR(50) NOT NULL CHECK (type IN ('stock_alert', 'sales_alert', 'anomaly', 'recommendation', 'system')),
+    title VARCHAR(255) NOT NULL,
+    message TEXT NOT NULL,
+    read BOOLEAN DEFAULT FALSE,
+    metadata JSONB,
+    created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE INDEX idx_notifications_user ON notifications(user_id);
+CREATE INDEX idx_notifications_user_read ON notifications(user_id, read);
+CREATE INDEX idx_notifications_user_created ON notifications(user_id, created_at DESC);
 
 -- ===================== TABLE LOGIN_LOG =====================
 CREATE TABLE login_log (

@@ -26,8 +26,11 @@ export default function Layout({ children, title = 'Smart Business Assistant' })
   const { language, setLanguage, t } = useLanguage();
   const [user, setUser] = useState(null);
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [notifications] = useState(4);
+  const [notifications, setNotifications] = useState([]);
+  const [unreadCount, setUnreadCount] = useState(0);
   const [showLanguageMenu, setShowLanguageMenu] = useState(false);
+  const [showProfileMenu, setShowProfileMenu] = useState(false);
+  const [showNotificationsMenu, setShowNotificationsMenu] = useState(false);
 
   useEffect(() => {
     const loadUser = async () => {
@@ -45,12 +48,62 @@ export default function Layout({ children, title = 'Smart Business Assistant' })
       }
     };
 
+    const loadNotifications = async () => {
+      try {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'}/api/auth/notifications?unreadOnly=true&limit=5`, {
+          headers: {
+            'Authorization': `Bearer ${document.cookie.replace(/(?:(?:^|.*;\s*)sba_token\s*=\s*([^;]*).*$)|^.*$/, "$1")}`,
+          },
+        });
+        const data = await response.json();
+        setNotifications(data.notifications || []);
+        setUnreadCount(data.notifications?.length || 0);
+      } catch (error) {
+        console.error('Failed to load notifications:', error);
+      }
+    };
+
     loadUser();
+    loadNotifications();
   }, [router]);
 
   const handleLogout = () => {
     logout();
     router.push('/');
+  };
+
+  const handleMarkAsRead = async (notificationId) => {
+    try {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'}/api/auth/notifications/${notificationId}/read`, {
+        method: 'PUT',
+        headers: {
+          'Authorization': `Bearer ${document.cookie.replace(/(?:(?:^|.*;\s*)sba_token\s*=\s*([^;]*).*$)|^.*$/, "$1")}`,
+        },
+      });
+      if (response.ok) {
+        setNotifications(notifications.filter(n => n.id !== notificationId));
+        setUnreadCount(Math.max(0, unreadCount - 1));
+      }
+    } catch (error) {
+      console.error('Failed to mark notification as read:', error);
+    }
+  };
+
+  const handleMarkAllAsRead = async () => {
+    try {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'}/api/auth/notifications/read-all`, {
+        method: 'PUT',
+        headers: {
+          'Authorization': `Bearer ${document.cookie.replace(/(?:(?:^|.*;\s*)sba_token\s*=\s*([^;]*).*$)|^.*$/, "$1")}`,
+        },
+      });
+      if (response.ok) {
+        setNotifications([]);
+        setUnreadCount(0);
+      }
+    } catch (error) {
+      console.error('Failed to mark all notifications as read:', error);
+    }
   };
 
   if (!user) return (
@@ -64,9 +117,7 @@ export default function Layout({ children, title = 'Smart Business Assistant' })
       {/* Logo */}
       <div className="p-6 border-b hairline">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 bg-amber rounded-xl flex items-center justify-center shadow-lg">
-            <Zap className="w-5 h-5 text-ground" />
-          </div>
+          <img src="/logo.png" alt="Smart Business Logo" className="w-10 h-10 rounded-xl shadow-lg object-contain" />
           <div>
             <h1 className="portal-heading text-ink text-sm leading-tight">Smart Business</h1>
             <p className="portal-label text-muted">AI Assistant</p>
@@ -199,16 +250,86 @@ export default function Layout({ children, title = 'Smart Business Assistant' })
                 )}
               </div>
               
-              <button className="relative p-2.5 rounded-xl bg-ground-secondary/80 border hairline hover:border-amber/50 transition-all">
-                <Bell size={18} className="text-ink-secondary" />
-                {notifications > 0 && (
-                  <span className="absolute -top-1 -right-1 w-5 h-5 bg-amber rounded-full text-xs flex items-center justify-center font-bold text-ground shadow">
-                    {notifications}
-                  </span>
+              <div className="relative">
+                <button 
+                  onClick={() => setShowNotificationsMenu(!showNotificationsMenu)}
+                  className="relative p-2.5 rounded-xl bg-ground-secondary/80 border hairline hover:border-amber/50 transition-all"
+                >
+                  <Bell size={18} className="text-ink-secondary" />
+                  {unreadCount > 0 && (
+                    <span className="absolute -top-1 -right-1 w-5 h-5 bg-amber rounded-full text-xs flex items-center justify-center font-bold text-ground shadow">
+                      {unreadCount}
+                    </span>
+                  )}
+                </button>
+                
+                {showNotificationsMenu && (
+                  <div className="absolute right-0 top-full mt-2 bg-ground-secondary border hairline rounded-xl shadow-xl py-2 min-w-[320px] z-50 max-h-[400px] overflow-y-auto">
+                    <div className="px-4 py-3 border-b hairline flex items-center justify-between">
+                      <h3 className="font-semibold text-ink text-sm">Notifications</h3>
+                      {unreadCount > 0 && (
+                        <button onClick={handleMarkAllAsRead} className="text-xs text-amber hover:text-amber/80 transition-colors">
+                          Mark all as read
+                        </button>
+                      )}
+                    </div>
+                    {notifications.length === 0 ? (
+                      <div className="px-4 py-8 text-center">
+                        <p className="portal-label text-muted text-sm">No notifications</p>
+                      </div>
+                    ) : (
+                      <div className="divide-y hairline">
+                        {notifications.map((notification) => (
+                          <div 
+                            key={notification.id} 
+                            className="px-4 py-3 hover:bg-ground transition-colors cursor-pointer"
+                            onClick={() => handleMarkAsRead(notification.id)}
+                          >
+                            <div className="flex items-start gap-3">
+                              <div className={`w-2 h-2 rounded-full mt-2 ${notification.read ? 'bg-muted' : 'bg-amber'}`} />
+                              <div className="flex-1 min-w-0">
+                                <p className="font-medium text-ink text-sm">{notification.title}</p>
+                                <p className="portal-label text-muted text-xs mt-1 line-clamp-2">{notification.message}</p>
+                                <p className="portal-label text-muted text-xs mt-2">
+                                  {new Date(notification.created_at).toLocaleDateString()}
+                                </p>
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
                 )}
-              </button>
-              <div className="w-9 h-9 bg-teal rounded-full flex items-center justify-center text-ground font-bold text-sm cursor-pointer shadow-lg">
-                {user.name?.[0]?.toUpperCase()}
+              </div>
+              <div className="relative">
+                <button 
+                  onClick={() => setShowProfileMenu(!showProfileMenu)}
+                  className="w-9 h-9 bg-teal rounded-full flex items-center justify-center text-ground font-bold text-sm cursor-pointer shadow-lg hover:bg-teal/80 transition-all"
+                >
+                  {user.avatar_url ? (
+                    <img src={`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'}${user.avatar_url}`} alt="Avatar" className="w-full h-full rounded-full object-cover" />
+                  ) : (
+                    user.name?.[0]?.toUpperCase()
+                  )}
+                </button>
+                
+                {showProfileMenu && (
+                  <div className="absolute right-0 top-full mt-2 bg-ground-secondary border hairline rounded-xl shadow-xl py-2 min-w-[200px] z-50">
+                    <div className="px-4 py-3 border-b hairline">
+                      <p className="font-semibold text-ink text-sm">{user.name}</p>
+                      <p className="portal-label text-muted text-xs">{user.email}</p>
+                    </div>
+                    <Link href="/profile" onClick={() => setShowProfileMenu(false)} className="flex items-center gap-3 px-4 py-2.5 text-sm text-ink-secondary hover:bg-ground transition-colors">
+                      <User size={16} />
+                      <span>{t('nav.profile')}</span>
+                    </Link>
+                    <button onClick={handleLogout} className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-red-400 hover:bg-ground hover:text-red-300 transition-colors">
+                      <LogOut size={16} />
+                      <span>{t('nav.logout')}</span>
+                    </button>
+                  </div>
+                )}
               </div>
             </div>
           </div>

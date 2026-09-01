@@ -1,11 +1,11 @@
 import { useState, useEffect } from 'react';
 import Layout from '../components/Layout';
 import { getUser, updateProfile, changePassword, toggleEmailNotifications, toggleTwoFactorAuth, setupTwoFactorAuth, verifyTwoFactorAuth, disableTwoFactorAuth } from '../lib/auth';
-import { apiGet } from '../lib/api';
+import { apiGet, apiPost } from '../lib/api';
 import { useLanguage } from '../lib/LanguageContext';
 import Cookies from 'js-cookie';
 import toast from 'react-hot-toast';
-import { User, Mail, Building, Save, Shield, Bell, Lock, X, Globe } from 'lucide-react';
+import { User, Mail, Building, Save, Shield, Bell, Lock, X, Globe, Camera, Upload } from 'lucide-react';
 
 export default function ProfilePage() {
   const { language, setLanguage, t } = useLanguage();
@@ -32,10 +32,16 @@ export default function ProfilePage() {
   const [twoFactorLoading, setTwoFactorLoading] = useState(false);
   const [showDisable2FAModal, setShowDisable2FAModal] = useState(false);
   const [disable2FAPassword, setDisable2FAPassword] = useState('');
+  const [avatarUrl, setAvatarUrl] = useState(null);
+  const [uploadingAvatar, setUploadingAvatar] = useState(false);
 
   useEffect(() => {
     const u = getUser();
-    if (u) { setUser(u); setForm({ name: u.name, company: u.company || '', email: u.email }); }
+    if (u) { 
+      setUser(u); 
+      setForm({ name: u.name, company: u.company || '', email: u.email });
+      setAvatarUrl(u.avatar_url);
+    }
     
     // Fetch user stats
     const fetchStats = async () => {
@@ -72,13 +78,57 @@ export default function ProfilePage() {
     if (!form.name) { toast.error(t('profile.nameRequired')); return; }
     setLoading(true);
     try {
-      const updated = await updateProfile({ name: form.name, company: form.company, language });
+      const updated = await updateProfile({ name: form.name, company: form.company, language, avatar_url: avatarUrl });
       setUser(updated);
       toast.success(t('profile.profileUpdated'));
     } catch (err) {
       toast.error(err.message || t('profile.profileUpdateFailed'));
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleAvatarUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    // Validate file type
+    if (!file.type.startsWith('image/')) {
+      toast.error('Please select an image file');
+      return;
+    }
+
+    // Validate file size (max 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error('Image size must be less than 5MB');
+      return;
+    }
+
+    setUploadingAvatar(true);
+    try {
+      const formData = new FormData();
+      formData.append('avatar', file);
+
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'}/api/auth/upload-avatar`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${Cookies.get('sba_token')}`,
+        },
+        body: formData,
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Upload failed');
+      }
+
+      setAvatarUrl(data.avatar_url);
+      toast.success('Avatar uploaded successfully');
+    } catch (err) {
+      toast.error(err.message || 'Failed to upload avatar');
+    } finally {
+      setUploadingAvatar(false);
     }
   };
 
@@ -188,8 +238,18 @@ export default function ProfilePage() {
       <div className="max-w-3xl mx-auto space-y-6">
         {/* Profile Header */}
         <div className="bg-ground-secondary border hairline rounded-xl p-6 flex items-center gap-6">
-          <div className="w-20 h-20 rounded-2xl bg-amber flex items-center justify-center text-ground text-3xl font-bold">
-            {user.name?.[0]?.toUpperCase()}
+          <div className="relative">
+            <div className="w-20 h-20 rounded-2xl bg-amber flex items-center justify-center text-ground text-3xl font-bold overflow-hidden">
+              {avatarUrl ? (
+                <img src={`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'}${avatarUrl}`} alt="Avatar" className="w-full h-full object-cover" />
+              ) : (
+                user.name?.[0]?.toUpperCase()
+              )}
+            </div>
+            <label className="absolute bottom-0 right-0 w-8 h-8 bg-amber rounded-full flex items-center justify-center cursor-pointer hover:bg-amber/80 transition-colors shadow-lg">
+              <Camera size={16} className="text-ground" />
+              <input type="file" accept="image/*" onChange={handleAvatarUpload} className="hidden" />
+            </label>
           </div>
           <div>
             <h2 className="portal-heading text-2xl">{user.name}</h2>

@@ -5,7 +5,41 @@ const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const speakeasy = require("speakeasy");
 const QRCode = require("qrcode");
+const multer = require("multer");
+const path = require("path");
+const fs = require("fs");
 const { query } = require("../db/pool");
+
+// Configure multer for avatar uploads
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    const uploadDir = path.join(__dirname, "../../uploads/avatars");
+    if (!fs.existsSync(uploadDir)) {
+      fs.mkdirSync(uploadDir, { recursive: true });
+    }
+    cb(null, uploadDir);
+  },
+  filename: function (req, file, cb) {
+    const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
+    cb(null, "avatar-" + uniqueSuffix + path.extname(file.originalname));
+  },
+});
+
+const upload = multer({
+  storage: storage,
+  limits: { fileSize: 5 * 1024 * 1024 }, // 5MB limit
+  fileFilter: function (req, file, cb) {
+    const allowedTypes = /jpeg|jpg|png|gif|webp/;
+    const extname = allowedTypes.test(path.extname(file.originalname).toLowerCase());
+    const mimetype = allowedTypes.test(file.mimetype);
+
+    if (extname && mimetype) {
+      return cb(null, true);
+    } else {
+      cb(new Error("Only image files are allowed"));
+    }
+  },
+});
 
 // ⚠️ MUST match the secret used in middleware/auth.js (JWT verification).
 const JWT_SECRET =
@@ -238,7 +272,7 @@ router.get("/me", require("../middleware/auth"), async (req, res) => {
 // UPDATE PROFILE
 router.put("/profile", require("../middleware/auth"), async (req, res) => {
   try {
-    const { name, company, language } = req.body;
+    const { name, company, language, avatar_url } = req.body;
 
     if (!name) {
       return res.status(400).json({
@@ -257,10 +291,11 @@ router.put("/profile", require("../middleware/auth"), async (req, res) => {
       `UPDATE users
          SET name = $1,
              company = $2,
-             language = COALESCE($3, language)
-         WHERE id = $4
-         RETURNING id, name, email, company, role, language`,
-      [name, company || "", language || null, req.user.id],
+             language = COALESCE($3, language),
+             avatar_url = COALESCE($4, avatar_url)
+         WHERE id = $5
+         RETURNING id, name, email, company, role, language, avatar_url`,
+      [name, company || "", language || null, avatar_url || null, req.user.id],
     );
 
     if (result.rowCount === 0) {
@@ -281,6 +316,139 @@ router.put("/profile", require("../middleware/auth"), async (req, res) => {
     });
   }
 });
+
+// UPLOAD AVATAR
+router.post("/upload-avatar", require("../middleware/auth"), upload.single("avatar"), async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({
+        error: "No file uploaded",
+      });
+    }
+
+    const avatarUrl = `/uploads/avatars/${req.file.filename}`;
+
+    // Update user's avatar_url in database
+    await query(
+      `UPDATE users SET avatar_url = $1 WHERE id = $2`,
+      [avatarUrl, req.user.id],
+    );
+
+    return res.json({
+      message: "Avatar uploaded successfully",
+      avatar_url: avatarUrl,
+    });
+  } catch (err) {
+    console.error("Erreur upload avatar:", err);
+
+    return res.status(500).json({
+      error: "Erreur serveur lors de l'upload",
+    });
+  }
+});
+
+// GET NOTIFICATIONS
+router.get("/notifications", require("../middleware/auth"), async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const limit = parseInt(req.query.limit) || 10;
+    const unreadOnly = req.query.unreadOnly === 'true';
+
+    let queryText = `
+      SELECT id, type, title, message, read, metadata, created_at
+      FROM notifications
+      WHERE user_id = $1
+    `;
+    const queryParams = [userId];
+
+    if (unreadOnly) {
+      queryText += ` AND read = FALSE`;
+    }
+
+    queryText += `
+      ORDER BY created_at DESC
+      LIMIT $2
+    `;
+    queryParams.push(limit);
+
+    const result = await query(queryText, queryParams);
+
+    return res.json({
+      notifications: result.rows,
+      total: result.rowCount,
+    });
+  } catch (err) {
+    console.error("Erreur get notifications:", err);
+    return res.status(500).json({
+      error: "Erreur serveur",
+    });
+  }
+});
+
+// MARK NOTIFICATION AS READ
+router.put("/notifications/:id/read", require("../middleware/auth"), async (req, res) => {
+  try {
+    const notificationId = req.params.id;
+
+    const result = await query(
+      `UPDATE notifications
+         SET read = TRUE
+         WHERE id = $1 AND user_id = $2
+         RETURNING *`,
+      [notificationId, req.user.id],
+    );
+
+    if (result.rowCount === 0) {
+      return res.status(404).json({
+        error: "Notification non trouvée",
+      });
+    }
+
+    return res.json({
+      message: "Notification marquée comme lue",
+      notification: result.rows[0],
+    });
+  } catch (err) {
+    console.error("Erreur mark notification read:", err);
+    return res.status(500).json({
+      error: "Erreur serveur",
+    });
+  }
+});
+
+// MARK ALL NOTIFICATIONS AS READ
+router.put("/notifications/read-all", require("../middleware/auth"), async (req, res) => {
+  try {
+    await query(
+      `UPDATE notifications
+         SET read = TRUE
+         WHERE user_id = $1 AND read = FALSE`,
+      [req.user.id],
+    );
+
+    return res.json({
+      message: "Toutes les notifications marquées comme lues",
+    });
+  } catch (err) {
+    console.error("Erreur mark all notifications read:", err);
+    return res.status(500).json({
+      error: "Erreur serveur",
+    });
+  }
+});
+
+// CREATE NOTIFICATION (internal function)
+const createNotification = async (userId, type, title, message, metadata = {}) => {
+  try {
+    await query(
+      `INSERT INTO notifications (user_id, type, title, message, metadata)
+         VALUES ($1, $2, $3, $4, $5)`,
+      [userId, type, title, message, JSON.stringify(metadata)],
+    );
+  } catch (err) {
+    console.error("Erreur create notification:", err);
+  }
+};
 
 // GET USER STATS
 router.get("/stats", require("../middleware/auth"), async (req, res) => {
