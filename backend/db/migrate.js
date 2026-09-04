@@ -37,8 +37,23 @@ const migrate = async () => {
 
   await query(`
     ALTER TABLE users
+      ADD COLUMN IF NOT EXISTS avatar_url TEXT,
+      ADD COLUMN IF NOT EXISTS language VARCHAR(5) DEFAULT 'en',
       ADD COLUMN IF NOT EXISTS two_factor_enabled BOOLEAN DEFAULT false,
       ADD COLUMN IF NOT EXISTS two_factor_secret VARCHAR(255)
+  `);
+
+  await query(`
+    CREATE TABLE IF NOT EXISTS notifications (
+      id SERIAL PRIMARY KEY,
+      user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+      type VARCHAR(50) NOT NULL,
+      title VARCHAR(255) NOT NULL,
+      message TEXT NOT NULL,
+      read BOOLEAN DEFAULT FALSE,
+      metadata JSONB,
+      created_at TIMESTAMPTZ DEFAULT NOW()
+    )
   `);
 
   await query(`

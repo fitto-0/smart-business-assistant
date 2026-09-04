@@ -390,7 +390,7 @@ export default function LandingPage() {
           <div className="grid md:grid-cols-2 gap-0">
             {FEATURES.map((feature, index) => (
               <div
-                key={feature.title}
+                key={feature.titleKey}
                 className="group relative overflow-hidden border-t border-r border-white/10 p-12 lg:p-16 transition-all duration-500 hover:bg-[#111111]"
                 style={{
                   animationDelay: `${index * 100}ms`,
@@ -504,7 +504,7 @@ export default function LandingPage() {
           <div className="grid md:grid-cols-2 gap-0">
             {INTELLIGENCE.map((item, index) => (
               <div
-                key={item.title}
+                key={item.titleKey}
                 className="group relative border-t border-r border-white/10 p-12 lg:p-20 transition-all duration-500 hover:bg-[#111111]"
               >
                 <div className="flex gap-8 items-start">
@@ -538,7 +538,7 @@ export default function LandingPage() {
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-0">
             {HOW_IT_WORKS.map((item, index) => (
               <div
-                key={item.title}
+                key={item.titleKey}
                 className="group relative border-t border-r border-white/10 p-12 lg:p-16 transition-all duration-500 hover:bg-[#111111]"
               >
                 <p className="font-syne font-extrabold text-4xl lg:text-5xl text-[#F5A623]/50 group-hover:text-[#F5A623] transition-colors duration-500 mb-6">
