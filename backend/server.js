@@ -27,6 +27,7 @@ app.use("/api/categories", require("./routes/categories"));
 app.use("/api/sales", require("./routes/sales"));
 app.use("/api/analysis", require("./routes/analysis"));
 app.use("/api/csv", require("./routes/csv"));
+app.use("/api/admin", require("./routes/admin"));
 
 console.log("Routes loaded:");
 console.log("  /api/auth");
@@ -34,6 +35,7 @@ console.log("  /api/products");
 console.log("  /api/sales");
 console.log("  /api/analysis");
 console.log("  /api/csv");
+console.log("  /api/admin");
 
 // Health check
 app.get("/api/health", (req, res) => {

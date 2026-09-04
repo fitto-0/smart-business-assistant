@@ -4,21 +4,15 @@ import Link from 'next/link';
 import { isAuthenticated, getUser, fetchCurrentUser, logout } from '../lib/auth';
 import { useLanguage } from '../lib/LanguageContext';
 import {
-  LayoutDashboard, TrendingUp, Package, MessageSquare,
-  Brain, AlertTriangle, Lightbulb, User, LogOut,
-  Bell, Search, Menu, X, ChevronRight, Zap, Globe
+  LogOut,
+  Bell, Search, Menu, X, ChevronRight, Zap, Globe, ShieldCheck, UserCog, Settings
 } from 'lucide-react';
 import Chatbot from './Chatbot';
 
-const navItems = [
-  { href: '/dashboard', key: 'nav.dashboard', icon: LayoutDashboard },
-  { href: '/sales', key: 'nav.sales', icon: TrendingUp },
-  { href: '/products', key: 'nav.products', icon: Package },
-  { href: '/reviews', key: 'nav.reviews', icon: MessageSquare },
-  { href: '/predictions', key: 'nav.predictions', icon: Brain },
-  { href: '/anomalies', key: 'nav.anomalies', icon: AlertTriangle },
-  { href: '/recommendations', key: 'nav.recommendations', icon: Lightbulb },
-  { href: '/profile', key: 'nav.profile', icon: User },
+const adminNavItems = [
+  { href: '/admin', label: 'Admin dashboard', icon: ShieldCheck },
+  { href: '/admin-users', label: 'User management', icon: UserCog },
+  { href: '/admin-settings', label: 'System settings', icon: Settings },
 ];
 
 export default function Layout({ children, title = 'Smart Business Assistant' }) {
@@ -140,23 +134,16 @@ export default function Layout({ children, title = 'Smart Business Assistant' })
 
       {/* Navigation */}
       <nav className="flex-1 p-4 space-y-1 overflow-y-auto">
-        <p className="portal-label px-4 mb-3">{t('common.menu') || 'Menu'}</p>
-        {navItems.map(({ href, key, icon: Icon }) => (
-          <Link
-            key={href}
-            href={href}
-            onClick={() => mobile && setSidebarOpen(false)}
-            className={`portal-nav-link flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 font-medium ${
-              router.pathname === href 
-                ? 'bg-amber/10 text-amber' 
-                : 'text-ink-secondary hover:text-ink hover:bg-ground-secondary/50'
-            }`}
-          >
-            <Icon className="w-4.5 h-4.5 flex-shrink-0" size={18} />
-            <span className="text-sm">{t(key)}</span>
+        {user.role === 'admin' && <>
+          <p className="portal-label px-4 mb-3">Administration</p>
+          {adminNavItems.map(({ href, label, icon: Icon }) => (
+          <Link key={href} href={href} onClick={() => mobile && setSidebarOpen(false)} className={`portal-nav-link flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 font-medium ${router.pathname === href ? 'bg-amber/10 text-amber' : 'text-ink-secondary hover:text-ink hover:bg-ground-secondary/50'}`}>
+            <Icon size={18} className="flex-shrink-0" />
+            <span className="text-sm">{label}</span>
             {router.pathname === href && <ChevronRight size={14} className="ml-auto opacity-60" />}
           </Link>
-        ))}
+          ))}
+        </>}
       </nav>
 
       {/* Logout */}

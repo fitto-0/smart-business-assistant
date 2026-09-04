@@ -236,6 +236,7 @@ router.get("/me", require("../middleware/auth"), async (req, res) => {
           company,
           role,
           avatar_url,
+          language,
           created_at
          FROM users
          WHERE id = $1`,

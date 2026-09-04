@@ -1,16 +1,17 @@
 -- ====================================================================
 -- SMART BUSINESS ASSISTANT - Données de démonstration (Seed)
 -- ====================================================================
--- Compte démo : demo@smartbusiness.com / demo123
+-- Compte démo : demo@smartbusiness.com / demo123 (utilisateur normal)
 -- Les données métier de chaque utilisateur sont SCOPÉES par user_id.
 -- ====================================================================
 
 -- ===================== UTILISATEURS =====================
 -- Note : le hash bcrypt correspond à "demo123" (10 rounds).
 INSERT INTO users (name, email, password_hash, company, role) VALUES
-('Admin Demo', 'demo@smartbusiness.com', '$2a$10$pkdmXPXhmR3uhhR4NFBF1ez1/TuWxQIo/IAdDGbN1gVkToyvJoAli', 'SmartBiz SARL', 'admin'),
+('Demo User', 'demo@smartbusiness.com', '$2a$10$pkdmXPXhmR3uhhR4NFBF1ez1/TuWxQIo/IAdDGbN1gVkToyvJoAli', 'SmartBiz SARL', 'user'),
 ('Karim Khali', 'karim@boutique.dz', '$2a$10$pkdmXPXhmR3uhhR4NFBF1ez1/TuWxQIo/IAdDGbN1gVkToyvJoAli', 'Boutique El Karama', 'user'),
-('Sophie Martin', 'sophie@martinedz.com', '$2a$10$pkdmXPXhmR3uhhR4NFBF1ez1/TuWxQIo/IAdDGbN1gVkToyvJoAli', 'Martin Boutique', 'user');
+('Sophie Martin', 'sophie@martinedz.com', '$2a$10$pkdmXPXhmR3uhhR4NFBF1ez1/TuWxQIo/IAdDGbN1gVkToyvJoAli', 'Martin Boutique', 'user'),
+('Platform Admin', 'admin@smartbusiness.com', '$2a$10$pkdmXPXhmR3uhhR4NFBF1ez1/TuWxQIo/IAdDGbN1gVkToyvJoAli', 'Smart Business Assistant', 'admin');
 
 -- ===================== PRODUITS — USER 1 (Admin Demo) =====================
 INSERT INTO products (user_id, name, category, price, stock, sold, revenue, trend, description) VALUES

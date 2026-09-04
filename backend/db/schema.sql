@@ -12,6 +12,7 @@ DROP TABLE IF EXISTS sales CASCADE;
 DROP TABLE IF EXISTS products CASCADE;
 DROP TABLE IF EXISTS monthly_targets CASCADE;
 DROP TABLE IF EXISTS users CASCADE;
+DROP TABLE IF EXISTS system_settings CASCADE;
 DROP TABLE IF EXISTS predictions_cache CASCADE;
 DROP VIEW IF EXISTS v_product_performance;
 DROP VIEW IF EXISTS v_monthly_sales;
@@ -41,6 +42,18 @@ CREATE TABLE users (
 );
 
 CREATE INDEX idx_users_email ON users(email);
+
+-- ===================== SYSTEM SETTINGS =====================
+CREATE TABLE system_settings (
+    id INTEGER PRIMARY KEY DEFAULT 1 CHECK (id = 1),
+    platform_name VARCHAR(150) NOT NULL DEFAULT 'Smart Business Assistant',
+    support_email VARCHAR(150) NOT NULL DEFAULT 'support@smartbusiness.com',
+    default_language VARCHAR(5) NOT NULL DEFAULT 'en' CHECK (default_language IN ('en', 'fr', 'ar')),
+    maintenance_mode BOOLEAN NOT NULL DEFAULT false,
+    updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+INSERT INTO system_settings (id) VALUES (1) ON CONFLICT (id) DO NOTHING;
 
 -- ===================== TABLE NOTIFICATIONS =====================
 CREATE TABLE notifications (
