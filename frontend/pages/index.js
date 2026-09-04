@@ -80,18 +80,18 @@ const INTELLIGENCE = [
     titleKey: "landing.intelligence.customerSentiment",
     descKey: "landing.intelligence.customerSentimentDesc",
   },
-  { 
-    number: "04", 
-    titleKey: "landing.intelligence.businessAlerts", 
-    descKey: "landing.intelligence.businessAlertsDesc" 
+  {
+    number: "04",
+    titleKey: "landing.intelligence.businessAlerts",
+    descKey: "landing.intelligence.businessAlertsDesc",
   },
 ];
 
 const HOW_IT_WORKS = [
-  { 
-    number: "01", 
-    titleKey: "landing.howItWorks.uploadData", 
-    descKey: "landing.howItWorks.uploadDataDesc" 
+  {
+    number: "01",
+    titleKey: "landing.howItWorks.uploadData",
+    descKey: "landing.howItWorks.uploadDataDesc",
   },
   {
     number: "02",
@@ -103,10 +103,10 @@ const HOW_IT_WORKS = [
     titleKey: "landing.howItWorks.getInsights",
     descKey: "landing.howItWorks.getInsightsDesc",
   },
-  { 
-    number: "04", 
-    titleKey: "landing.howItWorks.takeAction", 
-    descKey: "landing.howItWorks.takeActionDesc" 
+  {
+    number: "04",
+    titleKey: "landing.howItWorks.takeAction",
+    descKey: "landing.howItWorks.takeActionDesc",
   },
 ];
 
@@ -212,28 +212,39 @@ export default function LandingPage() {
                 className="p-2 rounded-lg border hairline hover:bg-ground-secondary transition-colors flex items-center gap-2"
               >
                 <Globe size={18} />
-                <span className="hidden sm:inline text-sm">{language.toUpperCase()}</span>
+                <span className="hidden sm:inline text-sm">
+                  {language.toUpperCase()}
+                </span>
               </button>
-              
+
               {showLanguageMenu && (
                 <div className="absolute right-0 top-full mt-2 bg-ground-secondary border hairline rounded-lg shadow-xl py-2 min-w-[140px] z-50">
                   <button
-                    onClick={() => { setLanguage('en'); setShowLanguageMenu(false); }}
-                    className={`w-full px-4 py-2 text-left text-sm hover:bg-ground transition-colors flex items-center gap-2 ${language === 'en' ? 'text-amber' : 'text-[#8A8A8A]'}`}
+                    onClick={() => {
+                      setLanguage("en");
+                      setShowLanguageMenu(false);
+                    }}
+                    className={`w-full px-4 py-2 text-left text-sm hover:bg-ground transition-colors flex items-center gap-2 ${language === "en" ? "text-amber" : "text-[#8A8A8A]"}`}
                   >
                     <span>🇬🇧</span>
                     <span>English</span>
                   </button>
                   <button
-                    onClick={() => { setLanguage('fr'); setShowLanguageMenu(false); }}
-                    className={`w-full px-4 py-2 text-left text-sm hover:bg-ground transition-colors flex items-center gap-2 ${language === 'fr' ? 'text-amber' : 'text-[#8A8A8A]'}`}
+                    onClick={() => {
+                      setLanguage("fr");
+                      setShowLanguageMenu(false);
+                    }}
+                    className={`w-full px-4 py-2 text-left text-sm hover:bg-ground transition-colors flex items-center gap-2 ${language === "fr" ? "text-amber" : "text-[#8A8A8A]"}`}
                   >
                     <span>🇫🇷</span>
                     <span>Français</span>
                   </button>
                   <button
-                    onClick={() => { setLanguage('ar'); setShowLanguageMenu(false); }}
-                    className={`w-full px-4 py-2 text-left text-sm hover:bg-ground transition-colors flex items-center gap-2 ${language === 'ar' ? 'text-amber' : 'text-[#8A8A8A]'}`}
+                    onClick={() => {
+                      setLanguage("ar");
+                      setShowLanguageMenu(false);
+                    }}
+                    className={`w-full px-4 py-2 text-left text-sm hover:bg-ground transition-colors flex items-center gap-2 ${language === "ar" ? "text-amber" : "text-[#8A8A8A]"}`}
                   >
                     <span>🇸🇦</span>
                     <span>العربية</span>
@@ -241,12 +252,12 @@ export default function LandingPage() {
                 </div>
               )}
             </div>
-            
+
             <Link href="/login" className="portal-nav-link">
-              {t('landing.nav.login')}
+              {t("landing.nav.login")}
             </Link>
             <Link href="/register" className="portal-pill-btn">
-              {t('landing.nav.getStarted')}
+              {t("landing.nav.getStarted")}
             </Link>
           </div>
         </div>
@@ -317,7 +328,7 @@ export default function LandingPage() {
                   transform: `translateY(${smoothAnimation * -10}px)`,
                 }}
               >
-                {t('landing.hero.subtitle')}
+                {t("landing.hero.subtitle")}
               </p>
 
               <h1
@@ -354,7 +365,7 @@ export default function LandingPage() {
                   transform: `translateY(${smoothAnimation * -15}px)`,
                 }}
               >
-                {t('landing.hero.tagline')}
+                {t("landing.hero.tagline")}
               </p>
             </div>
           </div>
@@ -440,11 +451,11 @@ export default function LandingPage() {
                   color: "#F5F5F5",
                 }}
               >
-                {t('landing.about.heading')}
+                {t("landing.about.heading")}
                 <br />
                 <br />
                 <span style={{ color: "#F5A623" }}>
-                  {t('landing.about.subheading')}
+                  {t("landing.about.subheading")}
                 </span>
               </h2>
 
@@ -455,7 +466,7 @@ export default function LandingPage() {
                     WebkitTextStroke: "2px rgba(245, 166, 35, 0.2)",
                   }}
                 >
-                  {t('landing.about.ready')}
+                  {t("landing.about.ready")}
                 </p>
               </div>
             </div>
@@ -464,26 +475,26 @@ export default function LandingPage() {
             <div className="lg:col-span-5 lg:pl-16">
               <div className="border-l-2 border-[#F5A623]/30 pl-8">
                 <p className="font-sora text-xl lg:text-2xl text-[#8A8A8A] leading-relaxed">
-                  {t('landing.about.description')}
+                  {t("landing.about.description")}
                 </p>
 
                 <div className="mt-8 space-y-4">
                   <div className="flex items-center gap-4">
                     <div className="w-2 h-2 bg-[#F5A623]" />
                     <p className="font-sora text-[#8A8A8A]">
-                      {t('landing.about.realTimeAnalytics')}
+                      {t("landing.about.realTimeAnalytics")}
                     </p>
                   </div>
                   <div className="flex items-center gap-4">
                     <div className="w-2 h-2 bg-[#F5A623]" />
                     <p className="font-sora text-[#8A8A8A]">
-                      {t('landing.about.aiPoweredPredictions')}
+                      {t("landing.about.aiPoweredPredictions")}
                     </p>
                   </div>
                   <div className="flex items-center gap-4">
                     <div className="w-2 h-2 bg-[#F5A623]" />
                     <p className="font-sora text-[#8A8A8A]">
-                      {t('landing.about.actionableInsights')}
+                      {t("landing.about.actionableInsights")}
                     </p>
                   </div>
                 </div>
@@ -561,17 +572,17 @@ export default function LandingPage() {
       <section className="py-32 px-5 border-t border-white/10">
         <div className="max-w-4xl mx-auto text-center">
           <h2 className="font-syne font-extrabold text-[clamp(2rem,6vw,5rem)] leading-[0.9] tracking-tight text-[#F5F5F5] mb-8">
-            {t('landing.cta.heading')}
+            {t("landing.cta.heading")}
           </h2>
           <p className="font-sora text-xl text-[#8A8A8A] mb-12 max-w-2xl mx-auto">
-            {t('landing.cta.description')}
+            {t("landing.cta.description")}
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link
               href="/register"
               className="group inline-flex items-center justify-center gap-2 bg-[#F5A623] text-[#080808] px-10 py-4 rounded-sm font-sora font-semibold text-sm tracking-wider uppercase transition-all duration-300 hover:bg-[#E8913C] hover:translate-x-2"
             >
-              {t('landing.cta.getStarted')}{" "}
+              {t("landing.cta.getStarted")}{" "}
               <ArrowRight
                 size={16}
                 className="group-hover:translate-x-1 transition-transform"
@@ -581,7 +592,7 @@ export default function LandingPage() {
               href="/login"
               className="inline-flex items-center justify-center border border-white/20 text-white px-10 py-4 rounded-sm font-sora font-semibold text-sm tracking-wider uppercase transition-all duration-300 hover:bg-white/5 hover:border-white/40"
             >
-              {t('landing.cta.login')}
+              {t("landing.cta.login")}
             </Link>
           </div>
         </div>
@@ -591,17 +602,20 @@ export default function LandingPage() {
       <footer className="portal-footer-strip px-5">
         <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
           <p className="portal-label">
-            {t('landing.footer.copyright').replace('{year}', new Date().getFullYear())}
+            {t("landing.footer.copyright").replace(
+              "{year}",
+              new Date().getFullYear(),
+            )}
           </p>
           <div className="flex gap-6">
             <Link href="/privacy" className="portal-nav-link">
-              {t('landing.footer.privacy')}
+              {t("landing.footer.privacy")}
             </Link>
             <Link href="/terms" className="portal-nav-link">
-              {t('landing.footer.terms')}
+              {t("landing.footer.terms")}
             </Link>
             <Link href="/contact" className="portal-nav-link">
-              {t('landing.footer.contact')}
+              {t("landing.footer.contact")}
             </Link>
           </div>
         </div>

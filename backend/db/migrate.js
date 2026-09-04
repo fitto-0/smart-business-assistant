@@ -67,7 +67,9 @@ const migrate = async () => {
     )
   `);
 
-  await query(`INSERT INTO system_settings (id) VALUES (1) ON CONFLICT (id) DO NOTHING`);
+  await query(
+    `INSERT INTO system_settings (id) VALUES (1) ON CONFLICT (id) DO NOTHING`,
+  );
 
   await query(`
     UPDATE users SET role = 'user', updated_at = NOW()
