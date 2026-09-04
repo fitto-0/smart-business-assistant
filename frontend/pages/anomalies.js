@@ -46,6 +46,21 @@ const TYPE_ICONS = {
   avis_négatifs: Star,
 };
 
+const formatDetectedDate = (value) => {
+  if (!value) return "—";
+
+  const datePart = String(value).slice(0, 10);
+  const date = new Date(`${datePart}T12:00:00`);
+
+  if (Number.isNaN(date.getTime())) return String(value);
+
+  return date.toLocaleDateString(undefined, {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  });
+};
+
 export default function AnomaliesPage() {
   const [anomalies, setAnomalies] = useState([]);
   const [filter, setFilter] = useState("tous");
@@ -239,7 +254,7 @@ export default function AnomaliesPage() {
                   </div>
                   <p className="portal-text mb-1">{a.description}</p>
                   <p className="portal-label text-muted">
-                    Detected {a.detected_at || a.detected || "—"}
+                    Detected {formatDetectedDate(a.detected_at || a.detected)}
                   </p>
                 </div>
                 <div className="flex sm:flex-col gap-2 flex-shrink-0">

@@ -420,14 +420,35 @@ router.get("/top-products", auth, async (req, res) => {
       SELECT
         p.id,
         p.name,
-        p.trend,
+        ROUND(
+          CASE
+            WHEN trend_data.previous_units > 0 THEN
+              ((trend_data.current_units - trend_data.previous_units)::numeric /
+                trend_data.previous_units) * 100
+            ELSE 0
+          END,
+          2
+        ) AS trend,
         COALESCE(SUM(s.total_amount), 0)::numeric AS revenue,
         COUNT(s.id)::int AS orders
       FROM sales s
       LEFT JOIN products p ON p.id = s.product_id AND p.user_id = s.user_id
+      LEFT JOIN LATERAL (
+        SELECT
+          COALESCE(SUM(quantity) FILTER (
+            WHERE date >= CURRENT_DATE - INTERVAL '29 days'
+          ), 0)::numeric AS current_units,
+          COALESCE(SUM(quantity) FILTER (
+            WHERE date >= CURRENT_DATE - INTERVAL '59 days'
+              AND date < CURRENT_DATE - INTERVAL '29 days'
+          ), 0)::numeric AS previous_units
+        FROM sales trend_sales
+        WHERE trend_sales.product_id = p.id
+          AND trend_sales.user_id = p.user_id
+      ) trend_data ON TRUE
       WHERE s.user_id = $1
         AND p.id IS NOT NULL
-      GROUP BY p.id, p.name, p.trend
+      GROUP BY p.id, p.name, trend_data.current_units, trend_data.previous_units
       ORDER BY revenue DESC
       LIMIT $2
       `,

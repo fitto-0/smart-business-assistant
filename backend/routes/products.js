@@ -78,7 +78,44 @@ router.get("/", auth, async (req, res) => {
         p.stock,
         p.sold,
         p.revenue,
-        p.trend,
+        ROUND(
+          CASE
+            WHEN (
+              SELECT COALESCE(SUM(s.quantity), 0)
+              FROM sales s
+              WHERE s.product_id = p.id
+                AND s.user_id = p.user_id
+                AND s.date >= CURRENT_DATE - INTERVAL '59 days'
+                AND s.date < CURRENT_DATE - INTERVAL '29 days'
+            ) > 0 THEN (
+              (
+                (
+                  SELECT COALESCE(SUM(s.quantity), 0)
+                  FROM sales s
+                  WHERE s.product_id = p.id
+                    AND s.user_id = p.user_id
+                    AND s.date >= CURRENT_DATE - INTERVAL '29 days'
+                ) - (
+                  SELECT COALESCE(SUM(s.quantity), 0)
+                  FROM sales s
+                  WHERE s.product_id = p.id
+                    AND s.user_id = p.user_id
+                    AND s.date >= CURRENT_DATE - INTERVAL '59 days'
+                    AND s.date < CURRENT_DATE - INTERVAL '29 days'
+                )
+              )::numeric / (
+                SELECT COALESCE(SUM(s.quantity), 0)
+                FROM sales s
+                WHERE s.product_id = p.id
+                  AND s.user_id = p.user_id
+                  AND s.date >= CURRENT_DATE - INTERVAL '59 days'
+                  AND s.date < CURRENT_DATE - INTERVAL '29 days'
+              ) * 100
+            )
+            ELSE 0
+          END,
+          2
+        ) AS trend,
         p.status,
         p.description,
         p.sku,
@@ -146,6 +183,45 @@ router.get("/:id", auth, async (req, res) => {
       `
       SELECT
         p.*,
+
+        ROUND(
+          CASE
+            WHEN (
+              SELECT COALESCE(SUM(s.quantity), 0)
+              FROM sales s
+              WHERE s.product_id = p.id
+                AND s.user_id = p.user_id
+                AND s.date >= CURRENT_DATE - INTERVAL '59 days'
+                AND s.date < CURRENT_DATE - INTERVAL '29 days'
+            ) > 0 THEN (
+              (
+                (
+                  SELECT COALESCE(SUM(s.quantity), 0)
+                  FROM sales s
+                  WHERE s.product_id = p.id
+                    AND s.user_id = p.user_id
+                    AND s.date >= CURRENT_DATE - INTERVAL '29 days'
+                ) - (
+                  SELECT COALESCE(SUM(s.quantity), 0)
+                  FROM sales s
+                  WHERE s.product_id = p.id
+                    AND s.user_id = p.user_id
+                    AND s.date >= CURRENT_DATE - INTERVAL '59 days'
+                    AND s.date < CURRENT_DATE - INTERVAL '29 days'
+                )
+              )::numeric / (
+                SELECT COALESCE(SUM(s.quantity), 0)
+                FROM sales s
+                WHERE s.product_id = p.id
+                  AND s.user_id = p.user_id
+                  AND s.date >= CURRENT_DATE - INTERVAL '59 days'
+                  AND s.date < CURRENT_DATE - INTERVAL '29 days'
+              ) * 100
+            )
+            ELSE 0
+          END,
+          2
+        ) AS trend,
 
         (
           SELECT COUNT(*)
@@ -248,7 +324,6 @@ router.put("/:id", auth, async (req, res) => {
       stock: "stock",
       description: "description",
       sku: "sku",
-      trend: "trend",
       revenue: "revenue",
     };
 
