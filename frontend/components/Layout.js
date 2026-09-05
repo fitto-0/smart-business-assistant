@@ -47,6 +47,7 @@ const adminNavItems = [
   { href: "/admin", label: "Admin dashboard", icon: ShieldCheck },
   { href: "/admin-users", label: "User management", icon: UserCog },
   { href: "/admin-settings", label: "System settings", icon: Settings },
+  { href: "/profile", label: "Profile", icon: User },
 ];
 
 export default function Layout({

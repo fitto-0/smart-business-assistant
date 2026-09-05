@@ -1,56 +1,82 @@
-import { useState, useEffect } from 'react';
-import { useRouter } from 'next/router';
-import Link from 'next/link';
-import { login, isAuthenticated } from '../lib/auth';
-import { useLanguage } from '../lib/LanguageContext';
-import toast from 'react-hot-toast';
-import { Eye, EyeOff, Zap, ArrowRight, ShieldCheck, TrendingUp, Brain } from 'lucide-react';
+import { useState, useEffect } from "react";
+import { useRouter } from "next/router";
+import Link from "next/link";
+import { login, isAuthenticated } from "../lib/auth";
+import { useLanguage } from "../lib/LanguageContext";
+import toast from "react-hot-toast";
+import {
+  Eye,
+  EyeOff,
+  Zap,
+  ArrowRight,
+  ShieldCheck,
+  TrendingUp,
+  Brain,
+} from "lucide-react";
 
 export default function LoginPage() {
   const { t } = useLanguage();
   const router = useRouter();
-  const [form, setForm] = useState({ email: 'demo@smartbusiness.com', password: 'demo123' });
+  const [form, setForm] = useState({
+    email: "demo@smartbusiness.com",
+    password: "demo123",
+  });
   const [showPwd, setShowPwd] = useState(false);
   const [loading, setLoading] = useState(false);
   const [requires2FA, setRequires2FA] = useState(false);
-  const [totpCode, setTotpCode] = useState('');
+  const [totpCode, setTotpCode] = useState("");
 
   const highlights = [
-    { icon: TrendingUp, text: t('login.realTimeAnalytics') },
-    { icon: Brain, text: t('login.aiPredictions') },
-    { icon: ShieldCheck, text: t('login.anomalyDetection') },
+    { icon: TrendingUp, text: t("login.realTimeAnalytics") },
+    { icon: Brain, text: t("login.aiPredictions") },
+    { icon: ShieldCheck, text: t("login.anomalyDetection") },
   ];
 
   useEffect(() => {
-    if (isAuthenticated()) router.push('/dashboard');
+    if (isAuthenticated()) router.push("/dashboard");
   }, [router]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
+
     try {
       if (requires2FA) {
-        // Submit with TOTP code
-        await login(form.email, form.password, totpCode);
-        toast.success(t('login.loginSuccess'));
-        router.push('/dashboard');
+        // Verify login with 2FA
+        const user = await login(form.email, form.password, totpCode);
+
+        toast.success(t("login.loginSuccess"));
+
+        // Redirect based on role
+        if (user?.role === "admin") {
+          router.push("/admin");
+        } else {
+          router.push("/dashboard");
+        }
       } else {
-        // First attempt - check if 2FA is required
+        // First login attempt
         try {
-          await login(form.email, form.password);
-          toast.success(t('login.loginSuccess'));
-          router.push('/dashboard');
+          const user = await login(form.email, form.password);
+
+          toast.success(t("login.loginSuccess"));
+
+          // Redirect based on role
+          if (user?.role === "admin") {
+            router.push("/admin");
+          } else {
+            router.push("/dashboard");
+          }
         } catch (err) {
-          if (err.message === 'Code 2FA requis' || err.requires2FA) {
+          if (err.message === "Code 2FA requis" || err.requires2FA) {
             setRequires2FA(true);
-            toast(t('login.twoFactorRequired'));
+            toast(t("login.twoFactorRequired"));
           } else {
             throw err;
           }
         }
       }
     } catch (err) {
-      toast.error(err.message || t('login.loginError'));
+      toast.error(err.message || t("login.loginError"));
     } finally {
       setLoading(false);
     }
@@ -73,11 +99,10 @@ export default function LoginPage() {
 
           <div>
             <h2 className="portal-heading text-3xl leading-tight mb-3">
-              {t('login.welcomeBack')} to your <span className="text-amber">intelligent</span> dashboard
+              {t("login.welcomeBack")} to your{" "}
+              <span className="text-amber">intelligent</span> dashboard
             </h2>
-            <p className="portal-text mb-8">
-              {t('login.salesDescription')}
-            </p>
+            <p className="portal-text mb-8">{t("login.salesDescription")}</p>
             <div className="space-y-3">
               {highlights.map(({ icon: Icon, text }) => (
                 <div key={text} className="flex items-center gap-3 portal-text">
@@ -90,7 +115,9 @@ export default function LoginPage() {
             </div>
           </div>
 
-          <p className="portal-label text-muted">© 2026 Smart Business Assistant</p>
+          <p className="portal-label text-muted">
+            © 2026 Smart Business Assistant
+          </p>
         </div>
 
         {/* Login card */}
@@ -106,20 +133,25 @@ export default function LoginPage() {
             </div>
           </div>
 
-          <h1 className="portal-heading text-2xl sm:text-3xl mb-2">{t('login.welcomeBack')}</h1>
-          <p className="portal-text mb-8">{t('login.signInToDashboard')}</p>
+          <h1 className="portal-heading text-2xl sm:text-3xl mb-2">
+            {t("login.welcomeBack")}
+          </h1>
+          <p className="portal-text mb-8">{t("login.signInToDashboard")}</p>
 
           {/* Demo badge */}
           <div className="flex items-center gap-2.5 rounded-xl border hairline bg-amber/10 px-4 py-3 mb-7">
             <Zap size={14} className="text-amber flex-shrink-0" />
             <p className="portal-label text-ink-secondary">
-              <strong>{t('login.demoAccount')}</strong> {t('login.demoCredentials')}
+              <strong>{t("login.demoAccount")}</strong>{" "}
+              {t("login.demoCredentials")}
             </p>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-5">
             <div>
-              <label className="block portal-label mb-2">{t('login.emailAddress')}</label>
+              <label className="block portal-label mb-2">
+                {t("login.emailAddress")}
+              </label>
               <input
                 type="email"
                 value={form.email}
@@ -130,12 +162,16 @@ export default function LoginPage() {
               />
             </div>
             <div>
-              <label className="block portal-label mb-2">{t('login.password')}</label>
+              <label className="block portal-label mb-2">
+                {t("login.password")}
+              </label>
               <div className="relative">
                 <input
-                  type={showPwd ? 'text' : 'password'}
+                  type={showPwd ? "text" : "password"}
                   value={form.password}
-                  onChange={(e) => setForm({ ...form, password: e.target.value })}
+                  onChange={(e) =>
+                    setForm({ ...form, password: e.target.value })
+                  }
                   className="w-full bg-ground-secondary border hairline rounded-xl px-4 py-3 text-ink placeholder-muted focus:outline-none focus:border-amber transition-colors pr-12"
                   placeholder="••••••••"
                   required
@@ -152,11 +188,15 @@ export default function LoginPage() {
             </div>
             {requires2FA && (
               <div>
-                <label className="block portal-label mb-2">{t('login.twoFactorCode')}</label>
+                <label className="block portal-label mb-2">
+                  {t("login.twoFactorCode")}
+                </label>
                 <input
                   type="text"
                   value={totpCode}
-                  onChange={(e) => setTotpCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
+                  onChange={(e) =>
+                    setTotpCode(e.target.value.replace(/\D/g, "").slice(0, 6))
+                  }
                   className="w-full bg-ground-secondary border hairline rounded-xl px-4 py-3 text-ink text-center text-2xl tracking-widest placeholder-muted focus:outline-none focus:border-amber transition-colors"
                   placeholder="000000"
                   maxLength={6}
@@ -164,24 +204,32 @@ export default function LoginPage() {
                 />
               </div>
             )}
-            <button type="submit" disabled={loading} className="portal-pill-btn w-full justify-center !py-3 text-base">
+            <button
+              type="submit"
+              disabled={loading}
+              className="portal-pill-btn w-full justify-center !py-3 text-base"
+            >
               {loading ? (
                 <>
                   <span className="animate-spin rounded-full h-4 w-4 border-2 border-amber border-t-transparent"></span>
-                  {requires2FA ? t('login.verifying') : t('login.signingIn')}
+                  {requires2FA ? t("login.verifying") : t("login.signingIn")}
                 </>
               ) : (
                 <>
-                  {requires2FA ? t('login.verifySignIn') : t('login.signIn')} <ArrowRight size={16} />
+                  {requires2FA ? t("login.verifySignIn") : t("login.signIn")}{" "}
+                  <ArrowRight size={16} />
                 </>
               )}
             </button>
           </form>
 
           <p className="mt-7 text-center portal-text">
-            {t('login.noAccount')}{' '}
-            <Link href="/register" className="text-amber hover:text-amber/80 font-semibold transition-colors">
-              {t('login.createAccount')}
+            {t("login.noAccount")}{" "}
+            <Link
+              href="/register"
+              className="text-amber hover:text-amber/80 font-semibold transition-colors"
+            >
+              {t("login.createAccount")}
             </Link>
           </p>
         </div>
