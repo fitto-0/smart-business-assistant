@@ -104,7 +104,7 @@ export default function Dashboard() {
   });
   const [monthlySales, setMonthlySales] = useState([]);
   const [categoryData, setCategoryData] = useState([]);
-  const [weeklyRevenue, setWeeklyRevenue] = useState([]);
+  const [topProducts, setTopProducts] = useState([]);
   const [anomalies, setAnomalies] = useState([]);
   const [recommendations, setRecommendations] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -116,7 +116,7 @@ export default function Dashboard() {
           apiGet("/sales/kpis"),
           apiGet("/sales/monthly"),
           apiGet("/sales/categories"),
-          apiGet("/sales/weekly"),
+          apiGet("/sales/top-products", { limit: 5 }),
           apiGet("/analysis/anomalies"),
           apiGet("/analysis/recommendations"),
         ]);
@@ -131,7 +131,7 @@ export default function Dashboard() {
         const salesKpis = getResponse(0, {});
         const monthly = getResponse(1, { data: [] });
         const categories = getResponse(2, { data: [] });
-        const weekly = getResponse(3, { data: [] });
+        const products = getResponse(3, { data: [] });
         const anomalyData = getResponse(4, { anomalies: [], stats: {} });
         const recData = getResponse(5, { recommendations: [] });
 
@@ -143,14 +143,7 @@ export default function Dashboard() {
         setKpis(derivedKpis);
         setMonthlySales(monthly?.data || []);
         setCategoryData(categories?.data || []);
-        setWeeklyRevenue(
-          (weekly?.data || []).map((item) => ({
-            jour: new Date(item.date).toLocaleDateString("fr-FR", {
-              weekday: "short",
-            }),
-            revenus: Number(item.revenue || 0),
-          })),
-        );
+        setTopProducts(products?.data || []);
         setAnomalies(anomalyData?.anomalies || []);
         setRecommendations(recData?.recommendations || []);
       } catch (error) {
@@ -340,42 +333,40 @@ export default function Dashboard() {
 
       {/* Bottom Row */}
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-4">
-        {/* Weekly Revenue */}
+        {/* Top Products */}
         <div className="bg-ground-secondary border hairline rounded-xl p-5">
           <div className="flex items-center justify-between mb-5">
             <div>
-              <h3 className="portal-heading text-base">{t('dashboard.charts.weeklyRevenue')}</h3>
-              <p className="portal-label mt-0.5">{t('dashboard.charts.thisWeek')}</p>
+              <h3 className="portal-heading text-base">Top Products</h3>
+              <p className="portal-label mt-0.5">Best performing products</p>
             </div>
+            <Link href="/products" className="portal-label text-amber hover:text-amber/80 flex items-center gap-1">
+              View all <ArrowRight size={12} />
+            </Link>
           </div>
-          <ResponsiveContainer width="100%" height={180}>
-            <BarChart data={weeklyRevenue} barSize={28}>
-              <CartesianGrid
-                strokeDasharray="3 3"
-                stroke="rgba(237,231,220,0.13)"
-                vertical={false}
-              />
-              <XAxis
-                dataKey="jour"
-                tick={{ fill: "#9EA5A8", fontSize: 11 }}
-                axisLine={false}
-                tickLine={false}
-              />
-              <YAxis
-                tick={{ fill: "#9EA5A8", fontSize: 11 }}
-                axisLine={false}
-                tickLine={false}
-                tickFormatter={(v) => `${v / 1000}k`}
-              />
-              <Tooltip content={<CustomTooltip />} />
-              <Bar
-                dataKey="revenus"
-                name="Revenue (DA)"
-                fill="#E8913C"
-                radius={[6, 6, 0, 0]}
-              />
-            </BarChart>
-          </ResponsiveContainer>
+          <div className="space-y-3">
+            {topProducts.length === 0 ? (
+              <p className="portal-label text-muted py-8 text-center">No sales data yet</p>
+            ) : (
+              topProducts.map((product, index) => (
+                <div key={product.id} className="flex items-center gap-3">
+                  <span className="w-7 h-7 rounded-lg bg-amber/15 text-amber flex items-center justify-center text-xs font-bold">
+                    {index + 1}
+                  </span>
+                  <div className="min-w-0 flex-1">
+                    <p className="portal-label font-semibold text-ink truncate">{product.name}</p>
+                    <p className="portal-label text-muted">{product.orders} orders</p>
+                  </div>
+                  <div className="text-right">
+                    <p className="portal-label font-semibold text-ink">{fmt(product.revenue)} DA</p>
+                    <p className={`portal-label font-semibold ${product.trend >= 0 ? "text-teal" : "text-red-400"}`}>
+                      {product.trend >= 0 ? "+" : ""}{product.trend}%
+                    </p>
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
         </div>
 
         {/* Anomalies */}

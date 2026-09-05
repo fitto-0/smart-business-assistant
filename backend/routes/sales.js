@@ -345,8 +345,8 @@ router.get("/weekly", auth, async (req, res) => {
         COALESCE(SUM(s.total_amount), 0)::numeric AS revenue,
         COUNT(s.id)::int AS orders
       FROM generate_series(
-        CURRENT_DATE - INTERVAL '6 days',
-        CURRENT_DATE,
+        date_trunc('week', CURRENT_DATE),
+        date_trunc('week', CURRENT_DATE) + INTERVAL '6 days',
         INTERVAL '1 day'
       ) AS days(day)
       LEFT JOIN sales s
