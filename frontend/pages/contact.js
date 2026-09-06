@@ -229,8 +229,8 @@ export default function ContactPage() {
                     </div>
                     <div>
                       <h3 className="font-semibold text-white mb-1">{t('contact.officeLabel')}</h3>
-                      <p className="text-gray-400 text-sm">123 Innovation Drive</p>
-                      <p className="text-gray-400 text-sm">San Francisco, CA 94102</p>
+                      <p className="text-gray-400 text-sm">123 somewhere</p>
+                      <p className="text-gray-400 text-sm">Tangier, Morocco</p>
                     </div>
                   </div>
                 </div>
