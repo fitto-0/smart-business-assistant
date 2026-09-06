@@ -48,22 +48,14 @@ export default function Chatbot() {
     setLoading(true);
 
     try {
-      const response = await fetch("http://localhost:8000/chatbot", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          question,
-          products,
-          history: messages.slice(-8).map((message) => ({
-            role: message.role === "bot" ? "assistant" : message.role,
-            content: message.text,
-          })),
-        }),
+      const data = await apiPost("/chatbot", {
+        question,
+        products,
+        history: messages.slice(-8).map((message) => ({
+          role: message.role === "bot" ? "assistant" : message.role,
+          content: message.text,
+        })),
       });
-
-      const data = await response.json();
-      if (!response.ok)
-        throw new Error(data.error || "The AI service rejected the request.");
       const botMessage = {
         role: "bot",
         text:

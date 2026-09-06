@@ -91,6 +91,17 @@ const migrate = async () => {
 
   await query(`
     ALTER TABLE products
+      ADD COLUMN IF NOT EXISTS cost_price NUMERIC(10, 2),
+      ADD COLUMN IF NOT EXISTS deleted_at TIMESTAMPTZ
+  `);
+
+  await query(`
+    CREATE INDEX IF NOT EXISTS idx_products_user_deleted
+      ON products(user_id, deleted_at)
+  `);
+
+  await query(`
+    ALTER TABLE products
       DROP CONSTRAINT IF EXISTS products_category_check
   `);
 

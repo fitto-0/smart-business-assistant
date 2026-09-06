@@ -67,6 +67,7 @@ router.get("/", auth, async (req, res) => {
       idx++;
     }
 
+    where.push("p.deleted_at IS NULL");
     const whereClause = `WHERE ${where.join(" AND ")}`;
 
     const sql = `
@@ -75,6 +76,10 @@ router.get("/", auth, async (req, res) => {
         p.name,
         p.category,
         p.price,
+        p.cost_price,
+        CASE WHEN p.cost_price IS NULL THEN NULL
+          ELSE ROUND((p.price - p.cost_price) / NULLIF(p.price, 0) * 100, 2)
+        END AS margin,
         p.stock,
         p.sold,
         p.revenue,
@@ -85,8 +90,8 @@ router.get("/", auth, async (req, res) => {
               FROM sales s
               WHERE s.product_id = p.id
                 AND s.user_id = p.user_id
-                AND s.date >= CURRENT_DATE - INTERVAL '59 days'
-                AND s.date < CURRENT_DATE - INTERVAL '29 days'
+                AND s.date >= CURRENT_DATE - INTERVAL '60 days'
+                AND s.date < CURRENT_DATE - INTERVAL '30 days'
             ) > 0 THEN (
               (
                 (
@@ -94,22 +99,22 @@ router.get("/", auth, async (req, res) => {
                   FROM sales s
                   WHERE s.product_id = p.id
                     AND s.user_id = p.user_id
-                    AND s.date >= CURRENT_DATE - INTERVAL '29 days'
+                    AND s.date >= CURRENT_DATE - INTERVAL '30 days'
                 ) - (
                   SELECT COALESCE(SUM(s.quantity), 0)
                   FROM sales s
                   WHERE s.product_id = p.id
                     AND s.user_id = p.user_id
-                    AND s.date >= CURRENT_DATE - INTERVAL '59 days'
-                    AND s.date < CURRENT_DATE - INTERVAL '29 days'
+                    AND s.date >= CURRENT_DATE - INTERVAL '60 days'
+                    AND s.date < CURRENT_DATE - INTERVAL '30 days'
                 )
               )::numeric / (
                 SELECT COALESCE(SUM(s.quantity), 0)
                 FROM sales s
                 WHERE s.product_id = p.id
                   AND s.user_id = p.user_id
-                  AND s.date >= CURRENT_DATE - INTERVAL '59 days'
-                  AND s.date < CURRENT_DATE - INTERVAL '29 days'
+                  AND s.date >= CURRENT_DATE - INTERVAL '60 days'
+                  AND s.date < CURRENT_DATE - INTERVAL '30 days'
               ) * 100
             )
             ELSE 0
@@ -183,6 +188,9 @@ router.get("/:id", auth, async (req, res) => {
       `
       SELECT
         p.*,
+        CASE WHEN p.cost_price IS NULL THEN NULL
+          ELSE ROUND((p.price - p.cost_price) / NULLIF(p.price, 0) * 100, 2)
+        END AS margin,
 
         ROUND(
           CASE
@@ -191,8 +199,8 @@ router.get("/:id", auth, async (req, res) => {
               FROM sales s
               WHERE s.product_id = p.id
                 AND s.user_id = p.user_id
-                AND s.date >= CURRENT_DATE - INTERVAL '59 days'
-                AND s.date < CURRENT_DATE - INTERVAL '29 days'
+                AND s.date >= CURRENT_DATE - INTERVAL '60 days'
+                AND s.date < CURRENT_DATE - INTERVAL '30 days'
             ) > 0 THEN (
               (
                 (
@@ -200,22 +208,22 @@ router.get("/:id", auth, async (req, res) => {
                   FROM sales s
                   WHERE s.product_id = p.id
                     AND s.user_id = p.user_id
-                    AND s.date >= CURRENT_DATE - INTERVAL '29 days'
+                    AND s.date >= CURRENT_DATE - INTERVAL '30 days'
                 ) - (
                   SELECT COALESCE(SUM(s.quantity), 0)
                   FROM sales s
                   WHERE s.product_id = p.id
                     AND s.user_id = p.user_id
-                    AND s.date >= CURRENT_DATE - INTERVAL '59 days'
-                    AND s.date < CURRENT_DATE - INTERVAL '29 days'
+                    AND s.date >= CURRENT_DATE - INTERVAL '60 days'
+                    AND s.date < CURRENT_DATE - INTERVAL '30 days'
                 )
               )::numeric / (
                 SELECT COALESCE(SUM(s.quantity), 0)
                 FROM sales s
                 WHERE s.product_id = p.id
                   AND s.user_id = p.user_id
-                  AND s.date >= CURRENT_DATE - INTERVAL '59 days'
-                  AND s.date < CURRENT_DATE - INTERVAL '29 days'
+                  AND s.date >= CURRENT_DATE - INTERVAL '60 days'
+                  AND s.date < CURRENT_DATE - INTERVAL '30 days'
               ) * 100
             )
             ELSE 0
@@ -240,6 +248,7 @@ router.get("/:id", auth, async (req, res) => {
       FROM products p
       WHERE p.id = $1
       AND p.user_id = $2
+      AND p.deleted_at IS NULL
       `,
       [parseInt(req.params.id), req.user.id],
     );
@@ -265,7 +274,7 @@ router.get("/:id", auth, async (req, res) => {
 // =====================================================
 router.post("/", auth, async (req, res) => {
   try {
-    const { name, category, price, stock, description, sku } = req.body;
+    const { name, category, price, cost_price, stock, description, sku } = req.body;
 
     if (!name || !category || price === undefined || stock === undefined) {
       return res.status(400).json({
@@ -280,19 +289,21 @@ router.post("/", auth, async (req, res) => {
           name,
           category,
           price,
+          cost_price,
           stock,
           description,
           sku,
           user_id
         )
       VALUES
-        ($1, $2, $3, $4, $5, $6, $7)
+        ($1, $2, $3, $4, $5, $6, $7, $8)
       RETURNING *
       `,
       [
         name.trim(),
         category,
         parseFloat(price),
+        cost_price === undefined || cost_price === null ? null : parseFloat(cost_price),
         parseInt(stock),
         description || null,
         sku || null,
@@ -324,6 +335,7 @@ router.put("/:id", auth, async (req, res) => {
       stock: "stock",
       description: "description",
       sku: "sku",
+      cost_price: "cost_price",
       revenue: "revenue",
     };
 
@@ -354,6 +366,7 @@ router.put("/:id", auth, async (req, res) => {
       SET ${updates.join(", ")}
       WHERE id = $${idx}
       AND user_id = $${idx + 1}
+      AND deleted_at IS NULL
       RETURNING *
       `,
       params,
@@ -382,9 +395,11 @@ router.delete("/:id", auth, async (req, res) => {
   try {
     const result = await query(
       `
-      DELETE FROM products
+      UPDATE products
+      SET deleted_at = NOW(), updated_at = NOW()
       WHERE id = $1
       AND user_id = $2
+      AND deleted_at IS NULL
       RETURNING id, name
       `,
       [parseInt(req.params.id), req.user.id],
@@ -430,6 +445,7 @@ router.post("/:id/restock", auth, async (req, res) => {
         updated_at = NOW()
       WHERE id = $2
       AND user_id = $3
+      AND deleted_at IS NULL
       RETURNING id, name, stock, status
       `,
       [quantity, parseInt(req.params.id), req.user.id],

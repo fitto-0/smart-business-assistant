@@ -87,7 +87,7 @@ export default function PredictionsPage() {
             <div className="flex flex-wrap gap-2 mt-3">
               <span className="portal-label bg-teal/10 text-teal px-2 py-1 rounded">Scikit-learn LinearRegression</span>
               <span className="portal-label bg-teal/10 text-teal px-2 py-1 rounded">Seasonality Analysis</span>
-              <span className="portal-label bg-teal/10 text-teal px-2 py-1 rounded">85% Confidence Interval</span>
+              <span className="portal-label bg-teal/10 text-teal px-2 py-1 rounded">Historical data + regression</span>
             </div>
           </div>
         </div>
@@ -118,8 +118,8 @@ export default function PredictionsPage() {
             <Zap size={20} className="text-ground" />
           </div>
           <div>
-            <p className="portal-label">Model Accuracy</p>
-            <p className="portal-heading text-xl">85.3%</p>
+            <p className="portal-label">Forecast Horizon</p>
+            <p className="portal-heading text-xl">{horizon} months</p>
           </div>
         </div>
         <div className="bg-ground-secondary border hairline rounded-xl p-4 flex items-center gap-4">
@@ -185,14 +185,13 @@ export default function PredictionsPage() {
                 <th className="portal-dates-header">Type</th>
                 <th className="portal-dates-header">Predicted Sales (DA)</th>
                 <th className="portal-dates-header">Growth vs Y-1</th>
-                <th className="portal-dates-header">Confidence</th>
+                <th className="portal-dates-header">Data basis</th>
               </tr>
             </thead>
             <tbody>
               {(predictions || []).slice(0, horizon).map((p, i) => {
                 const prev = monthlySales[i]?.actual || monthlySales[11]?.actual || 0;
                 const change = prev ? (((Number(p.value || 0) - prev) / prev) * 100).toFixed(1) : '0.0';
-                const confidence = 85 - i * 2;
                 return (
                   <tr key={p.month} className="hover:bg-ground/50 transition-colors">
                     <td className="portal-dates-cell portal-dates-cell-primary">{p.month}</td>
@@ -201,14 +200,7 @@ export default function PredictionsPage() {
                     <td className={`portal-dates-cell font-semibold ${parseFloat(change) >= 0 ? 'text-teal' : 'text-red-400'}`}>
                       {parseFloat(change) >= 0 ? '+' : ''}{change}%
                     </td>
-                    <td className="portal-dates-cell">
-                      <div className="flex items-center gap-2">
-                        <div className="w-16 bg-ground rounded-full h-1.5">
-                          <div className="h-1.5 rounded-full bg-teal" style={{ width: `${confidence}%` }} />
-                        </div>
-                        <span className="portal-label text-teal font-semibold">{confidence}%</span>
-                      </div>
-                    </td>
+                    <td className="portal-dates-cell portal-label">Monthly PostgreSQL aggregates</td>
                   </tr>
                 );
               })}

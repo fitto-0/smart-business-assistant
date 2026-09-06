@@ -436,11 +436,11 @@ router.get("/top-products", auth, async (req, res) => {
       LEFT JOIN LATERAL (
         SELECT
           COALESCE(SUM(quantity) FILTER (
-            WHERE date >= CURRENT_DATE - INTERVAL '29 days'
+            WHERE date >= CURRENT_DATE - INTERVAL '30 days'
           ), 0)::numeric AS current_units,
           COALESCE(SUM(quantity) FILTER (
-            WHERE date >= CURRENT_DATE - INTERVAL '59 days'
-              AND date < CURRENT_DATE - INTERVAL '29 days'
+            WHERE date >= CURRENT_DATE - INTERVAL '60 days'
+              AND date < CURRENT_DATE - INTERVAL '30 days'
           ), 0)::numeric AS previous_units
         FROM sales trend_sales
         WHERE trend_sales.product_id = p.id

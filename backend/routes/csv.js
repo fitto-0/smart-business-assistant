@@ -16,7 +16,7 @@ const AI_SERVICE_URL = process.env.AI_SERVICE_URL || "http://localhost:8000";
 // =====================================================
 // POST /api/csv/analyze
 // =====================================================
-router.post("/analyze", upload.single("file"), async (req, res) => {
+router.post("/analyze", auth, upload.single("file"), async (req, res) => {
   console.log("CSV analyze route hit");
   try {
     console.log("Request body:", req.body);

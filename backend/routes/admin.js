@@ -4,7 +4,7 @@ const { query, transaction } = require("../db/pool");
 const auth = require("../middleware/auth");
 
 const router = express.Router();
-router.use(auth, auth.requireRole("admin"));
+router.use(auth, auth.requireRole("admin", "manager"));
 
 router.get("/users", async (req, res) => {
   try {

@@ -27,6 +27,7 @@ app.use("/api/categories", require("./routes/categories"));
 app.use("/api/sales", require("./routes/sales"));
 app.use("/api/analysis", require("./routes/analysis"));
 app.use("/api/csv", require("./routes/csv"));
+app.use("/api/chatbot", require("./routes/chatbot"));
 app.use("/api/admin", require("./routes/admin"));
 
 console.log("Routes loaded:");
