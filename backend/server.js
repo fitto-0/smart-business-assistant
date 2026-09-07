@@ -17,11 +17,17 @@ app.use(
 app.use(express.json());
 app.use(morgan("dev"));
 
+// Apply default rate limiting to all routes
+const { defaultLimiter } = require("./middleware/rateLimit");
+app.use(defaultLimiter);
+
 // Serve static files (uploads)
 app.use("/uploads", express.static(path.join(__dirname, "../uploads")));
 
 // Routes
 app.use("/api/auth", require("./routes/auth"));
+app.use("/api/organizations", require("./routes/organizations"));
+app.use("/api/invitations", require("./routes/invitations"));
 app.use("/api/products", require("./routes/products"));
 app.use("/api/categories", require("./routes/categories"));
 app.use("/api/sales", require("./routes/sales"));
@@ -32,6 +38,7 @@ app.use("/api/admin", require("./routes/admin"));
 
 console.log("Routes loaded:");
 console.log("  /api/auth");
+console.log("  /api/organizations");
 console.log("  /api/products");
 console.log("  /api/sales");
 console.log("  /api/analysis");

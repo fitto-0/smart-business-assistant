@@ -21,6 +21,23 @@ services:
       timeout: 5s
       retries: 5
 
+  redis:
+    image: redis:7-alpine
+    container_name: smart-business-redis
+    restart: unless-stopped
+
+    ports:
+      - "6379:6379"
+
+    volumes:
+      - redis_data:/data
+
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
   backend:
     build:
       context: ./backend
@@ -38,11 +55,15 @@ services:
     environment:
       NODE_ENV: production
       DB_HOST: postgres
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
       AI_SERVICE_URL: http://ai:8000
       PORT: 5000
 
     depends_on:
       postgres:
+        condition: service_healthy
+      redis:
         condition: service_healthy
       ai:
         condition: service_started
@@ -85,3 +106,4 @@ services:
 
 volumes:
   postgres_data:
+  redis_data:

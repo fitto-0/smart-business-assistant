@@ -8,7 +8,10 @@ const QRCode = require("qrcode");
 const multer = require("multer");
 const path = require("path");
 const fs = require("fs");
+const crypto = require("crypto");
 const { query } = require("../db/pool");
+const { authLimiter, strictLimiter } = require("../middleware/rateLimit");
+const auth = require("../middleware/auth");
 
 // Configure multer for avatar uploads
 const storage = multer.diskStorage({
@@ -41,28 +44,46 @@ const upload = multer({
   },
 });
 
-// ⚠️ MUST match the secret used in middleware/auth.js (JWT verification).
-const JWT_SECRET =
-  process.env.JWT_SECRET || "aR2vT9xK8mNpQ4sW7zE6hJ3cL5yB1uF0dG8iV2nA";
+// JWT_SECRET must be set in environment variables
+const JWT_SECRET = process.env.JWT_SECRET;
 
+if (!JWT_SECRET) {
+  if (process.env.NODE_ENV === 'production') {
+    throw new Error('JWT_SECRET environment variable is required in production');
+  }
+  console.warn('⚠️  WARNING: JWT_SECRET not set. Using fallback for development only.');
+  console.warn('⚠️  Set JWT_SECRET in your .env file for security.');
+}
+
+const JWT_SECRET_FALLBACK = "aR2vT9xK8mNpQ4sW7zE6hJ3cL5yB1uF0dG8iV2nA"; // Only for development
 const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || "24h";
 
-const generateToken = (user) => {
+const generateToken = (user, organizationId = null) => {
+  const payload = {
+    id: user.id,
+    email: user.email,
+    role: user.role,
+  };
+  
+  if (organizationId) {
+    payload.organizationId = organizationId;
+  }
+  
   return jwt.sign(
-    {
-      id: user.id,
-      email: user.email,
-      role: user.role,
-    },
-    JWT_SECRET,
+    payload,
+    JWT_SECRET || JWT_SECRET_FALLBACK,
     {
       expiresIn: JWT_EXPIRES_IN,
     },
   );
 };
 
+const generateRefreshToken = () => {
+  return crypto.randomBytes(40).toString('hex');
+};
+
 // REGISTER
-router.post("/register", async (req, res) => {
+router.post("/register", authLimiter, async (req, res) => {
   try {
     const { name, email, password, company } = req.body;
 
@@ -125,7 +146,7 @@ router.post("/register", async (req, res) => {
 });
 
 // LOGIN
-router.post("/login", async (req, res) => {
+router.post("/login", authLimiter, async (req, res) => {
   try {
     const { email, password, totpCode } = req.body;
 
@@ -204,7 +225,19 @@ router.post("/login", async (req, res) => {
       [user.id, ipAddress, userAgent],
     );
 
-    const token = generateToken(user);
+    // Get user's organizations
+    const orgResult = await query(
+      `SELECT o.id, o.name, o.slug, om.role 
+       FROM organizations o
+       JOIN organization_members om ON o.id = om.organization_id
+       WHERE om.user_id = $1 AND om.status = 'active'
+       ORDER BY o.created_at ASC
+       LIMIT 1`,
+      [user.id]
+    );
+
+    const organizationId = orgResult.rowCount > 0 ? orgResult.rows[0].id : null;
+    const token = generateToken(user, organizationId);
 
     return res.json({
       token,
@@ -215,6 +248,7 @@ router.post("/login", async (req, res) => {
         company: user.company,
         role: user.role,
       },
+      organization: orgResult.rowCount > 0 ? orgResult.rows[0] : null,
     });
   } catch (err) {
     console.error("Erreur login:", err);
@@ -881,6 +915,476 @@ router.post("/disable-2fa", require("../middleware/auth"), async (req, res) => {
     console.error("Erreur disable-2fa:", err);
     return res.status(500).json({
       error: "Erreur serveur",
+    });
+  }
+});
+
+// SWITCH ORGANIZATION - Switch active organization context
+router.post("/switch-organization", require("../middleware/auth"), async (req, res) => {
+  try {
+    const { organizationId } = req.body;
+    const userId = req.user.id;
+
+    if (!organizationId) {
+      return res.status(400).json({
+        error: "Organization ID required",
+      });
+    }
+
+    // Verify user is member of this organization
+    const memberResult = await query(
+      `SELECT om.role, o.name, o.slug 
+       FROM organization_members om
+       JOIN organizations o ON om.organization_id = o.id
+       WHERE om.user_id = $1 AND om.organization_id = $2 AND om.status = 'active'`,
+      [userId, organizationId]
+    );
+
+    if (memberResult.rowCount === 0) {
+      return res.status(403).json({
+        error: "Not a member of this organization",
+      });
+    }
+
+    // Get user info for new token
+    const userResult = await query(
+      `SELECT id, name, email, company, role FROM users WHERE id = $1`,
+      [userId]
+    );
+
+    if (userResult.rowCount === 0) {
+      return res.status(404).json({
+        error: "User not found",
+      });
+    }
+
+    const user = userResult.rows[0];
+    const organization = memberResult.rows[0];
+
+    // Generate new token with organization context
+    const token = generateToken(user, organizationId);
+
+    return res.json({
+      token,
+      user: {
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        company: user.company,
+        role: user.role,
+      },
+      organization: {
+        id: organizationId,
+        name: organization.name,
+        slug: organization.slug,
+        role: organization.role,
+      },
+    });
+  } catch (err) {
+    console.error("Error switching organization:", err);
+    return res.status(500).json({
+      error: "Error switching organization",
+    });
+  }
+});
+
+// REFRESH TOKEN - Get new access token using refresh token
+router.post("/refresh-token", async (req, res) => {
+  try {
+    const { refreshToken } = req.body;
+
+    if (!refreshToken) {
+      return res.status(400).json({
+        error: "Refresh token required",
+      });
+    }
+
+    // Look up refresh token in database
+    const tokenResult = await query(
+      `SELECT rt.*, u.id as user_id, u.email, u.name, u.company, u.role, o.id as organization_id
+       FROM refresh_tokens rt
+       JOIN users u ON rt.user_id = u.id
+       LEFT JOIN organization_members om ON u.id = om.user_id AND om.status = 'active'
+       LEFT JOIN organizations o ON om.organization_id = o.id
+       WHERE rt.token = $1 AND rt.is_revoked = FALSE`,
+      [refreshToken]
+    );
+
+    if (tokenResult.rowCount === 0) {
+      return res.status(401).json({
+        error: "Invalid or expired refresh token",
+      });
+    }
+
+    const tokenData = tokenResult.rows[0];
+
+    // Check if token is expired
+    if (new Date(tokenData.expires_at) < new Date()) {
+      await query(
+        `UPDATE refresh_tokens SET is_revoked = TRUE WHERE id = $1`,
+        [tokenData.id]
+      );
+      return res.status(401).json({
+        error: "Refresh token expired",
+      });
+    }
+
+    // Generate new access token
+    const user = {
+      id: tokenData.user_id,
+      email: tokenData.email,
+      name: tokenData.name,
+      company: tokenData.company,
+      role: tokenData.role,
+    };
+
+    const organizationId = tokenData.organization_id;
+    const newToken = generateToken(user, organizationId);
+
+    // Generate new refresh token (rotate tokens for security)
+    const newRefreshToken = generateRefreshToken();
+    const refreshExpiresAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000); // 30 days
+
+    // Revoke old refresh token
+    await query(
+      `UPDATE refresh_tokens SET is_revoked = TRUE WHERE id = $1`,
+      [tokenData.id]
+    );
+
+    // Create new refresh token
+    await query(
+      `INSERT INTO refresh_tokens (user_id, organization_id, token, expires_at)
+       VALUES ($1, $2, $3, $4)`,
+      [user.id, organizationId, newRefreshToken, refreshExpiresAt]
+    );
+
+    return res.json({
+      token: newToken,
+      refreshToken: newRefreshToken,
+      user: {
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        company: user.company,
+        role: user.role,
+      },
+      organization: organizationId ? {
+        id: organizationId,
+      } : null,
+    });
+  } catch (err) {
+    console.error("Error refreshing token:", err);
+    return res.status(500).json({
+      error: "Error refreshing token",
+    });
+  }
+});
+
+// REVOKE REFRESH TOKEN - Logout and revoke refresh token
+router.post("/revoke-token", require("../middleware/auth"), async (req, res) => {
+  try {
+    const { refreshToken } = req.body;
+    const userId = req.user.id;
+
+    if (!refreshToken) {
+      return res.status(400).json({
+        error: "Refresh token required",
+      });
+    }
+
+    // Revoke the refresh token
+    const result = await query(
+      `UPDATE refresh_tokens 
+       SET is_revoked = TRUE, revoked_at = NOW()
+       WHERE token = $1 AND user_id = $2`,
+      [refreshToken, userId]
+    );
+
+    if (result.rowCount === 0) {
+      return res.status(404).json({
+        error: "Refresh token not found",
+      });
+    }
+
+    return res.json({
+      message: "Token revoked successfully",
+    });
+  } catch (err) {
+    console.error("Error revoking token:", err);
+    return res.status(500).json({
+      error: "Error revoking token",
+    });
+  }
+});
+
+// REVOKE ALL TOKENS - Logout from all devices
+router.post("/revoke-all-tokens", require("../middleware/auth"), async (req, res) => {
+  try {
+    const userId = req.user.id;
+
+    // Revoke all refresh tokens for this user
+    await query(
+      `UPDATE refresh_tokens 
+       SET is_revoked = TRUE, revoked_at = NOW()
+       WHERE user_id = $1 AND is_revoked = FALSE`,
+      [userId]
+    );
+
+    return res.json({
+      message: "All tokens revoked successfully",
+    });
+  } catch (err) {
+    console.error("Error revoking all tokens:", err);
+    return res.status(500).json({
+      error: "Error revoking all tokens",
+    });
+  }
+});
+
+// REQUEST PASSWORD RESET
+router.post("/request-password-reset", strictLimiter, async (req, res) => {
+  try {
+    const { email } = req.body;
+
+    if (!email) {
+      return res.status(400).json({
+        error: "Email required",
+      });
+    }
+
+    const normalizedEmail = email.trim().toLowerCase();
+
+    // Check if user exists
+    const userResult = await query(
+      `SELECT id, name FROM users WHERE email = $1`,
+      [normalizedEmail]
+    );
+
+    if (userResult.rowCount === 0) {
+      // Don't reveal if email exists or not for security
+      return res.json({
+        message: "If the email exists, a password reset link will be sent",
+      });
+    }
+
+    const user = userResult.rows[0];
+
+    // Generate reset token
+    const token = generateRefreshToken();
+    const expiresAt = new Date(Date.now() + 1 * 60 * 60 * 1000); // 1 hour
+
+    // Delete any existing reset tokens for this user
+    await query(
+      `DELETE FROM password_reset_tokens WHERE user_id = $1`,
+      [user.id]
+    );
+
+    // Store reset token
+    await query(
+      `INSERT INTO password_reset_tokens (user_id, token, expires_at)
+       VALUES ($1, $2, $3)`,
+      [user.id, token, expiresAt]
+    );
+
+    // TODO: Send password reset email
+    console.log(`Password reset email would be sent to ${normalizedEmail} with token ${token}`);
+
+    return res.json({
+      message: "If the email exists, a password reset link will be sent",
+    });
+  } catch (err) {
+    console.error("Error requesting password reset:", err);
+    return res.status(500).json({
+      error: "Error requesting password reset",
+    });
+  }
+});
+
+// RESET PASSWORD
+router.post("/reset-password", strictLimiter, async (req, res) => {
+  try {
+    const { token, newPassword } = req.body;
+
+    if (!token || !newPassword) {
+      return res.status(400).json({
+        error: "Token and new password required",
+      });
+    }
+
+    if (newPassword.length < 6) {
+      return res.status(400).json({
+        error: "Password must be at least 6 characters",
+      });
+    }
+
+    // Look up reset token
+    const tokenResult = await query(
+      `SELECT prt.*, u.id as user_id
+       FROM password_reset_tokens prt
+       JOIN users u ON prt.user_id = u.id
+       WHERE prt.token = $1 AND prt.used_at IS NULL`,
+      [token]
+    );
+
+    if (tokenResult.rowCount === 0) {
+      return res.status(400).json({
+        error: "Invalid or expired reset token",
+      });
+    }
+
+    const tokenData = tokenResult.rows[0];
+
+    // Check if token is expired
+    if (new Date(tokenData.expires_at) < new Date()) {
+      return res.status(400).json({
+        error: "Reset token has expired",
+      });
+    }
+
+    // Hash new password
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+    // Update user password
+    await query(
+      `UPDATE users 
+       SET password_hash = $1, password_last_changed = NOW()
+       WHERE id = $2`,
+      [hashedPassword, tokenData.user_id]
+    );
+
+    // Mark token as used
+    await query(
+      `UPDATE password_reset_tokens 
+       SET used_at = NOW()
+       WHERE id = $1`,
+      [tokenData.id]
+    );
+
+    // Revoke all refresh tokens for this user (force re-login)
+    await query(
+      `UPDATE refresh_tokens 
+       SET is_revoked = TRUE, revoked_at = NOW()
+       WHERE user_id = $1 AND is_revoked = FALSE`,
+      [tokenData.user_id]
+    );
+
+    return res.json({
+      message: "Password reset successfully",
+    });
+  } catch (err) {
+    console.error("Error resetting password:", err);
+    return res.status(500).json({
+      error: "Error resetting password",
+    });
+  }
+});
+
+// REQUEST EMAIL VERIFICATION
+router.post("/request-email-verification", auth, async (req, res) => {
+  try {
+    const userId = req.user.id;
+
+    // Get user email
+    const userResult = await query(
+      `SELECT id, name, email FROM users WHERE id = $1`,
+      [userId]
+    );
+
+    if (userResult.rowCount === 0) {
+      return res.status(404).json({
+        error: "User not found",
+      });
+    }
+
+    const user = userResult.rows[0];
+
+    // Generate verification token
+    const token = generateRefreshToken();
+    const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
+
+    // Delete any existing verification tokens for this user
+    await query(
+      `DELETE FROM email_verification_tokens WHERE user_id = $1`,
+      [user.id]
+    );
+
+    // Store verification token
+    await query(
+      `INSERT INTO email_verification_tokens (user_id, email, token, expires_at)
+       VALUES ($1, $2, $3, $4)`,
+      [user.id, user.email, token, expiresAt]
+    );
+
+    // TODO: Send verification email
+    console.log(`Email verification would be sent to ${user.email} with token ${token}`);
+
+    return res.json({
+      message: "Verification email sent",
+    });
+  } catch (err) {
+    console.error("Error requesting email verification:", err);
+    return res.status(500).json({
+      error: "Error requesting email verification",
+    });
+  }
+});
+
+// VERIFY EMAIL
+router.post("/verify-email", async (req, res) => {
+  try {
+    const { token } = req.body;
+
+    if (!token) {
+      return res.status(400).json({
+        error: "Verification token required",
+      });
+    }
+
+    // Look up verification token
+    const tokenResult = await query(
+      `SELECT evt.*, u.id as user_id
+       FROM email_verification_tokens evt
+       JOIN users u ON evt.user_id = u.id
+       WHERE evt.token = $1 AND evt.verified_at IS NULL`,
+      [token]
+    );
+
+    if (tokenResult.rowCount === 0) {
+      return res.status(400).json({
+        error: "Invalid or expired verification token",
+      });
+    }
+
+    const tokenData = tokenResult.rows[0];
+
+    // Check if token is expired
+    if (new Date(tokenData.expires_at) < new Date()) {
+      return res.status(400).json({
+        error: "Verification token has expired",
+      });
+    }
+
+    // Mark token as verified
+    await query(
+      `UPDATE email_verification_tokens 
+       SET verified_at = NOW()
+       WHERE id = $1`,
+      [tokenData.id]
+    );
+
+    // TODO: Update user email_verified_at field if you add it to users table
+    // await query(
+    //   `UPDATE users SET email_verified_at = NOW() WHERE id = $1`,
+    //   [tokenData.user_id]
+    // );
+
+    return res.json({
+      message: "Email verified successfully",
+    });
+  } catch (err) {
+    console.error("Error verifying email:", err);
+    return res.status(500).json({
+      error: "Error verifying email",
     });
   }
 });
