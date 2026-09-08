@@ -12,6 +12,7 @@ const crypto = require("crypto");
 const { query } = require("../db/pool");
 const { authLimiter, strictLimiter } = require("../middleware/rateLimit");
 const auth = require("../middleware/auth");
+const { sendPasswordReset, sendEmailVerification } = require("../lib/email");
 
 // Configure multer for avatar uploads
 const storage = multer.diskStorage({
@@ -1186,8 +1187,14 @@ router.post("/request-password-reset", strictLimiter, async (req, res) => {
       [user.id, token, expiresAt]
     );
 
-    // TODO: Send password reset email
-    console.log(`Password reset email would be sent to ${normalizedEmail} with token ${token}`);
+    // Send password reset email
+    const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
+    const resetUrl = `${frontendUrl}/reset-password?token=${token}`;
+    
+    await sendPasswordReset(normalizedEmail, {
+      resetUrl,
+      expiryHours: 1,
+    });
 
     return res.json({
       message: "If the email exists, a password reset link will be sent",
@@ -1315,8 +1322,14 @@ router.post("/request-email-verification", auth, async (req, res) => {
       [user.id, user.email, token, expiresAt]
     );
 
-    // TODO: Send verification email
-    console.log(`Email verification would be sent to ${user.email} with token ${token}`);
+    // Send verification email
+    const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
+    const verifyUrl = `${frontendUrl}/verify-email?token=${token}`;
+    
+    await sendEmailVerification(user.email, {
+      verifyUrl,
+      expiryHours: 24,
+    });
 
     return res.json({
       message: "Verification email sent",

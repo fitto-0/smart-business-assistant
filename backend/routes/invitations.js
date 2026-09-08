@@ -6,6 +6,7 @@ const { query } = require("../db/pool");
 const auth = require("../middleware/auth");
 const { requirePermission, requireOwnerOrAdmin } = require("../middleware/permissions");
 const { createAuditLog } = require("../middleware/audit");
+const { sendInvitation } = require("../lib/email");
 
 /**
  * Generate a secure invitation token
@@ -119,9 +120,28 @@ router.post(
         userAgent: req.headers['user-agent'],
       });
 
-      // TODO: Send invitation email
-      // This would integrate with an email service like SendGrid, Mailgun, or AWS SES
-      console.log(`Invitation email would be sent to ${email} with token ${token}`);
+      // Get organization and inviter info for email
+      const orgInfo = await query(
+        `SELECT name FROM organizations WHERE id = $1`,
+        [organizationId]
+      );
+      const inviterInfo = await query(
+        `SELECT name FROM users WHERE id = $1`,
+        [userId]
+      );
+
+      // Send invitation email
+      const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
+      const acceptUrl = `${frontendUrl}/invitations/accept?token=${token}`;
+      const declineUrl = `${frontendUrl}/invitations/decline?token=${token}`;
+      
+      await sendInvitation(email, {
+        organizationName: orgInfo.rows[0]?.name || 'Organization',
+        inviterName: inviterInfo.rows[0]?.name || 'Team Member',
+        role,
+        acceptUrl,
+        declineUrl,
+      });
 
       return res.status(201).json({
         message: "Invitation sent successfully",

@@ -1038,6 +1038,413 @@ router.put("/recommendations/:id/toggle", auth, async (req, res) => {
 });
 
 // =====================================================
+// GET /api/analysis/profit-margin
+// Profit and margin analysis
+// =====================================================
+router.get("/profit-margin", auth, async (req, res) => {
+  try {
+    const { startDate, endDate, productId } = req.query;
+    const organizationId = req.organizationId || req.user.id;
+
+    let whereClause = "WHERE s.organization_id = $1";
+    const params = [organizationId];
+    let paramIndex = 2;
+
+    if (startDate) {
+      whereClause += ` AND s.sale_date >= $${paramIndex}`;
+      params.push(startDate);
+      paramIndex++;
+    }
+
+    if (endDate) {
+      whereClause += ` AND s.sale_date <= $${paramIndex}`;
+      params.push(endDate);
+      paramIndex++;
+    }
+
+    if (productId) {
+      whereClause += ` AND s.product_id = $${paramIndex}`;
+      params.push(productId);
+      paramIndex++;
+    }
+
+    // Overall profit and margin
+    const overall = await query(
+      `
+      SELECT
+        COUNT(DISTINCT s.id) as total_sales,
+        SUM(s.quantity) as total_quantity,
+        SUM(s.total_amount) as total_revenue,
+        SUM(p.cost * s.quantity) as total_cost,
+        SUM(s.total_amount - p.cost * s.quantity) as total_profit,
+        ROUND(
+          (SUM(s.total_amount - p.cost * s.quantity) / NULLIF(SUM(s.total_amount), 0)) * 100,
+          2
+        ) as profit_margin_percentage
+      FROM sales s
+      LEFT JOIN products p ON s.product_id = p.id
+      ${whereClause}
+      `,
+      params
+    );
+
+    // Profit by product
+    const byProduct = await query(
+      `
+      SELECT
+        p.id,
+        p.name,
+        p.category,
+        COUNT(s.id) as sales_count,
+        SUM(s.quantity) as total_quantity,
+        SUM(s.total_amount) as revenue,
+        SUM(p.cost * s.quantity) as cost,
+        SUM(s.total_amount - p.cost * s.quantity) as profit,
+        ROUND(
+          (SUM(s.total_amount - p.cost * s.quantity) / NULLIF(SUM(s.total_amount), 0)) * 100,
+          2
+        ) as margin_percentage
+      FROM sales s
+      LEFT JOIN products p ON s.product_id = p.id
+      ${whereClause}
+      GROUP BY p.id, p.name, p.category
+      ORDER BY profit DESC
+      `,
+      params
+    );
+
+    // Profit by month
+    const byMonth = await query(
+      `
+      SELECT
+        DATE_TRUNC('month', s.sale_date) as month,
+        COUNT(DISTINCT s.id) as sales_count,
+        SUM(s.total_amount) as revenue,
+        SUM(p.cost * s.quantity) as cost,
+        SUM(s.total_amount - p.cost * s.quantity) as profit,
+        ROUND(
+          (SUM(s.total_amount - p.cost * s.quantity) / NULLIF(SUM(s.total_amount), 0)) * 100,
+          2
+        ) as margin_percentage
+      FROM sales s
+      LEFT JOIN products p ON s.product_id = p.id
+      ${whereClause}
+      GROUP BY DATE_TRUNC('month', s.sale_date)
+      ORDER BY month DESC
+      LIMIT 12
+      `,
+      params
+    );
+
+    return res.json({
+      overall: overall.rows[0],
+      byProduct: byProduct.rows,
+      byMonth: byMonth.rows,
+    });
+  } catch (err) {
+    console.error("Error GET /profit-margin:", err);
+    return res.status(500).json({ error: "Error fetching profit margin data" });
+  }
+});
+
+// =====================================================
+// GET /api/analysis/customer-ltv
+// Customer lifetime value analysis
+// =====================================================
+router.get("/customer-ltv", auth, async (req, res) => {
+  try {
+    const { startDate, endDate } = req.query;
+    const organizationId = req.organizationId || req.user.id;
+
+    let whereClause = "WHERE organization_id = $1";
+    const params = [organizationId];
+    let paramIndex = 2;
+
+    if (startDate) {
+      whereClause += ` AND sale_date >= $${paramIndex}`;
+      params.push(startDate);
+      paramIndex++;
+    }
+
+    if (endDate) {
+      whereClause += ` AND sale_date <= $${paramIndex}`;
+      params.push(endDate);
+      paramIndex++;
+    }
+
+    // Customer LTV metrics
+    const metrics = await query(
+      `
+      SELECT
+        COUNT(DISTINCT customer_email) as total_customers,
+        SUM(total_amount) as total_revenue,
+        SUM(total_amount) / COUNT(DISTINCT customer_email) as average_ltv,
+        AVG(total_amount) as average_order_value,
+        COUNT(id) / COUNT(DISTINCT customer_email) as average_orders_per_customer
+      FROM sales
+      ${whereClause}
+      AND customer_email IS NOT NULL
+      `,
+      params
+    );
+
+    // LTV by customer
+    const byCustomer = await query(
+      `
+      SELECT
+        customer_email,
+        customer_name,
+        COUNT(id) as order_count,
+        SUM(total_amount) as total_spent,
+        AVG(total_amount) as average_order_value,
+        MIN(sale_date) as first_purchase,
+        MAX(sale_date) as last_purchase,
+        EXTRACT(DAY FROM (MAX(sale_date) - MIN(sale_date))) as days_active
+      FROM sales
+      ${whereClause}
+      AND customer_email IS NOT NULL
+      GROUP BY customer_email, customer_name
+      ORDER BY total_spent DESC
+      LIMIT 50
+      `,
+      params
+    );
+
+    // Customer segments
+    const segments = await query(
+      `
+      SELECT
+        CASE
+          WHEN total_spent >= 1000 THEN 'High Value'
+          WHEN total_spent >= 500 THEN 'Medium Value'
+          ELSE 'Low Value'
+        END as segment,
+        COUNT(*) as customer_count,
+        SUM(total_spent) as total_revenue,
+        AVG(total_spent) as average_ltv
+      FROM (
+        SELECT
+          customer_email,
+          SUM(total_amount) as total_spent
+        FROM sales
+        ${whereClause}
+        AND customer_email IS NOT NULL
+        GROUP BY customer_email
+      ) customer_data
+      GROUP BY segment
+      ORDER BY
+        CASE segment
+          WHEN 'High Value' THEN 1
+          WHEN 'Medium Value' THEN 2
+          ELSE 3
+        END
+      `,
+      params
+    );
+
+    return res.json({
+      metrics: metrics.rows[0],
+      byCustomer: byCustomer.rows,
+      segments: segments.rows,
+    });
+  } catch (err) {
+    console.error("Error GET /customer-ltv:", err);
+    return res.status(500).json({ error: "Error fetching customer LTV data" });
+  }
+});
+
+// =====================================================
+// GET /api/analysis/cohort
+// Cohort analysis
+// =====================================================
+router.get("/cohort", auth, async (req, res) => {
+  try {
+    const organizationId = req.organizationId || req.user.id;
+
+    // Get first purchase date for each customer
+    const firstPurchases = await query(
+      `
+      SELECT
+        customer_email,
+        DATE_TRUNC('month', MIN(sale_date)) as cohort_month
+      FROM sales
+      WHERE organization_id = $1
+      AND customer_email IS NOT NULL
+      GROUP BY customer_email
+      `,
+      [organizationId]
+    );
+
+    // Build cohort retention matrix
+    const cohortData = [];
+    const cohorts = {};
+
+    for (const customer of firstPurchases.rows) {
+      const cohortKey = customer.cohort_month.toISOString().slice(0, 7);
+      if (!cohorts[cohortKey]) {
+        cohorts[cohortKey] = {
+          month: cohortKey,
+          customers: [],
+        };
+      }
+      cohorts[cohortKey].customers.push(customer.customer_email);
+    }
+
+    // Calculate retention for each cohort
+    for (const cohortKey in cohorts) {
+      const cohort = cohorts[cohortKey];
+      const cohortCustomers = cohort.customers;
+      const cohortSize = cohortCustomers.length;
+
+      const retention = await query(
+        `
+        SELECT
+          EXTRACT(MONTH FROM AGE(DATE_TRUNC('month', s.sale_date), DATE_TRUNC('month', $1::date))) as month_offset,
+          COUNT(DISTINCT s.customer_email) as active_customers
+        FROM sales s
+        WHERE s.customer_email = ANY($2)
+        AND s.organization_id = $3
+        GROUP BY month_offset
+        ORDER BY month_offset
+        `,
+        [cohortKey + '-01', cohortCustomers, organizationId]
+      );
+
+      const retentionData = {
+        cohort: cohortKey,
+        size: cohortSize,
+        retention: {},
+      };
+
+      for (const row of retention.rows) {
+        retentionData.retention[row.month_offset] = {
+          active: parseInt(row.active_customers),
+          percentage: ((row.active_customers / cohortSize) * 100).toFixed(1),
+        };
+      }
+
+      cohortData.push(retentionData);
+    }
+
+    cohortData.sort((a, b) => b.cohort.localeCompare(a.cohort));
+
+    return res.json({
+      cohorts: cohortData,
+    });
+  } catch (err) {
+    console.error("Error GET /cohort:", err);
+    return res.status(500).json({ error: "Error fetching cohort analysis data" });
+  }
+});
+
+// =====================================================
+// GET /api/analysis/inventory-forecast
+// Inventory forecasting
+// =====================================================
+router.get("/inventory-forecast", auth, async (req, res) => {
+  try {
+    const { days = 30 } = req.query;
+    const organizationId = req.organizationId || req.user.id;
+
+    // Get products with sales history
+    const products = await query(
+      `
+      SELECT
+        p.id,
+        p.name,
+        p.stock,
+        p.category,
+        COALESCE(SUM(s.quantity), 0) as total_sold,
+        COALESCE(AVG(s.quantity), 0) as avg_daily_sales,
+        COALESCE(
+          SUM(s.quantity) / NULLIF(
+            EXTRACT(DAY FROM (MAX(s.sale_date) - MIN(s.sale_date))) + 1,
+            0
+          ),
+          0
+        ) as daily_sales_rate
+      FROM products p
+      LEFT JOIN sales s ON p.id = s.product_id
+      AND s.organization_id = p.organization_id
+      AND s.sale_date >= NOW() - INTERVAL '90 days'
+      WHERE p.organization_id = $1
+      GROUP BY p.id, p.name, p.stock, p.category
+      HAVING COALESCE(SUM(s.quantity), 0) > 0
+      `,
+      [organizationId]
+    );
+
+    const forecastData = products.rows.map(product => {
+      const dailySalesRate = parseFloat(product.daily_sales_rate) || 0;
+      const forecastDays = parseInt(days);
+      const projectedSales = dailySalesRate * forecastDays;
+      const daysUntilStockout = dailySalesRate > 0 
+        ? Math.floor(product.stock / dailySalesRate) 
+        : null;
+      
+      let stockStatus = 'healthy';
+      if (product.stock === 0) {
+        stockStatus = 'out_of_stock';
+      } else if (daysUntilStockout !== null && daysUntilStockout <= 7) {
+        stockStatus = 'critical';
+      } else if (daysUntilStockout !== null && daysUntilStockout <= 14) {
+        stockStatus = 'low';
+      } else if (daysUntilStockout !== null && daysUntilStockout <= 30) {
+        stockStatus = 'warning';
+      }
+
+      return {
+        id: product.id,
+        name: product.name,
+        category: product.category,
+        currentStock: parseInt(product.stock),
+        totalSold: parseInt(product.total_sold),
+        avgDailySales: parseFloat(product.avg_daily_sales).toFixed(2),
+        dailySalesRate: dailySalesRate.toFixed(2),
+        projectedSales: Math.round(projectedSales),
+        daysUntilStockout,
+        stockStatus,
+        recommendedOrder: daysUntilStockout !== null && daysUntilStockout < forecastDays
+          ? Math.ceil(projectedSales - product.stock)
+          : 0,
+      };
+    });
+
+    // Sort by stock status priority
+    const statusPriority = {
+      'out_of_stock': 0,
+      'critical': 1,
+      'low': 2,
+      'warning': 3,
+      'healthy': 4,
+    };
+
+    forecastData.sort((a, b) => {
+      return statusPriority[a.stockStatus] - statusPriority[b.stockStatus];
+    });
+
+    // Summary stats
+    const summary = {
+      totalProducts: forecastData.length,
+      outOfStock: forecastData.filter(p => p.stockStatus === 'out_of_stock').length,
+      critical: forecastData.filter(p => p.stockStatus === 'critical').length,
+      low: forecastData.filter(p => p.stockStatus === 'low').length,
+      warning: forecastData.filter(p => p.stockStatus === 'warning').length,
+      healthy: forecastData.filter(p => p.stockStatus === 'healthy').length,
+    };
+
+    return res.json({
+      forecast: forecastData,
+      summary,
+      forecastDays: parseInt(days),
+    });
+  } catch (err) {
+    console.error("Error GET /inventory-forecast:", err);
+    return res.status(500).json({ error: "Error fetching inventory forecast data" });
+  }
+});
+
+// =====================================================
 // POST /api/analysis/reviews/import
 // Import reviews from CSV file
 // =====================================================

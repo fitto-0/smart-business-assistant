@@ -152,6 +152,31 @@ CREATE INDEX IF NOT EXISTS idx_email_verify_user ON email_verification_tokens(us
 CREATE INDEX IF NOT EXISTS idx_email_verify_token ON email_verification_tokens(token);
 CREATE INDEX IF NOT EXISTS idx_email_verify_expires ON email_verification_tokens(expires_at);
 
+-- ===================== TABLE INTEGRATIONS =====================
+CREATE TABLE IF NOT EXISTS integrations (
+    id SERIAL PRIMARY KEY,
+    organization_id INTEGER NOT NULL REFERENCES organizations(id) ON DELETE CASCADE,
+    user_id INTEGER REFERENCES users(id) ON DELETE SET NULL,
+    type VARCHAR(50) NOT NULL CHECK (type IN ('shopify', 'woocommerce', 'stripe', 'google_sheets')),
+    shop_url VARCHAR(255),
+    shop_name VARCHAR(255),
+    access_token TEXT,
+    refresh_token TEXT,
+    api_key VARCHAR(255),
+    api_secret VARCHAR(255),
+    branch_id INTEGER REFERENCES branches(id) ON DELETE SET NULL,
+    status VARCHAR(20) DEFAULT 'active' CHECK (status IN ('active', 'inactive', 'error')),
+    settings JSONB DEFAULT '{}',
+    last_sync_at TIMESTAMPTZ,
+    sync_frequency VARCHAR(20) DEFAULT 'daily' CHECK (sync_frequency IN ('hourly', 'daily', 'weekly', 'manual')),
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_integrations_org ON integrations(organization_id);
+CREATE INDEX IF NOT EXISTS idx_integrations_type ON integrations(type);
+CREATE INDEX IF NOT EXISTS idx_integrations_status ON integrations(status);
+
 -- ===================== TRIGGERS FOR UPDATED_AT =====================
 CREATE OR REPLACE FUNCTION update_updated_at_column()
 RETURNS TRIGGER AS $$
@@ -177,6 +202,12 @@ CREATE TRIGGER update_organization_members_updated_at
 DROP TRIGGER IF EXISTS update_branches_updated_at ON branches;
 CREATE TRIGGER update_branches_updated_at
     BEFORE UPDATE ON branches
+    FOR EACH ROW
+    EXECUTE FUNCTION update_updated_at_column();
+
+DROP TRIGGER IF EXISTS update_integrations_updated_at ON integrations;
+CREATE TRIGGER update_integrations_updated_at
+    BEFORE UPDATE ON integrations
     FOR EACH ROW
     EXECUTE FUNCTION update_updated_at_column();
 
@@ -314,6 +345,28 @@ CREATE INDEX IF NOT EXISTS idx_products_branch ON products(branch_id);
 
 ALTER TABLE sales ADD COLUMN IF NOT EXISTS branch_id INTEGER REFERENCES branches(id) ON DELETE SET NULL;
 CREATE INDEX IF NOT EXISTS idx_sales_branch ON sales(branch_id);
+
+-- ===================== ADD SHOPIFY FIELDS TO PRODUCTS AND SALES =====================
+ALTER TABLE products ADD COLUMN IF NOT EXISTS shopify_product_id BIGINT;
+ALTER TABLE products ADD COLUMN IF NOT EXISTS shopify_variant_id BIGINT;
+CREATE INDEX IF NOT EXISTS idx_products_shopify ON products(shopify_product_id);
+
+ALTER TABLE sales ADD COLUMN IF NOT EXISTS shopify_order_id BIGINT;
+ALTER TABLE sales ADD COLUMN IF NOT EXISTS shopify_order_number INTEGER;
+ALTER TABLE sales ADD COLUMN IF NOT EXISTS customer_email VARCHAR(150);
+ALTER TABLE sales ADD COLUMN IF NOT EXISTS customer_name VARCHAR(200);
+CREATE INDEX IF NOT EXISTS idx_sales_shopify ON sales(shopify_order_id);
+
+-- ===================== ADD WOOCOMMERCE FIELDS TO PRODUCTS AND SALES =====================
+ALTER TABLE products ADD COLUMN IF NOT EXISTS woo_product_id BIGINT;
+CREATE INDEX IF NOT EXISTS idx_products_woo ON products(woo_product_id);
+
+ALTER TABLE sales ADD COLUMN IF NOT EXISTS woo_order_id BIGINT;
+ALTER TABLE sales ADD COLUMN IF NOT EXISTS woo_order_number INTEGER;
+CREATE INDEX IF NOT EXISTS idx_sales_woo ON sales(woo_order_id);
+
+-- ===================== ADD COST COLUMN TO PRODUCTS FOR PROFIT CALCULATIONS =====================
+ALTER TABLE products ADD COLUMN IF NOT EXISTS cost DECIMAL(10,2) DEFAULT 0;
 
 -- ====================================================================
 -- END OF ORGANIZATIONS MIGRATION
