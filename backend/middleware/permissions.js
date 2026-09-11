@@ -48,6 +48,32 @@ const PERMISSIONS = {
     billing: ['owner'],
     delete: ['owner'],
   },
+  // Security management
+  security: {
+    view: ['owner', 'admin'],
+    manage: ['owner', 'admin'],
+  },
+  // Backup management
+  backup: {
+    view: ['owner', 'admin'],
+    create: ['owner', 'admin'],
+    restore: ['owner', 'admin'],
+    delete: ['owner', 'admin'],
+    manage: ['owner', 'admin'],
+  },
+  // Reports management
+  reports: {
+    view: ['owner', 'admin', 'manager', 'accountant', 'viewer'],
+    create: ['owner', 'admin', 'manager', 'accountant'],
+    update: ['owner', 'admin', 'manager'],
+    delete: ['owner', 'admin'],
+    run: ['owner', 'admin', 'manager', 'accountant', 'viewer'],
+  },
+  // Admin functions
+  admin: {
+    view: ['owner', 'admin'],
+    manage: ['owner', 'admin'],
+  },
   // Branch management
   branches: {
     view: ['owner', 'admin', 'manager', 'viewer'],

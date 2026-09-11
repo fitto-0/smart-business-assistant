@@ -10,7 +10,7 @@ const path = require("path");
 const fs = require("fs");
 const crypto = require("crypto");
 const { query } = require("../db/pool");
-const { authLimiter, strictLimiter } = require("../middleware/rateLimit");
+const { authLimiter } = require("../middleware/rateLimit");
 const auth = require("../middleware/auth");
 const { sendPasswordReset, sendEmailVerification } = require("../lib/email");
 
@@ -1143,7 +1143,7 @@ router.post("/revoke-all-tokens", require("../middleware/auth"), async (req, res
 });
 
 // REQUEST PASSWORD RESET
-router.post("/request-password-reset", strictLimiter, async (req, res) => {
+router.post("/request-password-reset", authLimiter, async (req, res) => {
   try {
     const { email } = req.body;
 
@@ -1208,7 +1208,7 @@ router.post("/request-password-reset", strictLimiter, async (req, res) => {
 });
 
 // RESET PASSWORD
-router.post("/reset-password", strictLimiter, async (req, res) => {
+router.post("/reset-password", authLimiter, async (req, res) => {
   try {
     const { token, newPassword } = req.body;
 

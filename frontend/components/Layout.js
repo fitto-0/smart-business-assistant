@@ -29,6 +29,9 @@ import {
   Lightbulb,
   MessageSquare,
   User,
+  Shield,
+  Database,
+  FileText,
 } from "lucide-react";
 import Chatbot from "./Chatbot";
 
@@ -40,6 +43,9 @@ const userNavItems = [
   { href: "/predictions", label: "Predictions", icon: Brain },
   { href: "/recommendations", label: "Recommendations", icon: Lightbulb },
   { href: "/reviews", label: "Reviews", icon: MessageSquare },
+  { href: "/security", label: "Security", icon: Shield },
+  { href: "/backup", label: "Backup", icon: Database },
+  { href: "/reports", label: "Reports", icon: FileText },
   { href: "/profile", label: "Profile", icon: User },
 ];
 

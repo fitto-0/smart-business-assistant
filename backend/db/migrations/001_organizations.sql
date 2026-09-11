@@ -368,6 +368,159 @@ CREATE INDEX IF NOT EXISTS idx_sales_woo ON sales(woo_order_id);
 -- ===================== ADD COST COLUMN TO PRODUCTS FOR PROFIT CALCULATIONS =====================
 ALTER TABLE products ADD COLUMN IF NOT EXISTS cost DECIMAL(10,2) DEFAULT 0;
 
+-- ===================== SECURITY FEATURES =====================
+
+-- IP Whitelist table
+CREATE TABLE IF NOT EXISTS ip_whitelist (
+  id SERIAL PRIMARY KEY,
+  organization_id INTEGER NOT NULL REFERENCES organizations(id) ON DELETE CASCADE,
+  ip_addresses TEXT[] DEFAULT ARRAY[]::TEXT[],
+  status VARCHAR(20) DEFAULT 'inactive',
+  created_at TIMESTAMP DEFAULT NOW(),
+  updated_at TIMESTAMP DEFAULT NOW(),
+  UNIQUE(organization_id)
+);
+
+-- Security events log table
+CREATE TABLE IF NOT EXISTS security_events (
+  id SERIAL PRIMARY KEY,
+  user_id INTEGER REFERENCES users(id) ON DELETE SET NULL,
+  organization_id INTEGER REFERENCES organizations(id) ON DELETE CASCADE,
+  event_type VARCHAR(50) NOT NULL,
+  details JSONB,
+  ip_address VARCHAR(45),
+  user_agent TEXT,
+  created_at TIMESTAMP DEFAULT NOW()
+);
+
+-- Indexes for security tables
+CREATE INDEX IF NOT EXISTS idx_ip_whitelist_org ON ip_whitelist(organization_id);
+CREATE INDEX IF NOT EXISTS idx_security_events_org ON security_events(organization_id);
+CREATE INDEX IF NOT EXISTS idx_security_events_user ON security_events(user_id);
+CREATE INDEX IF NOT EXISTS idx_security_events_type ON security_events(event_type);
+CREATE INDEX IF NOT EXISTS idx_security_events_created ON security_events(created_at);
+
+-- Trigger for ip_whitelist updated_at
+CREATE OR REPLACE FUNCTION update_ip_whitelist_updated_at()
+RETURNS TRIGGER AS $$
+BEGIN
+  NEW.updated_at = NOW();
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+DROP TRIGGER IF EXISTS trigger_update_ip_whitelist_updated_at ON ip_whitelist;
+CREATE TRIGGER trigger_update_ip_whitelist_updated_at
+  BEFORE UPDATE ON ip_whitelist
+  FOR EACH ROW
+  EXECUTE FUNCTION update_ip_whitelist_updated_at();
+
+-- ===================== BACKUP AND RESTORE =====================
+
+-- Backups table
+CREATE TABLE IF NOT EXISTS backups (
+  id SERIAL PRIMARY KEY,
+  organization_id INTEGER REFERENCES organizations(id) ON DELETE CASCADE,
+  filename VARCHAR(255) NOT NULL,
+  filepath TEXT NOT NULL,
+  file_size DECIMAL(10,2),
+  status VARCHAR(20) DEFAULT 'pending',
+  last_restored_at TIMESTAMP,
+  created_at TIMESTAMP DEFAULT NOW(),
+  updated_at TIMESTAMP DEFAULT NOW()
+);
+
+-- Backup schedules table
+CREATE TABLE IF NOT EXISTS backup_schedules (
+  id SERIAL PRIMARY KEY,
+  organization_id INTEGER NOT NULL REFERENCES organizations(id) ON DELETE CASCADE,
+  frequency VARCHAR(20) NOT NULL, -- 'daily', 'weekly', 'monthly'
+  status VARCHAR(20) DEFAULT 'active',
+  last_run_at TIMESTAMP,
+  next_run_at TIMESTAMP,
+  created_at TIMESTAMP DEFAULT NOW(),
+  updated_at TIMESTAMP DEFAULT NOW(),
+  UNIQUE(organization_id)
+);
+
+-- Indexes for backup tables
+CREATE INDEX IF NOT EXISTS idx_backups_org ON backups(organization_id);
+CREATE INDEX IF NOT EXISTS idx_backups_status ON backups(status);
+CREATE INDEX IF NOT EXISTS idx_backups_created ON backups(created_at);
+CREATE INDEX IF NOT EXISTS idx_backup_schedules_org ON backup_schedules(organization_id);
+CREATE INDEX IF NOT EXISTS idx_backup_schedules_status ON backup_schedules(status);
+
+-- Trigger for backups updated_at
+CREATE OR REPLACE FUNCTION update_backups_updated_at()
+RETURNS TRIGGER AS $$
+BEGIN
+  NEW.updated_at = NOW();
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+DROP TRIGGER IF EXISTS trigger_update_backups_updated_at ON backups;
+CREATE TRIGGER trigger_update_backups_updated_at
+  BEFORE UPDATE ON backups
+  FOR EACH ROW
+  EXECUTE FUNCTION update_backups_updated_at();
+
+-- Trigger for backup_schedules updated_at
+CREATE OR REPLACE FUNCTION update_backup_schedules_updated_at()
+RETURNS TRIGGER AS $$
+BEGIN
+  NEW.updated_at = NOW();
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+DROP TRIGGER IF EXISTS trigger_update_backup_schedules_updated_at ON backup_schedules;
+CREATE TRIGGER trigger_update_backup_schedules_updated_at
+  BEFORE UPDATE ON backup_schedules
+  FOR EACH ROW
+  EXECUTE FUNCTION update_backup_schedules_updated_at();
+
+-- ===================== CUSTOM REPORTS =====================
+
+-- Custom reports table
+CREATE TABLE IF NOT EXISTS custom_reports (
+  id SERIAL PRIMARY KEY,
+  organization_id INTEGER NOT NULL REFERENCES organizations(id) ON DELETE CASCADE,
+  user_id INTEGER REFERENCES users(id) ON DELETE SET NULL,
+  name VARCHAR(255) NOT NULL,
+  description TEXT,
+  type VARCHAR(50) NOT NULL, -- 'sales', 'products', 'customers', 'inventory', 'custom'
+  filters JSONB DEFAULT '{}',
+  columns TEXT[] NOT NULL,
+  group_by VARCHAR(255),
+  sort_by VARCHAR(255),
+  sort_order VARCHAR(4) DEFAULT 'ASC',
+  last_run_at TIMESTAMP,
+  created_at TIMESTAMP DEFAULT NOW(),
+  updated_at TIMESTAMP DEFAULT NOW()
+);
+
+-- Indexes for custom reports
+CREATE INDEX IF NOT EXISTS idx_custom_reports_org ON custom_reports(organization_id);
+CREATE INDEX IF NOT EXISTS idx_custom_reports_user ON custom_reports(user_id);
+CREATE INDEX IF NOT EXISTS idx_custom_reports_type ON custom_reports(type);
+CREATE INDEX IF NOT EXISTS idx_custom_reports_created ON custom_reports(created_at);
+
+-- Trigger for custom_reports updated_at
+CREATE OR REPLACE FUNCTION update_custom_reports_updated_at()
+RETURNS TRIGGER AS $$
+BEGIN
+  NEW.updated_at = NOW();
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+DROP TRIGGER IF EXISTS trigger_update_custom_reports_updated_at ON custom_reports;
+CREATE TRIGGER trigger_update_custom_reports_updated_at
+  BEFORE UPDATE ON custom_reports
+  FOR EACH ROW
+  EXECUTE FUNCTION update_custom_reports_updated_at();
+
 -- ====================================================================
 -- END OF ORGANIZATIONS MIGRATION
 -- ====================================================================

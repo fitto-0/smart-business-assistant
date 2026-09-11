@@ -2,10 +2,17 @@ const express = require("express");
 const cors = require("cors");
 const morgan = require("morgan");
 const path = require("path");
+const rateLimit = require("express-rate-limit");
+const http = require("http");
 require("dotenv").config();
 
 const app = express();
+const server = http.createServer(app);
 const PORT = process.env.PORT || 5000;
+
+// Initialize WebSocket
+const { initWebSocket } = require("./lib/websocket");
+initWebSocket(server);
 
 // Middleware
 app.use(
@@ -30,6 +37,11 @@ app.use("/api/organizations", require("./routes/organizations"));
 app.use("/api/invitations", require("./routes/invitations"));
 app.use("/api/integrations", require("./routes/integrations"));
 app.use("/api/ai-copilot", require("./routes/ai-copilot"));
+app.use("/api/dashboard", require("./routes/dashboard"));
+app.use("/api/security", require("./routes/security"));
+app.use("/api/visualization", require("./routes/visualization"));
+app.use("/api/backup", require("./routes/backup"));
+app.use("/api/reports", require("./routes/reports"));
 app.use("/api/products", require("./routes/products"));
 app.use("/api/categories", require("./routes/categories"));
 app.use("/api/sales", require("./routes/sales"));
@@ -44,6 +56,11 @@ console.log("  /api/organizations");
 console.log("  /api/invitations");
 console.log("  /api/integrations");
 console.log("  /api/ai-copilot");
+console.log("  /api/dashboard");
+console.log("  /api/security");
+console.log("  /api/visualization");
+console.log("  /api/backup");
+console.log("  /api/reports");
 console.log("  /api/products");
 console.log("  /api/sales");
 console.log("  /api/analysis");
@@ -59,9 +76,10 @@ app.get("/api/health", (req, res) => {
   });
 });
 
-app.listen(PORT, () => {
+server.listen(PORT, () => {
   console.log(`🚀 Smart Business Assistant Backend running on port ${PORT}`);
   console.log(`   Health: http://localhost:${PORT}/api/health`);
+  console.log(`   WebSocket: ws://localhost:${PORT}`);
 });
 
 module.exports = app;
