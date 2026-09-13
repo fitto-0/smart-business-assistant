@@ -13,7 +13,7 @@ const backup = require("../lib/backup");
 router.post(
   "/create",
   auth,
-  requirePermission('admin', 'manage'),
+  requirePermission('backup', 'create'),
   async (req, res) => {
     try {
       const { organizationId } = req.body;
@@ -52,7 +52,7 @@ router.post(
 router.get(
   "/list",
   auth,
-  requirePermission('admin', 'view'),
+  requirePermission('backup', 'view'),
   async (req, res) => {
     try {
       const { organizationId } = req.query;
@@ -79,7 +79,7 @@ router.get(
 router.post(
   "/restore/:id",
   auth,
-  requirePermission('admin', 'manage'),
+  requirePermission('backup', 'restore'),
   async (req, res) => {
     try {
       const backupId = req.params.id;
@@ -117,7 +117,7 @@ router.post(
 router.delete(
   "/:id",
   auth,
-  requirePermission('admin', 'manage'),
+  requirePermission('backup', 'delete'),
   async (req, res) => {
     try {
       const backupId = req.params.id;
@@ -155,7 +155,7 @@ router.delete(
 router.post(
   "/schedule",
   auth,
-  requirePermission('admin', 'manage'),
+  requirePermission('backup', 'manage'),
   [
     body("frequency").isIn(['daily', 'weekly', 'monthly']),
   ],

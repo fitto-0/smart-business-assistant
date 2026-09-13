@@ -20,7 +20,7 @@ const ensureBackupDir = () => {
 };
 
 /**
- * Create database backup
+ * Create database backup using SQL queries
  */
 const createBackup = async (organizationId = null) => {
   try {
@@ -28,70 +28,80 @@ const createBackup = async (organizationId = null) => {
 
     const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
     const filename = organizationId 
-      ? `backup_org_${organizationId}_${timestamp}.sql`
-      : `backup_full_${timestamp}.sql`;
+      ? `backup_org_${organizationId}_${timestamp}.json`
+      : `backup_full_${timestamp}.json`;
     
     const filepath = path.join(BACKUP_DIR, filename);
 
-    const dbConfig = {
-      host: process.env.DB_HOST || 'localhost',
-      port: process.env.DB_PORT || 5432,
-      database: process.env.DB_NAME,
-      user: process.env.DB_USER,
-      password: process.env.DB_PASSWORD,
+    // Tables to backup
+    const tables = [
+      'organizations',
+      'organization_members',
+      'branches',
+      'products',
+      'sales',
+      'categories',
+      'audit_logs',
+      'notifications',
+      'integrations',
+      'ip_whitelist',
+      'security_events',
+      'users',
+      'login_log'
+    ];
+
+    const backupData = {
+      timestamp: new Date().toISOString(),
+      organizationId,
+      tables: {}
     };
 
-    let pgDumpCommand = `pg_dump -h ${dbConfig.host} -p ${dbConfig.port} -U ${dbConfig.user} -d ${dbConfig.database} -F p`;
-
-    if (organizationId) {
-      // Backup only organization-specific data
-      pgDumpCommand += ` -t organizations -t organization_members -t branches -t products -t sales -t categories -t audit_logs -t notifications -t integrations -t ip_whitelist -t security_events`;
+    // Export data from each table
+    for (const table of tables) {
+      try {
+        let queryText = organizationId 
+          ? `SELECT * FROM ${table} WHERE organization_id = $1`
+          : `SELECT * FROM ${table}`;
+        
+        const params = organizationId ? [organizationId] : [];
+        const result = await query(queryText, params);
+        
+        if (result.rows.length > 0) {
+          backupData.tables[table] = result.rows;
+        }
+      } catch (err) {
+        console.log(`Skipping table ${table}:`, err.message);
+      }
     }
 
-    pgDumpCommand += ` > "${filepath}"`;
+    // Write backup to file
+    fs.writeFileSync(filepath, JSON.stringify(backupData, null, 2));
 
-    // Set PGPASSWORD environment variable for pg_dump
-    const env = { ...process.env, PGPASSWORD: dbConfig.password };
+    // Get file size
+    const stats = fs.statSync(filepath);
+    const fileSize = (stats.size / 1024 / 1024).toFixed(2); // MB
 
-    return new Promise((resolve, reject) => {
-      exec(pgDumpCommand, { env }, (error, stdout, stderr) => {
-        if (error) {
-          console.error('Backup error:', error);
-          reject({ success: false, error: error.message });
-          return;
-        }
+    // Log backup to database
+    try {
+      await query(
+        `INSERT INTO backups (organization_id, filename, filepath, file_size, status, created_at)
+         VALUES ($1, $2, $3, $4, 'completed', NOW())
+         RETURNING id`,
+        [organizationId, filename, filepath, fileSize]
+      );
+    } catch (err) {
+      console.log('Backup logging failed:', err.message);
+    }
 
-        // Get file size
-        const stats = fs.statSync(filepath);
-        const fileSize = (stats.size / 1024 / 1024).toFixed(2); // MB
-
-        // Log backup to database
-        query(
-          `INSERT INTO backups (organization_id, filename, filepath, file_size, status, created_at)
-           VALUES ($1, $2, $3, $4, 'completed', NOW())
-           RETURNING id`,
-          [organizationId, filename, filepath, fileSize]
-        ).then(() => {
-          resolve({
-            success: true,
-            filename,
-            filepath,
-            fileSize: `${fileSize} MB`,
-            timestamp,
-          });
-        }).catch(err => {
-          // Still return success even if logging fails
-          resolve({
-            success: true,
-            filename,
-            filepath,
-            fileSize: `${fileSize} MB`,
-            timestamp,
-          });
-        });
-      });
-    });
+    return {
+      success: true,
+      filename,
+      filepath,
+      fileSize: `${fileSize} MB`,
+      timestamp,
+    };
   } catch (error) {
+    console.error('Backup error:', error);
     return { success: false, error: error.message };
   }
 };

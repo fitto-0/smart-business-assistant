@@ -160,23 +160,62 @@ router.post(
       let params = [organizationId];
       let paramIndex = 2;
 
+      // Fix old column names in configuration
+      const fixColumnName = (col) => 
+        col === 'sale_date' ? 'date' : 
+        col === 'customer_email' ? 'customer_name' : 
+        col;
+
+      const fixedColumns = config.columns.map(fixColumnName);
+      const fixedGroupBy = config.group_by ? fixColumnName(config.group_by) : null;
+      const fixedSortBy = config.sort_by ? fixColumnName(config.sort_by) : null;
+
       // Build SQL based on report type
       switch (config.type) {
         case 'sales':
-          sql = `SELECT ${config.columns.join(', ')} FROM sales WHERE organization_id = $1`;
+          if (fixedGroupBy) {
+            // When grouping, only include grouped column and aggregates
+            const groupColumn = fixedGroupBy;
+            const aggregates = fixedColumns.filter(col => col !== groupColumn);
+            const selectCols = [groupColumn, ...aggregates];
+            sql = `SELECT ${selectCols.join(', ')} FROM sales WHERE organization_id = $1 GROUP BY ${groupColumn}`;
+          } else {
+            sql = `SELECT ${fixedColumns.join(', ')} FROM sales WHERE organization_id = $1`;
+          }
           break;
         case 'products':
-          sql = `SELECT ${config.columns.join(', ')} FROM products WHERE organization_id = $1`;
+          if (fixedGroupBy) {
+            const groupColumn = fixedGroupBy;
+            const aggregates = fixedColumns.filter(col => col !== groupColumn);
+            const selectCols = [groupColumn, ...aggregates];
+            sql = `SELECT ${selectCols.join(', ')} FROM products WHERE organization_id = $1 GROUP BY ${groupColumn}`;
+          } else {
+            sql = `SELECT ${fixedColumns.join(', ')} FROM products WHERE organization_id = $1`;
+          }
           break;
         case 'customers':
-          sql = `SELECT DISTINCT customer_email, customer_name, COUNT(*) as orders, SUM(total_amount) as total_spent 
-                 FROM sales WHERE organization_id = $1 AND customer_email IS NOT NULL GROUP BY customer_email, customer_name`;
+          sql = `SELECT DISTINCT customer_name, COUNT(*) as orders, SUM(total_amount) as total_spent 
+                 FROM sales WHERE organization_id = $1 AND customer_name IS NOT NULL GROUP BY customer_name`;
           break;
         case 'inventory':
-          sql = `SELECT ${config.columns.join(', ')} FROM products WHERE organization_id = $1`;
+          if (fixedGroupBy) {
+            const groupColumn = fixedGroupBy;
+            const aggregates = fixedColumns.filter(col => col !== groupColumn);
+            const selectCols = [groupColumn, ...aggregates];
+            sql = `SELECT ${selectCols.join(', ')} FROM products WHERE organization_id = $1 GROUP BY ${groupColumn}`;
+          } else {
+            sql = `SELECT ${fixedColumns.join(', ')} FROM products WHERE organization_id = $1`;
+          }
           break;
         default:
-          sql = `SELECT ${config.columns.join(', ')} FROM sales WHERE organization_id = $1`;
+          if (fixedGroupBy) {
+            const groupColumn = fixedGroupBy;
+            const aggregates = fixedColumns.filter(col => col !== groupColumn);
+            const selectCols = [groupColumn, ...aggregates];
+            sql = `SELECT ${selectCols.join(', ')} FROM sales WHERE organization_id = $1 GROUP BY ${groupColumn}`;
+          } else {
+            sql = `SELECT ${fixedColumns.join(', ')} FROM sales WHERE organization_id = $1`;
+          }
       }
 
       // Apply filters
@@ -198,14 +237,10 @@ router.post(
         }
       }
 
-      // Apply grouping
-      if (config.group_by) {
-        sql += ` GROUP BY ${config.group_by}`;
-      }
-
+      // Apply grouping (already handled above, but keep for HAVING clause if needed)
       // Apply sorting
-      if (config.sort_by) {
-        sql += ` ORDER BY ${config.sort_by} ${config.sort_order || 'ASC'}`;
+      if (fixedSortBy) {
+        sql += ` ORDER BY ${fixedSortBy} ${config.sort_order || 'ASC'}`;
       }
 
       // Execute query
