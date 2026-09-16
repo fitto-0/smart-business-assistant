@@ -1,32 +1,33 @@
-import { useState, useEffect } from 'react';
-import { useRouter } from 'next/router';
-import Head from 'next/head';
-import axios from 'axios';
-import { 
-  ShoppingBag, 
-  Eye, 
-  Settings, 
-  Upload, 
-  Sparkles, 
+import { useState, useEffect } from "react";
+import { useRouter } from "next/router";
+import Head from "next/head";
+import axios from "axios";
+import {
+  ShoppingBag,
+  Eye,
+  Settings,
+  Upload,
+  Sparkles,
   ExternalLink,
   ToggleLeft,
   ToggleRight,
   Save,
-  RefreshCw
-} from 'lucide-react';
-import toast from 'react-hot-toast';
-import { getToken, getUser } from '../../lib/auth';
+  RefreshCw,
+} from "lucide-react";
+import toast from "react-hot-toast";
+import { getToken, getUser } from "../../lib/auth";
 
 export default function StorefrontManagement() {
   const router = useRouter();
-  
+
   const [storefrontEnabled, setStorefrontEnabled] = useState(true);
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [activeTab, setActiveTab] = useState('products');
+  const [activeTab, setActiveTab] = useState("products");
 
-  const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
+  const API_URL =
+    process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
 
   useEffect(() => {
     fetchProducts();
@@ -37,12 +38,12 @@ export default function StorefrontManagement() {
       setLoading(true);
       const token = getToken();
       const response = await axios.get(`${API_URL}/products`, {
-        headers: { Authorization: `Bearer ${token}` }
+        headers: { Authorization: `Bearer ${token}` },
       });
       setProducts(response.data.products || []);
     } catch (err) {
-      toast.error('Failed to load products');
-      console.error('Error fetching products:', err);
+      toast.error("Failed to load products");
+      console.error("Error fetching products:", err);
     } finally {
       setLoading(false);
     }
@@ -54,16 +55,18 @@ export default function StorefrontManagement() {
       await axios.put(
         `${API_URL}/products/${productId}`,
         { storefront_enabled: !currentStatus },
-        { headers: { Authorization: `Bearer ${token}` } }
+        { headers: { Authorization: `Bearer ${token}` } },
       );
-      
-      setProducts(products.map(p => 
-        p.id === productId ? { ...p, storefront_enabled: !currentStatus } : p
-      ));
-      toast.success('Product updated');
+
+      setProducts(
+        products.map((p) =>
+          p.id === productId ? { ...p, storefront_enabled: !currentStatus } : p,
+        ),
+      );
+      toast.success("Product updated");
     } catch (err) {
-      toast.error('Failed to update product');
-      console.error('Error updating product:', err);
+      toast.error("Failed to update product");
+      console.error("Error updating product:", err);
     }
   };
 
@@ -73,16 +76,18 @@ export default function StorefrontManagement() {
       await axios.put(
         `${API_URL}/products/${productId}`,
         { featured: !currentStatus },
-        { headers: { Authorization: `Bearer ${token}` } }
+        { headers: { Authorization: `Bearer ${token}` } },
       );
-      
-      setProducts(products.map(p => 
-        p.id === productId ? { ...p, featured: !currentStatus } : p
-      ));
-      toast.success('Product updated');
+
+      setProducts(
+        products.map((p) =>
+          p.id === productId ? { ...p, featured: !currentStatus } : p,
+        ),
+      );
+      toast.success("Product updated");
     } catch (err) {
-      toast.error('Failed to update product');
-      console.error('Error updating product:', err);
+      toast.error("Failed to update product");
+      console.error("Error updating product:", err);
     }
   };
 
@@ -92,43 +97,43 @@ export default function StorefrontManagement() {
       await axios.post(
         `${API_URL}/ai-copilot/enhance-product`,
         { productId },
-        { headers: { Authorization: `Bearer ${token}` } }
+        { headers: { Authorization: `Bearer ${token}` } },
       );
-      
-      toast.success('Product enhanced with AI');
+
+      toast.success("Product enhanced with AI");
       fetchProducts();
     } catch (err) {
-      toast.error('Failed to enhance product');
-      console.error('Error enhancing product:', err);
+      toast.error("Failed to enhance product");
+      console.error("Error enhancing product:", err);
     }
   };
 
   const batchEnhanceWithAI = async () => {
     try {
-      const productIds = products.map(p => p.id);
+      const productIds = products.map((p) => p.id);
       const token = getToken();
-      
+
       await axios.post(
         `${API_URL}/ai-copilot/batch-enhance`,
         { productIds },
-        { headers: { Authorization: `Bearer ${token}` } }
+        { headers: { Authorization: `Bearer ${token}` } },
       );
-      
-      toast.success('Products enhanced with AI');
+
+      toast.success("Products enhanced with AI");
       fetchProducts();
     } catch (err) {
-      toast.error('Failed to enhance products');
-      console.error('Error batch enhancing:', err);
+      toast.error("Failed to enhance products");
+      console.error("Error batch enhancing:", err);
     }
   };
 
   const previewStorefront = () => {
     // Use current user ID for preview
-    const userId = localStorage.getItem('userId');
+    const userId = localStorage.getItem("userId");
     if (userId) {
-      window.open(`/storefront/${userId}`, '_blank');
+      window.open(`/storefront/${userId}`, "_blank");
     } else {
-      toast.error('User ID not found');
+      toast.error("User ID not found");
     }
   };
 
@@ -144,8 +149,12 @@ export default function StorefrontManagement() {
           <div className="mb-8">
             <div className="flex items-center justify-between mb-4">
               <div>
-                <h1 className="text-3xl font-bold text-gray-900">Storefront Management</h1>
-                <p className="text-gray-600 mt-1">Configure and manage your online storefront</p>
+                <h1 className="text-3xl font-bold text-gray-900">
+                  Storefront Management
+                </h1>
+                <p className="text-gray-600 mt-1">
+                  Configure and manage your online storefront
+                </p>
               </div>
               <button
                 onClick={previewStorefront}
@@ -164,9 +173,13 @@ export default function StorefrontManagement() {
                     <ShoppingBag className="h-6 w-6 text-blue-600" />
                   </div>
                   <div>
-                    <h3 className="font-semibold text-gray-900">Storefront Status</h3>
+                    <h3 className="font-semibold text-gray-900">
+                      Storefront Status
+                    </h3>
                     <p className="text-sm text-gray-600">
-                      {storefrontEnabled ? 'Your storefront is live and accessible to customers' : 'Your storefront is currently disabled'}
+                      {storefrontEnabled
+                        ? "Your storefront is live and accessible to customers"
+                        : "Your storefront is currently disabled"}
                     </p>
                   </div>
                 </div>
@@ -189,21 +202,21 @@ export default function StorefrontManagement() {
             <div className="border-b">
               <nav className="flex gap-4 px-6">
                 <button
-                  onClick={() => setActiveTab('products')}
+                  onClick={() => setActiveTab("products")}
                   className={`py-4 px-2 border-b-2 font-medium transition ${
-                    activeTab === 'products'
-                      ? 'border-blue-600 text-blue-600'
-                      : 'border-transparent text-gray-600 hover:text-gray-900'
+                    activeTab === "products"
+                      ? "border-blue-600 text-blue-600"
+                      : "border-transparent text-gray-600 hover:text-gray-900"
                   }`}
                 >
                   Products
                 </button>
                 <button
-                  onClick={() => setActiveTab('settings')}
+                  onClick={() => setActiveTab("settings")}
                   className={`py-4 px-2 border-b-2 font-medium transition ${
-                    activeTab === 'settings'
-                      ? 'border-blue-600 text-blue-600'
-                      : 'border-transparent text-gray-600 hover:text-gray-900'
+                    activeTab === "settings"
+                      ? "border-blue-600 text-blue-600"
+                      : "border-transparent text-gray-600 hover:text-gray-900"
                   }`}
                 >
                   Settings
@@ -213,7 +226,7 @@ export default function StorefrontManagement() {
           </div>
 
           {/* Products Tab */}
-          {activeTab === 'products' && (
+          {activeTab === "products" && (
             <div className="space-y-6">
               {/* Actions */}
               <div className="flex items-center justify-between">
@@ -227,7 +240,8 @@ export default function StorefrontManagement() {
                   </button>
                 </div>
                 <div className="text-sm text-gray-600">
-                  {products.filter(p => p.storefront_enabled).length} of {products.length} products visible
+                  {products.filter((p) => p.storefront_enabled).length} of{" "}
+                  {products.length} products visible
                 </div>
               </div>
 
@@ -241,7 +255,7 @@ export default function StorefrontManagement() {
                   <ShoppingBag className="h-16 w-16 text-gray-400 mx-auto mb-4" />
                   <p className="text-gray-600 mb-4">No products yet</p>
                   <button
-                    onClick={() => router.push('/products')}
+                    onClick={() => router.push("/products")}
                     className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition"
                   >
                     Add Products
@@ -277,24 +291,38 @@ export default function StorefrontManagement() {
                         <tr key={product.id} className="hover:bg-gray-50">
                           <td className="px-6 py-4">
                             <div>
-                              <div className="font-medium text-gray-900">{product.name}</div>
-                              <div className="text-sm text-gray-500">{product.category}</div>
+                              <div className="font-medium text-gray-900">
+                                {product.name}
+                              </div>
+                              <div className="text-sm text-gray-500">
+                                {product.category}
+                              </div>
                             </div>
                           </td>
                           <td className="px-6 py-4 text-gray-900">
                             ${parseFloat(product.price).toFixed(2)}
                           </td>
                           <td className="px-6 py-4">
-                            <span className={`px-2 py-1 text-xs font-medium rounded-full ${
-                              product.stock > 10 ? 'bg-green-100 text-green-700' : 
-                              product.stock > 0 ? 'bg-yellow-100 text-yellow-700' : 'bg-red-100 text-red-700'
-                            }`}>
+                            <span
+                              className={`px-2 py-1 text-xs font-medium rounded-full ${
+                                product.stock > 10
+                                  ? "bg-green-100 text-green-700"
+                                  : product.stock > 0
+                                    ? "bg-yellow-100 text-yellow-700"
+                                    : "bg-red-100 text-red-700"
+                              }`}
+                            >
                               {product.stock}
                             </span>
                           </td>
                           <td className="px-6 py-4">
                             <button
-                              onClick={() => toggleStorefrontEnabled(product.id, product.storefront_enabled)}
+                              onClick={() =>
+                                toggleStorefrontEnabled(
+                                  product.id,
+                                  product.storefront_enabled,
+                                )
+                              }
                             >
                               {product.storefront_enabled ? (
                                 <ToggleRight className="h-6 w-6 text-blue-600" />
@@ -305,7 +333,9 @@ export default function StorefrontManagement() {
                           </td>
                           <td className="px-6 py-4">
                             <button
-                              onClick={() => toggleFeatured(product.id, product.featured)}
+                              onClick={() =>
+                                toggleFeatured(product.id, product.featured)
+                              }
                             >
                               {product.featured ? (
                                 <Sparkles className="h-5 w-5 text-yellow-500 fill-current" />
@@ -324,7 +354,9 @@ export default function StorefrontManagement() {
                                 <Sparkles className="h-4 w-4" />
                               </button>
                               <button
-                                onClick={() => router.push(`/dashboard/products`)}
+                                onClick={() =>
+                                  router.push(`/dashboard/products`)
+                                }
                                 className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition"
                                 title="Edit"
                               >
@@ -342,11 +374,14 @@ export default function StorefrontManagement() {
           )}
 
           {/* Settings Tab */}
-          {activeTab === 'settings' && (
+          {activeTab === "settings" && (
             <div className="bg-white rounded-xl shadow-sm p-6">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">Storefront Settings</h3>
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">
+                Storefront Settings
+              </h3>
               <p className="text-gray-600">
-                Additional storefront settings will be available soon, including:
+                Additional storefront settings will be available soon,
+                including:
               </p>
               <ul className="mt-4 space-y-2 text-gray-600">
                 <li className="flex items-center gap-2">
