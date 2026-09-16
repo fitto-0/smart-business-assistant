@@ -124,6 +124,8 @@ router.get("/", auth, async (req, res) => {
         p.status,
         p.description,
         p.sku,
+        p.storefront_enabled,
+        p.featured,
         p.created_at,
 
         (
@@ -337,6 +339,12 @@ router.put("/:id", auth, async (req, res) => {
       sku: "sku",
       cost_price: "cost_price",
       revenue: "revenue",
+      storefront_enabled: "storefront_enabled",
+      featured: "featured",
+      ai_enhanced_description: "ai_enhanced_description",
+      ai_suggested_category: "ai_suggested_category",
+      seo_keywords: "seo_keywords",
+      storefront_order: "storefront_order",
     };
 
     const updates = [];

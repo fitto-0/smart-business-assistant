@@ -129,7 +129,8 @@ export default function StorefrontManagement() {
 
   const previewStorefront = () => {
     // Use current user ID for preview
-    const userId = localStorage.getItem("userId");
+    const user = getUser();
+    const userId = user?.id;
     if (userId) {
       window.open(`/storefront/${userId}`, "_blank");
     } else {

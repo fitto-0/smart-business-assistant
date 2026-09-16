@@ -12,7 +12,7 @@ const query = (text, params) => pool.query(text, params);
 // Rate limiting to prevent abuse
 const storefrontLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100, // Limit each IP to 100 requests per windowMs
+  max: 1000, // Limit each IP to 1000 requests per windowMs (increased for dev)
   message: { error: "Too many requests, please try again later" },
 });
 

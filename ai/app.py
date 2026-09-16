@@ -604,6 +604,39 @@ def analyze_reviews_csv_endpoint():
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
+@app.route('/enhance-description', methods=['POST'])
+def enhance_description():
+    data = request.get_json()
+    name = data.get('productName', '')
+    desc = data.get('currentDescription', '')
+    # Simple simulated enhancement
+    enhanced = f"Découvrez le fantastique {name} ! {desc} Ce produit de qualité supérieure est conçu pour répondre à toutes vos attentes avec élégance et performance exceptionnelle."
+    return jsonify({
+        'enhanced_description': enhanced
+    })
+
+@app.route('/suggest-category', methods=['POST'])
+def suggest_category_endpoint():
+    data = request.get_json()
+    cat = data.get('currentCategory', 'Général')
+    return jsonify({
+        'category': cat,
+        'confidence': 0.95
+    })
+
+@app.route('/generate-seo-keywords', methods=['POST'])
+def generate_seo_keywords_endpoint():
+    data = request.get_json()
+    name = data.get('productName', '')
+    cat = data.get('category', '')
+    # Generate some simple simulated tags based on the input
+    words = name.split() + [cat, "premium", "qualité", "meilleur prix", "nouveau"]
+    keywords = list(set([w.lower() for w in words if w and len(w) > 2]))
+    return jsonify({
+        'keywords': keywords[:5]
+    })
+
+
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 8000))
     print(f"🤖 Smart Business Assistant AI Engine starting on port {port}")
