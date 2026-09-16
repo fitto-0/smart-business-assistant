@@ -17,7 +17,20 @@ initWebSocket(server);
 // Middleware
 app.use(
   cors({
-    origin: process.env.FRONTEND_URL || "http://localhost:3000",
+    origin: function (origin, callback) {
+      const allowedOrigins = [
+        process.env.FRONTEND_URL || "http://localhost:3000",
+        "http://127.0.0.1:52266",
+        "http://127.0.0.1:3000",
+      ];
+      // Allow requests with no origin (like mobile apps or curl requests)
+      if (!origin) return callback(null, true);
+      if (allowedOrigins.indexOf(origin) !== -1) {
+        callback(null, true);
+      } else {
+        callback(new Error("Not allowed by CORS"));
+      }
+    },
     credentials: true,
   }),
 );
@@ -49,6 +62,7 @@ app.use("/api/analysis", require("./routes/analysis"));
 app.use("/api/csv", require("./routes/csv"));
 app.use("/api/chatbot", require("./routes/chatbot"));
 app.use("/api/admin", require("./routes/admin"));
+app.use("/api/storefront", require("./routes/storefront"));
 
 console.log("Routes loaded:");
 console.log("  /api/auth");
@@ -66,6 +80,7 @@ console.log("  /api/sales");
 console.log("  /api/analysis");
 console.log("  /api/csv");
 console.log("  /api/admin");
+console.log("  /api/storefront (public)");
 
 // Health check
 app.get("/api/health", (req, res) => {

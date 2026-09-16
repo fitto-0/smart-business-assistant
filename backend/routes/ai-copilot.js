@@ -6,6 +6,7 @@ const { query } = require("../db/pool");
 const auth = require("../middleware/auth");
 const { requirePermission } = require("../middleware/permissions");
 const { createAuditLog } = require("../middleware/audit");
+const aiEnhancer = require("../lib/ai-enhancer");
 
 /**
  * POST /api/ai-copilot/query
@@ -424,5 +425,254 @@ const generateReportAction = async (parameters, organizationId, userId) => {
     return { success: false, error: error.message };
   }
 };
+
+/**
+ * POST /api/ai-copilot/enhance-product
+ * Enhance a single product with AI (description, category, SEO)
+ */
+router.post(
+  "/enhance-product",
+  auth,
+  [
+    body("productId").isInt(),
+  ],
+  async (req, res) => {
+    try {
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+        return res.status(400).json({ errors: errors.array() });
+      }
+
+      const { productId } = req.body;
+      const userId = req.user.id;
+
+      // Get product from database
+      const productResult = await query(
+        `SELECT * FROM products WHERE id = $1 AND user_id = $2 AND deleted_at IS NULL`,
+        [productId, userId]
+      );
+
+      if (productResult.rowCount === 0) {
+        return res.status(404).json({ error: "Product not found" });
+      }
+
+      const product = productResult.rows[0];
+
+      // Enhance product using AI
+      const enhancement = await aiEnhancer.enhanceProduct(product);
+
+      if (!enhancement.success) {
+        return res.status(503).json({ error: "AI service unavailable" });
+      }
+
+      // Update product with AI enhancements
+      const updateResult = await query(
+        `UPDATE products
+         SET ai_enhanced_description = $1,
+             ai_suggested_category = $2,
+             seo_keywords = $3,
+             updated_at = NOW()
+         WHERE id = $4 AND user_id = $5
+         RETURNING *`,
+        [
+          enhancement.description.enhancedDescription,
+          enhancement.category.suggestedCategory,
+          enhancement.seo.keywords,
+          productId,
+          userId,
+        ]
+      );
+
+      return res.json({
+        success: true,
+        product: updateResult.rows[0],
+        enhancement,
+      });
+    } catch (err) {
+      console.error("Error enhancing product:", err);
+      return res.status(500).json({ error: "Error enhancing product" });
+    }
+  }
+);
+
+/**
+ * POST /api/ai-copilot/batch-enhance
+ * Enhance multiple products with AI
+ */
+router.post(
+  "/batch-enhance",
+  auth,
+  [
+    body("productIds").isArray(),
+  ],
+  async (req, res) => {
+    try {
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+        return res.status(400).json({ errors: errors.array() });
+      }
+
+      const { productIds } = req.body;
+      const userId = req.user.id;
+
+      // Get products from database
+      const productsResult = await query(
+        `SELECT * FROM products WHERE id = ANY($1) AND user_id = $2 AND deleted_at IS NULL`,
+        [productIds, userId]
+      );
+
+      if (productsResult.rowCount === 0) {
+        return res.status(404).json({ error: "No products found" });
+      }
+
+      const products = productsResult.rows;
+
+      // Batch enhance products
+      const results = await aiEnhancer.batchEnhance(products);
+
+      // Update each product with enhancements
+      const updatePromises = results.map(async (result) => {
+        if (result.success) {
+          return await query(
+            `UPDATE products
+             SET ai_enhanced_description = $1,
+                 ai_suggested_category = $2,
+                 seo_keywords = $3,
+                 updated_at = NOW()
+             WHERE id = $4 AND user_id = $5`,
+            [
+              result.description.enhancedDescription,
+              result.category.suggestedCategory,
+              result.seo.keywords,
+              result.productId,
+              userId,
+            ]
+          );
+        }
+        return null;
+      });
+
+      await Promise.all(updatePromises);
+
+      return res.json({
+        success: true,
+        results,
+        total: products.length,
+        enhanced: results.filter(r => r.success).length,
+      });
+    } catch (err) {
+      console.error("Error batch enhancing products:", err);
+      return res.status(500).json({ error: "Error batch enhancing products" });
+    }
+  }
+);
+
+/**
+ * POST /api/ai-copilot/categorize-product
+ * Suggest category for a product using AI
+ */
+router.post(
+  "/categorize-product",
+  auth,
+  [
+    body("productId").isInt(),
+  ],
+  async (req, res) => {
+    try {
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+        return res.status(400).json({ errors: errors.array() });
+      }
+
+      const { productId } = req.body;
+      const userId = req.user.id;
+
+      // Get product from database
+      const productResult = await query(
+        `SELECT * FROM products WHERE id = $1 AND user_id = $2 AND deleted_at IS NULL`,
+        [productId, userId]
+      );
+
+      if (productResult.rowCount === 0) {
+        return res.status(404).json({ error: "Product not found" });
+      }
+
+      const product = productResult.rows[0];
+
+      // Get category suggestion from AI
+      const suggestion = await aiEnhancer.suggestCategory(product);
+
+      if (!suggestion.success) {
+        return res.status(503).json({ error: "AI service unavailable" });
+      }
+
+      return res.json({
+        success: true,
+        productId,
+        currentCategory: product.category,
+        suggestedCategory: suggestion.suggestedCategory,
+        confidence: suggestion.confidence,
+      });
+    } catch (err) {
+      console.error("Error categorizing product:", err);
+      return res.status(500).json({ error: "Error categorizing product" });
+    }
+  }
+);
+
+/**
+ * POST /api/ai-copilot/recommend-products
+ * Get product recommendations based on a product
+ */
+router.post(
+  "/recommend-products",
+  auth,
+  [
+    body("productId").isInt(),
+  ],
+  async (req, res) => {
+    try {
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+        return res.status(400).json({ errors: errors.array() });
+      }
+
+      const { productId, limit = 5 } = req.body;
+      const userId = req.user.id;
+
+      // Get all user's products
+      const productsResult = await query(
+        `SELECT * FROM products WHERE user_id = $1 AND deleted_at IS NULL AND storefront_enabled = true`,
+        [userId]
+      );
+
+      if (productsResult.rowCount === 0) {
+        return res.status(404).json({ error: "No products found" });
+      }
+
+      const products = productsResult.rows;
+
+      // Get recommendations from AI
+      const recommendations = await aiEnhancer.getRecommendations(
+        productId,
+        products,
+        limit
+      );
+
+      if (!recommendations.success) {
+        return res.status(503).json({ error: "AI service unavailable" });
+      }
+
+      return res.json({
+        success: true,
+        productId,
+        recommendations: recommendations.recommendations,
+      });
+    } catch (err) {
+      console.error("Error getting recommendations:", err);
+      return res.status(500).json({ error: "Error getting recommendations" });
+    }
+  }
+);
 
 module.exports = router;

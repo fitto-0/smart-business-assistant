@@ -20,6 +20,10 @@ const runMigration = async (migrationFile) => {
 const migrate = async () => {
   // Run organizations migration
   await runMigration("001_organizations.sql");
+  
+  // Run storefront fields migration
+  await runMigration("002_storefront_fields.sql");
+  
   await query(`
     DO $$
     DECLARE
