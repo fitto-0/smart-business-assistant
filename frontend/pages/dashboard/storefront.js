@@ -2,11 +2,34 @@
 import { useRouter } from "next/router";
 import Head from "next/head";
 import {
-  ShoppingBag, Eye, Settings, Sparkles, ExternalLink,
-  ToggleLeft, ToggleRight, Save, RefreshCw, Palette,
-  Phone, Mail, MapPin, Globe, BarChart3, Star, Package,
-  TrendingUp, CheckCircle, AlertCircle, Copy, MessageCircle,
-  Image, Link, Upload, Trash2, Zap, Shield,
+  ShoppingBag,
+  Eye,
+  Settings,
+  Sparkles,
+  ExternalLink,
+  ToggleLeft,
+  ToggleRight,
+  Save,
+  RefreshCw,
+  Palette,
+  Phone,
+  Mail,
+  MapPin,
+  Globe,
+  BarChart3,
+  Star,
+  Package,
+  TrendingUp,
+  CheckCircle,
+  AlertCircle,
+  Copy,
+  MessageCircle,
+  Image,
+  Link,
+  Upload,
+  Trash2,
+  Zap,
+  Shield,
 } from "lucide-react";
 import toast from "react-hot-toast";
 import { apiGet, apiPost, apiPut } from "../../lib/api";
@@ -20,7 +43,9 @@ const DEFAULT_COLORS = {
   accent: "#F59E0B",
 };
 
-const API_ORIGIN = (process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api").replace(/\/api\/?$/, "");
+const API_ORIGIN = (
+  process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api"
+).replace(/\/api\/?$/, "");
 
 const getAssetUrl = (url) => {
   if (!url) return "";
@@ -68,7 +93,7 @@ export default function StorefrontCustomize() {
   const loadStoreSettings = async () => {
     try {
       const data = await apiGet("/store-settings");
-      setStoreSettings(prev => ({ ...prev, ...data }));
+      setStoreSettings((prev) => ({ ...prev, ...data }));
     } catch (err) {
       console.error("Failed to load store settings:", err);
       toast.error(t("storefront.loadError") || "Failed to load store settings");
@@ -90,7 +115,7 @@ export default function StorefrontCustomize() {
   };
 
   const handleChange = (field, value) => {
-    setStoreSettings(prev => ({ ...prev, [field]: value }));
+    setStoreSettings((prev) => ({ ...prev, [field]: value }));
   };
 
   const handleLogoUpload = async (e) => {
@@ -98,12 +123,16 @@ export default function StorefrontCustomize() {
     if (!file) return;
 
     if (!file.type.startsWith("image/")) {
-      toast.error(t("storefront.invalidImageType") || "Please select an image file");
+      toast.error(
+        t("storefront.invalidImageType") || "Please select an image file",
+      );
       return;
     }
 
     if (file.size > 2 * 1024 * 1024) {
-      toast.error(t("storefront.imageTooLarge") || "Image size must be less than 2MB");
+      toast.error(
+        t("storefront.imageTooLarge") || "Image size must be less than 2MB",
+      );
       return;
     }
 
@@ -113,17 +142,23 @@ export default function StorefrontCustomize() {
 
       const data = await apiPost("/store-settings/logo", formData);
 
-      setStoreSettings(prev => ({ ...prev, logo_url: data.logo_url }));
+      setStoreSettings((prev) => ({ ...prev, logo_url: data.logo_url }));
       setLogoPreview(getAssetUrl(data.logo_url));
-      toast.success(t("storefront.logoUploaded") || "Logo uploaded successfully");
+      toast.success(
+        t("storefront.logoUploaded") || "Logo uploaded successfully",
+      );
     } catch (err) {
-      toast.error(err.message || t("storefront.logoUploadFailed") || "Failed to upload logo");
+      toast.error(
+        err.message ||
+          t("storefront.logoUploadFailed") ||
+          "Failed to upload logo",
+      );
     }
   };
 
   const handleRemoveLogo = async () => {
     try {
-      setStoreSettings(prev => ({ ...prev, logo_url: null }));
+      setStoreSettings((prev) => ({ ...prev, logo_url: null }));
       setLogoPreview(null);
       toast.success(t("storefront.logoRemoved") || "Logo removed");
     } catch (err) {
@@ -155,9 +190,13 @@ export default function StorefrontCustomize() {
       };
 
       await apiPut("/store-settings", payload);
-      toast.success(t("storefront.saved") || "Store settings saved successfully");
+      toast.success(
+        t("storefront.saved") || "Store settings saved successfully",
+      );
     } catch (err) {
-      toast.error(err.message || t("storefront.saveError") || "Failed to save settings");
+      toast.error(
+        err.message || t("storefront.saveError") || "Failed to save settings",
+      );
     } finally {
       setSaving(false);
     }
@@ -165,27 +204,65 @@ export default function StorefrontCustomize() {
 
   const handleDomainVerify = async () => {
     if (!storeSettings.custom_domain) {
-      toast.error(t("storefront.enterDomainFirst") || "Please enter a domain first");
+      toast.error(
+        t("storefront.enterDomainFirst") || "Please enter a domain first",
+      );
       return;
     }
 
-    toast.loading(t("storefront.verifyingDomain") || "Verifying domain...", { id: "domain-verify" });
+    toast.loading(t("storefront.verifyingDomain") || "Verifying domain...", {
+      id: "domain-verify",
+    });
     try {
-      await apiPut("/store-settings/verify-domain", { domain: storeSettings.custom_domain });
-      setStoreSettings(prev => ({ ...prev, domain_verified: true }));
-      toast.success(t("storefront.domainVerified") || "Domain verified successfully!", { id: "domain-verify" });
+      await apiPut("/store-settings/verify-domain", {
+        domain: storeSettings.custom_domain,
+      });
+      setStoreSettings((prev) => ({ ...prev, domain_verified: true }));
+      toast.success(
+        t("storefront.domainVerified") || "Domain verified successfully!",
+        { id: "domain-verify" },
+      );
     } catch (err) {
-      toast.error(err.message || t("storefront.domainVerifyFailed") || "Domain verification failed", { id: "domain-verify" });
+      toast.error(
+        err.message ||
+          t("storefront.domainVerifyFailed") ||
+          "Domain verification failed",
+        { id: "domain-verify" },
+      );
     }
   };
 
   const tabs = [
-    { id: "branding", label: t("storefront.tabs.branding") || "Branding", icon: Palette },
-    { id: "info", label: t("storefront.tabs.info") || "Store Info", icon: Settings },
-    { id: "domain", label: t("storefront.tabs.domain") || "Domain", icon: Globe },
-    { id: "social", label: t("storefront.tabs.social") || "Social", icon: MessageCircle },
-    { id: "analytics", label: t("storefront.tabs.analytics") || "Analytics", icon: BarChart3 },
-    { id: "preview", label: t("storefront.tabs.preview") || "Preview", icon: Eye },
+    {
+      id: "branding",
+      label: t("storefront.tabs.branding") || "Branding",
+      icon: Palette,
+    },
+    {
+      id: "info",
+      label: t("storefront.tabs.info") || "Store Info",
+      icon: Settings,
+    },
+    {
+      id: "domain",
+      label: t("storefront.tabs.domain") || "Domain",
+      icon: Globe,
+    },
+    {
+      id: "social",
+      label: t("storefront.tabs.social") || "Social",
+      icon: MessageCircle,
+    },
+    {
+      id: "analytics",
+      label: t("storefront.tabs.analytics") || "Analytics",
+      icon: BarChart3,
+    },
+    {
+      id: "preview",
+      label: t("storefront.tabs.preview") || "Preview",
+      icon: Eye,
+    },
   ];
 
   if (loading) {
@@ -208,12 +285,16 @@ export default function StorefrontCustomize() {
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <div className="md:col-span-1">
-            <label className="block portal-label mb-3">{t("storefront.fields.logo") || "Store Logo"}</label>
+            <label className="block portal-label mb-3">
+              {t("storefront.fields.logo") || "Store Logo"}
+            </label>
             <div className="space-y-3">
               <div className="relative">
                 <div
                   className="w-full aspect-square bg-ground border-2 border-dashed hairline rounded-xl flex items-center justify-center cursor-pointer hover:border-amber/50 transition-colors"
-                  onClick={() => document.getElementById("logo-upload")?.click()}
+                  onClick={() =>
+                    document.getElementById("logo-upload")?.click()
+                  }
                 >
                   {storeSettings.logo_url || logoPreview ? (
                     <img
@@ -224,8 +305,13 @@ export default function StorefrontCustomize() {
                   ) : (
                     <div className="flex flex-col items-center gap-2 text-muted">
                       <Upload size={32} />
-                      <span className="portal-label">{t("storefront.clickToUpload") || "Click to upload logo"}</span>
-                      <p className="text-xs">{t("storefront.maxSize") || "Max 2MB, PNG/JPG"}</p>
+                      <span className="portal-label">
+                        {t("storefront.clickToUpload") ||
+                          "Click to upload logo"}
+                      </span>
+                      <p className="text-xs">
+                        {t("storefront.maxSize") || "Max 2MB, PNG/JPG"}
+                      </p>
                     </div>
                   )}
                   <input
@@ -251,78 +337,104 @@ export default function StorefrontCustomize() {
 
           <div className="md:col-span-2 space-y-6">
             <div>
-              <label className="block portal-label mb-3">{t("storefront.fields.storeName") || "Store Name"}</label>
+              <label className="block portal-label mb-3">
+                {t("storefront.fields.storeName") || "Store Name"}
+              </label>
               <input
                 type="text"
                 value={storeSettings.store_name}
                 onChange={(e) => handleChange("store_name", e.target.value)}
-                placeholder={t("storefront.placeholders.storeName") || "My Awesome Store"}
+                placeholder={
+                  t("storefront.placeholders.storeName") || "My Awesome Store"
+                }
                 className="w-full bg-ground border hairline rounded-xl px-4 py-3 text-ink placeholder-muted focus:outline-none focus:border-amber transition-colors"
               />
             </div>
 
             <div>
-              <label className="block portal-label mb-3">{t("storefront.fields.tagline") || "Tagline"}</label>
+              <label className="block portal-label mb-3">
+                {t("storefront.fields.tagline") || "Tagline"}
+              </label>
               <input
                 type="text"
                 value={storeSettings.tagline}
                 onChange={(e) => handleChange("tagline", e.target.value)}
-                placeholder={t("storefront.placeholders.tagline") || "Your tagline here"}
+                placeholder={
+                  t("storefront.placeholders.tagline") || "Your tagline here"
+                }
                 className="w-full bg-ground border hairline rounded-xl px-4 py-3 text-ink placeholder-muted focus:outline-none focus:border-amber transition-colors"
               />
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div>
-                <label className="block portal-label mb-2">{t("storefront.fields.primaryColor") || "Primary Color"}</label>
+                <label className="block portal-label mb-2">
+                  {t("storefront.fields.primaryColor") || "Primary Color"}
+                </label>
                 <div className="flex items-center gap-3">
                   <input
                     type="color"
                     value={storeSettings.primary_color}
-                    onChange={(e) => handleChange("primary_color", e.target.value)}
+                    onChange={(e) =>
+                      handleChange("primary_color", e.target.value)
+                    }
                     className="w-12 h-12 rounded-lg border hairline cursor-pointer p-1"
                     title={t("storefront.fields.primaryColor")}
                   />
                   <input
                     type="text"
                     value={storeSettings.primary_color}
-                    onChange={(e) => handleChange("primary_color", e.target.value)}
+                    onChange={(e) =>
+                      handleChange("primary_color", e.target.value)
+                    }
                     className="flex-1 bg-ground border hairline rounded-xl px-4 py-3 text-ink uppercase font-mono text-sm focus:outline-none focus:border-amber transition-colors"
                   />
                 </div>
               </div>
               <div>
-                <label className="block portal-label mb-2">{t("storefront.fields.secondaryColor") || "Secondary Color"}</label>
+                <label className="block portal-label mb-2">
+                  {t("storefront.fields.secondaryColor") || "Secondary Color"}
+                </label>
                 <div className="flex items-center gap-3">
                   <input
                     type="color"
                     value={storeSettings.secondary_color}
-                    onChange={(e) => handleChange("secondary_color", e.target.value)}
+                    onChange={(e) =>
+                      handleChange("secondary_color", e.target.value)
+                    }
                     className="w-12 h-12 rounded-lg border hairline cursor-pointer p-1"
                     title={t("storefront.fields.secondaryColor")}
                   />
                   <input
                     type="text"
                     value={storeSettings.secondary_color}
-                    onChange={(e) => handleChange("secondary_color", e.target.value)}
+                    onChange={(e) =>
+                      handleChange("secondary_color", e.target.value)
+                    }
                     className="flex-1 bg-ground border hairline rounded-xl px-4 py-3 text-ink uppercase font-mono text-sm focus:outline-none focus:border-amber transition-colors"
                   />
                 </div>
               </div>
               <div>
-                <label className="block portal-label mb-2">{t("storefront.fields.accentColor") || "Accent Color"}</label>
+                <label className="block portal-label mb-2">
+                  {t("storefront.fields.accentColor") || "Accent Color"}
+                </label>
                 <div className="flex items-center gap-3">
                   <input
                     type="color"
                     value={storeSettings.accent_color}
-                    onChange={(e) => handleChange("accent_color", e.target.value)}
+                    onChange={(e) =>
+                      handleChange("accent_color", e.target.value)
+                    }
                     className="w-12 h-12 rounded-lg border hairline cursor-pointer p-1"
                     title={t("storefront.fields.accentColor")}
                   />
                   <input
                     type="text"
                     value={storeSettings.accent_color}
-                    onChange={(e) => handleChange("accent_color", e.target.value)}
+                    onChange={(e) =>
+                      handleChange("accent_color", e.target.value)
+                    }
                     className="flex-1 bg-ground border hairline rounded-xl px-4 py-3 text-ink uppercase font-mono text-sm focus:outline-none focus:border-amber transition-colors"
                   />
                 </div>
@@ -338,17 +450,32 @@ export default function StorefrontCustomize() {
           {t("storefront.sections.colorPreview") || "Color Preview"}
         </h3>
         <div className="flex flex-wrap gap-4">
-          <div className="flex-1 min-w-[200px] p-6 rounded-xl flex flex-col items-center justify-center" style={{ backgroundColor: storeSettings.primary_color }}>
+          <div
+            className="flex-1 min-w-[200px] p-6 rounded-xl flex flex-col items-center justify-center"
+            style={{ backgroundColor: storeSettings.primary_color }}
+          >
             <span className="text-white font-semibold text-lg">Primary</span>
-            <span className="text-white/80 text-sm font-mono">{storeSettings.primary_color}</span>
+            <span className="text-white/80 text-sm font-mono">
+              {storeSettings.primary_color}
+            </span>
           </div>
-          <div className="flex-1 min-w-[200px] p-6 rounded-xl flex flex-col items-center justify-center" style={{ backgroundColor: storeSettings.secondary_color }}>
+          <div
+            className="flex-1 min-w-[200px] p-6 rounded-xl flex flex-col items-center justify-center"
+            style={{ backgroundColor: storeSettings.secondary_color }}
+          >
             <span className="text-white font-semibold text-lg">Secondary</span>
-            <span className="text-white/80 text-sm font-mono">{storeSettings.secondary_color}</span>
+            <span className="text-white/80 text-sm font-mono">
+              {storeSettings.secondary_color}
+            </span>
           </div>
-          <div className="flex-1 min-w-[200px] p-6 rounded-xl flex flex-col items-center justify-center" style={{ backgroundColor: storeSettings.accent_color }}>
+          <div
+            className="flex-1 min-w-[200px] p-6 rounded-xl flex flex-col items-center justify-center"
+            style={{ backgroundColor: storeSettings.accent_color }}
+          >
             <span className="text-white font-semibold text-lg">Accent</span>
-            <span className="text-white/80 text-sm font-mono">{storeSettings.accent_color}</span>
+            <span className="text-white/80 text-sm font-mono">
+              {storeSettings.accent_color}
+            </span>
           </div>
         </div>
       </div>
@@ -365,39 +492,62 @@ export default function StorefrontCustomize() {
 
         <div className="space-y-4">
           <div>
-            <label className="block portal-label mb-2">{t("storefront.fields.description") || "Description"}</label>
+            <label className="block portal-label mb-2">
+              {t("storefront.fields.description") || "Description"}
+            </label>
             <textarea
               value={storeSettings.description}
               onChange={(e) => handleChange("description", e.target.value)}
               rows={4}
-              placeholder={t("storefront.placeholders.description") || "Describe your store..."}
+              placeholder={
+                t("storefront.placeholders.description") ||
+                "Describe your store..."
+              }
               className="w-full bg-ground border hairline rounded-xl px-4 py-3 text-ink placeholder-muted focus:outline-none focus:border-amber transition-colors resize-none"
             />
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block portal-label mb-2">{t("storefront.fields.contactEmail") || "Contact Email"}</label>
+              <label className="block portal-label mb-2">
+                {t("storefront.fields.contactEmail") || "Contact Email"}
+              </label>
               <div className="relative">
-                <Mail size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted" />
+                <Mail
+                  size={16}
+                  className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted"
+                />
                 <input
                   type="email"
                   value={storeSettings.contact_email}
-                  onChange={(e) => handleChange("contact_email", e.target.value)}
-                  placeholder={t("storefront.placeholders.email") || "contact@store.com"}
+                  onChange={(e) =>
+                    handleChange("contact_email", e.target.value)
+                  }
+                  placeholder={
+                    t("storefront.placeholders.email") || "contact@store.com"
+                  }
                   className="w-full bg-ground border hairline rounded-xl px-4 py-3 pl-10 text-ink placeholder-muted focus:outline-none focus:border-amber transition-colors"
                 />
               </div>
             </div>
             <div>
-              <label className="block portal-label mb-2">{t("storefront.fields.contactPhone") || "Contact Phone"}</label>
+              <label className="block portal-label mb-2">
+                {t("storefront.fields.contactPhone") || "Contact Phone"}
+              </label>
               <div className="relative">
-                <Phone size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted" />
+                <Phone
+                  size={16}
+                  className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted"
+                />
                 <input
                   type="tel"
                   value={storeSettings.contact_phone}
-                  onChange={(e) => handleChange("contact_phone", e.target.value)}
-                  placeholder={t("storefront.placeholders.phone") || "+212 XXX XX XX XX"}
+                  onChange={(e) =>
+                    handleChange("contact_phone", e.target.value)
+                  }
+                  placeholder={
+                    t("storefront.placeholders.phone") || "+212 XXX XX XX XX"
+                  }
                   className="w-full bg-ground border hairline rounded-xl px-4 py-3 pl-10 text-ink placeholder-muted focus:outline-none focus:border-amber transition-colors"
                 />
               </div>
@@ -405,14 +555,21 @@ export default function StorefrontCustomize() {
           </div>
 
           <div>
-            <label className="block portal-label mb-2">{t("storefront.fields.address") || "Address"}</label>
+            <label className="block portal-label mb-2">
+              {t("storefront.fields.address") || "Address"}
+            </label>
             <div className="relative">
-              <MapPin size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted" />
+              <MapPin
+                size={16}
+                className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted"
+              />
               <input
                 type="text"
                 value={storeSettings.address}
                 onChange={(e) => handleChange("address", e.target.value)}
-                placeholder={t("storefront.placeholders.address") || "123 Main Street"}
+                placeholder={
+                  t("storefront.placeholders.address") || "123 Main Street"
+                }
                 className="w-full bg-ground border hairline rounded-xl px-4 py-3 pl-10 text-ink placeholder-muted focus:outline-none focus:border-amber transition-colors"
               />
             </div>
@@ -420,7 +577,9 @@ export default function StorefrontCustomize() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block portal-label mb-2">{t("storefront.fields.city") || "City"}</label>
+              <label className="block portal-label mb-2">
+                {t("storefront.fields.city") || "City"}
+              </label>
               <input
                 type="text"
                 value={storeSettings.city}
@@ -430,7 +589,9 @@ export default function StorefrontCustomize() {
               />
             </div>
             <div>
-              <label className="block portal-label mb-2">{t("storefront.fields.country") || "Country"}</label>
+              <label className="block portal-label mb-2">
+                {t("storefront.fields.country") || "Country"}
+              </label>
               <input
                 type="text"
                 value={storeSettings.country}
@@ -455,25 +616,35 @@ export default function StorefrontCustomize() {
 
         <div className="space-y-4">
           <div>
-            <label className="block portal-label mb-2">{t("storefront.fields.customDomain") || "Custom Domain"}</label>
+            <label className="block portal-label mb-2">
+              {t("storefront.fields.customDomain") || "Custom Domain"}
+            </label>
             <div className="relative">
-              <Globe size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted" />
+              <Globe
+                size={16}
+                className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted"
+              />
               <input
                 type="text"
                 value={storeSettings.custom_domain}
                 onChange={(e) => handleChange("custom_domain", e.target.value)}
-                placeholder={t("storefront.placeholders.domain") || "store.example.com"}
+                placeholder={
+                  t("storefront.placeholders.domain") || "store.example.com"
+                }
                 className="w-full bg-ground border hairline rounded-xl px-4 py-3 pl-10 text-ink placeholder-muted focus:outline-none focus:border-amber transition-colors"
               />
             </div>
             <p className="portal-label text-muted mt-2">
-              {t("storefront.help.domain") || "Configure your custom domain. You'll need to add a CNAME record pointing to your storefront URL."}
+              {t("storefront.help.domain") ||
+                "Configure your custom domain. You'll need to add a CNAME record pointing to your storefront URL."}
             </p>
           </div>
 
           <div className="flex items-center gap-4 p-4 bg-ground/50 border hairline rounded-xl">
             <div className="flex-1">
-              <p className="portal-label font-semibold text-ink">{t("storefront.domain.status") || "Domain Status"}</p>
+              <p className="portal-label font-semibold text-ink">
+                {t("storefront.domain.status") || "Domain Status"}
+              </p>
               <p className="portal-label text-muted text-sm">
                 {storeSettings.custom_domain
                   ? storeSettings.domain_verified
@@ -483,16 +654,15 @@ export default function StorefrontCustomize() {
               </p>
             </div>
             {storeSettings.custom_domain && !storeSettings.domain_verified && (
-              <button
-                onClick={handleDomainVerify}
-                className="portal-pill-btn"
-              >
-                <Shield size={16} /> {t("storefront.domain.verify") || "Verify Domain"}
+              <button onClick={handleDomainVerify} className="portal-pill-btn">
+                <Shield size={16} />{" "}
+                {t("storefront.domain.verify") || "Verify Domain"}
               </button>
             )}
             {storeSettings.domain_verified && (
               <span className="flex items-center gap-2 text-teal font-medium">
-                <CheckCircle size={16} /> {t("storefront.domain.verifiedBadge") || "Verified"}
+                <CheckCircle size={16} />{" "}
+                {t("storefront.domain.verifiedBadge") || "Verified"}
               </span>
             )}
           </div>
@@ -500,23 +670,40 @@ export default function StorefrontCustomize() {
           {storeSettings.custom_domain && (
             <div className="bg-amber/10 border border-amber/30 rounded-xl p-4">
               <h4 className="portal-label font-semibold text-amber mb-2 flex items-center gap-2">
-                <ExternalLink size={16} /> {t("storefront.domain.dnsInstructions") || "DNS Configuration"}
+                <ExternalLink size={16} />{" "}
+                {t("storefront.domain.dnsInstructions") || "DNS Configuration"}
               </h4>
               <div className="space-y-2 text-sm portal-label text-ink-secondary">
-                <p>{t("storefront.domain.dnsStep1") || "1. Go to your domain registrar's DNS settings"}</p>
-                <p>{t("storefront.domain.dnsStep2") || "2. Add a CNAME record:"}</p>
+                <p>
+                  {t("storefront.domain.dnsStep1") ||
+                    "1. Go to your domain registrar's DNS settings"}
+                </p>
+                <p>
+                  {t("storefront.domain.dnsStep2") || "2. Add a CNAME record:"}
+                </p>
                 <div className="bg-ground border hairline rounded-lg p-3 font-mono text-amber ml-4">
-                  {t("storefront.domain.cnameLabel") || "Name"}: <strong>@</strong> or <strong>www</strong><br />
-                  {t("storefront.domain.cnameTarget") || "Target"}: <strong>{window.location.hostname}</strong>
+                  {t("storefront.domain.cnameLabel") || "Name"}:{" "}
+                  <strong>@</strong> or <strong>www</strong>
+                  <br />
+                  {t("storefront.domain.cnameTarget") || "Target"}:{" "}
+                  <strong>{window.location.hostname}</strong>
                 </div>
-                <p>{t("storefront.domain.dnsStep3") || "3. Save changes and click Verify Domain above"}</p>
-                <p>{t("storefront.domain.dnsStep4") || "4. DNS propagation may take up to 24-48 hours"}</p>
+                <p>
+                  {t("storefront.domain.dnsStep3") ||
+                    "3. Save changes and click Verify Domain above"}
+                </p>
+                <p>
+                  {t("storefront.domain.dnsStep4") ||
+                    "4. DNS propagation may take up to 24-48 hours"}
+                </p>
               </div>
             </div>
           )}
 
           <div className="border-t hairline pt-4">
-            <h4 className="portal-label font-semibold mb-3">{t("storefront.sections.storefrontUrl") || "Your Storefront URL"}</h4>
+            <h4 className="portal-label font-semibold mb-3">
+              {t("storefront.sections.storefrontUrl") || "Your Storefront URL"}
+            </h4>
             <div className="flex items-center gap-3 flex-wrap">
               <span className="bg-ground border hairline rounded-xl px-4 py-3 font-mono text-sm text-amber flex-1 min-w-[250px] text-center">
                 {storeSettings.custom_domain && storeSettings.domain_verified
@@ -525,21 +712,28 @@ export default function StorefrontCustomize() {
               </span>
               <button
                 className="portal-pill-btn"
-                onClick={() => navigator.clipboard.writeText(
-                  storeSettings.custom_domain && storeSettings.domain_verified
-                    ? `https://${storeSettings.custom_domain}`
-                    : `${window.location.origin}/storefront/${storefrontUserId}`
-                )}
+                onClick={() =>
+                  navigator.clipboard.writeText(
+                    storeSettings.custom_domain && storeSettings.domain_verified
+                      ? `https://${storeSettings.custom_domain}`
+                      : `${window.location.origin}/storefront/${storefrontUserId}`,
+                  )
+                }
               >
                 <Copy size={16} /> {t("storefront.copyUrl") || "Copy URL"}
               </button>
               <a
-                href={storeSettings.custom_domain && storeSettings.domain_verified ? `https://${storeSettings.custom_domain}` : `/storefront/${storefrontUserId}`}
+                href={
+                  storeSettings.custom_domain && storeSettings.domain_verified
+                    ? `https://${storeSettings.custom_domain}`
+                    : `/storefront/${storefrontUserId}`
+                }
                 target="_blank"
                 rel="noopener noreferrer"
                 className="portal-pill-btn"
               >
-                <ExternalLink size={16} /> {t("storefront.visitStore") || "Visit Store"}
+                <ExternalLink size={16} />{" "}
+                {t("storefront.visitStore") || "Visit Store"}
               </a>
             </div>
           </div>
@@ -558,15 +752,40 @@ export default function StorefrontCustomize() {
 
         <div className="space-y-4">
           {[
-            { field: "facebook_url", label: "Facebook", icon: "📘", placeholder: "https://facebook.com/yourstore" },
-            { field: "instagram_url", label: "Instagram", icon: "📷", placeholder: "https://instagram.com/yourstore" },
-            { field: "twitter_url", label: "Twitter/X", icon: "🐦", placeholder: "https://twitter.com/yourstore" },
-            { field: "whatsapp_number", label: "WhatsApp", icon: "💬", placeholder: "+212 XXX XX XX XX" },
+            {
+              field: "facebook_url",
+              label: "Facebook",
+              icon: "📘",
+              placeholder: "https://facebook.com/yourstore",
+            },
+            {
+              field: "instagram_url",
+              label: "Instagram",
+              icon: "📷",
+              placeholder: "https://instagram.com/yourstore",
+            },
+            {
+              field: "twitter_url",
+              label: "Twitter/X",
+              icon: "🐦",
+              placeholder: "https://twitter.com/yourstore",
+            },
+            {
+              field: "whatsapp_number",
+              label: "WhatsApp",
+              icon: "💬",
+              placeholder: "+212 XXX XX XX XX",
+            },
           ].map((social) => (
-            <div key={social.field} className="flex items-center gap-4 p-4 bg-ground/50 border hairline rounded-xl">
+            <div
+              key={social.field}
+              className="flex items-center gap-4 p-4 bg-ground/50 border hairline rounded-xl"
+            >
               <span className="text-2xl w-12 text-center">{social.icon}</span>
               <div className="flex-1">
-                <label className="block portal-label mb-1">{social.label}</label>
+                <label className="block portal-label mb-1">
+                  {social.label}
+                </label>
                 <input
                   type="text"
                   value={storeSettings[social.field]}
@@ -587,7 +806,9 @@ export default function StorefrontCustomize() {
       return (
         <div className="bg-ground-secondary border hairline rounded-xl p-8 text-center">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-amber mx-auto mb-4"></div>
-          <p className="portal-label">{t("storefront.loadingAnalytics") || "Loading analytics..."}</p>
+          <p className="portal-label">
+            {t("storefront.loadingAnalytics") || "Loading analytics..."}
+          </p>
         </div>
       );
     }
@@ -595,7 +816,9 @@ export default function StorefrontCustomize() {
     if (!analytics) {
       return (
         <div className="bg-ground-secondary border hairline rounded-xl p-8 text-center">
-          <p className="portal-label text-muted">{t("storefront.noAnalytics") || "No analytics data available yet"}</p>
+          <p className="portal-label text-muted">
+            {t("storefront.noAnalytics") || "No analytics data available yet"}
+          </p>
         </div>
       );
     }
@@ -611,10 +834,17 @@ export default function StorefrontCustomize() {
                 <Package size={20} className="text-amber" />
               </div>
               <div>
-                <p className="portal-label text-muted">{t("storefront.analytics.totalProducts") || "Total Products"}</p>
-                <p className="portal-heading text-2xl font-bold text-ink">{products?.total || 0}</p>
+                <p className="portal-label text-muted">
+                  {t("storefront.analytics.totalProducts") || "Total Products"}
+                </p>
+                <p className="portal-heading text-2xl font-bold text-ink">
+                  {products?.total || 0}
+                </p>
                 <p className="portal-label text-teal text-sm mt-1">
-                  {t("storefront.analytics.visible") || "Visible"}: {products?.visible || 0} | {t("storefront.analytics.featured") || "Featured"}: {products?.featured || 0}
+                  {t("storefront.analytics.visible") || "Visible"}:{" "}
+                  {products?.visible || 0} |{" "}
+                  {t("storefront.analytics.featured") || "Featured"}:{" "}
+                  {products?.featured || 0}
                 </p>
               </div>
             </div>
@@ -626,10 +856,15 @@ export default function StorefrontCustomize() {
                 <Star size={20} className="text-teal" />
               </div>
               <div>
-                <p className="portal-label text-muted">{t("storefront.analytics.totalReviews") || "Total Reviews"}</p>
-                <p className="portal-heading text-2xl font-bold text-ink">{reviews?.total_reviews || 0}</p>
+                <p className="portal-label text-muted">
+                  {t("storefront.analytics.totalReviews") || "Total Reviews"}
+                </p>
+                <p className="portal-heading text-2xl font-bold text-ink">
+                  {reviews?.total_reviews || 0}
+                </p>
                 <p className="portal-label text-amber text-sm mt-1">
-                  {t("storefront.analytics.avgRating") || "Avg Rating"}: {reviews?.avg_rating || 0}/5
+                  {t("storefront.analytics.avgRating") || "Avg Rating"}:{" "}
+                  {reviews?.avg_rating || 0}/5
                 </p>
               </div>
             </div>
@@ -641,10 +876,15 @@ export default function StorefrontCustomize() {
                 <BarChart3 size={20} className="text-purple-400" />
               </div>
               <div>
-                <p className="portal-label text-muted">{t("storefront.analytics.categories") || "Categories"}</p>
-                <p className="portal-heading text-2xl font-bold text-ink">{categories?.length || 0}</p>
+                <p className="portal-label text-muted">
+                  {t("storefront.analytics.categories") || "Categories"}
+                </p>
+                <p className="portal-heading text-2xl font-bold text-ink">
+                  {categories?.length || 0}
+                </p>
                 <p className="portal-label text-muted text-sm mt-1">
-                  {t("storefront.analytics.activeCategories") || "Active categories"}
+                  {t("storefront.analytics.activeCategories") ||
+                    "Active categories"}
                 </p>
               </div>
             </div>
@@ -656,8 +896,12 @@ export default function StorefrontCustomize() {
                 <TrendingUp size={20} className="text-pink-400" />
               </div>
               <div>
-                <p className="portal-label text-muted">{t("storefront.analytics.topProducts") || "Top Products"}</p>
-                <p className="portal-heading text-2xl font-bold text-ink">{top_products?.length || 0}</p>
+                <p className="portal-label text-muted">
+                  {t("storefront.analytics.topProducts") || "Top Products"}
+                </p>
+                <p className="portal-heading text-2xl font-bold text-ink">
+                  {top_products?.length || 0}
+                </p>
                 <p className="portal-label text-muted text-sm mt-1">
                   {t("storefront.analytics.bestSellers") || "Best sellers"}
                 </p>
@@ -668,12 +912,23 @@ export default function StorefrontCustomize() {
 
         {categories && categories.length > 0 && (
           <div className="bg-ground-secondary border hairline rounded-xl p-5">
-            <h3 className="portal-heading text-base mb-4">{t("storefront.analytics.productsByCategory") || "Products by Category"}</h3>
+            <h3 className="portal-heading text-base mb-4">
+              {t("storefront.analytics.productsByCategory") ||
+                "Products by Category"}
+            </h3>
             <div className="space-y-3">
               {categories.map((cat, i) => (
-                <div key={i} className="flex items-center justify-between p-3 bg-ground/50 border hairline rounded-lg">
-                  <span className="portal-label font-medium">{cat.category}</span>
-                  <span className="portal-heading font-bold text-amber">{cat.count} {t("storefront.analytics.products") || "products"}</span>
+                <div
+                  key={i}
+                  className="flex items-center justify-between p-3 bg-ground/50 border hairline rounded-lg"
+                >
+                  <span className="portal-label font-medium">
+                    {cat.category}
+                  </span>
+                  <span className="portal-heading font-bold text-amber">
+                    {cat.count}{" "}
+                    {t("storefront.analytics.products") || "products"}
+                  </span>
                 </div>
               ))}
             </div>
@@ -682,17 +937,31 @@ export default function StorefrontCustomize() {
 
         {top_products && top_products.length > 0 && (
           <div className="bg-ground-secondary border hairline rounded-xl p-5">
-            <h3 className="portal-heading text-base mb-4">{t("storefront.analytics.topProductsList") || "Top Performing Products"}</h3>
+            <h3 className="portal-heading text-base mb-4">
+              {t("storefront.analytics.topProductsList") ||
+                "Top Performing Products"}
+            </h3>
             <div className="space-y-3">
               {top_products.map((product, i) => (
-                <div key={product.id} className="flex items-center gap-4 p-3 bg-ground/50 border hairline rounded-lg">
-                  <span className="w-8 h-8 bg-amber/15 text-amber rounded-lg flex items-center justify-center font-bold text-sm">{i + 1}</span>
+                <div
+                  key={product.id}
+                  className="flex items-center gap-4 p-3 bg-ground/50 border hairline rounded-lg"
+                >
+                  <span className="w-8 h-8 bg-amber/15 text-amber rounded-lg flex items-center justify-center font-bold text-sm">
+                    {i + 1}
+                  </span>
                   <div className="flex-1 min-w-0">
-                    <p className="portal-label font-semibold text-ink truncate">{product.name}</p>
-                    <p className="portal-label text-muted text-sm">{product.sold} {t("storefront.analytics.sold") || "sold"}</p>
+                    <p className="portal-label font-semibold text-ink truncate">
+                      {product.name}
+                    </p>
+                    <p className="portal-label text-muted text-sm">
+                      {product.sold} {t("storefront.analytics.sold") || "sold"}
+                    </p>
                   </div>
                   <div className="text-right">
-                    <p className="portal-heading font-bold text-ink">{product.revenue} DA</p>
+                    <p className="portal-heading font-bold text-ink">
+                      {product.revenue} DA
+                    </p>
                   </div>
                 </div>
               ))}
@@ -702,10 +971,12 @@ export default function StorefrontCustomize() {
 
         <div className="flex gap-3">
           <button onClick={loadAnalytics} className="portal-pill-btn">
-            <RefreshCw size={16} /> {t("storefront.refreshAnalytics") || "Refresh Analytics"}
+            <RefreshCw size={16} />{" "}
+            {t("storefront.refreshAnalytics") || "Refresh Analytics"}
           </button>
           <a href="/reports" className="portal-pill-btn">
-            <BarChart3 size={16} /> {t("storefront.viewFullReports") || "View Full Reports"}
+            <BarChart3 size={16} />{" "}
+            {t("storefront.viewFullReports") || "View Full Reports"}
           </a>
         </div>
       </div>
@@ -727,12 +998,23 @@ export default function StorefrontCustomize() {
               onChange={(e) => setPreviewMode(e.target.checked)}
               className="w-4 h-4 rounded border-hairline text-amber focus:ring-amber"
             />
-            <span className="portal-label">{t("storefront.previewMode") || "Preview Mode"}</span>
+            <span className="portal-label">
+              {t("storefront.previewMode") || "Preview Mode"}
+            </span>
           </label>
         </div>
 
-        <div className="bg-ground border-2 rounded-xl overflow-hidden" style={{ borderColor: storeSettings.primary_color }}>
-          <div className="p-4 border-b" style={{ borderColor: storeSettings.secondary_color, backgroundColor: storeSettings.primary_color }}>
+        <div
+          className="bg-ground border-2 rounded-xl overflow-hidden"
+          style={{ borderColor: storeSettings.primary_color }}
+        >
+          <div
+            className="p-4 border-b"
+            style={{
+              borderColor: storeSettings.secondary_color,
+              backgroundColor: storeSettings.primary_color,
+            }}
+          >
             <div className="flex items-center gap-3">
               {storeSettings.logo_url && (
                 <img
@@ -742,9 +1024,15 @@ export default function StorefrontCustomize() {
                 />
               )}
               <div>
-                <h1 className="text-white font-bold text-xl">{storeSettings.store_name || t("storefront.preview.storeName") || "Your Store Name"}</h1>
+                <h1 className="text-white font-bold text-xl">
+                  {storeSettings.store_name ||
+                    t("storefront.preview.storeName") ||
+                    "Your Store Name"}
+                </h1>
                 {storeSettings.tagline && (
-                  <p className="text-white/80 text-sm">{storeSettings.tagline}</p>
+                  <p className="text-white/80 text-sm">
+                    {storeSettings.tagline}
+                  </p>
                 )}
               </div>
             </div>
@@ -752,48 +1040,83 @@ export default function StorefrontCustomize() {
 
           <div className="p-6">
             {storeSettings.description && (
-              <p className="portal-text mb-6 text-ink-secondary">{storeSettings.description}</p>
+              <p className="portal-text mb-6 text-ink-secondary">
+                {storeSettings.description}
+              </p>
             )}
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
               {storeSettings.contact_email && (
-                <a href={`mailto:${storeSettings.contact_email}`} className="flex items-center gap-2 p-3 bg-ground-secondary border hairline rounded-lg hover:border-amber/50 transition-colors">
+                <a
+                  href={`mailto:${storeSettings.contact_email}`}
+                  className="flex items-center gap-2 p-3 bg-ground-secondary border hairline rounded-lg hover:border-amber/50 transition-colors"
+                >
                   <Mail size={18} className="text-amber" />
-                  <span className="portal-label text-ink">{storeSettings.contact_email}</span>
+                  <span className="portal-label text-ink">
+                    {storeSettings.contact_email}
+                  </span>
                 </a>
               )}
               {storeSettings.contact_phone && (
-                <a href={`tel:${storeSettings.contact_phone}`} className="flex items-center gap-2 p-3 bg-ground-secondary border hairline rounded-lg hover:border-amber/50 transition-colors">
+                <a
+                  href={`tel:${storeSettings.contact_phone}`}
+                  className="flex items-center gap-2 p-3 bg-ground-secondary border hairline rounded-lg hover:border-amber/50 transition-colors"
+                >
                   <Phone size={18} className="text-amber" />
-                  <span className="portal-label text-ink">{storeSettings.contact_phone}</span>
+                  <span className="portal-label text-ink">
+                    {storeSettings.contact_phone}
+                  </span>
                 </a>
               )}
               {storeSettings.address && (
                 <div className="flex items-center gap-2 p-3 bg-ground-secondary border hairline rounded-lg">
                   <MapPin size={18} className="text-amber" />
-                  <span className="portal-label text-ink">{storeSettings.address}, {storeSettings.city}, {storeSettings.country}</span>
+                  <span className="portal-label text-ink">
+                    {storeSettings.address}, {storeSettings.city},{" "}
+                    {storeSettings.country}
+                  </span>
                 </div>
               )}
             </div>
 
             <div className="flex items-center gap-4 pt-4 border-t hairline">
               {storeSettings.facebook_url && (
-                <a href={storeSettings.facebook_url} target="_blank" rel="noopener noreferrer" className="p-2 bg-ground-secondary border hairline rounded-lg hover:bg-amber/10 transition-colors">
+                <a
+                  href={storeSettings.facebook_url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="p-2 bg-ground-secondary border hairline rounded-lg hover:bg-amber/10 transition-colors"
+                >
                   📘
                 </a>
               )}
               {storeSettings.instagram_url && (
-                <a href={storeSettings.instagram_url} target="_blank" rel="noopener noreferrer" className="p-2 bg-ground-secondary border hairline rounded-lg hover:bg-amber/10 transition-colors">
+                <a
+                  href={storeSettings.instagram_url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="p-2 bg-ground-secondary border hairline rounded-lg hover:bg-amber/10 transition-colors"
+                >
                   📷
                 </a>
               )}
               {storeSettings.twitter_url && (
-                <a href={storeSettings.twitter_url} target="_blank" rel="noopener noreferrer" className="p-2 bg-ground-secondary border hairline rounded-lg hover:bg-amber/10 transition-colors">
+                <a
+                  href={storeSettings.twitter_url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="p-2 bg-ground-secondary border hairline rounded-lg hover:bg-amber/10 transition-colors"
+                >
                   🐦
                 </a>
               )}
               {storeSettings.whatsapp_number && (
-                <a href={`https://wa.me/${storeSettings.whatsapp_number.replace(/\D/g, '')}`} target="_blank" rel="noopener noreferrer" className="p-2 bg-ground-secondary border hairline rounded-lg hover:bg-amber/10 transition-colors">
+                <a
+                  href={`https://wa.me/${storeSettings.whatsapp_number.replace(/\D/g, "")}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="p-2 bg-ground-secondary border hairline rounded-lg hover:bg-amber/10 transition-colors"
+                >
                   💬
                 </a>
               )}
@@ -802,7 +1125,8 @@ export default function StorefrontCustomize() {
         </div>
 
         <p className="portal-label text-muted text-center mt-4">
-          {t("storefront.preview.note") || "This is a preview of how your storefront will appear to customers."}
+          {t("storefront.preview.note") ||
+            "This is a preview of how your storefront will appear to customers."}
         </p>
       </div>
     </div>
@@ -830,7 +1154,10 @@ export default function StorefrontCustomize() {
   return (
     <Layout title={t("storefront.title") || "Customize Your Store"}>
       <Head>
-        <title>{t("storefront.title") || "Customize Your Store"} - Smart Business Assistant</title>
+        <title>
+          {t("storefront.title") || "Customize Your Store"} - Smart Business
+          Assistant
+        </title>
       </Head>
 
       <div className="max-w-6xl mx-auto">
@@ -840,9 +1167,16 @@ export default function StorefrontCustomize() {
               <ShoppingBag size={28} className="text-amber" />
               {t("storefront.title") || "Customize Your Store"}
             </h1>
-            <p className="portal-label text-muted mt-1">{t("storefront.subtitle") || "Manage your storefront branding, domain, and analytics"}</p>
+            <p className="portal-label text-muted mt-1">
+              {t("storefront.subtitle") ||
+                "Manage your storefront branding, domain, and analytics"}
+            </p>
           </div>
-          <button onClick={handleSave} disabled={saving} className="portal-pill-btn">
+          <button
+            onClick={handleSave}
+            disabled={saving}
+            className="portal-pill-btn"
+          >
             {saving ? (
               <>
                 <span className="animate-spin rounded-full h-4 w-4 border-2 border-amber border-t-transparent mr-2"></span>
@@ -878,9 +1212,7 @@ export default function StorefrontCustomize() {
             </nav>
           </div>
 
-          <div className="p-6">
-            {renderTabContent()}
-          </div>
+          <div className="p-6">{renderTabContent()}</div>
         </div>
       </div>
     </Layout>
