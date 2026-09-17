@@ -30,6 +30,7 @@ import {
   Trash2,
   Zap,
   Shield,
+  Type,
 } from "lucide-react";
 import toast from "react-hot-toast";
 import { apiGet, apiPost, apiPut } from "../../lib/api";
@@ -64,6 +65,23 @@ export default function StorefrontCustomize() {
     primary_color: DEFAULT_COLORS.primary,
     secondary_color: DEFAULT_COLORS.secondary,
     accent_color: DEFAULT_COLORS.accent,
+    background_color: "#FFFFFF",
+    background_type: "color",
+    background_gradient: "",
+    text_color: "#1F2937",
+    text_secondary_color: "#6B7280",
+    border_color: "#E5E7EB",
+    header_background_color: "#FFFFFF",
+    footer_background_color: "#1E40AF",
+    card_background_color: "#FFFFFF",
+    card_text_color: "#1F2937",
+    button_text_color: "#FFFFFF",
+    font_family: "Inter, system-ui, sans-serif",
+    heading_font_family: "Inter, system-ui, sans-serif",
+    font_size_base: "16px",
+    container_width: "max-w-7xl",
+    border_radius: "0.75rem",
+    content_overrides: {},
     description: "",
     tagline: "",
     contact_email: "",
@@ -118,6 +136,13 @@ export default function StorefrontCustomize() {
     setStoreSettings((prev) => ({ ...prev, [field]: value }));
   };
 
+  const handleContentChange = (field, value) => {
+    setStoreSettings((prev) => ({
+      ...prev,
+      content_overrides: { ...(prev.content_overrides || {}), [field]: value },
+    }));
+  };
+
   const handleLogoUpload = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
@@ -169,27 +194,7 @@ export default function StorefrontCustomize() {
   const handleSave = async () => {
     setSaving(true);
     try {
-      const payload = {
-        store_name: storeSettings.store_name,
-        logo_url: storeSettings.logo_url,
-        primary_color: storeSettings.primary_color,
-        secondary_color: storeSettings.secondary_color,
-        accent_color: storeSettings.accent_color,
-        description: storeSettings.description,
-        tagline: storeSettings.tagline,
-        contact_email: storeSettings.contact_email,
-        contact_phone: storeSettings.contact_phone,
-        address: storeSettings.address,
-        city: storeSettings.city,
-        country: storeSettings.country,
-        custom_domain: storeSettings.custom_domain,
-        facebook_url: storeSettings.facebook_url,
-        instagram_url: storeSettings.instagram_url,
-        twitter_url: storeSettings.twitter_url,
-        whatsapp_number: storeSettings.whatsapp_number,
-      };
-
-      await apiPut("/store-settings", payload);
+      await apiPut("/store-settings", storeSettings);
       toast.success(
         t("storefront.saved") || "Store settings saved successfully",
       );
@@ -242,6 +247,16 @@ export default function StorefrontCustomize() {
       id: "info",
       label: t("storefront.tabs.info") || "Store Info",
       icon: Settings,
+    },
+    {
+      id: "design",
+      label: "Design",
+      icon: Palette,
+    },
+    {
+      id: "content",
+      label: "Content",
+      icon: Type,
     },
     {
       id: "domain",
@@ -605,6 +620,194 @@ export default function StorefrontCustomize() {
       </div>
     </div>
   );
+
+  const renderDesignTab = () => {
+    const colors = [
+      ["background_color", "Page background"],
+      ["header_background_color", "Header background"],
+      ["card_background_color", "Card background"],
+      ["primary_color", "Primary buttons"],
+      ["secondary_color", "Secondary surfaces"],
+      ["accent_color", "Accent"],
+      ["text_color", "Main text"],
+      ["text_secondary_color", "Muted text"],
+      ["card_text_color", "Card text"],
+      ["border_color", "Borders"],
+      ["button_text_color", "Button text"],
+      ["footer_background_color", "Footer background"],
+    ];
+
+    return (
+      <div className="space-y-6">
+        <div className="bg-ground-secondary border hairline rounded-xl p-6">
+          <h3 className="portal-heading text-lg mb-6 flex items-center gap-2">
+            <Palette size={20} className="text-amber" /> Storefront surfaces
+          </h3>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+            {colors.map(([field, label]) => (
+              <label key={field} className="block">
+                <span className="portal-label block mb-2">{label}</span>
+                <div className="flex items-center gap-3">
+                  <input
+                    type="color"
+                    value={storeSettings[field] || "#FFFFFF"}
+                    onChange={(e) => handleChange(field, e.target.value)}
+                    className="w-11 h-11 rounded-lg border hairline cursor-pointer p-1"
+                  />
+                  <input
+                    value={storeSettings[field] || ""}
+                    onChange={(e) => handleChange(field, e.target.value)}
+                    className="flex-1 bg-ground border hairline rounded-xl px-3 py-2.5 text-ink uppercase font-mono text-sm"
+                    placeholder="#FFFFFF"
+                  />
+                </div>
+              </label>
+            ))}
+          </div>
+        </div>
+
+        <div className="bg-ground-secondary border hairline rounded-xl p-6">
+          <h3 className="portal-heading text-lg mb-6">Background and layout</h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+            <label className="block">
+              <span className="portal-label block mb-2">Background type</span>
+              <select
+                value={storeSettings.background_type || "color"}
+                onChange={(e) => handleChange("background_type", e.target.value)}
+                className="w-full bg-ground border hairline rounded-xl px-3 py-2.5 text-ink"
+              >
+                <option value="color">Solid color</option>
+                <option value="gradient">Gradient</option>
+                <option value="image">Image URL</option>
+              </select>
+            </label>
+            {storeSettings.background_type === "gradient" && (
+              <label className="block">
+                <span className="portal-label block mb-2">CSS gradient</span>
+                <input
+                  value={storeSettings.background_gradient || ""}
+                  onChange={(e) => handleChange("background_gradient", e.target.value)}
+                  placeholder="linear-gradient(135deg, #1e293b, #2e6b72)"
+                  className="w-full bg-ground border hairline rounded-xl px-3 py-2.5 text-ink"
+                />
+              </label>
+            )}
+            {storeSettings.background_type === "image" && (
+              <label className="block">
+                <span className="portal-label block mb-2">Background image URL</span>
+                <input
+                  value={storeSettings.background_image_url || ""}
+                  onChange={(e) => handleChange("background_image_url", e.target.value)}
+                  placeholder="https://..."
+                  className="w-full bg-ground border hairline rounded-xl px-3 py-2.5 text-ink"
+                />
+              </label>
+            )}
+            <label className="block">
+              <span className="portal-label block mb-2">Body font</span>
+              <input
+                value={storeSettings.font_family || ""}
+                onChange={(e) => handleChange("font_family", e.target.value)}
+                placeholder="Inter, system-ui, sans-serif"
+                className="w-full bg-ground border hairline rounded-xl px-3 py-2.5 text-ink"
+              />
+            </label>
+            <label className="block">
+              <span className="portal-label block mb-2">Heading font</span>
+              <input
+                value={storeSettings.heading_font_family || ""}
+                onChange={(e) => handleChange("heading_font_family", e.target.value)}
+                placeholder="Inter, system-ui, sans-serif"
+                className="w-full bg-ground border hairline rounded-xl px-3 py-2.5 text-ink"
+              />
+            </label>
+            <label className="block">
+              <span className="portal-label block mb-2">Container width</span>
+              <select
+                value={storeSettings.container_width || "max-w-7xl"}
+                onChange={(e) => handleChange("container_width", e.target.value)}
+                className="w-full bg-ground border hairline rounded-xl px-3 py-2.5 text-ink"
+              >
+                <option value="max-w-7xl">Wide</option>
+                <option value="max-w-screen-xl">Extra wide</option>
+                <option value="max-w-6xl">Compact</option>
+                <option value="full">Full width</option>
+              </select>
+            </label>
+            <label className="block">
+              <span className="portal-label block mb-2">Corner radius</span>
+              <select
+                value={storeSettings.border_radius || "0.75rem"}
+                onChange={(e) => handleChange("border_radius", e.target.value)}
+                className="w-full bg-ground border hairline rounded-xl px-3 py-2.5 text-ink"
+              >
+                <option value="0">Square</option>
+                <option value="0.375rem">Subtle</option>
+                <option value="0.75rem">Rounded</option>
+                <option value="1.5rem">Soft</option>
+              </select>
+            </label>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  const renderContentTab = () => {
+    const content = storeSettings.content_overrides || {};
+    const fields = [
+      ["nav_home", "Home navigation label"],
+      ["nav_products", "Products navigation label"],
+      ["nav_categories", "Categories navigation label"],
+      ["nav_about", "About navigation label"],
+      ["nav_contact", "Contact navigation label"],
+      ["products_title", "Products page title"],
+      ["featured_products_title", "Featured products title"],
+      ["categories_title", "Categories section title"],
+      ["view_all", "View all button"],
+      ["view_all_products", "View all products button"],
+      ["about_title", "About page title"],
+      ["mission_title", "Mission section title"],
+      ["contact_title", "Contact information title"],
+      ["newsletter_title", "Newsletter title"],
+      ["footer_text", "Footer text"],
+    ];
+
+    return (
+      <div className="space-y-6">
+        <div className="bg-ground-secondary border hairline rounded-xl p-6">
+          <h3 className="portal-heading text-lg mb-2">Storefront copy</h3>
+          <p className="portal-label text-muted mb-6">
+            Replace the default labels shown across your public store. Leave a field blank to use the default.
+          </p>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+            {fields.map(([field, label]) => (
+              <label key={field} className="block">
+                <span className="portal-label block mb-2">{label}</span>
+                <input
+                  value={content[field] || ""}
+                  onChange={(e) => handleContentChange(field, e.target.value)}
+                  className="w-full bg-ground border hairline rounded-xl px-3 py-2.5 text-ink"
+                />
+              </label>
+            ))}
+          </div>
+        </div>
+
+        <div className="bg-ground-secondary border hairline rounded-xl p-6">
+          <h3 className="portal-heading text-lg mb-2">Home page content</h3>
+          <div className="space-y-5">
+            <label className="block"><span className="portal-label block mb-2">Hero title</span><input value={storeSettings.hero_title || ""} onChange={(e) => handleChange("hero_title", e.target.value)} className="w-full bg-ground border hairline rounded-xl px-3 py-2.5 text-ink" /></label>
+            <label className="block"><span className="portal-label block mb-2">Hero subtitle</span><textarea rows={3} value={storeSettings.hero_subtitle || ""} onChange={(e) => handleChange("hero_subtitle", e.target.value)} className="w-full bg-ground border hairline rounded-xl px-3 py-2.5 text-ink" /></label>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+              <label className="block"><span className="portal-label block mb-2">Hero button text</span><input value={storeSettings.hero_button_text || ""} onChange={(e) => handleChange("hero_button_text", e.target.value)} className="w-full bg-ground border hairline rounded-xl px-3 py-2.5 text-ink" /></label>
+              <label className="block"><span className="portal-label block mb-2">Hero image URL</span><input value={storeSettings.hero_image_url || ""} onChange={(e) => handleChange("hero_image_url", e.target.value)} className="w-full bg-ground border hairline rounded-xl px-3 py-2.5 text-ink" /></label>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  };
 
   const renderDomainTab = () => (
     <div className="space-y-6">
@@ -1138,6 +1341,10 @@ export default function StorefrontCustomize() {
         return renderBrandingTab();
       case "info":
         return renderInfoTab();
+      case "design":
+        return renderDesignTab();
+      case "content":
+        return renderContentTab();
       case "domain":
         return renderDomainTab();
       case "social":

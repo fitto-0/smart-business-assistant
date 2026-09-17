@@ -36,6 +36,7 @@ const ALL_FIELDS = [
   // Extended Colors
   "background_color", "background_type", "background_gradient", "background_image_url",
   "text_color", "text_secondary_color", "border_color",
+  "header_background_color", "footer_background_color", "card_background_color", "card_text_color", "button_text_color", "content_overrides",
   // Typography
   "font_family", "heading_font_family", "font_size_base",
   // Layout
@@ -80,6 +81,12 @@ const DEFAULTS = {
   text_color: "#1F2937",
   text_secondary_color: "#6B7280",
   border_color: "#E5E7EB",
+  header_background_color: "#FFFFFF",
+  footer_background_color: null,
+  card_background_color: "#FFFFFF",
+  card_text_color: null,
+  button_text_color: "#FFFFFF",
+  content_overrides: {},
   font_family: "Inter, system-ui, sans-serif",
   heading_font_family: "Inter, system-ui, sans-serif",
   font_size_base: "16px",

@@ -105,6 +105,7 @@ export default function StorefrontHomePage() {
   const backgroundImageUrl = storeSettings?.background_image_url;
   const heroLayout = storeSettings?.hero_layout || "centered";
   const containerWidth = storeSettings?.container_width || "max-w-7xl";
+  const content = storeSettings?.content_overrides || {};
 
   const features = [
     { icon: Truck, title: "Free Shipping", description: "On orders over $50" },
@@ -373,7 +374,7 @@ export default function StorefrontHomePage() {
                     className="section-title"
                     style={{ fontFamily: storeSettings.heading_font_family }}
                   >
-                    {storeSettings.featured_products_title ||
+                    {content.featured_products_title || storeSettings.featured_products_title ||
                       "Featured Products"}
                   </h2>
                   <p
@@ -387,7 +388,7 @@ export default function StorefrontHomePage() {
                   href={`/storefront/${userId}/products`}
                   className="btn-outline hidden sm:inline-flex"
                 >
-                  View All <ArrowRight size={16} />
+                  {content.view_all || "View All"} <ArrowRight size={16} />
                 </Link>
               </div>
 
@@ -399,6 +400,9 @@ export default function StorefrontHomePage() {
                     userId={validUserId}
                     primaryColor={primaryColor}
                     accentColor={accentColor}
+                    cardBackgroundColor={storeSettings.card_background_color}
+                    cardTextColor={storeSettings.card_text_color || textColor}
+                    borderColor={storeSettings.border_color}
                   />
                 ))}
               </div>
@@ -408,7 +412,7 @@ export default function StorefrontHomePage() {
                   href={`/storefront/${userId}/products`}
                   className="btn-primary inline-flex items-center gap-2"
                 >
-                  View All Products <ArrowRight size={16} />
+                  {content.view_all_products || "View All Products"} <ArrowRight size={16} />
                 </Link>
               </div>
             </div>
@@ -428,7 +432,7 @@ export default function StorefrontHomePage() {
                   className="section-title"
                   style={{ fontFamily: storeSettings.heading_font_family }}
                 >
-                  {storeSettings.categories_section_title || "Shop by Category"}
+                  {content.categories_title || storeSettings.categories_section_title || "Shop by Category"}
                 </h2>
                 <p
                   className="section-subtitle mt-2"

@@ -23,6 +23,9 @@ const migrate = async () => {
   
   // Run storefront fields migration
   await runMigration("002_storefront_fields.sql");
+
+  await runMigration("003_store_settings.sql");
+  await runMigration("004_storefront_customization.sql");
   
   await query(`
     DO $$

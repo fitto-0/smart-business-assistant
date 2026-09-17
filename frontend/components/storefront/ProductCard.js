@@ -2,7 +2,7 @@ import { useRouter } from 'next/router';
 import { Heart, Share2, ShoppingCart, Plus } from 'lucide-react';
 import { motion } from 'framer-motion';
 
-export default function ProductCard({ product, userId, primaryColor = '#3B82F6', accentColor = '#F59E0B', layout = 'grid', cardStyle = 'standard' }) {
+export default function ProductCard({ product, userId, primaryColor = '#3B82F6', accentColor = '#F59E0B', cardBackgroundColor = '#FFFFFF', cardTextColor = '#1F2937', borderColor = '#E5E7EB', layout = 'grid', cardStyle = 'standard' }) {
   const router = useRouter();
 
   const handleClick = () => {
@@ -55,7 +55,7 @@ export default function ProductCard({ product, userId, primaryColor = '#3B82F6',
         whileHover={{ x: 4 }}
         className="card flex gap-4 p-4 cursor-pointer transition-all"
         onClick={handleClick}
-        style={{ borderColor: primaryColor + '33' }}
+        style={{ borderColor: primaryColor + '33', backgroundColor: cardBackgroundColor, color: cardTextColor }}
       >
         <div className="relative w-32 h-32 flex-shrink-0 rounded-lg overflow-hidden" style={{ borderRadius: '0.5rem' }}>
           {product.image_url ? (
@@ -77,10 +77,10 @@ export default function ProductCard({ product, userId, primaryColor = '#3B82F6',
               </span>
               {product.featured && <span className="text-xs font-medium px-2 py-0.5 rounded badge badge-accent">Featured</span>}
             </div>
-            <h3 className="font-semibold truncate mb-1" style={{ color: '#1F2937' }}>{product.name}</h3>
-            <p className="text-sm line-clamp-2" style={{ color: '#6B7280' }}>{product.description || 'No description available.'}</p>
+            <h3 className="font-semibold truncate mb-1" style={{ color: cardTextColor }}>{product.name}</h3>
+            <p className="text-sm line-clamp-2" style={{ color: cardTextColor, opacity: 0.72 }}>{product.description || 'No description available.'}</p>
           </div>
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mt-4 pt-4 border-t" style={{ borderColor: '#E5E7EB' }}>
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mt-4 pt-4 border-t" style={{ borderColor }}>
             <div className="flex items-center gap-3">
               <div className="text-lg font-bold" style={{ color: accentColor }}>
                 {parseFloat(product.price).toFixed(2)} DA
@@ -112,7 +112,7 @@ export default function ProductCard({ product, userId, primaryColor = '#3B82F6',
       whileHover={{ y: -4 }}
       className="card cursor-pointer overflow-hidden transition-all"
       onClick={handleClick}
-      style={{ borderColor: primaryColor + '33' }}
+      style={{ borderColor: primaryColor + '33', backgroundColor: cardBackgroundColor, color: cardTextColor }}
     >
       {/* Product Image */}
       <div className="relative aspect-square" style={{ backgroundColor: 'rgba(0,0,0,0.02)' }}>
@@ -164,12 +164,12 @@ export default function ProductCard({ product, userId, primaryColor = '#3B82F6',
           </span>
           {product.featured && <span className="text-xs font-medium px-2 py-0.5 rounded badge badge-accent">Featured</span>}
         </div>
-        <h3 className="font-semibold mb-2 line-clamp-2" style={{ color: '#1F2937' }}>
+        <h3 className="font-semibold mb-2 line-clamp-2" style={{ color: cardTextColor }}>
           {product.name}
         </h3>
         
         {cardStyle === 'detailed' && product.description && (
-          <p className="text-sm mb-3 line-clamp-2" style={{ color: '#6B7280' }}>{product.description}</p>
+          <p className="text-sm mb-3 line-clamp-2" style={{ color: cardTextColor, opacity: 0.72 }}>{product.description}</p>
         )}
         
         <div className="flex items-center justify-between">

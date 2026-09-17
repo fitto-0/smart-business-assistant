@@ -55,6 +55,7 @@ export default function ProductsPage() {
     price: "",
     stock: "",
   });
+  const [imageFile, setImageFile] = useState(null);
   const [loading, setLoading] = useState(true);
   const [showCsvModal, setShowCsvModal] = useState(false);
   const [csvFile, setCsvFile] = useState(null);
@@ -130,6 +131,7 @@ export default function ProductsPage() {
       price: "",
       stock: "",
     });
+    setImageFile(null);
     setShowModal(true);
   };
 
@@ -141,6 +143,7 @@ export default function ProductsPage() {
       price: p.price,
       stock: p.stock,
     });
+    setImageFile(null);
     setShowModal(true);
   };
 
@@ -157,18 +160,26 @@ export default function ProductsPage() {
         price: parseFloat(form.price),
         stock: parseInt(form.stock, 10),
       };
+      let savedProduct;
       if (editProduct) {
-        const updated = await apiPut(`/products/${editProduct.id}`, payload);
+        savedProduct = await apiPut(`/products/${editProduct.id}`, payload);
         setProducts((current) =>
-          current.map((p) => (p.id === updated.id ? updated : p)),
+          current.map((p) => (p.id === savedProduct.id ? savedProduct : p)),
         );
         toast.success(t('products.productUpdated'));
       } else {
-        const created = await apiPost("/products", payload);
-        setProducts((current) => [created, ...current]);
+        savedProduct = await apiPost("/products", payload);
+        setProducts((current) => [savedProduct, ...current]);
         toast.success(t('products.productAdded'));
       }
+      if (imageFile && savedProduct?.id) {
+        const imageData = new FormData();
+        imageData.append("image", imageFile);
+        const withImage = await apiPost(`/products/${savedProduct.id}/image`, imageData);
+        setProducts((current) => current.map((p) => p.id === withImage.id ? withImage : p));
+      }
       setShowModal(false);
+      setImageFile(null);
     } catch (error) {
       toast.error(error.message || t('common.saveError') || "Failed to save");
     }
@@ -530,6 +541,16 @@ export default function ProductsPage() {
                   className="w-full bg-ground border hairline rounded-xl px-4 py-2 text-ink placeholder-muted focus:outline-none focus:border-amber transition-colors"
                   placeholder="0"
                 />
+              </div>
+              <div>
+                <label className="block portal-label mb-1.5">Product image</label>
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) => setImageFile(e.target.files?.[0] || null)}
+                  className="w-full bg-ground border hairline rounded-xl px-4 py-2 text-ink file:mr-3 file:rounded-lg file:border-0 file:bg-amber file:px-3 file:py-1 file:text-ground"
+                />
+                <p className="portal-label text-muted mt-1">PNG, JPG, or WEBP up to 8MB.</p>
               </div>
             </div>
             <div className="flex gap-3 mt-6">

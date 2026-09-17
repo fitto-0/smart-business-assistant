@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/router";
+import Link from "next/link";
 import Head from "next/head";
 import axios from "axios";
 import {
@@ -18,6 +19,8 @@ import {
   RotateCcw,
   CheckCircle,
   X,
+  Minus,
+  Plus,
 } from "lucide-react";
 import { motion } from "framer-motion";
 import StorefrontLayout from "../../../../components/storefront/StorefrontLayout";

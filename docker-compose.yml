@@ -49,6 +49,9 @@ services:
     ports:
       - "5000:5000"
 
+    volumes:
+      - ./uploads:/uploads
+
     env_file:
       - .env
 

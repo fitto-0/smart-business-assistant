@@ -20,6 +20,12 @@ import {
   Moon,
 } from "lucide-react";
 import { useRouter } from "next/router";
+const API_ORIGIN = (
+  process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api"
+).replace(/\/api\/?$/, "");
+
+const assetUrl = (url) =>
+  url && !url.startsWith("http") ? `${API_ORIGIN}${url}` : url;
 
 export default function StorefrontLayout({
   children,
@@ -40,10 +46,16 @@ export default function StorefrontLayout({
   const backgroundColor = storeSettings?.background_color || "#FFFFFF";
   const backgroundType = storeSettings?.background_type || "color";
   const backgroundGradient = storeSettings?.background_gradient;
-  const backgroundImageUrl = storeSettings?.background_image_url;
+  const backgroundImageUrl = assetUrl(storeSettings?.background_image_url);
   const textColor = storeSettings?.text_color || "#1F2937";
   const textSecondaryColor = storeSettings?.text_secondary_color || "#6B7280";
   const borderColor = storeSettings?.border_color || "#E5E7EB";
+  const headerBackgroundColor = storeSettings?.header_background_color || backgroundColor;
+  const footerBackgroundColor = storeSettings?.footer_background_color || secondaryColor;
+  const cardBackgroundColor = storeSettings?.card_background_color || "#FFFFFF";
+  const cardTextColor = storeSettings?.card_text_color || textColor;
+  const buttonTextColor = storeSettings?.button_text_color || "#FFFFFF";
+  const content = storeSettings?.content_overrides || {};
   const fontFamily =
     storeSettings?.font_family || "Inter, system-ui, sans-serif";
   const headingFontFamily =
@@ -141,27 +153,27 @@ export default function StorefrontLayout({
   const navLinks = [
     {
       href: `/storefront/${userId}`,
-      label: "Home",
+      label: content.nav_home || "Home",
       show: storeSettings?.show_home_page !== false,
     },
     {
       href: `/storefront/${userId}/products`,
-      label: "Products",
+      label: content.nav_products || "Products",
       show: storeSettings?.show_products_page !== false,
     },
     {
       href: `/storefront/${userId}/categories`,
-      label: "Categories",
+      label: content.nav_categories || "Categories",
       show: storeSettings?.show_categories_page !== false,
     },
     {
       href: `/storefront/${userId}/about`,
-      label: "About",
+      label: content.nav_about || "About",
       show: storeSettings?.show_about_page !== false,
     },
     {
       href: `/storefront/${userId}/contact`,
-      label: "Contact",
+      label: content.nav_contact || "Contact",
       show: storeSettings?.show_contact_page !== false,
     },
   ].filter((link) => link.show);
@@ -184,7 +196,7 @@ export default function StorefrontLayout({
         />
         <meta name="theme-color" content={primaryColor} />
         {storeSettings?.favicon_url && (
-          <link rel="icon" href={storeSettings.favicon_url} />
+          <link rel="icon" href={assetUrl(storeSettings.favicon_url)} />
         )}
         {storeSettings?.og_image_url && (
           <>
@@ -221,17 +233,17 @@ export default function StorefrontLayout({
           * { font-family: var(--store-font) !important; }
           h1, h2, h3, h4, h5, h6 { font-family: var(--store-heading-font) !important; }
           .store-container { max-width: 80rem; margin: 0 auto; padding: 0 1.5rem; }
-          .btn-primary { background: var(--store-primary); color: white; padding: 0.75rem 1.5rem; border-radius: var(--store-radius); font-weight: 600; transition: all 0.2s; }
+          .btn-primary { background: var(--store-primary); color: ${buttonTextColor}; padding: 0.75rem 1.5rem; border-radius: var(--store-radius); font-weight: 600; transition: all 0.2s; }
           .btn-primary:hover { opacity: 0.9; transform: translateY(-1px); }
-          .btn-secondary { background: var(--store-secondary); color: white; padding: 0.75rem 1.5rem; border-radius: var(--store-radius); font-weight: 600; transition: all 0.2s; }
+          .btn-secondary { background: var(--store-secondary); color: ${buttonTextColor}; padding: 0.75rem 1.5rem; border-radius: var(--store-radius); font-weight: 600; transition: all 0.2s; }
           .btn-secondary:hover { opacity: 0.9; }
-          .btn-accent { background: var(--store-accent); color: white; padding: 0.75rem 1.5rem; border-radius: var(--store-radius); font-weight: 600; transition: all 0.2s; }
+          .btn-accent { background: var(--store-accent); color: ${buttonTextColor}; padding: 0.75rem 1.5rem; border-radius: var(--store-radius); font-weight: 600; transition: all 0.2s; }
           .btn-accent:hover { opacity: 0.9; }
           .btn-outline { border: 2px solid var(--store-primary); color: var(--store-primary); padding: 0.75rem 1.5rem; border-radius: var(--store-radius); font-weight: 600; transition: all 0.2s; background: transparent; }
           .btn-outline:hover { background: var(--store-primary); color: white; }
           .input-field { width: 100%; padding: 0.75rem 1rem; border: 1px solid var(--store-border); border-radius: var(--store-radius); background: white; color: var(--store-text); transition: all 0.2s; }
           .input-field:focus { outline: none; border-color: var(--store-primary); box-shadow: 0 0 0 3px ${primaryColor + "33"}; }
-          .card { background: white; border: 1px solid var(--store-border); border-radius: var(--store-radius); transition: all 0.3s; }
+          .card { background: ${cardBackgroundColor}; color: ${cardTextColor}; border: 1px solid var(--store-border); border-radius: var(--store-radius); transition: all 0.3s; }
           .card:hover { box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1), 0 8px 10px -6px rgba(0,0,0,0.1); }
           .section-title { font-size: 1.875rem; font-weight: 700; color: var(--store-text); margin-bottom: 0.5rem; }
           .section-subtitle { color: var(--store-text-secondary); font-size: 1.125rem; }
@@ -264,10 +276,7 @@ export default function StorefrontLayout({
         <header
           className="sticky top-0 z-50"
           style={{
-            backgroundColor:
-              backgroundType === "color"
-                ? backgroundColor
-                : "rgba(255,255,255,0.95)",
+            backgroundColor: headerBackgroundColor,
             backdropFilter: "blur(8px)",
             borderBottom: `1px solid ${borderColor}`,
           }}
@@ -511,8 +520,8 @@ export default function StorefrontLayout({
         {/* Footer */}
         <footer
           style={{
-            backgroundColor: secondaryColor,
-            color: "white",
+            backgroundColor: footerBackgroundColor,
+            color: buttonTextColor,
             borderTop: `1px solid ${borderColor}`,
           }}
         >

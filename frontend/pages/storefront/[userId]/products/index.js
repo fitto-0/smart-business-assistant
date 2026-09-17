@@ -159,6 +159,7 @@ export default function StorefrontProductsPage() {
   const showFilters = storeSettings?.show_product_filters !== false;
   const showSort = storeSettings?.show_product_sort !== false;
   const cardStyle = storeSettings?.product_card_style || 'standard';
+  const content = storeSettings?.content_overrides || {};
 
   return (
     <StorefrontLayout 
@@ -170,7 +171,7 @@ export default function StorefrontProductsPage() {
         <div className={`${containerWidth} mx-auto px-4 sm:px-6 lg:px-8`}>
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
             <div>
-              <h1 className="text-3xl font-bold" style={{ color: textColor, fontFamily: storeSettings?.heading_font_family }}>Products</h1>
+              <h1 className="text-3xl font-bold" style={{ color: textColor, fontFamily: storeSettings?.heading_font_family }}>{content.products_title || 'Products'}</h1>
               <p className="text-sm mt-1" style={{ color: textSecondaryColor }}>
                 {pagination.total} product{pagination.total !== 1 ? 's' : ''} found
               </p>
@@ -270,6 +271,9 @@ export default function StorefrontProductsPage() {
                     userId={validUserId}
                     primaryColor={primaryColor}
                     accentColor={storeSettings?.accent_color || '#F59E0B'}
+                    cardBackgroundColor={storeSettings?.card_background_color}
+                    cardTextColor={storeSettings?.card_text_color || textColor}
+                    borderColor={borderColor}
                     layout={viewMode}
                     cardStyle={cardStyle}
                   />

@@ -5,8 +5,25 @@
 const router = require("express").Router();
 const auth = require("../middleware/auth");
 const pool = require("../config/db");
+const multer = require("multer");
+const path = require("path");
+const fs = require("fs");
 
 const query = (text, params) => pool.query(text, params);
+
+const productImageDir = path.join(__dirname, "..", "..", "uploads", "products");
+fs.mkdirSync(productImageDir, { recursive: true });
+const productImageUpload = multer({
+  storage: multer.diskStorage({
+    destination: productImageDir,
+    filename: (req, file, cb) => {
+      const suffix = `${Date.now()}-${Math.round(Math.random() * 1e9)}`;
+      cb(null, `product-${req.user.id}-${suffix}${path.extname(file.originalname)}`);
+    },
+  }),
+  limits: { fileSize: 8 * 1024 * 1024 },
+  fileFilter: (req, file, cb) => cb(null, file.mimetype.startsWith("image/")),
+});
 
 // =====================================================
 // GET /api/products
@@ -393,6 +410,23 @@ router.put("/:id", auth, async (req, res) => {
     return res.status(500).json({
       error: "Erreur serveur",
     });
+  }
+});
+
+router.post("/:id/image", auth, productImageUpload.single("image"), async (req, res) => {
+  try {
+    if (!req.file) return res.status(400).json({ error: "An image file is required" });
+
+    const result = await query(
+      "UPDATE products SET image_url = $1 WHERE id = $2 AND user_id = $3 AND deleted_at IS NULL RETURNING *",
+      [`/uploads/products/${req.file.filename}`, parseInt(req.params.id), req.user.id],
+    );
+
+    if (result.rowCount === 0) return res.status(404).json({ error: "Product not found" });
+    return res.json(result.rows[0]);
+  } catch (err) {
+    console.error("Erreur POST /products/:id/image:", err);
+    return res.status(500).json({ error: "Erreur serveur" });
   }
 });
 
