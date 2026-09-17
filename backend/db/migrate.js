@@ -7,7 +7,7 @@ const { query } = require("./pool");
 const runMigration = async (migrationFile) => {
   const migrationPath = path.join(__dirname, "migrations", migrationFile);
   const migrationSQL = fs.readFileSync(migrationPath, "utf8");
-  
+
   try {
     await query(migrationSQL);
     console.log(`✓ Migration applied: ${migrationFile}`);
@@ -20,13 +20,13 @@ const runMigration = async (migrationFile) => {
 const migrate = async () => {
   // Run organizations migration
   await runMigration("001_organizations.sql");
-  
+
   // Run storefront fields migration
   await runMigration("002_storefront_fields.sql");
 
   await runMigration("003_store_settings.sql");
   await runMigration("004_storefront_customization.sql");
-  
+
   await query(`
     DO $$
     DECLARE
@@ -162,7 +162,6 @@ const migrate = async () => {
     WHERE c.id = ranked.id
   `);
 
-  
   // Legacy migrations (preserved for backward compatibility)
   await query(`
     DO $$

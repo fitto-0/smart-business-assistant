@@ -18,7 +18,10 @@ const productImageUpload = multer({
     destination: productImageDir,
     filename: (req, file, cb) => {
       const suffix = `${Date.now()}-${Math.round(Math.random() * 1e9)}`;
-      cb(null, `product-${req.user.id}-${suffix}${path.extname(file.originalname)}`);
+      cb(
+        null,
+        `product-${req.user.id}-${suffix}${path.extname(file.originalname)}`,
+      );
     },
   }),
   limits: { fileSize: 8 * 1024 * 1024 },
@@ -293,7 +296,8 @@ router.get("/:id", auth, async (req, res) => {
 // =====================================================
 router.post("/", auth, async (req, res) => {
   try {
-    const { name, category, price, cost_price, stock, description, sku } = req.body;
+    const { name, category, price, cost_price, stock, description, sku } =
+      req.body;
 
     if (!name || !category || price === undefined || stock === undefined) {
       return res.status(400).json({
@@ -322,7 +326,9 @@ router.post("/", auth, async (req, res) => {
         name.trim(),
         category,
         parseFloat(price),
-        cost_price === undefined || cost_price === null ? null : parseFloat(cost_price),
+        cost_price === undefined || cost_price === null
+          ? null
+          : parseFloat(cost_price),
         parseInt(stock),
         description || null,
         sku || null,
@@ -413,22 +419,33 @@ router.put("/:id", auth, async (req, res) => {
   }
 });
 
-router.post("/:id/image", auth, productImageUpload.single("image"), async (req, res) => {
-  try {
-    if (!req.file) return res.status(400).json({ error: "An image file is required" });
+router.post(
+  "/:id/image",
+  auth,
+  productImageUpload.single("image"),
+  async (req, res) => {
+    try {
+      if (!req.file)
+        return res.status(400).json({ error: "An image file is required" });
 
-    const result = await query(
-      "UPDATE products SET image_url = $1 WHERE id = $2 AND user_id = $3 AND deleted_at IS NULL RETURNING *",
-      [`/uploads/products/${req.file.filename}`, parseInt(req.params.id), req.user.id],
-    );
+      const result = await query(
+        "UPDATE products SET image_url = $1 WHERE id = $2 AND user_id = $3 AND deleted_at IS NULL RETURNING *",
+        [
+          `/uploads/products/${req.file.filename}`,
+          parseInt(req.params.id),
+          req.user.id,
+        ],
+      );
 
-    if (result.rowCount === 0) return res.status(404).json({ error: "Product not found" });
-    return res.json(result.rows[0]);
-  } catch (err) {
-    console.error("Erreur POST /products/:id/image:", err);
-    return res.status(500).json({ error: "Erreur serveur" });
-  }
-});
+      if (result.rowCount === 0)
+        return res.status(404).json({ error: "Product not found" });
+      return res.json(result.rows[0]);
+    } catch (err) {
+      console.error("Erreur POST /products/:id/image:", err);
+      return res.status(500).json({ error: "Erreur serveur" });
+    }
+  },
+);
 
 // =====================================================
 // DELETE /api/products/:id

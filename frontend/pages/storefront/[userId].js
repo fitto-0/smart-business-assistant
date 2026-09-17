@@ -374,7 +374,8 @@ export default function StorefrontHomePage() {
                     className="section-title"
                     style={{ fontFamily: storeSettings.heading_font_family }}
                   >
-                    {content.featured_products_title || storeSettings.featured_products_title ||
+                    {content.featured_products_title ||
+                      storeSettings.featured_products_title ||
                       "Featured Products"}
                   </h2>
                   <p
@@ -412,7 +413,8 @@ export default function StorefrontHomePage() {
                   href={`/storefront/${userId}/products`}
                   className="btn-primary inline-flex items-center gap-2"
                 >
-                  {content.view_all_products || "View All Products"} <ArrowRight size={16} />
+                  {content.view_all_products || "View All Products"}{" "}
+                  <ArrowRight size={16} />
                 </Link>
               </div>
             </div>
@@ -432,7 +434,9 @@ export default function StorefrontHomePage() {
                   className="section-title"
                   style={{ fontFamily: storeSettings.heading_font_family }}
                 >
-                  {content.categories_title || storeSettings.categories_section_title || "Shop by Category"}
+                  {content.categories_title ||
+                    storeSettings.categories_section_title ||
+                    "Shop by Category"}
                 </h2>
                 <p
                   className="section-subtitle mt-2"

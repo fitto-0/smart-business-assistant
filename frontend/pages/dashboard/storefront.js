@@ -673,7 +673,9 @@ export default function StorefrontCustomize() {
               <span className="portal-label block mb-2">Background type</span>
               <select
                 value={storeSettings.background_type || "color"}
-                onChange={(e) => handleChange("background_type", e.target.value)}
+                onChange={(e) =>
+                  handleChange("background_type", e.target.value)
+                }
                 className="w-full bg-ground border hairline rounded-xl px-3 py-2.5 text-ink"
               >
                 <option value="color">Solid color</option>
@@ -686,7 +688,9 @@ export default function StorefrontCustomize() {
                 <span className="portal-label block mb-2">CSS gradient</span>
                 <input
                   value={storeSettings.background_gradient || ""}
-                  onChange={(e) => handleChange("background_gradient", e.target.value)}
+                  onChange={(e) =>
+                    handleChange("background_gradient", e.target.value)
+                  }
                   placeholder="linear-gradient(135deg, #1e293b, #2e6b72)"
                   className="w-full bg-ground border hairline rounded-xl px-3 py-2.5 text-ink"
                 />
@@ -694,10 +698,14 @@ export default function StorefrontCustomize() {
             )}
             {storeSettings.background_type === "image" && (
               <label className="block">
-                <span className="portal-label block mb-2">Background image URL</span>
+                <span className="portal-label block mb-2">
+                  Background image URL
+                </span>
                 <input
                   value={storeSettings.background_image_url || ""}
-                  onChange={(e) => handleChange("background_image_url", e.target.value)}
+                  onChange={(e) =>
+                    handleChange("background_image_url", e.target.value)
+                  }
                   placeholder="https://..."
                   className="w-full bg-ground border hairline rounded-xl px-3 py-2.5 text-ink"
                 />
@@ -716,7 +724,9 @@ export default function StorefrontCustomize() {
               <span className="portal-label block mb-2">Heading font</span>
               <input
                 value={storeSettings.heading_font_family || ""}
-                onChange={(e) => handleChange("heading_font_family", e.target.value)}
+                onChange={(e) =>
+                  handleChange("heading_font_family", e.target.value)
+                }
                 placeholder="Inter, system-ui, sans-serif"
                 className="w-full bg-ground border hairline rounded-xl px-3 py-2.5 text-ink"
               />
@@ -725,7 +735,9 @@ export default function StorefrontCustomize() {
               <span className="portal-label block mb-2">Container width</span>
               <select
                 value={storeSettings.container_width || "max-w-7xl"}
-                onChange={(e) => handleChange("container_width", e.target.value)}
+                onChange={(e) =>
+                  handleChange("container_width", e.target.value)
+                }
                 className="w-full bg-ground border hairline rounded-xl px-3 py-2.5 text-ink"
               >
                 <option value="max-w-7xl">Wide</option>
@@ -778,7 +790,8 @@ export default function StorefrontCustomize() {
         <div className="bg-ground-secondary border hairline rounded-xl p-6">
           <h3 className="portal-heading text-lg mb-2">Storefront copy</h3>
           <p className="portal-label text-muted mb-6">
-            Replace the default labels shown across your public store. Leave a field blank to use the default.
+            Replace the default labels shown across your public store. Leave a
+            field blank to use the default.
           </p>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
             {fields.map(([field, label]) => (
@@ -797,11 +810,46 @@ export default function StorefrontCustomize() {
         <div className="bg-ground-secondary border hairline rounded-xl p-6">
           <h3 className="portal-heading text-lg mb-2">Home page content</h3>
           <div className="space-y-5">
-            <label className="block"><span className="portal-label block mb-2">Hero title</span><input value={storeSettings.hero_title || ""} onChange={(e) => handleChange("hero_title", e.target.value)} className="w-full bg-ground border hairline rounded-xl px-3 py-2.5 text-ink" /></label>
-            <label className="block"><span className="portal-label block mb-2">Hero subtitle</span><textarea rows={3} value={storeSettings.hero_subtitle || ""} onChange={(e) => handleChange("hero_subtitle", e.target.value)} className="w-full bg-ground border hairline rounded-xl px-3 py-2.5 text-ink" /></label>
+            <label className="block">
+              <span className="portal-label block mb-2">Hero title</span>
+              <input
+                value={storeSettings.hero_title || ""}
+                onChange={(e) => handleChange("hero_title", e.target.value)}
+                className="w-full bg-ground border hairline rounded-xl px-3 py-2.5 text-ink"
+              />
+            </label>
+            <label className="block">
+              <span className="portal-label block mb-2">Hero subtitle</span>
+              <textarea
+                rows={3}
+                value={storeSettings.hero_subtitle || ""}
+                onChange={(e) => handleChange("hero_subtitle", e.target.value)}
+                className="w-full bg-ground border hairline rounded-xl px-3 py-2.5 text-ink"
+              />
+            </label>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-              <label className="block"><span className="portal-label block mb-2">Hero button text</span><input value={storeSettings.hero_button_text || ""} onChange={(e) => handleChange("hero_button_text", e.target.value)} className="w-full bg-ground border hairline rounded-xl px-3 py-2.5 text-ink" /></label>
-              <label className="block"><span className="portal-label block mb-2">Hero image URL</span><input value={storeSettings.hero_image_url || ""} onChange={(e) => handleChange("hero_image_url", e.target.value)} className="w-full bg-ground border hairline rounded-xl px-3 py-2.5 text-ink" /></label>
+              <label className="block">
+                <span className="portal-label block mb-2">
+                  Hero button text
+                </span>
+                <input
+                  value={storeSettings.hero_button_text || ""}
+                  onChange={(e) =>
+                    handleChange("hero_button_text", e.target.value)
+                  }
+                  className="w-full bg-ground border hairline rounded-xl px-3 py-2.5 text-ink"
+                />
+              </label>
+              <label className="block">
+                <span className="portal-label block mb-2">Hero image URL</span>
+                <input
+                  value={storeSettings.hero_image_url || ""}
+                  onChange={(e) =>
+                    handleChange("hero_image_url", e.target.value)
+                  }
+                  className="w-full bg-ground border hairline rounded-xl px-3 py-2.5 text-ink"
+                />
+              </label>
             </div>
           </div>
         </div>

@@ -163,7 +163,9 @@ export default function StorefrontContactPage() {
               fontFamily: storeSettings?.heading_font_family,
             }}
           >
-            {content.contact_title || storeSettings?.contact_info_title || "Get in Touch"}
+            {content.contact_title ||
+              storeSettings?.contact_info_title ||
+              "Get in Touch"}
           </h1>
           <p
             className="text-xl max-w-3xl mx-auto"

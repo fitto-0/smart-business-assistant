@@ -23,9 +23,9 @@ const fmt = (n) => new Intl.NumberFormat("fr-FR").format(n);
 
 const getStatusLabel = (status, t) => {
   const labels = {
-    actif: t('products.active'),
-    stock_faible: t('products.lowStock'),
-    rupture: t('products.outOfStock')
+    actif: t("products.active"),
+    stock_faible: t("products.lowStock"),
+    rupture: t("products.outOfStock"),
   };
   return labels[status] || status;
 };
@@ -34,7 +34,7 @@ const getStatusClass = (status) => {
   const classes = {
     actif: "text-teal",
     stock_faible: "text-amber",
-    rupture: "text-red-400"
+    rupture: "text-red-400",
   };
   return classes[status] || "text-muted";
 };
@@ -73,7 +73,7 @@ export default function ProductsPage() {
         setProducts(productData.products || []);
         setCategories(categoryData.categories || []);
       } catch (error) {
-        toast.error(error.message || t('products.loadError'));
+        toast.error(error.message || t("products.loadError"));
       } finally {
         setLoading(false);
       }
@@ -96,9 +96,9 @@ export default function ProductsPage() {
         [...current, category].sort((a, b) => a.name.localeCompare(b.name)),
       );
       setNewCategory("");
-      toast.success(t('products.categoryAdded'));
+      toast.success(t("products.categoryAdded"));
     } catch (error) {
-      toast.error(error.message || t('products.addCategoryError'));
+      toast.error(error.message || t("products.addCategoryError"));
     }
   };
 
@@ -108,10 +108,11 @@ export default function ProductsPage() {
       setCategories((current) =>
         current.filter((item) => item.id !== category.id),
       );
-      if (catFilter === category.name) setCatFilter(t('products.allCategories'));
-      toast.success(t('products.categoryDeleted'));
+      if (catFilter === category.name)
+        setCatFilter(t("products.allCategories"));
+      toast.success(t("products.categoryDeleted"));
     } catch (error) {
-      toast.error(error.message || t('products.categoryDeleteError'));
+      toast.error(error.message || t("products.categoryDeleteError"));
     }
   };
 
@@ -119,7 +120,8 @@ export default function ProductsPage() {
     const matchSearch =
       p.name.toLowerCase().includes(search.toLowerCase()) ||
       p.category.toLowerCase().includes(search.toLowerCase());
-    const matchCat = catFilter === t('products.allCategories') || p.category === catFilter;
+    const matchCat =
+      catFilter === t("products.allCategories") || p.category === catFilter;
     return matchSearch && matchCat;
   });
 
@@ -149,7 +151,7 @@ export default function ProductsPage() {
 
   const handleSave = async () => {
     if (!form.name || !form.price || form.stock === "") {
-      toast.error(t('common.fillAllFields') || "Please fill in all fields");
+      toast.error(t("common.fillAllFields") || "Please fill in all fields");
       return;
     }
 
@@ -166,33 +168,40 @@ export default function ProductsPage() {
         setProducts((current) =>
           current.map((p) => (p.id === savedProduct.id ? savedProduct : p)),
         );
-        toast.success(t('products.productUpdated'));
+        toast.success(t("products.productUpdated"));
       } else {
         savedProduct = await apiPost("/products", payload);
         setProducts((current) => [savedProduct, ...current]);
-        toast.success(t('products.productAdded'));
+        toast.success(t("products.productAdded"));
       }
       if (imageFile && savedProduct?.id) {
         const imageData = new FormData();
         imageData.append("image", imageFile);
-        const withImage = await apiPost(`/products/${savedProduct.id}/image`, imageData);
-        setProducts((current) => current.map((p) => p.id === withImage.id ? withImage : p));
+        const withImage = await apiPost(
+          `/products/${savedProduct.id}/image`,
+          imageData,
+        );
+        setProducts((current) =>
+          current.map((p) => (p.id === withImage.id ? withImage : p)),
+        );
       }
       setShowModal(false);
       setImageFile(null);
     } catch (error) {
-      toast.error(error.message || t('common.saveError') || "Failed to save");
+      toast.error(error.message || t("common.saveError") || "Failed to save");
     }
   };
 
   const handleDelete = async (id) => {
-    if (!window.confirm(t('products.delete') + " this product?")) return;
+    if (!window.confirm(t("products.delete") + " this product?")) return;
     try {
       await apiDelete(`/products/${id}`);
       setProducts((current) => current.filter((p) => p.id !== id));
-      toast.success(t('products.productDeleted'));
+      toast.success(t("products.productDeleted"));
     } catch (error) {
-      toast.error(error.message || t('common.deleteError') || "Failed to delete");
+      toast.error(
+        error.message || t("common.deleteError") || "Failed to delete",
+      );
     }
   };
 
@@ -202,7 +211,7 @@ export default function ProductsPage() {
       setCsvFile(file);
       setCsvAnalysis(null);
     } else {
-      toast.error(t('products.uploadCSVError') || "Please select a CSV file");
+      toast.error(t("products.uploadCSVError") || "Please select a CSV file");
     }
   };
 
@@ -258,14 +267,26 @@ export default function ProductsPage() {
   const outStock = products.filter((p) => p.status === "rupture").length;
 
   return (
-    <Layout title={t('products.title')}>
+    <Layout title={t("products.title")}>
       {/* Stats */}
       <div className="grid grid-cols-2 xl:grid-cols-4 gap-4 mb-6">
         {[
-          { label: t('products.totalProducts') || "Total Products", value: totalProducts, color: "bg-amber" },
-          { label: t('products.inStock') || "In Stock", value: inStock, color: "bg-teal" },
-          { label: t('products.lowStock'), value: lowStock, color: "bg-amber" },
-          { label: t('products.outOfStock'), value: outStock, color: "bg-red-400" },
+          {
+            label: t("products.totalProducts") || "Total Products",
+            value: totalProducts,
+            color: "bg-amber",
+          },
+          {
+            label: t("products.inStock") || "In Stock",
+            value: inStock,
+            color: "bg-teal",
+          },
+          { label: t("products.lowStock"), value: lowStock, color: "bg-amber" },
+          {
+            label: t("products.outOfStock"),
+            value: outStock,
+            color: "bg-red-400",
+          },
         ].map((s, i) => (
           <div
             key={i}
@@ -297,12 +318,12 @@ export default function ProductsPage() {
                 type="text"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                placeholder={t('products.searchPlaceholder')}
+                placeholder={t("products.searchPlaceholder")}
                 className="w-full bg-ground border hairline rounded-xl px-4 py-2 pl-9 text-ink placeholder-muted focus:outline-none focus:border-amber transition-colors"
               />
             </div>
             <div className="flex gap-2 flex-wrap">
-              {[t('products.allCategories'), ...categoryNames].map((c) => (
+              {[t("products.allCategories"), ...categoryNames].map((c) => (
                 <button
                   key={c}
                   onClick={() => setCatFilter(c)}
@@ -318,10 +339,10 @@ export default function ProductsPage() {
               onClick={() => setShowCsvModal(true)}
               className="portal-pill-btn"
             >
-              <Upload size={16} /> {t('products.importCSV')}
+              <Upload size={16} /> {t("products.importCSV")}
             </button>
             <button onClick={openAdd} className="portal-pill-btn">
-              <Plus size={16} /> {t('products.addProduct')}
+              <Plus size={16} /> {t("products.addProduct")}
             </button>
           </div>
         </div>
@@ -331,28 +352,30 @@ export default function ProductsPage() {
         <div className="flex flex-col lg:flex-row lg:items-center gap-3">
           <div className="flex items-center gap-2">
             <Palette size={16} className="text-amber" />
-            <span className="portal-heading text-sm">{t('products.manageCategories')}</span>
+            <span className="portal-heading text-sm">
+              {t("products.manageCategories")}
+            </span>
           </div>
           <div className="flex flex-1 flex-col sm:flex-row gap-2">
             <input
               value={newCategory}
               onChange={(e) => setNewCategory(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && addCategory()}
-              placeholder={t('products.newCategoryName')}
+              placeholder={t("products.newCategoryName")}
               className="flex-1 bg-ground border hairline rounded-xl px-3 py-2 portal-text text-ink placeholder-muted focus:outline-none focus:border-amber"
             />
             <input
               type="color"
               value={newCategoryColor}
               onChange={(e) => setNewCategoryColor(e.target.value)}
-              title={t('products.chooseCategoryColor')}
+              title={t("products.chooseCategoryColor")}
               className="h-10 w-12 bg-ground border hairline rounded-xl p-1 cursor-pointer"
             />
             <button
               onClick={addCategory}
               className="portal-pill-btn justify-center"
             >
-              <Plus size={15} /> {t('products.addCategoryBtn')}
+              <Plus size={15} /> {t("products.addCategoryBtn")}
             </button>
           </div>
         </div>
@@ -369,7 +392,7 @@ export default function ProductsPage() {
               <span className="portal-label">{category.name}</span>
               <button
                 onClick={() => deleteCategory(category)}
-                title={t('products.deleteCategory')}
+                title={t("products.deleteCategory")}
                 className="text-muted hover:text-red-400 transition-colors"
               >
                 <X size={13} />
@@ -381,7 +404,7 @@ export default function ProductsPage() {
 
       {loading && (
         <div className="bg-ground-secondary border hairline rounded-xl text-center py-8 portal-text">
-          {t('products.loading')}
+          {t("products.loading")}
         </div>
       )}
 
@@ -391,15 +414,17 @@ export default function ProductsPage() {
           <table className="w-full">
             <thead>
               <tr className="border-b hairline">
-                <th className="portal-dates-header">{t('products.product')}</th>
-                <th className="portal-dates-header">{t('products.category')}</th>
-                <th className="portal-dates-header">{t('products.price')}</th>
-                <th className="portal-dates-header">{t('products.stock')}</th>
-                <th className="portal-dates-header">{t('products.sold')}</th>
-                <th className="portal-dates-header">{t('products.revenue')}</th>
-                <th className="portal-dates-header">{t('products.trend')}</th>
-                <th className="portal-dates-header">{t('products.status')}</th>
-                <th className="portal-dates-header">{t('products.actions')}</th>
+                <th className="portal-dates-header">{t("products.product")}</th>
+                <th className="portal-dates-header">
+                  {t("products.category")}
+                </th>
+                <th className="portal-dates-header">{t("products.price")}</th>
+                <th className="portal-dates-header">{t("products.stock")}</th>
+                <th className="portal-dates-header">{t("products.sold")}</th>
+                <th className="portal-dates-header">{t("products.revenue")}</th>
+                <th className="portal-dates-header">{t("products.trend")}</th>
+                <th className="portal-dates-header">{t("products.status")}</th>
+                <th className="portal-dates-header">{t("products.actions")}</th>
               </tr>
             </thead>
             <tbody>
@@ -423,7 +448,9 @@ export default function ProductsPage() {
                     <td
                       className={`portal-dates-cell font-semibold ${p.stock === 0 ? "text-red-400" : p.stock <= 10 ? "text-amber" : "text-teal"}`}
                     >
-                      {p.stock === 0 ? `⚠ ${t('products.outOfStock')}` : p.stock}
+                      {p.stock === 0
+                        ? `⚠ ${t("products.outOfStock")}`
+                        : p.stock}
                     </td>
                     <td className="portal-dates-cell text-ink-secondary">
                       {p.sold}
@@ -445,7 +472,9 @@ export default function ProductsPage() {
                       </div>
                     </td>
                     <td className="portal-dates-cell">
-                      <span className={getStatusClass(p.status)}>{getStatusLabel(p.status, t)}</span>
+                      <span className={getStatusClass(p.status)}>
+                        {getStatusLabel(p.status, t)}
+                      </span>
                     </td>
                     <td className="portal-dates-cell">
                       <div className="flex items-center gap-2">
@@ -471,7 +500,7 @@ export default function ProductsPage() {
           {filtered.length === 0 && (
             <div className="text-center py-12 portal-text">
               <Package size={40} className="mx-auto mb-3 opacity-30" />
-              <p>{t('products.noProducts') || "No products found"}</p>
+              <p>{t("products.noProducts") || "No products found"}</p>
             </div>
           )}
         </div>
@@ -483,7 +512,9 @@ export default function ProductsPage() {
           <div className="bg-ground-secondary border hairline rounded-2xl p-6 w-full max-w-md shadow-2xl animate-slide-up">
             <div className="flex items-center justify-between mb-5">
               <h3 className="portal-heading text-lg">
-                {editProduct ? t('products.editProduct') : t('products.newProduct')}
+                {editProduct
+                  ? t("products.editProduct")
+                  : t("products.newProduct")}
               </h3>
               <button
                 onClick={() => setShowModal(false)}
@@ -495,18 +526,20 @@ export default function ProductsPage() {
             <div className="space-y-4">
               <div>
                 <label className="block portal-label mb-1.5">
-                  {t('products.productName')}
+                  {t("products.productName")}
                 </label>
                 <input
                   type="text"
                   value={form.name}
                   onChange={(e) => setForm({ ...form, name: e.target.value })}
                   className="w-full bg-ground border hairline rounded-xl px-4 py-2 text-ink placeholder-muted focus:outline-none focus:border-amber transition-colors"
-                  placeholder={t('products.productNamePlaceholder')}
+                  placeholder={t("products.productNamePlaceholder")}
                 />
               </div>
               <div>
-                <label className="block portal-label mb-1.5">{t('products.category')}</label>
+                <label className="block portal-label mb-1.5">
+                  {t("products.category")}
+                </label>
                 <select
                   value={form.category}
                   onChange={(e) =>
@@ -514,7 +547,7 @@ export default function ProductsPage() {
                   }
                   className="w-full bg-ground border hairline rounded-xl px-4 py-2 text-ink focus:outline-none focus:border-amber transition-colors"
                 >
-                  <option value="">{t('products.selectCategory')}</option>
+                  <option value="">{t("products.selectCategory")}</option>
                   {categoryOptions.map((c) => (
                     <option key={c} value={c}>
                       {c}
@@ -523,7 +556,9 @@ export default function ProductsPage() {
                 </select>
               </div>
               <div>
-                <label className="block portal-label mb-1.5">{t('products.price')} (DA)</label>
+                <label className="block portal-label mb-1.5">
+                  {t("products.price")} (DA)
+                </label>
                 <input
                   type="number"
                   value={form.price}
@@ -533,7 +568,9 @@ export default function ProductsPage() {
                 />
               </div>
               <div>
-                <label className="block portal-label mb-1.5">{t('products.stock')}</label>
+                <label className="block portal-label mb-1.5">
+                  {t("products.stock")}
+                </label>
                 <input
                   type="number"
                   value={form.stock}
@@ -543,14 +580,18 @@ export default function ProductsPage() {
                 />
               </div>
               <div>
-                <label className="block portal-label mb-1.5">Product image</label>
+                <label className="block portal-label mb-1.5">
+                  Product image
+                </label>
                 <input
                   type="file"
                   accept="image/*"
                   onChange={(e) => setImageFile(e.target.files?.[0] || null)}
                   className="w-full bg-ground border hairline rounded-xl px-4 py-2 text-ink file:mr-3 file:rounded-lg file:border-0 file:bg-amber file:px-3 file:py-1 file:text-ground"
                 />
-                <p className="portal-label text-muted mt-1">PNG, JPG, or WEBP up to 8MB.</p>
+                <p className="portal-label text-muted mt-1">
+                  PNG, JPG, or WEBP up to 8MB.
+                </p>
               </div>
             </div>
             <div className="flex gap-3 mt-6">
@@ -558,13 +599,13 @@ export default function ProductsPage() {
                 onClick={handleSave}
                 className="flex-1 portal-pill-btn justify-center"
               >
-                <Save size={16} /> {t('products.save')}
+                <Save size={16} /> {t("products.save")}
               </button>
               <button
                 onClick={() => setShowModal(false)}
                 className="portal-pill-btn justify-center"
               >
-                {t('products.cancel')}
+                {t("products.cancel")}
               </button>
             </div>
           </div>
@@ -577,7 +618,7 @@ export default function ProductsPage() {
           <div className="bg-ground-secondary border hairline rounded-2xl p-6 w-full max-w-lg shadow-2xl animate-slide-up">
             <div className="flex items-center justify-between mb-5">
               <h3 className="portal-heading text-lg">
-                {t('products.importFromCSV')}
+                {t("products.importFromCSV")}
               </h3>
               <button
                 onClick={() => setShowCsvModal(false)}
@@ -590,7 +631,7 @@ export default function ProductsPage() {
             <div className="space-y-4">
               <div>
                 <label className="block portal-label mb-1.5">
-                  {t('products.selectCSVFile')}
+                  {t("products.selectCSVFile")}
                 </label>
                 <div className="relative">
                   <input
@@ -601,7 +642,7 @@ export default function ProductsPage() {
                   />
                 </div>
                 <p className="portal-label text-muted mt-2 text-xs">
-                  {t('products.requiredColumns')}
+                  {t("products.requiredColumns")}
                 </p>
               </div>
 
@@ -610,21 +651,27 @@ export default function ProductsPage() {
                   <div className="flex items-center gap-2 mb-3">
                     <Check size={18} className="text-teal" />
                     <span className="portal-heading text-sm text-teal">
-                      {t('products.analysisComplete')}
+                      {t("products.analysisComplete")}
                     </span>
                   </div>
                   <div className="space-y-2 portal-text text-sm">
                     <p>
-                      <span className="text-muted">{t('products.totalProducts')}</span>{" "}
+                      <span className="text-muted">
+                        {t("products.totalProducts")}
+                      </span>{" "}
                       {csvAnalysis.total}
                     </p>
                     <p>
-                      <span className="text-muted">{t('products.detectedColumns')}</span>{" "}
+                      <span className="text-muted">
+                        {t("products.detectedColumns")}
+                      </span>{" "}
                       {Object.keys(csvAnalysis.column_mapping).join(", ")}
                     </p>
                     {csvAnalysis.preview && csvAnalysis.preview.length > 0 && (
                       <div className="mt-3">
-                        <p className="text-muted mb-2">{t('products.preview')}</p>
+                        <p className="text-muted mb-2">
+                          {t("products.preview")}
+                        </p>
                         <div className="space-y-1">
                           {csvAnalysis.preview.map((p, i) => (
                             <div
@@ -646,7 +693,7 @@ export default function ProductsPage() {
                   onClick={() => setShowCsvModal(false)}
                   className="w-full bg-ground border hairline rounded-xl px-4 py-2 portal-label text-ink-secondary hover:bg-ground/50 transition-colors justify-center"
                 >
-                  {t('products.cancel')}
+                  {t("products.cancel")}
                 </button>
                 {!csvAnalysis ? (
                   <button
@@ -655,10 +702,10 @@ export default function ProductsPage() {
                     className="portal-pill-btn flex-1 justify-center disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     {csvAnalyzing ? (
-                      t('products.analyzing')
+                      t("products.analyzing")
                     ) : (
                       <>
-                        <FileText size={16} /> {t('products.analyze')}
+                        <FileText size={16} /> {t("products.analyze")}
                       </>
                     )}
                   </button>
@@ -669,10 +716,10 @@ export default function ProductsPage() {
                     className="portal-pill-btn flex-1 justify-center disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     {csvUploading ? (
-                      t('products.importing')
+                      t("products.importing")
                     ) : (
                       <>
-                        <Upload size={16} /> {t('products.importProducts')}
+                        <Upload size={16} /> {t("products.importProducts")}
                       </>
                     )}
                   </button>

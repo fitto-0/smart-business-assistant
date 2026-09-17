@@ -165,7 +165,8 @@ export default function StorefrontAboutPage() {
               fontFamily: storeSettings?.heading_font_family,
             }}
           >
-            {content.about_title || "About"} {storeSettings?.store_name || "Our Store"}
+            {content.about_title || "About"}{" "}
+            {storeSettings?.store_name || "Our Store"}
           </h1>
           <p
             className="text-xl max-w-3xl mx-auto"

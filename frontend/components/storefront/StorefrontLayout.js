@@ -50,8 +50,10 @@ export default function StorefrontLayout({
   const textColor = storeSettings?.text_color || "#1F2937";
   const textSecondaryColor = storeSettings?.text_secondary_color || "#6B7280";
   const borderColor = storeSettings?.border_color || "#E5E7EB";
-  const headerBackgroundColor = storeSettings?.header_background_color || backgroundColor;
-  const footerBackgroundColor = storeSettings?.footer_background_color || secondaryColor;
+  const headerBackgroundColor =
+    storeSettings?.header_background_color || backgroundColor;
+  const footerBackgroundColor =
+    storeSettings?.footer_background_color || secondaryColor;
   const cardBackgroundColor = storeSettings?.card_background_color || "#FFFFFF";
   const cardTextColor = storeSettings?.card_text_color || textColor;
   const buttonTextColor = storeSettings?.button_text_color || "#FFFFFF";
