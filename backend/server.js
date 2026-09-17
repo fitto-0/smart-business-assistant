@@ -63,6 +63,7 @@ app.use("/api/csv", require("./routes/csv"));
 app.use("/api/chatbot", require("./routes/chatbot"));
 app.use("/api/admin", require("./routes/admin"));
 app.use("/api/storefront", require("./routes/storefront"));
+app.use("/api/store-settings", require("./routes/store-settings"));
 
 console.log("Routes loaded:");
 console.log("  /api/auth");

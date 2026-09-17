@@ -1,411 +1,892 @@
-import { useState, useEffect } from "react";
+﻿import { useState, useEffect } from "react";
 import { useRouter } from "next/router";
 import Head from "next/head";
-import axios from "axios";
 import {
-  ShoppingBag,
-  Eye,
-  Settings,
-  Upload,
-  Sparkles,
-  ExternalLink,
-  ToggleLeft,
-  ToggleRight,
-  Save,
-  RefreshCw,
+  ShoppingBag, Eye, Settings, Sparkles, ExternalLink,
+  ToggleLeft, ToggleRight, Save, RefreshCw, Palette,
+  Phone, Mail, MapPin, Globe, BarChart3, Star, Package,
+  TrendingUp, CheckCircle, AlertCircle, Copy, MessageCircle,
+  Image, Link, Upload, Trash2, Zap, Shield,
 } from "lucide-react";
 import toast from "react-hot-toast";
-import { getToken, getUser } from "../../lib/auth";
+import { apiGet, apiPut } from "../../lib/api";
+import { useLanguage } from "../../lib/LanguageContext";
+import Layout from "../../components/Layout";
 
-export default function StorefrontManagement() {
+const DEFAULT_COLORS = {
+  primary: "#3B82F6",
+  secondary: "#1E40AF",
+  accent: "#F59E0B",
+};
+
+export default function StorefrontCustomize() {
   const router = useRouter();
-
-  const [storefrontEnabled, setStorefrontEnabled] = useState(true);
-  const [products, setProducts] = useState([]);
+  const { t } = useLanguage();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [activeTab, setActiveTab] = useState("products");
-
-  const API_URL =
-    process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
+  const [activeTab, setActiveTab] = useState("branding");
+  const [storeSettings, setStoreSettings] = useState({
+    store_name: "",
+    logo_url: null,
+    primary_color: DEFAULT_COLORS.primary,
+    secondary_color: DEFAULT_COLORS.secondary,
+    accent_color: DEFAULT_COLORS.accent,
+    description: "",
+    tagline: "",
+    contact_email: "",
+    contact_phone: "",
+    address: "",
+    city: "",
+    country: "",
+    custom_domain: "",
+    domain_verified: false,
+    facebook_url: "",
+    instagram_url: "",
+    twitter_url: "",
+    whatsapp_number: "",
+    storefront_enabled: true,
+  });
+  const [analytics, setAnalytics] = useState(null);
+  const [analyticsLoading, setAnalyticsLoading] = useState(false);
+  const [previewMode, setPreviewMode] = useState(false);
+  const [logoPreview, setLogoPreview] = useState(null);
 
   useEffect(() => {
-    fetchProducts();
+    loadStoreSettings();
+    loadAnalytics();
   }, []);
 
-  const fetchProducts = async () => {
+  const loadStoreSettings = async () => {
     try {
-      setLoading(true);
-      const token = getToken();
-      const response = await axios.get(`${API_URL}/products`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      setProducts(response.data.products || []);
+      const data = await apiGet("/store-settings");
+      setStoreSettings(prev => ({ ...prev, ...data }));
     } catch (err) {
-      toast.error("Failed to load products");
-      console.error("Error fetching products:", err);
+      console.error("Failed to load store settings:", err);
+      toast.error(t("storefront.loadError") || "Failed to load store settings");
     } finally {
       setLoading(false);
     }
   };
 
-  const toggleStorefrontEnabled = async (productId, currentStatus) => {
+  const loadAnalytics = async () => {
+    setAnalyticsLoading(true);
     try {
-      const token = getToken();
-      await axios.put(
-        `${API_URL}/products/${productId}`,
-        { storefront_enabled: !currentStatus },
-        { headers: { Authorization: `Bearer ${token}` } },
-      );
-
-      setProducts(
-        products.map((p) =>
-          p.id === productId ? { ...p, storefront_enabled: !currentStatus } : p,
-        ),
-      );
-      toast.success("Product updated");
+      const data = await apiGet("/store-settings/analytics");
+      setAnalytics(data);
     } catch (err) {
-      toast.error("Failed to update product");
-      console.error("Error updating product:", err);
+      console.error("Failed to load analytics:", err);
+    } finally {
+      setAnalyticsLoading(false);
     }
   };
 
-  const toggleFeatured = async (productId, currentStatus) => {
-    try {
-      const token = getToken();
-      await axios.put(
-        `${API_URL}/products/${productId}`,
-        { featured: !currentStatus },
-        { headers: { Authorization: `Bearer ${token}` } },
-      );
+  const handleChange = (field, value) => {
+    setStoreSettings(prev => ({ ...prev, [field]: value }));
+  };
 
-      setProducts(
-        products.map((p) =>
-          p.id === productId ? { ...p, featured: !currentStatus } : p,
-        ),
-      );
-      toast.success("Product updated");
+  const handleLogoUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    if (!file.type.startsWith("image/")) {
+      toast.error(t("storefront.invalidImageType") || "Please select an image file");
+      return;
+    }
+
+    if (file.size > 2 * 1024 * 1024) {
+      toast.error(t("storefront.imageTooLarge") || "Image size must be less than 2MB");
+      return;
+    }
+
+    try {
+      const formData = new FormData();
+      formData.append("logo", file);
+
+      const token = localStorage.getItem("sba_token") || document.cookie.split("; ").find(row => row.startsWith("sba_token="))?.split("=")[1];
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000"}/api/store-settings/logo`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        body: formData,
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || "Upload failed");
+      }
+
+      setStoreSettings(prev => ({ ...prev, logo_url: data.logo_url }));
+      setLogoPreview(data.logo_url);
+      toast.success(t("storefront.logoUploaded") || "Logo uploaded successfully");
     } catch (err) {
-      toast.error("Failed to update product");
-      console.error("Error updating product:", err);
+      toast.error(err.message || t("storefront.logoUploadFailed") || "Failed to upload logo");
     }
   };
 
-  const enhanceWithAI = async (productId) => {
+  const handleRemoveLogo = async () => {
     try {
-      const token = getToken();
-      await axios.post(
-        `${API_URL}/ai-copilot/enhance-product`,
-        { productId },
-        { headers: { Authorization: `Bearer ${token}` } },
-      );
-
-      toast.success("Product enhanced with AI");
-      fetchProducts();
+      setStoreSettings(prev => ({ ...prev, logo_url: null }));
+      setLogoPreview(null);
+      toast.success(t("storefront.logoRemoved") || "Logo removed");
     } catch (err) {
-      toast.error("Failed to enhance product");
-      console.error("Error enhancing product:", err);
+      toast.error(t("storefront.logoRemoveFailed") || "Failed to remove logo");
     }
   };
 
-  const batchEnhanceWithAI = async () => {
+  const handleSave = async () => {
+    setSaving(true);
     try {
-      const productIds = products.map((p) => p.id);
-      const token = getToken();
+      const payload = {
+        store_name: storeSettings.store_name,
+        logo_url: storeSettings.logo_url,
+        primary_color: storeSettings.primary_color,
+        secondary_color: storeSettings.secondary_color,
+        accent_color: storeSettings.accent_color,
+        description: storeSettings.description,
+        tagline: storeSettings.tagline,
+        contact_email: storeSettings.contact_email,
+        contact_phone: storeSettings.contact_phone,
+        address: storeSettings.address,
+        city: storeSettings.city,
+        country: storeSettings.country,
+        custom_domain: storeSettings.custom_domain,
+        facebook_url: storeSettings.facebook_url,
+        instagram_url: storeSettings.instagram_url,
+        twitter_url: storeSettings.twitter_url,
+        whatsapp_number: storeSettings.whatsapp_number,
+      };
 
-      await axios.post(
-        `${API_URL}/ai-copilot/batch-enhance`,
-        { productIds },
-        { headers: { Authorization: `Bearer ${token}` } },
-      );
-
-      toast.success("Products enhanced with AI");
-      fetchProducts();
+      await apiPut("/store-settings", payload);
+      toast.success(t("storefront.saved") || "Store settings saved successfully");
     } catch (err) {
-      toast.error("Failed to enhance products");
-      console.error("Error batch enhancing:", err);
+      toast.error(err.message || t("storefront.saveError") || "Failed to save settings");
+    } finally {
+      setSaving(false);
     }
   };
 
-  const previewStorefront = () => {
-    // Use current user ID for preview
-    const user = getUser();
-    const userId = user?.id;
-    if (userId) {
-      window.open(`/storefront/${userId}`, "_blank");
-    } else {
-      toast.error("User ID not found");
+  const handleDomainVerify = async () => {
+    if (!storeSettings.custom_domain) {
+      toast.error(t("storefront.enterDomainFirst") || "Please enter a domain first");
+      return;
+    }
+
+    toast.loading(t("storefront.verifyingDomain") || "Verifying domain...", { id: "domain-verify" });
+    try {
+      await apiPut("/store-settings/verify-domain", { domain: storeSettings.custom_domain });
+      setStoreSettings(prev => ({ ...prev, domain_verified: true }));
+      toast.success(t("storefront.domainVerified") || "Domain verified successfully!", { id: "domain-verify" });
+    } catch (err) {
+      toast.error(err.message || t("storefront.domainVerifyFailed") || "Domain verification failed", { id: "domain-verify" });
+    }
+  };
+
+  const tabs = [
+    { id: "branding", label: t("storefront.tabs.branding") || "Branding", icon: Palette },
+    { id: "info", label: t("storefront.tabs.info") || "Store Info", icon: Settings },
+    { id: "domain", label: t("storefront.tabs.domain") || "Domain", icon: Globe },
+    { id: "social", label: t("storefront.tabs.social") || "Social", icon: MessageCircle },
+    { id: "analytics", label: t("storefront.tabs.analytics") || "Analytics", icon: BarChart3 },
+    { id: "preview", label: t("storefront.tabs.preview") || "Preview", icon: Eye },
+  ];
+
+  if (loading) {
+    return (
+      <Layout title={t("storefront.title") || "Customize Your Store"}>
+        <div className="bg-ground-secondary border hairline rounded-xl text-center py-16 portal-text">
+          {t("storefront.loading") || "Loading store settings..."}
+        </div>
+      </Layout>
+    );
+  }
+
+  const renderBrandingTab = () => (
+    <div className="space-y-6">
+      <div className="bg-ground-secondary border hairline rounded-xl p-6">
+        <h3 className="portal-heading text-lg mb-6 flex items-center gap-2">
+          <Palette size={20} className="text-amber" />
+          {t("storefront.sections.visualIdentity") || "Visual Identity"}
+        </h3>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="md:col-span-1">
+            <label className="block portal-label mb-3">{t("storefront.fields.logo") || "Store Logo"}</label>
+            <div className="space-y-3">
+              <div className="relative">
+                <div
+                  className="w-full aspect-square bg-ground border-2 border-dashed hairline rounded-xl flex items-center justify-center cursor-pointer hover:border-amber/50 transition-colors"
+                  onClick={() => document.getElementById("logo-upload")?.click()}
+                >
+                  {storeSettings.logo_url || logoPreview ? (
+                    <img
+                      src={`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000"}${storeSettings.logo_url || logoPreview}`}
+                      alt="Logo preview"
+                      className="w-full h-full object-cover rounded-lg"
+                    />
+                  ) : (
+                    <div className="flex flex-col items-center gap-2 text-muted">
+                      <Upload size={32} />
+                      <span className="portal-label">{t("storefront.clickToUpload") || "Click to upload logo"}</span>
+                      <p className="text-xs">{t("storefront.maxSize") || "Max 2MB, PNG/JPG"}</p>
+                    </div>
+                  )}
+                  <input
+                    id="logo-upload"
+                    type="file"
+                    accept="image/*"
+                    onChange={handleLogoUpload}
+                    className="hidden"
+                  />
+                </div>
+                {storeSettings.logo_url && (
+                  <button
+                    onClick={handleRemoveLogo}
+                    className="absolute top-2 right-2 w-8 h-8 bg-red-500/90 text-white rounded-full flex items-center justify-center hover:bg-red-500 transition-colors shadow-lg"
+                    title={t("storefront.removeLogo") || "Remove logo"}
+                  >
+                    <Trash2 size={16} />
+                  </button>
+                )}
+              </div>
+            </div>
+          </div>
+
+          <div className="md:col-span-2 space-y-6">
+            <div>
+              <label className="block portal-label mb-3">{t("storefront.fields.storeName") || "Store Name"}</label>
+              <input
+                type="text"
+                value={storeSettings.store_name}
+                onChange={(e) => handleChange("store_name", e.target.value)}
+                placeholder={t("storefront.placeholders.storeName") || "My Awesome Store"}
+                className="w-full bg-ground border hairline rounded-xl px-4 py-3 text-ink placeholder-muted focus:outline-none focus:border-amber transition-colors"
+              />
+            </div>
+
+            <div>
+              <label className="block portal-label mb-3">{t("storefront.fields.tagline") || "Tagline"}</label>
+              <input
+                type="text"
+                value={storeSettings.tagline}
+                onChange={(e) => handleChange("tagline", e.target.value)}
+                placeholder={t("storefront.placeholders.tagline") || "Your tagline here"}
+                className="w-full bg-ground border hairline rounded-xl px-4 py-3 text-ink placeholder-muted focus:outline-none focus:border-amber transition-colors"
+              />
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div>
+                <label className="block portal-label mb-2">{t("storefront.fields.primaryColor") || "Primary Color"}</label>
+                <div className="flex items-center gap-3">
+                  <input
+                    type="color"
+                    value={storeSettings.primary_color}
+                    onChange={(e) => handleChange("primary_color", e.target.value)}
+                    className="w-12 h-12 rounded-lg border hairline cursor-pointer p-1"
+                    title={t("storefront.fields.primaryColor")}
+                  />
+                  <input
+                    type="text"
+                    value={storeSettings.primary_color}
+                    onChange={(e) => handleChange("primary_color", e.target.value)}
+                    className="flex-1 bg-ground border hairline rounded-xl px-4 py-3 text-ink uppercase font-mono text-sm focus:outline-none focus:border-amber transition-colors"
+                  />
+                </div>
+              </div>
+              <div>
+                <label className="block portal-label mb-2">{t("storefront.fields.secondaryColor") || "Secondary Color"}</label>
+                <div className="flex items-center gap-3">
+                  <input
+                    type="color"
+                    value={storeSettings.secondary_color}
+                    onChange={(e) => handleChange("secondary_color", e.target.value)}
+                    className="w-12 h-12 rounded-lg border hairline cursor-pointer p-1"
+                    title={t("storefront.fields.secondaryColor")}
+                  />
+                  <input
+                    type="text"
+                    value={storeSettings.secondary_color}
+                    onChange={(e) => handleChange("secondary_color", e.target.value)}
+                    className="flex-1 bg-ground border hairline rounded-xl px-4 py-3 text-ink uppercase font-mono text-sm focus:outline-none focus:border-amber transition-colors"
+                  />
+                </div>
+              </div>
+              <div>
+                <label className="block portal-label mb-2">{t("storefront.fields.accentColor") || "Accent Color"}</label>
+                <div className="flex items-center gap-3">
+                  <input
+                    type="color"
+                    value={storeSettings.accent_color}
+                    onChange={(e) => handleChange("accent_color", e.target.value)}
+                    className="w-12 h-12 rounded-lg border hairline cursor-pointer p-1"
+                    title={t("storefront.fields.accentColor")}
+                  />
+                  <input
+                    type="text"
+                    value={storeSettings.accent_color}
+                    onChange={(e) => handleChange("accent_color", e.target.value)}
+                    className="flex-1 bg-ground border hairline rounded-xl px-4 py-3 text-ink uppercase font-mono text-sm focus:outline-none focus:border-amber transition-colors"
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="bg-ground-secondary border hairline rounded-xl p-6">
+        <h3 className="portal-heading text-lg mb-6 flex items-center gap-2">
+          <Zap size={20} className="text-amber" />
+          {t("storefront.sections.colorPreview") || "Color Preview"}
+        </h3>
+        <div className="flex flex-wrap gap-4">
+          <div className="flex-1 min-w-[200px] p-6 rounded-xl flex flex-col items-center justify-center" style={{ backgroundColor: storeSettings.primary_color }}>
+            <span className="text-white font-semibold text-lg">Primary</span>
+            <span className="text-white/80 text-sm font-mono">{storeSettings.primary_color}</span>
+          </div>
+          <div className="flex-1 min-w-[200px] p-6 rounded-xl flex flex-col items-center justify-center" style={{ backgroundColor: storeSettings.secondary_color }}>
+            <span className="text-white font-semibold text-lg">Secondary</span>
+            <span className="text-white/80 text-sm font-mono">{storeSettings.secondary_color}</span>
+          </div>
+          <div className="flex-1 min-w-[200px] p-6 rounded-xl flex flex-col items-center justify-center" style={{ backgroundColor: storeSettings.accent_color }}>
+            <span className="text-white font-semibold text-lg">Accent</span>
+            <span className="text-white/80 text-sm font-mono">{storeSettings.accent_color}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+
+  const renderInfoTab = () => (
+    <div className="space-y-6">
+      <div className="bg-ground-secondary border hairline rounded-xl p-6">
+        <h3 className="portal-heading text-lg mb-6 flex items-center gap-2">
+          <Settings size={20} className="text-amber" />
+          {t("storefront.sections.storeDetails") || "Store Details"}
+        </h3>
+
+        <div className="space-y-4">
+          <div>
+            <label className="block portal-label mb-2">{t("storefront.fields.description") || "Description"}</label>
+            <textarea
+              value={storeSettings.description}
+              onChange={(e) => handleChange("description", e.target.value)}
+              rows={4}
+              placeholder={t("storefront.placeholders.description") || "Describe your store..."}
+              className="w-full bg-ground border hairline rounded-xl px-4 py-3 text-ink placeholder-muted focus:outline-none focus:border-amber transition-colors resize-none"
+            />
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="block portal-label mb-2">{t("storefront.fields.contactEmail") || "Contact Email"}</label>
+              <div className="relative">
+                <Mail size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted" />
+                <input
+                  type="email"
+                  value={storeSettings.contact_email}
+                  onChange={(e) => handleChange("contact_email", e.target.value)}
+                  placeholder={t("storefront.placeholders.email") || "contact@store.com"}
+                  className="w-full bg-ground border hairline rounded-xl px-4 py-3 pl-10 text-ink placeholder-muted focus:outline-none focus:border-amber transition-colors"
+                />
+              </div>
+            </div>
+            <div>
+              <label className="block portal-label mb-2">{t("storefront.fields.contactPhone") || "Contact Phone"}</label>
+              <div className="relative">
+                <Phone size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted" />
+                <input
+                  type="tel"
+                  value={storeSettings.contact_phone}
+                  onChange={(e) => handleChange("contact_phone", e.target.value)}
+                  placeholder={t("storefront.placeholders.phone") || "+213 5XX XX XX XX"}
+                  className="w-full bg-ground border hairline rounded-xl px-4 py-3 pl-10 text-ink placeholder-muted focus:outline-none focus:border-amber transition-colors"
+                />
+              </div>
+            </div>
+          </div>
+
+          <div>
+            <label className="block portal-label mb-2">{t("storefront.fields.address") || "Address"}</label>
+            <div className="relative">
+              <MapPin size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted" />
+              <input
+                type="text"
+                value={storeSettings.address}
+                onChange={(e) => handleChange("address", e.target.value)}
+                placeholder={t("storefront.placeholders.address") || "123 Main Street"}
+                className="w-full bg-ground border hairline rounded-xl px-4 py-3 pl-10 text-ink placeholder-muted focus:outline-none focus:border-amber transition-colors"
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="block portal-label mb-2">{t("storefront.fields.city") || "City"}</label>
+              <input
+                type="text"
+                value={storeSettings.city}
+                onChange={(e) => handleChange("city", e.target.value)}
+                placeholder={t("storefront.placeholders.city") || "Algiers"}
+                className="w-full bg-ground border hairline rounded-xl px-4 py-3 text-ink placeholder-muted focus:outline-none focus:border-amber transition-colors"
+              />
+            </div>
+            <div>
+              <label className="block portal-label mb-2">{t("storefront.fields.country") || "Country"}</label>
+              <input
+                type="text"
+                value={storeSettings.country}
+                onChange={(e) => handleChange("country", e.target.value)}
+                placeholder={t("storefront.placeholders.country") || "Algeria"}
+                className="w-full bg-ground border hairline rounded-xl px-4 py-3 text-ink placeholder-muted focus:outline-none focus:border-amber transition-colors"
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+
+  const renderDomainTab = () => (
+    <div className="space-y-6">
+      <div className="bg-ground-secondary border hairline rounded-xl p-6">
+        <h3 className="portal-heading text-lg mb-6 flex items-center gap-2">
+          <Globe size={20} className="text-amber" />
+          {t("storefront.sections.customDomain") || "Custom Domain"}
+        </h3>
+
+        <div className="space-y-4">
+          <div>
+            <label className="block portal-label mb-2">{t("storefront.fields.customDomain") || "Custom Domain"}</label>
+            <div className="relative">
+              <Globe size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted" />
+              <input
+                type="text"
+                value={storeSettings.custom_domain}
+                onChange={(e) => handleChange("custom_domain", e.target.value)}
+                placeholder={t("storefront.placeholders.domain") || "store.example.com"}
+                className="w-full bg-ground border hairline rounded-xl px-4 py-3 pl-10 text-ink placeholder-muted focus:outline-none focus:border-amber transition-colors"
+              />
+            </div>
+            <p className="portal-label text-muted mt-2">
+              {t("storefront.help.domain") || "Configure your custom domain. You'll need to add a CNAME record pointing to your storefront URL."}
+            </p>
+          </div>
+
+          <div className="flex items-center gap-4 p-4 bg-ground/50 border hairline rounded-xl">
+            <div className="flex-1">
+              <p className="portal-label font-semibold text-ink">{t("storefront.domain.status") || "Domain Status"}</p>
+              <p className="portal-label text-muted text-sm">
+                {storeSettings.custom_domain
+                  ? storeSettings.domain_verified
+                    ? t("storefront.domain.verified") || "Verified and active"
+                    : t("storefront.domain.pending") || "Pending verification"
+                  : t("storefront.domain.notConfigured") || "Not configured"}
+              </p>
+            </div>
+            {storeSettings.custom_domain && !storeSettings.domain_verified && (
+              <button
+                onClick={handleDomainVerify}
+                className="portal-pill-btn"
+              >
+                <Shield size={16} /> {t("storefront.domain.verify") || "Verify Domain"}
+              </button>
+            )}
+            {storeSettings.domain_verified && (
+              <span className="flex items-center gap-2 text-teal font-medium">
+                <CheckCircle size={16} /> {t("storefront.domain.verifiedBadge") || "Verified"}
+              </span>
+            )}
+          </div>
+
+          {storeSettings.custom_domain && (
+            <div className="bg-amber/10 border border-amber/30 rounded-xl p-4">
+              <h4 className="portal-label font-semibold text-amber mb-2 flex items-center gap-2">
+                <ExternalLink size={16} /> {t("storefront.domain.dnsInstructions") || "DNS Configuration"}
+              </h4>
+              <div className="space-y-2 text-sm portal-label text-ink-secondary">
+                <p>{t("storefront.domain.dnsStep1") || "1. Go to your domain registrar's DNS settings"}</p>
+                <p>{t("storefront.domain.dnsStep2") || "2. Add a CNAME record:"}</p>
+                <div className="bg-ground border hairline rounded-lg p-3 font-mono text-amber ml-4">
+                  {t("storefront.domain.cnameLabel") || "Name"}: <strong>@</strong> or <strong>www</strong><br />
+                  {t("storefront.domain.cnameTarget") || "Target"}: <strong>{window.location.hostname}</strong>
+                </div>
+                <p>{t("storefront.domain.dnsStep3") || "3. Save changes and click Verify Domain above"}</p>
+                <p>{t("storefront.domain.dnsStep4") || "4. DNS propagation may take up to 24-48 hours"}</p>
+              </div>
+            </div>
+          )}
+
+          <div className="border-t hairline pt-4">
+            <h4 className="portal-label font-semibold mb-3">{t("storefront.sections.storefrontUrl") || "Your Storefront URL"}</h4>
+            <div className="flex items-center gap-3 flex-wrap">
+              <span className="bg-ground border hairline rounded-xl px-4 py-3 font-mono text-sm text-amber flex-1 min-w-[250px] text-center">
+                {storeSettings.custom_domain && storeSettings.domain_verified
+                  ? `https://${storeSettings.custom_domain}`
+                  : `${window.location.origin}/storefront/{userId}`}
+              </span>
+              <button
+                className="portal-pill-btn"
+                onClick={() => navigator.clipboard.writeText(
+                  storeSettings.custom_domain && storeSettings.domain_verified
+                    ? `https://${storeSettings.custom_domain}`
+                    : `${window.location.origin}/storefront/{userId}`
+                )}
+              >
+                <Copy size={16} /> {t("storefront.copyUrl") || "Copy URL"}
+              </button>
+              <a
+                href={storeSettings.custom_domain && storeSettings.domain_verified ? `https://${storeSettings.custom_domain}` : `/storefront/{userId}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="portal-pill-btn"
+              >
+                <ExternalLink size={16} /> {t("storefront.visitStore") || "Visit Store"}
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+
+  const renderSocialTab = () => (
+    <div className="space-y-6">
+      <div className="bg-ground-secondary border hairline rounded-xl p-6">
+        <h3 className="portal-heading text-lg mb-6 flex items-center gap-2">
+          <MessageCircle size={20} className="text-amber" />
+          {t("storefront.sections.socialLinks") || "Social Media Links"}
+        </h3>
+
+        <div className="space-y-4">
+          {[
+            { field: "facebook_url", label: "Facebook", icon: "📘", placeholder: "https://facebook.com/yourstore" },
+            { field: "instagram_url", label: "Instagram", icon: "📷", placeholder: "https://instagram.com/yourstore" },
+            { field: "twitter_url", label: "Twitter/X", icon: "🐦", placeholder: "https://twitter.com/yourstore" },
+            { field: "whatsapp_number", label: "WhatsApp", icon: "💬", placeholder: "+213 5XX XX XX XX" },
+          ].map((social) => (
+            <div key={social.field} className="flex items-center gap-4 p-4 bg-ground/50 border hairline rounded-xl">
+              <span className="text-2xl w-12 text-center">{social.icon}</span>
+              <div className="flex-1">
+                <label className="block portal-label mb-1">{social.label}</label>
+                <input
+                  type="text"
+                  value={storeSettings[social.field]}
+                  onChange={(e) => handleChange(social.field, e.target.value)}
+                  placeholder={social.placeholder}
+                  className="w-full bg-ground border hairline rounded-xl px-4 py-2 text-ink placeholder-muted focus:outline-none focus:border-amber transition-colors"
+                />
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+
+  const renderAnalyticsTab = () => {
+    if (analyticsLoading) {
+      return (
+        <div className="bg-ground-secondary border hairline rounded-xl p-8 text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-amber mx-auto mb-4"></div>
+          <p className="portal-label">{t("storefront.loadingAnalytics") || "Loading analytics..."}</p>
+        </div>
+      );
+    }
+
+    if (!analytics) {
+      return (
+        <div className="bg-ground-secondary border hairline rounded-xl p-8 text-center">
+          <p className="portal-label text-muted">{t("storefront.noAnalytics") || "No analytics data available yet"}</p>
+        </div>
+      );
+    }
+
+    const { products, reviews, categories, top_products } = analytics;
+
+    return (
+      <div className="space-y-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
+          <div className="bg-ground-secondary border hairline rounded-xl p-5">
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 bg-amber/15 rounded-xl flex items-center justify-center">
+                <Package size={20} className="text-amber" />
+              </div>
+              <div>
+                <p className="portal-label text-muted">{t("storefront.analytics.totalProducts") || "Total Products"}</p>
+                <p className="portal-heading text-2xl font-bold text-ink">{products?.total || 0}</p>
+                <p className="portal-label text-teal text-sm mt-1">
+                  {t("storefront.analytics.visible") || "Visible"}: {products?.visible || 0} | {t("storefront.analytics.featured") || "Featured"}: {products?.featured || 0}
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-ground-secondary border hairline rounded-xl p-5">
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 bg-teal/15 rounded-xl flex items-center justify-center">
+                <Star size={20} className="text-teal" />
+              </div>
+              <div>
+                <p className="portal-label text-muted">{t("storefront.analytics.totalReviews") || "Total Reviews"}</p>
+                <p className="portal-heading text-2xl font-bold text-ink">{reviews?.total_reviews || 0}</p>
+                <p className="portal-label text-amber text-sm mt-1">
+                  {t("storefront.analytics.avgRating") || "Avg Rating"}: {reviews?.avg_rating || 0}/5
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-ground-secondary border hairline rounded-xl p-5">
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 bg-purple/15 rounded-xl flex items-center justify-center">
+                <BarChart3 size={20} className="text-purple-400" />
+              </div>
+              <div>
+                <p className="portal-label text-muted">{t("storefront.analytics.categories") || "Categories"}</p>
+                <p className="portal-heading text-2xl font-bold text-ink">{categories?.length || 0}</p>
+                <p className="portal-label text-muted text-sm mt-1">
+                  {t("storefront.analytics.activeCategories") || "Active categories"}
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-ground-secondary border hairline rounded-xl p-5">
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 bg-pink/15 rounded-xl flex items-center justify-center">
+                <TrendingUp size={20} className="text-pink-400" />
+              </div>
+              <div>
+                <p className="portal-label text-muted">{t("storefront.analytics.topProducts") || "Top Products"}</p>
+                <p className="portal-heading text-2xl font-bold text-ink">{top_products?.length || 0}</p>
+                <p className="portal-label text-muted text-sm mt-1">
+                  {t("storefront.analytics.bestSellers") || "Best sellers"}
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {categories && categories.length > 0 && (
+          <div className="bg-ground-secondary border hairline rounded-xl p-5">
+            <h3 className="portal-heading text-base mb-4">{t("storefront.analytics.productsByCategory") || "Products by Category"}</h3>
+            <div className="space-y-3">
+              {categories.map((cat, i) => (
+                <div key={i} className="flex items-center justify-between p-3 bg-ground/50 border hairline rounded-lg">
+                  <span className="portal-label font-medium">{cat.category}</span>
+                  <span className="portal-heading font-bold text-amber">{cat.count} {t("storefront.analytics.products") || "products"}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {top_products && top_products.length > 0 && (
+          <div className="bg-ground-secondary border hairline rounded-xl p-5">
+            <h3 className="portal-heading text-base mb-4">{t("storefront.analytics.topProductsList") || "Top Performing Products"}</h3>
+            <div className="space-y-3">
+              {top_products.map((product, i) => (
+                <div key={product.id} className="flex items-center gap-4 p-3 bg-ground/50 border hairline rounded-lg">
+                  <span className="w-8 h-8 bg-amber/15 text-amber rounded-lg flex items-center justify-center font-bold text-sm">{i + 1}</span>
+                  <div className="flex-1 min-w-0">
+                    <p className="portal-label font-semibold text-ink truncate">{product.name}</p>
+                    <p className="portal-label text-muted text-sm">{product.sold} {t("storefront.analytics.sold") || "sold"}</p>
+                  </div>
+                  <div className="text-right">
+                    <p className="portal-heading font-bold text-ink">{product.revenue} DA</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        <div className="flex gap-3">
+          <button onClick={loadAnalytics} className="portal-pill-btn">
+            <RefreshCw size={16} /> {t("storefront.refreshAnalytics") || "Refresh Analytics"}
+          </button>
+          <a href="/reports" className="portal-pill-btn">
+            <BarChart3 size={16} /> {t("storefront.viewFullReports") || "View Full Reports"}
+          </a>
+        </div>
+      </div>
+    );
+  };
+
+  const renderPreviewTab = () => (
+    <div className="space-y-6">
+      <div className="bg-ground-secondary border hairline rounded-xl p-6">
+        <div className="flex items-center justify-between mb-6">
+          <h3 className="portal-heading text-lg flex items-center gap-2">
+            <Eye size={20} className="text-amber" />
+            {t("storefront.sections.livePreview") || "Live Preview"}
+          </h3>
+          <label className="flex items-center gap-2 cursor-pointer">
+            <input
+              type="checkbox"
+              checked={previewMode}
+              onChange={(e) => setPreviewMode(e.target.checked)}
+              className="w-4 h-4 rounded border-hairline text-amber focus:ring-amber"
+            />
+            <span className="portal-label">{t("storefront.previewMode") || "Preview Mode"}</span>
+          </label>
+        </div>
+
+        <div className="bg-ground border-2 rounded-xl overflow-hidden" style={{ borderColor: storeSettings.primary_color }}>
+          <div className="p-4 border-b" style={{ borderColor: storeSettings.secondary_color, backgroundColor: storeSettings.primary_color }}>
+            <div className="flex items-center gap-3">
+              {storeSettings.logo_url && (
+                <img
+                  src={`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000"}${storeSettings.logo_url}`}
+                  alt={storeSettings.store_name}
+                  className="w-10 h-10 rounded-lg object-cover"
+                />
+              )}
+              <div>
+                <h1 className="text-white font-bold text-xl">{storeSettings.store_name || t("storefront.preview.storeName") || "Your Store Name"}</h1>
+                {storeSettings.tagline && (
+                  <p className="text-white/80 text-sm">{storeSettings.tagline}</p>
+                )}
+              </div>
+            </div>
+          </div>
+
+          <div className="p-6">
+            {storeSettings.description && (
+              <p className="portal-text mb-6 text-ink-secondary">{storeSettings.description}</p>
+            )}
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+              {storeSettings.contact_email && (
+                <a href={`mailto:${storeSettings.contact_email}`} className="flex items-center gap-2 p-3 bg-ground-secondary border hairline rounded-lg hover:border-amber/50 transition-colors">
+                  <Mail size={18} className="text-amber" />
+                  <span className="portal-label text-ink">{storeSettings.contact_email}</span>
+                </a>
+              )}
+              {storeSettings.contact_phone && (
+                <a href={`tel:${storeSettings.contact_phone}`} className="flex items-center gap-2 p-3 bg-ground-secondary border hairline rounded-lg hover:border-amber/50 transition-colors">
+                  <Phone size={18} className="text-amber" />
+                  <span className="portal-label text-ink">{storeSettings.contact_phone}</span>
+                </a>
+              )}
+              {storeSettings.address && (
+                <div className="flex items-center gap-2 p-3 bg-ground-secondary border hairline rounded-lg">
+                  <MapPin size={18} className="text-amber" />
+                  <span className="portal-label text-ink">{storeSettings.address}, {storeSettings.city}, {storeSettings.country}</span>
+                </div>
+              )}
+            </div>
+
+            <div className="flex items-center gap-4 pt-4 border-t hairline">
+              {storeSettings.facebook_url && (
+                <a href={storeSettings.facebook_url} target="_blank" rel="noopener noreferrer" className="p-2 bg-ground-secondary border hairline rounded-lg hover:bg-amber/10 transition-colors">
+                  📘
+                </a>
+              )}
+              {storeSettings.instagram_url && (
+                <a href={storeSettings.instagram_url} target="_blank" rel="noopener noreferrer" className="p-2 bg-ground-secondary border hairline rounded-lg hover:bg-amber/10 transition-colors">
+                  📷
+                </a>
+              )}
+              {storeSettings.twitter_url && (
+                <a href={storeSettings.twitter_url} target="_blank" rel="noopener noreferrer" className="p-2 bg-ground-secondary border hairline rounded-lg hover:bg-amber/10 transition-colors">
+                  🐦
+                </a>
+              )}
+              {storeSettings.whatsapp_number && (
+                <a href={`https://wa.me/${storeSettings.whatsapp_number.replace(/\D/g, '')}`} target="_blank" rel="noopener noreferrer" className="p-2 bg-ground-secondary border hairline rounded-lg hover:bg-amber/10 transition-colors">
+                  💬
+                </a>
+              )}
+            </div>
+          </div>
+        </div>
+
+        <p className="portal-label text-muted text-center mt-4">
+          {t("storefront.preview.note") || "This is a preview of how your storefront will appear to customers."}
+        </p>
+      </div>
+    </div>
+  );
+
+  const renderTabContent = () => {
+    switch (activeTab) {
+      case "branding":
+        return renderBrandingTab();
+      case "info":
+        return renderInfoTab();
+      case "domain":
+        return renderDomainTab();
+      case "social":
+        return renderSocialTab();
+      case "analytics":
+        return renderAnalyticsTab();
+      case "preview":
+        return renderPreviewTab();
+      default:
+        return renderBrandingTab();
     }
   };
 
   return (
-    <>
+    <Layout title={t("storefront.title") || "Customize Your Store"}>
       <Head>
-        <title>Storefront Management - Dashboard</title>
+        <title>{t("storefront.title") || "Customize Your Store"} - Smart Business Assistant</title>
       </Head>
 
-      <div className="min-h-screen bg-gray-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          {/* Header */}
-          <div className="mb-8">
-            <div className="flex items-center justify-between mb-4">
-              <div>
-                <h1 className="text-3xl font-bold text-gray-900">
-                  Storefront Management
-                </h1>
-                <p className="text-gray-600 mt-1">
-                  Configure and manage your online storefront
-                </p>
-              </div>
-              <button
-                onClick={previewStorefront}
-                className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition"
-              >
-                <ExternalLink className="h-4 w-4" />
-                Preview Storefront
-              </button>
-            </div>
-
-            {/* Storefront Toggle */}
-            <div className="bg-white rounded-xl shadow-sm p-6">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="bg-blue-100 p-2 rounded-lg">
-                    <ShoppingBag className="h-6 w-6 text-blue-600" />
-                  </div>
-                  <div>
-                    <h3 className="font-semibold text-gray-900">
-                      Storefront Status
-                    </h3>
-                    <p className="text-sm text-gray-600">
-                      {storefrontEnabled
-                        ? "Your storefront is live and accessible to customers"
-                        : "Your storefront is currently disabled"}
-                    </p>
-                  </div>
-                </div>
-                <button
-                  onClick={() => setStorefrontEnabled(!storefrontEnabled)}
-                  className="relative"
-                >
-                  {storefrontEnabled ? (
-                    <ToggleRight className="h-8 w-8 text-blue-600" />
-                  ) : (
-                    <ToggleLeft className="h-8 w-8 text-gray-400" />
-                  )}
-                </button>
-              </div>
-            </div>
+      <div className="max-w-6xl mx-auto">
+        <div className="mb-6 flex items-center justify-between">
+          <div>
+            <h1 className="portal-heading text-2xl flex items-center gap-2">
+              <ShoppingBag size={28} className="text-amber" />
+              {t("storefront.title") || "Customize Your Store"}
+            </h1>
+            <p className="portal-label text-muted mt-1">{t("storefront.subtitle") || "Manage your storefront branding, domain, and analytics"}</p>
           </div>
+          <button onClick={handleSave} disabled={saving} className="portal-pill-btn">
+            {saving ? (
+              <>
+                <span className="animate-spin rounded-full h-4 w-4 border-2 border-amber border-t-transparent mr-2"></span>
+                {t("common.saving") || "Saving..."}
+              </>
+            ) : (
+              <>
+                <Save size={16} /> {t("common.save") || "Save Changes"}
+              </>
+            )}
+          </button>
+        </div>
 
-          {/* Tabs */}
-          <div className="bg-white rounded-xl shadow-sm mb-6">
-            <div className="border-b">
-              <nav className="flex gap-4 px-6">
+        <div className="bg-ground-secondary border hairline rounded-xl overflow-hidden">
+          <div className="border-b hairline overflow-x-auto">
+            <nav className="flex gap-1 p-1 min-w-max" role="tablist">
+              {tabs.map((tab) => (
                 <button
-                  onClick={() => setActiveTab("products")}
-                  className={`py-4 px-2 border-b-2 font-medium transition ${
-                    activeTab === "products"
-                      ? "border-blue-600 text-blue-600"
-                      : "border-transparent text-gray-600 hover:text-gray-900"
+                  key={tab.id}
+                  role="tab"
+                  aria-selected={activeTab === tab.id}
+                  onClick={() => setActiveTab(tab.id)}
+                  className={`portal-nav-link flex items-center gap-2 px-4 py-3 rounded-lg transition-all duration-200 font-medium whitespace-nowrap ${
+                    activeTab === tab.id
+                      ? "bg-amber/10 text-amber border hairline"
+                      : "text-ink-secondary hover:text-ink hover:bg-ground/50"
                   }`}
                 >
-                  Products
+                  <tab.icon size={18} className="flex-shrink-0" />
+                  <span className="text-sm">{tab.label}</span>
                 </button>
-                <button
-                  onClick={() => setActiveTab("settings")}
-                  className={`py-4 px-2 border-b-2 font-medium transition ${
-                    activeTab === "settings"
-                      ? "border-blue-600 text-blue-600"
-                      : "border-transparent text-gray-600 hover:text-gray-900"
-                  }`}
-                >
-                  Settings
-                </button>
-              </nav>
-            </div>
+              ))}
+            </nav>
           </div>
 
-          {/* Products Tab */}
-          {activeTab === "products" && (
-            <div className="space-y-6">
-              {/* Actions */}
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <button
-                    onClick={batchEnhanceWithAI}
-                    className="flex items-center gap-2 bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition"
-                  >
-                    <Sparkles className="h-4 w-4" />
-                    Enhance All with AI
-                  </button>
-                </div>
-                <div className="text-sm text-gray-600">
-                  {products.filter((p) => p.storefront_enabled).length} of{" "}
-                  {products.length} products visible
-                </div>
-              </div>
-
-              {/* Products List */}
-              {loading ? (
-                <div className="text-center py-12">
-                  <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-                </div>
-              ) : products.length === 0 ? (
-                <div className="text-center py-12 bg-white rounded-xl shadow-sm">
-                  <ShoppingBag className="h-16 w-16 text-gray-400 mx-auto mb-4" />
-                  <p className="text-gray-600 mb-4">No products yet</p>
-                  <button
-                    onClick={() => router.push("/products")}
-                    className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition"
-                  >
-                    Add Products
-                  </button>
-                </div>
-              ) : (
-                <div className="bg-white rounded-xl shadow-sm overflow-hidden">
-                  <table className="w-full">
-                    <thead className="bg-gray-50">
-                      <tr>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          Product
-                        </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          Price
-                        </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          Stock
-                        </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          Visible
-                        </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          Featured
-                        </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          Actions
-                        </th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-gray-200">
-                      {products.map((product) => (
-                        <tr key={product.id} className="hover:bg-gray-50">
-                          <td className="px-6 py-4">
-                            <div>
-                              <div className="font-medium text-gray-900">
-                                {product.name}
-                              </div>
-                              <div className="text-sm text-gray-500">
-                                {product.category}
-                              </div>
-                            </div>
-                          </td>
-                          <td className="px-6 py-4 text-gray-900">
-                            ${parseFloat(product.price).toFixed(2)}
-                          </td>
-                          <td className="px-6 py-4">
-                            <span
-                              className={`px-2 py-1 text-xs font-medium rounded-full ${
-                                product.stock > 10
-                                  ? "bg-green-100 text-green-700"
-                                  : product.stock > 0
-                                    ? "bg-yellow-100 text-yellow-700"
-                                    : "bg-red-100 text-red-700"
-                              }`}
-                            >
-                              {product.stock}
-                            </span>
-                          </td>
-                          <td className="px-6 py-4">
-                            <button
-                              onClick={() =>
-                                toggleStorefrontEnabled(
-                                  product.id,
-                                  product.storefront_enabled,
-                                )
-                              }
-                            >
-                              {product.storefront_enabled ? (
-                                <ToggleRight className="h-6 w-6 text-blue-600" />
-                              ) : (
-                                <ToggleLeft className="h-6 w-6 text-gray-400" />
-                              )}
-                            </button>
-                          </td>
-                          <td className="px-6 py-4">
-                            <button
-                              onClick={() =>
-                                toggleFeatured(product.id, product.featured)
-                              }
-                            >
-                              {product.featured ? (
-                                <Sparkles className="h-5 w-5 text-yellow-500 fill-current" />
-                              ) : (
-                                <Sparkles className="h-5 w-5 text-gray-400" />
-                              )}
-                            </button>
-                          </td>
-                          <td className="px-6 py-4">
-                            <div className="flex items-center gap-2">
-                              <button
-                                onClick={() => enhanceWithAI(product.id)}
-                                className="p-2 text-purple-600 hover:bg-purple-50 rounded-lg transition"
-                                title="Enhance with AI"
-                              >
-                                <Sparkles className="h-4 w-4" />
-                              </button>
-                              <button
-                                onClick={() =>
-                                  router.push(`/dashboard/products`)
-                                }
-                                className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition"
-                                title="Edit"
-                              >
-                                <Settings className="h-4 w-4" />
-                              </button>
-                            </div>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              )}
-            </div>
-          )}
-
-          {/* Settings Tab */}
-          {activeTab === "settings" && (
-            <div className="bg-white rounded-xl shadow-sm p-6">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">
-                Storefront Settings
-              </h3>
-              <p className="text-gray-600">
-                Additional storefront settings will be available soon,
-                including:
-              </p>
-              <ul className="mt-4 space-y-2 text-gray-600">
-                <li className="flex items-center gap-2">
-                  <div className="w-2 h-2 bg-blue-600 rounded-full"></div>
-                  Custom branding (logo, colors)
-                </li>
-                <li className="flex items-center gap-2">
-                  <div className="w-2 h-2 bg-blue-600 rounded-full"></div>
-                  Store description and contact info
-                </li>
-                <li className="flex items-center gap-2">
-                  <div className="w-2 h-2 bg-blue-600 rounded-full"></div>
-                  Custom domain configuration
-                </li>
-                <li className="flex items-center gap-2">
-                  <div className="w-2 h-2 bg-blue-600 rounded-full"></div>
-                  Analytics and insights
-                </li>
-              </ul>
-            </div>
-          )}
+          <div className="p-6">
+            {renderTabContent()}
+          </div>
         </div>
       </div>
-    </>
+    </Layout>
   );
 }

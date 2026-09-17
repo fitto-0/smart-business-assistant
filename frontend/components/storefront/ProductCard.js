@@ -2,7 +2,7 @@ import { useRouter } from 'next/router';
 import { Heart, Share2, ShoppingCart } from 'lucide-react';
 import { motion } from 'framer-motion';
 
-export default function ProductCard({ product, userId }) {
+export default function ProductCard({ product, userId, primaryColor = '#3B82F6', accentColor = '#F59E0B' }) {
   const router = useRouter();
 
   const handleClick = () => {
@@ -32,11 +32,12 @@ export default function ProductCard({ product, userId }) {
   return (
     <motion.div
       whileHover={{ y: -4 }}
-      className="bg-white rounded-xl shadow-sm hover:shadow-lg transition-shadow cursor-pointer overflow-hidden"
+      className="bg-ground-secondary border hairline rounded-xl shadow-sm hover:shadow-lg transition-shadow cursor-pointer overflow-hidden"
       onClick={handleClick}
+      style={{ borderColor: primaryColor }}
     >
       {/* Product Image */}
-      <div className="relative aspect-square bg-gray-100">
+      <div className="relative aspect-square bg-ground">
         {product.image_url ? (
           <img
             src={product.image_url}
@@ -44,13 +45,13 @@ export default function ProductCard({ product, userId }) {
             className="w-full h-full object-cover"
           />
         ) : (
-          <div className="w-full h-full flex items-center justify-center text-gray-400">
+          <div className="w-full h-full flex items-center justify-center text-muted">
             <ShoppingCart className="h-16 w-16" />
           </div>
         )}
         
         {product.featured && (
-          <div className="absolute top-2 left-2 bg-yellow-400 text-yellow-900 text-xs font-semibold px-2 py-1 rounded">
+          <div className="absolute top-2 left-2 text-xs font-semibold px-2 py-1 rounded text-white" style={{ backgroundColor: accentColor }}>
             Featured
           </div>
         )}
@@ -58,34 +59,34 @@ export default function ProductCard({ product, userId }) {
         <div className="absolute top-2 right-2 flex gap-2">
           <button
             onClick={handleFavorite}
-            className="p-2 bg-white/90 rounded-full hover:bg-white transition"
+            className="p-2 bg-ground/90 rounded-full hover:bg-ground transition backdrop-blur-sm"
           >
-            <Heart className="h-4 w-4 text-gray-600" />
+            <Heart className="h-4 w-4 text-ink-secondary hover:text-red-400 transition-colors" />
           </button>
           <button
             onClick={handleShare}
-            className="p-2 bg-white/90 rounded-full hover:bg-white transition"
+            className="p-2 bg-ground/90 rounded-full hover:bg-ground transition backdrop-blur-sm"
           >
-            <Share2 className="h-4 w-4 text-gray-600" />
+            <Share2 className="h-4 w-4 text-ink-secondary hover:text-amber transition-colors" />
           </button>
         </div>
       </div>
 
       {/* Product Info */}
       <div className="p-4">
-        <div className="text-xs text-gray-500 mb-1">{product.category}</div>
-        <h3 className="font-semibold text-gray-900 mb-2 line-clamp-2">
+        <div className="text-xs text-muted mb-1">{product.category}</div>
+        <h3 className="font-semibold text-ink mb-2 line-clamp-2">
           {product.name}
         </h3>
         
         <div className="flex items-center justify-between">
-          <div className="text-lg font-bold text-blue-600">
-            ${parseFloat(product.price).toFixed(2)}
+          <div className="text-lg font-bold" style={{ color: accentColor }}>
+            {parseFloat(product.price).toFixed(2)} DA
           </div>
           
           <div className={`text-xs font-medium ${
-            product.stock > 10 ? 'text-green-600' : 
-            product.stock > 0 ? 'text-yellow-600' : 'text-red-600'
+            product.stock > 10 ? 'text-teal' : 
+            product.stock > 0 ? 'text-amber' : 'text-red-400'
           }`}>
             {product.stock > 0 ? `${product.stock} in stock` : 'Out of stock'}
           </div>

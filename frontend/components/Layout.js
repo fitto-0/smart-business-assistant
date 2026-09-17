@@ -32,6 +32,7 @@ import {
   Shield,
   Database,
   FileText,
+  ShoppingBag,
 } from "lucide-react";
 import Chatbot from "./Chatbot";
 
@@ -47,6 +48,10 @@ const userNavItems = [
   { href: "/backup", label: "Backup", icon: Database },
   { href: "/reports", label: "Reports", icon: FileText },
   { href: "/profile", label: "Profile", icon: User },
+];
+
+const storefrontNavItems = [
+  { href: "/dashboard/storefront", label: "Customize Store", icon: ShoppingBag },
 ];
 
 const adminNavItems = [
@@ -186,6 +191,25 @@ export default function Layout({
                 <Icon size={18} className="flex-shrink-0" />
                 <span className="text-sm">{label}</span>
                 {router.pathname === href && (
+                  <ChevronRight size={14} className="ml-auto opacity-60" />
+                )}
+              </Link>
+            ))}
+          </>
+        )}
+        {user.role !== "admin" && (
+          <>
+            <p className="portal-label px-4 mt-5 mb-3">Store</p>
+            {storefrontNavItems.map(({ href, label, icon: Icon }) => (
+              <Link
+                key={href}
+                href={href}
+                onClick={() => mobile && setSidebarOpen(false)}
+                className={`portal-nav-link flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 font-medium ${router.pathname.startsWith("/dashboard/storefront") ? "bg-amber/10 text-amber" : "text-ink-secondary hover:text-ink hover:bg-ground-secondary/50"}`}
+              >
+                <Icon size={18} className="flex-shrink-0" />
+                <span className="text-sm">{label}</span>
+                {router.pathname.startsWith("/dashboard/storefront") && (
                   <ChevronRight size={14} className="ml-auto opacity-60" />
                 )}
               </Link>

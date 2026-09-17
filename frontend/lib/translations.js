@@ -247,6 +247,113 @@ const translations = {
         viewAll: "View all"
       }
     },
+    // Storefront
+    storefront: {
+      title: "Customize Your Store",
+      subtitle: "Manage your storefront branding, domain, and analytics",
+      loading: "Loading store settings...",
+      loadError: "Failed to load store settings",
+      saveError: "Failed to save settings",
+      saved: "Store settings saved successfully",
+      saving: "Saving...",
+      tabs: {
+        branding: "Branding",
+        info: "Store Info",
+        domain: "Domain",
+        social: "Social",
+        analytics: "Analytics",
+        preview: "Preview"
+      },
+      sections: {
+        visualIdentity: "Visual Identity",
+        storeDetails: "Store Details",
+        customDomain: "Custom Domain",
+        socialLinks: "Social Media Links",
+        colorPreview: "Color Preview",
+        livePreview: "Live Preview"
+      },
+      fields: {
+        logo: "Store Logo",
+        storeName: "Store Name",
+        tagline: "Tagline",
+        primaryColor: "Primary Color",
+        secondaryColor: "Secondary Color",
+        accentColor: "Accent Color",
+        description: "Description",
+        contactEmail: "Contact Email",
+        contactPhone: "Contact Phone",
+        address: "Address",
+        city: "City",
+        country: "Country",
+        customDomain: "Custom Domain"
+      },
+      placeholders: {
+        storeName: "My Awesome Store",
+        tagline: "Your tagline here",
+        description: "Describe your store...",
+        email: "contact@store.com",
+        phone: "+213 5XX XX XX XX",
+        address: "123 Main Street",
+        city: "Algiers",
+        country: "Algeria",
+        domain: "store.example.com"
+      },
+      domain: {
+        status: "Domain Status",
+        verified: "Verified and active",
+        pending: "Pending verification",
+        notConfigured: "Not configured",
+        verify: "Verify Domain",
+        dnsInstructions: "DNS Configuration",
+        dnsStep1: "1. Go to your domain registrar's DNS settings",
+        dnsStep2: "2. Add a CNAME record:",
+        cnameLabel: "Name",
+        cnameTarget: "Target",
+        dnsStep3: "3. Save changes and click Verify Domain above",
+        dnsStep4: "4. DNS propagation may take up to 24-48 hours"
+      },
+      help: {
+        domain: "Configure your custom domain. You'll need to add a CNAME record pointing to your storefront URL."
+      },
+      copyUrl: "Copy URL",
+      visitStore: "Visit Store",
+      invalidImageType: "Please select an image file",
+      imageTooLarge: "Image size must be less than 2MB",
+      logoUploaded: "Logo uploaded successfully",
+      logoUploadFailed: "Failed to upload logo",
+      logoRemoved: "Logo removed",
+      logoRemoveFailed: "Failed to remove logo",
+      clickToUpload: "Click to upload logo",
+      maxSize: "Max 2MB, PNG/JPG",
+      enterDomainFirst: "Please enter a domain first",
+      verifyingDomain: "Verifying domain...",
+      domainVerified: "Domain verified successfully!",
+      domainVerifyFailed: "Domain verification failed",
+      analytics: {
+        totalProducts: "Total Products",
+        visible: "Visible",
+        featured: "Featured",
+        totalReviews: "Total Reviews",
+        avgRating: "Avg Rating",
+        categories: "Categories",
+        activeCategories: "Active categories",
+        topProducts: "Top Products",
+        bestSellers: "Best sellers",
+        productsByCategory: "Products by Category",
+        topProductsList: "Top Performing Products",
+        sold: "sold",
+        products: "products",
+        noAnalytics: "No analytics data available yet",
+        loadingAnalytics: "Loading analytics...",
+        refreshAnalytics: "Refresh Analytics",
+        viewFullReports: "View Full Reports"
+      },
+      preview: {
+        storeName: "Your Store Name",
+        note: "This is a preview of how your storefront will appear to customers.",
+        previewMode: "Preview Mode"
+      }
+    },
     // Reviews
     reviews: {
       title: "Customer Reviews",
@@ -928,6 +1035,113 @@ const translations = {
       recommendations: {
         aiRecommendations: "Recommandations IA",
         viewAll: "Voir tout"
+      }
+    },
+    // Storefront
+    storefront: {
+      title: "Personnaliser votre boutique",
+      subtitle: "Gérez le branding, le domaine et les analyses de votre vitrine",
+      loading: "Chargement des paramètres de la boutique...",
+      loadError: "Échec du chargement des paramètres de la boutique",
+      saveError: "Échec de l'enregistrement des paramètres",
+      saved: "Paramètres de la boutique enregistrés avec succès",
+      saving: "Enregistrement...",
+      tabs: {
+        branding: "Image de marque",
+        info: "Infos boutique",
+        domain: "Domaine",
+        social: "Réseaux sociaux",
+        analytics: "Analyses",
+        preview: "Aperçu"
+      },
+      sections: {
+        visualIdentity: "Identité visuelle",
+        storeDetails: "Détails de la boutique",
+        customDomain: "Domaine personnalisé",
+        socialLinks: "Liens réseaux sociaux",
+        colorPreview: "Aperçu des couleurs",
+        livePreview: "Aperçu en direct"
+      },
+      fields: {
+        logo: "Logo de la boutique",
+        storeName: "Nom de la boutique",
+        tagline: "Slogan",
+        primaryColor: "Couleur principale",
+        secondaryColor: "Couleur secondaire",
+        accentColor: "Couleur d'accent",
+        description: "Description",
+        contactEmail: "Email de contact",
+        contactPhone: "Téléphone de contact",
+        address: "Adresse",
+        city: "Ville",
+        country: "Pays",
+        customDomain: "Domaine personnalisé"
+      },
+      placeholders: {
+        storeName: "Ma super boutique",
+        tagline: "Votre slogan ici",
+        description: "Décrivez votre boutique...",
+        email: "contact@boutique.com",
+        phone: "+213 5XX XX XX XX",
+        address: "123 Rue Principale",
+        city: "Alger",
+        country: "Algérie",
+        domain: "boutique.exemple.com"
+      },
+      domain: {
+        status: "Statut du domaine",
+        verified: "Vérifié et actif",
+        pending: "Vérification en attente",
+        notConfigured: "Non configuré",
+        verify: "Vérifier le domaine",
+        dnsInstructions: "Configuration DNS",
+        dnsStep1: "1. Allez dans les paramètres DNS de votre registraire de domaine",
+        dnsStep2: "2. Ajoutez un enregistrement CNAME :",
+        cnameLabel: "Nom",
+        cnameTarget: "Cible",
+        dnsStep3: "3. Sauvegardez les changements et cliquez sur Vérifier le domaine ci-dessus",
+        dnsStep4: "4. La propagation DNS peut prendre jusqu'à 24-48 heures"
+      },
+      help: {
+        domain: "Configurez votre domaine personnalisé. Vous devrez ajouter un enregistrement CNAME pointant vers l'URL de votre vitrine."
+      },
+      copyUrl: "Copier l'URL",
+      visitStore: "Visiter la boutique",
+      invalidImageType: "Veuillez sélectionner un fichier image",
+      imageTooLarge: "La taille de l'image doit être inférieure à 2MB",
+      logoUploaded: "Logo téléchargé avec succès",
+      logoUploadFailed: "Échec du téléchargement du logo",
+      logoRemoved: "Logo supprimé",
+      logoRemoveFailed: "Échec de la suppression du logo",
+      clickToUpload: "Cliquez pour télécharger le logo",
+      maxSize: "Max 2MB, PNG/JPG",
+      enterDomainFirst: "Veuillez d'abord entrer un domaine",
+      verifyingDomain: "Vérification du domaine...",
+      domainVerified: "Domaine vérifié avec succès!",
+      domainVerifyFailed: "Échec de la vérification du domaine",
+      analytics: {
+        totalProducts: "Total des produits",
+        visible: "Visibles",
+        featured: "Mis en avant",
+        totalReviews: "Total des avis",
+        avgRating: "Note moyenne",
+        categories: "Catégories",
+        activeCategories: "Catégories actives",
+        topProducts: "Meilleurs produits",
+        bestSellers: "Meilleures ventes",
+        productsByCategory: "Produits par catégorie",
+        topProductsList: "Produits les plus performants",
+        sold: "vendus",
+        products: "produits",
+        noAnalytics: "Aucune donnée d'analyse disponible pour le moment",
+        loadingAnalytics: "Chargement des analyses...",
+        refreshAnalytics: "Actualiser les analyses",
+        viewFullReports: "Voir les rapports complets"
+      },
+      preview: {
+        storeName: "Nom de votre boutique",
+        note: "Ceci est un aperçu de l'apparence de votre vitrine pour les clients.",
+        previewMode: "Mode aperçu"
       }
     },
     // Reviews

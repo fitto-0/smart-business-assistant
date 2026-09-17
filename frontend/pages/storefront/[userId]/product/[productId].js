@@ -14,6 +14,7 @@ export default function ProductDetailPage() {
   const [recommendedProducts, setRecommendedProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [storeSettings, setStoreSettings] = useState(null);
 
   const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
 
@@ -21,8 +22,18 @@ export default function ProductDetailPage() {
     if (userId && productId) {
       fetchProduct();
       fetchRecommendedProducts();
+      fetchStoreSettings();
     }
   }, [userId, productId]);
+
+  const fetchStoreSettings = async () => {
+    try {
+      const response = await axios.get(`${API_URL}/store-settings/public/${userId}`);
+      setStoreSettings(response.data);
+    } catch (err) {
+      console.error('Error fetching store settings:', err);
+    }
+  };
 
   const fetchProduct = async () => {
     try {
@@ -71,36 +82,51 @@ export default function ProductDetailPage() {
     alert('Contact functionality coming soon!');
   };
 
+  // Apply store theme colors
+  useEffect(() => {
+    if (storeSettings) {
+      const root = document.documentElement;
+      root.style.setProperty('--store-primary', storeSettings.primary_color || '#3B82F6');
+      root.style.setProperty('--store-secondary', storeSettings.secondary_color || '#1E40AF');
+      root.style.setProperty('--store-accent', storeSettings.accent_color || '#F59E0B');
+    }
+  }, [storeSettings]);
+
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+      <div className="min-h-screen flex items-center justify-center bg-ground">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-amber"></div>
       </div>
     );
   }
 
   if (error || !product) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-red-600">{error || 'Product not found'}</div>
+      <div className="min-h-screen flex items-center justify-center bg-ground">
+        <div className="text-red-400 text-center p-4">{error || 'Product not found'}</div>
       </div>
     );
   }
 
+  const primaryColor = storeSettings?.primary_color || '#3B82F6';
+  const secondaryColor = storeSettings?.secondary_color || '#1E40AF';
+  const accentColor = storeSettings?.accent_color || '#F59E0B';
+
   return (
     <>
       <Head>
-        <title>{product.name} - Storefront</title>
+        <title>{product.name} - {storeSettings?.store_name || 'Storefront'}</title>
         <meta name="description" content={product.description} />
+        <meta name="theme-color" content={primaryColor} />
       </Head>
 
-      <div className="min-h-screen bg-gray-50">
+      <div className="min-h-screen bg-ground" style={{ '--store-primary': primaryColor, '--store-secondary': secondaryColor, '--store-accent': accentColor }}>
         {/* Header */}
-        <header className="bg-white border-b sticky top-0 z-50">
+        <header className="bg-ground-secondary border-b hairline sticky top-0 z-50" style={{ borderColor: secondaryColor }}>
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
             <button
               onClick={() => router.back()}
-              className="flex items-center gap-2 text-gray-600 hover:text-gray-900 transition"
+              className="flex items-center gap-2 text-ink-secondary hover:text-amber transition"
             >
               <ArrowLeft className="h-5 w-5" />
               Back to Store
@@ -114,9 +140,10 @@ export default function ProductDetailPage() {
             <motion.div
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
-              className="bg-white rounded-xl shadow-sm overflow-hidden"
+              className="bg-ground-secondary border hairline rounded-xl shadow-sm overflow-hidden"
+              style={{ borderColor: secondaryColor }}
             >
-              <div className="aspect-square bg-gray-100">
+              <div className="aspect-square bg-ground">
                 {product.image_url ? (
                   <img
                     src={product.image_url}
@@ -124,7 +151,7 @@ export default function ProductDetailPage() {
                     className="w-full h-full object-cover"
                   />
                 ) : (
-                  <div className="w-full h-full flex items-center justify-center text-gray-400">
+                  <div className="w-full h-full flex items-center justify-center text-muted">
                     <ShoppingCart className="h-32 w-32" />
                   </div>
                 )}
@@ -138,17 +165,17 @@ export default function ProductDetailPage() {
               className="space-y-6"
             >
               <div>
-                <div className="text-sm text-gray-500 mb-2">{product.category}</div>
-                <h1 className="text-3xl font-bold text-gray-900 mb-4">
+                <div className="text-sm text-muted mb-2">{product.category}</div>
+                <h1 className="text-3xl font-bold text-ink mb-4">
                   {product.name}
                 </h1>
                 <div className="flex items-center gap-4">
-                  <div className="text-3xl font-bold text-blue-600">
-                    ${parseFloat(product.price).toFixed(2)}
+                  <div className="text-3xl font-bold" style={{ color: accentColor }}>
+                    {parseFloat(product.price).toFixed(2)} DA
                   </div>
                   <div className={`text-sm font-medium px-3 py-1 rounded-full ${
-                    product.stock > 10 ? 'bg-green-100 text-green-700' : 
-                    product.stock > 0 ? 'bg-yellow-100 text-yellow-700' : 'bg-red-100 text-red-700'
+                    product.stock > 10 ? 'bg-teal/10 text-teal' : 
+                    product.stock > 0 ? 'bg-amber/10 text-amber' : 'bg-red-400/10 text-red-400'
                   }`}>
                     {product.stock > 0 ? `${product.stock} in stock` : 'Out of stock'}
                   </div>
@@ -159,37 +186,40 @@ export default function ProductDetailPage() {
                 <button
                   onClick={handleContact}
                   disabled={product.stock === 0}
-                  className="flex-1 flex items-center justify-center gap-2 bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition disabled:bg-gray-400 disabled:cursor-not-allowed"
+                  className="flex-1 flex items-center justify-center gap-2 text-white py-3 rounded-lg transition disabled:opacity-50 disabled:cursor-not-allowed font-medium"
+                  style={{ backgroundColor: primaryColor }}
                 >
                   <Mail className="h-5 w-5" />
                   Contact Seller
                 </button>
                 <button
                   onClick={handleShare}
-                  className="p-3 border border-gray-300 rounded-lg hover:bg-gray-50 transition"
+                  className="p-3 border hairline rounded-lg hover:bg-ground/50 transition"
+                  style={{ borderColor: secondaryColor }}
                 >
-                  <Share2 className="h-5 w-5 text-gray-600" />
+                  <Share2 className="h-5 w-5 text-ink-secondary hover:text-amber transition-colors" />
                 </button>
-                <button className="p-3 border border-gray-300 rounded-lg hover:bg-gray-50 transition">
-                  <Heart className="h-5 w-5 text-gray-600" />
+                <button className="p-3 border hairline rounded-lg hover:bg-ground/50 transition" style={{ borderColor: secondaryColor }}>
+                  <Heart className="h-5 w-5 text-ink-secondary hover:text-red-400 transition-colors" />
                 </button>
               </div>
 
-              <div className="prose prose-gray">
-                <h3 className="text-lg font-semibold mb-2">Description</h3>
-                <p className="text-gray-600 leading-relaxed">
+              <div className="prose prose-invert max-w-none">
+                <h3 className="text-lg font-semibold mb-2 text-ink">Description</h3>
+                <p className="text-ink-secondary leading-relaxed">
                   {product.description || 'No description available.'}
                 </p>
               </div>
 
               {product.seo_keywords && product.seo_keywords.length > 0 && (
                 <div>
-                  <h3 className="text-sm font-semibold text-gray-500 mb-2">Tags</h3>
+                  <h3 className="text-sm font-semibold text-muted mb-2">Tags</h3>
                   <div className="flex flex-wrap gap-2">
                     {product.seo_keywords.map((keyword, index) => (
                       <span
                         key={index}
-                        className="px-3 py-1 bg-gray-100 text-gray-700 text-sm rounded-full"
+                        className="px-3 py-1 text-sm rounded-full border hairline"
+                        style={{ backgroundColor: primaryColor + '20', borderColor: primaryColor, color: primaryColor }}
                       >
                         {keyword}
                       </span>
@@ -203,7 +233,7 @@ export default function ProductDetailPage() {
           {/* Recommended Products */}
           {recommendedProducts.length > 0 && (
             <div>
-              <h2 className="text-2xl font-bold text-gray-900 mb-6">
+              <h2 className="text-2xl font-bold text-ink mb-6" style={{ color: primaryColor }}>
                 You might also like
               </h2>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -212,12 +242,22 @@ export default function ProductDetailPage() {
                     key={recommendedProduct.id}
                     product={recommendedProduct}
                     userId={userId}
+                    primaryColor={primaryColor}
+                    accentColor={accentColor}
                   />
                 ))}
               </div>
             </div>
           )}
         </main>
+
+        <footer className="bg-ground-secondary border-t hairline py-8 mt-12" style={{ borderColor: secondaryColor }}>
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            <p className="text-sm text-muted">
+              © 2026 {storeSettings?.store_name || 'Store'}. All rights reserved.
+            </p>
+          </div>
+        </footer>
       </div>
     </>
   );
