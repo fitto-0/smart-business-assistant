@@ -292,10 +292,10 @@ const translations = {
         tagline: "Your tagline here",
         description: "Describe your store...",
         email: "contact@store.com",
-        phone: "+213 5XX XX XX XX",
+        phone: "+212 XXX XX XX XX",
         address: "123 Main Street",
-        city: "Algiers",
-        country: "Algeria",
+        city: "Tagier",
+        country: "Morocco",
         domain: "store.example.com"
       },
       domain: {
@@ -1082,7 +1082,7 @@ const translations = {
         tagline: "Votre slogan ici",
         description: "Décrivez votre boutique...",
         email: "contact@boutique.com",
-        phone: "+213 5XX XX XX XX",
+        phone: "+212 XXX XX XX XX",
         address: "123 Rue Principale",
         city: "Alger",
         country: "Algérie",

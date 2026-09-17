@@ -8,13 +8,20 @@ export default function StorefrontHeader({ userId }) {
 
   const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
 
+  // Validate userId is a valid number
+  const validUserId = userId && !isNaN(parseInt(userId)) ? parseInt(userId) : null;
+
   useEffect(() => {
-    fetchStoreInfo();
-  }, [userId]);
+    if (validUserId) {
+      fetchStoreInfo();
+    } else {
+      setLoading(false);
+    }
+  }, [validUserId]);
 
   const fetchStoreInfo = async () => {
     try {
-      const response = await axios.get(`${API_URL}/api/store-settings/public/${userId}`);
+      const response = await axios.get(`${API_URL}/api/store-settings/public/${validUserId}`);
       setStoreInfo(response.data);
     } catch (err) {
       console.error('Error fetching store info:', err);

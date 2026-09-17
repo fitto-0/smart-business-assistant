@@ -9,7 +9,8 @@ import {
   Image, Link, Upload, Trash2, Zap, Shield,
 } from "lucide-react";
 import toast from "react-hot-toast";
-import { apiGet, apiPut } from "../../lib/api";
+import { apiGet, apiPost, apiPut } from "../../lib/api";
+import { getUser } from "../../lib/auth";
 import { useLanguage } from "../../lib/LanguageContext";
 import Layout from "../../components/Layout";
 
@@ -17,6 +18,13 @@ const DEFAULT_COLORS = {
   primary: "#3B82F6",
   secondary: "#1E40AF",
   accent: "#F59E0B",
+};
+
+const API_ORIGIN = (process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api").replace(/\/api\/?$/, "");
+
+const getAssetUrl = (url) => {
+  if (!url) return "";
+  return url.startsWith("http") ? url : `${API_ORIGIN}${url}`;
 };
 
 export default function StorefrontCustomize() {
@@ -50,6 +58,7 @@ export default function StorefrontCustomize() {
   const [analyticsLoading, setAnalyticsLoading] = useState(false);
   const [previewMode, setPreviewMode] = useState(false);
   const [logoPreview, setLogoPreview] = useState(null);
+  const storefrontUserId = storeSettings.user_id || getUser()?.id;
 
   useEffect(() => {
     loadStoreSettings();
@@ -102,23 +111,10 @@ export default function StorefrontCustomize() {
       const formData = new FormData();
       formData.append("logo", file);
 
-      const token = localStorage.getItem("sba_token") || document.cookie.split("; ").find(row => row.startsWith("sba_token="))?.split("=")[1];
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000"}/api/store-settings/logo`, {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-        body: formData,
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || "Upload failed");
-      }
+      const data = await apiPost("/store-settings/logo", formData);
 
       setStoreSettings(prev => ({ ...prev, logo_url: data.logo_url }));
-      setLogoPreview(data.logo_url);
+      setLogoPreview(getAssetUrl(data.logo_url));
       toast.success(t("storefront.logoUploaded") || "Logo uploaded successfully");
     } catch (err) {
       toast.error(err.message || t("storefront.logoUploadFailed") || "Failed to upload logo");
@@ -221,7 +217,7 @@ export default function StorefrontCustomize() {
                 >
                   {storeSettings.logo_url || logoPreview ? (
                     <img
-                      src={`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000"}${storeSettings.logo_url || logoPreview}`}
+                      src={getAssetUrl(storeSettings.logo_url || logoPreview)}
                       alt="Logo preview"
                       className="w-full h-full object-cover rounded-lg"
                     />
@@ -401,7 +397,7 @@ export default function StorefrontCustomize() {
                   type="tel"
                   value={storeSettings.contact_phone}
                   onChange={(e) => handleChange("contact_phone", e.target.value)}
-                  placeholder={t("storefront.placeholders.phone") || "+213 5XX XX XX XX"}
+                  placeholder={t("storefront.placeholders.phone") || "+212 XXX XX XX XX"}
                   className="w-full bg-ground border hairline rounded-xl px-4 py-3 pl-10 text-ink placeholder-muted focus:outline-none focus:border-amber transition-colors"
                 />
               </div>
@@ -429,7 +425,7 @@ export default function StorefrontCustomize() {
                 type="text"
                 value={storeSettings.city}
                 onChange={(e) => handleChange("city", e.target.value)}
-                placeholder={t("storefront.placeholders.city") || "Algiers"}
+                placeholder={t("storefront.placeholders.city") || "Tangier"}
                 className="w-full bg-ground border hairline rounded-xl px-4 py-3 text-ink placeholder-muted focus:outline-none focus:border-amber transition-colors"
               />
             </div>
@@ -439,7 +435,7 @@ export default function StorefrontCustomize() {
                 type="text"
                 value={storeSettings.country}
                 onChange={(e) => handleChange("country", e.target.value)}
-                placeholder={t("storefront.placeholders.country") || "Algeria"}
+                placeholder={t("storefront.placeholders.country") || "Morocco"}
                 className="w-full bg-ground border hairline rounded-xl px-4 py-3 text-ink placeholder-muted focus:outline-none focus:border-amber transition-colors"
               />
             </div>
@@ -525,20 +521,20 @@ export default function StorefrontCustomize() {
               <span className="bg-ground border hairline rounded-xl px-4 py-3 font-mono text-sm text-amber flex-1 min-w-[250px] text-center">
                 {storeSettings.custom_domain && storeSettings.domain_verified
                   ? `https://${storeSettings.custom_domain}`
-                  : `${window.location.origin}/storefront/{userId}`}
+                  : `${window.location.origin}/storefront/${storefrontUserId}`}
               </span>
               <button
                 className="portal-pill-btn"
                 onClick={() => navigator.clipboard.writeText(
                   storeSettings.custom_domain && storeSettings.domain_verified
                     ? `https://${storeSettings.custom_domain}`
-                    : `${window.location.origin}/storefront/{userId}`
+                    : `${window.location.origin}/storefront/${storefrontUserId}`
                 )}
               >
                 <Copy size={16} /> {t("storefront.copyUrl") || "Copy URL"}
               </button>
               <a
-                href={storeSettings.custom_domain && storeSettings.domain_verified ? `https://${storeSettings.custom_domain}` : `/storefront/{userId}`}
+                href={storeSettings.custom_domain && storeSettings.domain_verified ? `https://${storeSettings.custom_domain}` : `/storefront/${storefrontUserId}`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="portal-pill-btn"
@@ -565,7 +561,7 @@ export default function StorefrontCustomize() {
             { field: "facebook_url", label: "Facebook", icon: "📘", placeholder: "https://facebook.com/yourstore" },
             { field: "instagram_url", label: "Instagram", icon: "📷", placeholder: "https://instagram.com/yourstore" },
             { field: "twitter_url", label: "Twitter/X", icon: "🐦", placeholder: "https://twitter.com/yourstore" },
-            { field: "whatsapp_number", label: "WhatsApp", icon: "💬", placeholder: "+213 5XX XX XX XX" },
+            { field: "whatsapp_number", label: "WhatsApp", icon: "💬", placeholder: "+212 XXX XX XX XX" },
           ].map((social) => (
             <div key={social.field} className="flex items-center gap-4 p-4 bg-ground/50 border hairline rounded-xl">
               <span className="text-2xl w-12 text-center">{social.icon}</span>
@@ -740,7 +736,7 @@ export default function StorefrontCustomize() {
             <div className="flex items-center gap-3">
               {storeSettings.logo_url && (
                 <img
-                  src={`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000"}${storeSettings.logo_url}`}
+                  src={getAssetUrl(storeSettings.logo_url)}
                   alt={storeSettings.store_name}
                   className="w-10 h-10 rounded-lg object-cover"
                 />
