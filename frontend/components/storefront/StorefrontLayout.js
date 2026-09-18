@@ -16,6 +16,7 @@ import {
   MapPin,
   ArrowRight,
   ChevronDown,
+  ChevronRight,
   Sun,
   Moon,
 } from "lucide-react";
@@ -38,6 +39,15 @@ export default function StorefrontLayout({
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [cartOpen, setCartOpen] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
+
+  // Responsive breakpoint detection
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 768);
+    checkMobile();
+    window.addEventListener("resize", checkMobile);
+    return () => window.removeEventListener("resize", checkMobile);
+  }, []);
   const [cartItems, setCartItems] = useState([]);
 
   const primaryColor = storeSettings?.primary_color || "#3B82F6";
@@ -476,7 +486,7 @@ export default function StorefrontLayout({
 
         {/* Mobile Menu */}
         {mobileMenuOpen && (
-          <div className="md:hidden fixed inset-0 z-40 bg-white animate-slide-in">
+          <div className="md:hidden fixed inset-0 z-40 bg-white animate-slide-in flex flex-col">
             <div className="p-4 border-b" style={{ borderColor: borderColor }}>
               <button
                 onClick={() => setMobileMenuOpen(false)}
@@ -485,7 +495,7 @@ export default function StorefrontLayout({
                 <X size={24} />
               </button>
             </div>
-            <nav className="p-4 space-y-2">
+            <nav className="p-4 space-y-2 flex-1 overflow-y-auto">
               {navLinks.map((link) => (
                 <Link
                   key={link.href}
@@ -504,6 +514,63 @@ export default function StorefrontLayout({
                   {link.label}
                 </Link>
               ))}
+              
+              {/* Categories in Mobile Menu */}
+              {storeSettings?.show_categories_page !== false && (
+                <div className="pt-4 border-t" style={{ borderColor: borderColor }}>
+                  <h3 className="px-4 pb-2 font-semibold text-sm uppercase tracking-wide" style={{ color: textSecondaryColor }}>
+                    Categories
+                  </h3>
+                  <div className="space-y-1">
+                    {[
+                      { label: 'All Products', href: `/storefront/${userId}/products` },
+                      { label: 'New Arrivals', href: `/storefront/${userId}/products?sort=newest` },
+                      { label: 'Best Sellers', href: `/storefront/${userId}/products?sort=popular` },
+                      { label: 'On Sale', href: `/storefront/${userId}/products?sale=true` },
+                    ].map((cat) => (
+                      <Link
+                        key={cat.href}
+                        href={cat.href}
+                        onClick={() => setMobileMenuOpen(false)}
+                        className="block py-2 px-4 rounded-lg text-sm transition-colors hover:bg-gray-100"
+                        style={{ color: textColor }}
+                      >
+                        {cat.label}
+                      </Link>
+                    ))}
+                  </div>
+                </div>
+              )}
+              
+              {/* Account Links in Mobile Menu */}
+              <div className="pt-4 border-t" style={{ borderColor: borderColor }}>
+                <Link
+                  href={`/storefront/${userId}/wishlist`}
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="block py-3 px-4 rounded-lg font-medium transition-colors text-[${textColor}] hover:bg-gray-100"
+                >
+                  <Heart size={20} className="inline mr-2" /> Wishlist
+                </Link>
+                <Link
+                  href={`/storefront/${userId}/cart`}
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="block py-3 px-4 rounded-lg font-medium transition-colors relative text-[${textColor}] hover:bg-gray-100"
+                >
+                  <ShoppingBag size={20} className="inline mr-2" /> Cart
+                  {cartCount > 0 && (
+                    <span className="absolute -top-1 -right-1 w-5 h-5 rounded-full text-xs flex items-center justify-center font-bold text-white" style={{ backgroundColor: accentColor }}>
+                      {cartCount > 99 ? '99+' : cartCount}
+                    </span>
+                  )}
+                </Link>
+                <Link
+                  href={`/storefront/${userId}/account`}
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="block py-3 px-4 rounded-lg font-medium transition-colors text-[${textColor}] hover:bg-gray-100"
+                >
+                  <User size={20} className="inline mr-2" /> Account
+                </Link>
+              </div>
             </nav>
           </div>
         )}

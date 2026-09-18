@@ -109,7 +109,7 @@ export default function ProfilePage() {
       const formData = new FormData();
       formData.append('avatar', file);
 
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'}/api/auth/upload-avatar`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api'}/auth/upload-avatar`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${Cookies.get('sba_token')}`,
