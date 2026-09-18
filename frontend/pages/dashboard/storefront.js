@@ -292,21 +292,21 @@ export default function StorefrontCustomize() {
 
   const renderBrandingTab = () => (
     <div className="space-y-6">
-      <div className="bg-ground-secondary border hairline rounded-xl p-6">
+      <div className="bg-ground-secondary border hairline rounded-xl p-4 sm:p-6">
         <h3 className="portal-heading text-lg mb-6 flex items-center gap-2">
           <Palette size={20} className="text-amber" />
           {t("storefront.sections.visualIdentity") || "Visual Identity"}
         </h3>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div className="md:col-span-1">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="lg:col-span-1">
             <label className="block portal-label mb-3">
               {t("storefront.fields.logo") || "Store Logo"}
             </label>
-            <div className="space-y-3">
+            <div className="space-y-3 max-w-xs w-full mx-auto lg:mx-0">
               <div className="relative">
                 <div
-                  className="w-full aspect-square bg-ground border-2 border-dashed hairline rounded-xl flex items-center justify-center cursor-pointer hover:border-amber/50 transition-colors"
+                  className="w-full aspect-square max-h-64 bg-ground border-2 border-dashed hairline rounded-xl flex items-center justify-center cursor-pointer hover:border-amber/50 transition-colors overflow-hidden p-2 text-center"
                   onClick={() =>
                     document.getElementById("logo-upload")?.click()
                   }
@@ -350,7 +350,7 @@ export default function StorefrontCustomize() {
             </div>
           </div>
 
-          <div className="md:col-span-2 space-y-6">
+          <div className="lg:col-span-2 space-y-6 min-w-0">
             <div>
               <label className="block portal-label mb-3">
                 {t("storefront.fields.storeName") || "Store Name"}
@@ -381,19 +381,19 @@ export default function StorefrontCustomize() {
               />
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
+              <div className="min-w-0">
                 <label className="block portal-label mb-2">
                   {t("storefront.fields.primaryColor") || "Primary Color"}
                 </label>
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-2 sm:gap-3 min-w-0">
                   <input
                     type="color"
                     value={storeSettings.primary_color}
                     onChange={(e) =>
                       handleChange("primary_color", e.target.value)
                     }
-                    className="w-12 h-12 rounded-lg border hairline cursor-pointer p-1"
+                    className="w-11 h-11 sm:w-12 sm:h-12 rounded-lg border hairline cursor-pointer p-1 shrink-0"
                     title={t("storefront.fields.primaryColor")}
                   />
                   <input
@@ -402,22 +402,22 @@ export default function StorefrontCustomize() {
                     onChange={(e) =>
                       handleChange("primary_color", e.target.value)
                     }
-                    className="flex-1 bg-ground border hairline rounded-xl px-4 py-3 text-ink uppercase font-mono text-sm focus:outline-none focus:border-amber transition-colors"
+                    className="flex-1 min-w-0 bg-ground border hairline rounded-xl px-3 sm:px-4 py-3 text-ink uppercase font-mono text-sm focus:outline-none focus:border-amber transition-colors"
                   />
                 </div>
               </div>
-              <div>
+              <div className="min-w-0">
                 <label className="block portal-label mb-2">
                   {t("storefront.fields.secondaryColor") || "Secondary Color"}
                 </label>
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-2 sm:gap-3 min-w-0">
                   <input
                     type="color"
                     value={storeSettings.secondary_color}
                     onChange={(e) =>
                       handleChange("secondary_color", e.target.value)
                     }
-                    className="w-12 h-12 rounded-lg border hairline cursor-pointer p-1"
+                    className="w-11 h-11 sm:w-12 sm:h-12 rounded-lg border hairline cursor-pointer p-1 shrink-0"
                     title={t("storefront.fields.secondaryColor")}
                   />
                   <input
@@ -426,22 +426,22 @@ export default function StorefrontCustomize() {
                     onChange={(e) =>
                       handleChange("secondary_color", e.target.value)
                     }
-                    className="flex-1 bg-ground border hairline rounded-xl px-4 py-3 text-ink uppercase font-mono text-sm focus:outline-none focus:border-amber transition-colors"
+                    className="flex-1 min-w-0 bg-ground border hairline rounded-xl px-3 sm:px-4 py-3 text-ink uppercase font-mono text-sm focus:outline-none focus:border-amber transition-colors"
                   />
                 </div>
               </div>
-              <div>
+              <div className="min-w-0 sm:col-span-2 xl:col-span-1">
                 <label className="block portal-label mb-2">
                   {t("storefront.fields.accentColor") || "Accent Color"}
                 </label>
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-2 sm:gap-3 min-w-0">
                   <input
                     type="color"
                     value={storeSettings.accent_color}
                     onChange={(e) =>
                       handleChange("accent_color", e.target.value)
                     }
-                    className="w-12 h-12 rounded-lg border hairline cursor-pointer p-1"
+                    className="w-11 h-11 sm:w-12 sm:h-12 rounded-lg border hairline cursor-pointer p-1 shrink-0"
                     title={t("storefront.fields.accentColor")}
                   />
                   <input
@@ -450,7 +450,7 @@ export default function StorefrontCustomize() {
                     onChange={(e) =>
                       handleChange("accent_color", e.target.value)
                     }
-                    className="flex-1 bg-ground border hairline rounded-xl px-4 py-3 text-ink uppercase font-mono text-sm focus:outline-none focus:border-amber transition-colors"
+                    className="flex-1 min-w-0 bg-ground border hairline rounded-xl px-3 sm:px-4 py-3 text-ink uppercase font-mono text-sm focus:outline-none focus:border-amber transition-colors"
                   />
                 </div>
               </div>
@@ -459,36 +459,36 @@ export default function StorefrontCustomize() {
         </div>
       </div>
 
-      <div className="bg-ground-secondary border hairline rounded-xl p-6">
+      <div className="bg-ground-secondary border hairline rounded-xl p-4 sm:p-6">
         <h3 className="portal-heading text-lg mb-6 flex items-center gap-2">
           <Zap size={20} className="text-amber" />
           {t("storefront.sections.colorPreview") || "Color Preview"}
         </h3>
-        <div className="flex flex-wrap gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <div
-            className="flex-1 min-w-[200px] p-6 rounded-xl flex flex-col items-center justify-center"
+            className="p-4 sm:p-6 rounded-xl flex flex-col items-center justify-center min-w-0 break-all"
             style={{ backgroundColor: storeSettings.primary_color }}
           >
             <span className="text-white font-semibold text-lg">Primary</span>
-            <span className="text-white/80 text-sm font-mono">
+            <span className="text-white/80 text-sm font-mono break-all">
               {storeSettings.primary_color}
             </span>
           </div>
           <div
-            className="flex-1 min-w-[200px] p-6 rounded-xl flex flex-col items-center justify-center"
+            className="p-4 sm:p-6 rounded-xl flex flex-col items-center justify-center min-w-0 break-all"
             style={{ backgroundColor: storeSettings.secondary_color }}
           >
             <span className="text-white font-semibold text-lg">Secondary</span>
-            <span className="text-white/80 text-sm font-mono">
+            <span className="text-white/80 text-sm font-mono break-all">
               {storeSettings.secondary_color}
             </span>
           </div>
           <div
-            className="flex-1 min-w-[200px] p-6 rounded-xl flex flex-col items-center justify-center"
+            className="p-4 sm:p-6 rounded-xl flex flex-col items-center justify-center min-w-0 break-all"
             style={{ backgroundColor: storeSettings.accent_color }}
           >
             <span className="text-white font-semibold text-lg">Accent</span>
-            <span className="text-white/80 text-sm font-mono">
+            <span className="text-white/80 text-sm font-mono break-all">
               {storeSettings.accent_color}
             </span>
           </div>
@@ -499,7 +499,7 @@ export default function StorefrontCustomize() {
 
   const renderInfoTab = () => (
     <div className="space-y-6">
-      <div className="bg-ground-secondary border hairline rounded-xl p-6">
+      <div className="bg-ground-secondary border hairline rounded-xl p-4 sm:p-6">
         <h3 className="portal-heading text-lg mb-6 flex items-center gap-2">
           <Settings size={20} className="text-amber" />
           {t("storefront.sections.storeDetails") || "Store Details"}
@@ -639,25 +639,25 @@ export default function StorefrontCustomize() {
 
     return (
       <div className="space-y-6">
-        <div className="bg-ground-secondary border hairline rounded-xl p-6">
+        <div className="bg-ground-secondary border hairline rounded-xl p-4 sm:p-6">
           <h3 className="portal-heading text-lg mb-6 flex items-center gap-2">
             <Palette size={20} className="text-amber" /> Storefront surfaces
           </h3>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5">
             {colors.map(([field, label]) => (
-              <label key={field} className="block">
+              <label key={field} className="block min-w-0">
                 <span className="portal-label block mb-2">{label}</span>
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-2 sm:gap-3 min-w-0">
                   <input
                     type="color"
                     value={storeSettings[field] || "#FFFFFF"}
                     onChange={(e) => handleChange(field, e.target.value)}
-                    className="w-11 h-11 rounded-lg border hairline cursor-pointer p-1"
+                    className="w-11 h-11 rounded-lg border hairline cursor-pointer p-1 shrink-0"
                   />
                   <input
                     value={storeSettings[field] || ""}
                     onChange={(e) => handleChange(field, e.target.value)}
-                    className="flex-1 bg-ground border hairline rounded-xl px-3 py-2.5 text-ink uppercase font-mono text-sm"
+                    className="flex-1 min-w-0 bg-ground border hairline rounded-xl px-3 py-2.5 text-ink uppercase font-mono text-sm"
                     placeholder="#FFFFFF"
                   />
                 </div>
@@ -666,9 +666,9 @@ export default function StorefrontCustomize() {
           </div>
         </div>
 
-        <div className="bg-ground-secondary border hairline rounded-xl p-6">
+        <div className="bg-ground-secondary border hairline rounded-xl p-4 sm:p-6">
           <h3 className="portal-heading text-lg mb-6">Background and layout</h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-5">
             <label className="block">
               <span className="portal-label block mb-2">Background type</span>
               <select
@@ -787,13 +787,13 @@ export default function StorefrontCustomize() {
 
     return (
       <div className="space-y-6">
-        <div className="bg-ground-secondary border hairline rounded-xl p-6">
+        <div className="bg-ground-secondary border hairline rounded-xl p-4 sm:p-6">
           <h3 className="portal-heading text-lg mb-2">Storefront copy</h3>
           <p className="portal-label text-muted mb-6">
             Replace the default labels shown across your public store. Leave a
             field blank to use the default.
           </p>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-5">
             {fields.map(([field, label]) => (
               <label key={field} className="block">
                 <span className="portal-label block mb-2">{label}</span>
@@ -807,7 +807,7 @@ export default function StorefrontCustomize() {
           </div>
         </div>
 
-        <div className="bg-ground-secondary border hairline rounded-xl p-6">
+        <div className="bg-ground-secondary border hairline rounded-xl p-4 sm:p-6">
           <h3 className="portal-heading text-lg mb-2">Home page content</h3>
           <div className="space-y-5">
             <label className="block">
@@ -827,7 +827,7 @@ export default function StorefrontCustomize() {
                 className="w-full bg-ground border hairline rounded-xl px-3 py-2.5 text-ink"
               />
             </label>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-5">
               <label className="block">
                 <span className="portal-label block mb-2">
                   Hero button text
@@ -859,7 +859,7 @@ export default function StorefrontCustomize() {
 
   const renderDomainTab = () => (
     <div className="space-y-6">
-      <div className="bg-ground-secondary border hairline rounded-xl p-6">
+      <div className="bg-ground-secondary border hairline rounded-xl p-4 sm:p-6">
         <h3 className="portal-heading text-lg mb-6 flex items-center gap-2">
           <Globe size={20} className="text-amber" />
           {t("storefront.sections.customDomain") || "Custom Domain"}
@@ -891,8 +891,8 @@ export default function StorefrontCustomize() {
             </p>
           </div>
 
-          <div className="flex items-center gap-4 p-4 bg-ground/50 border hairline rounded-xl">
-            <div className="flex-1">
+          <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 p-4 bg-ground/50 border hairline rounded-xl">
+            <div className="flex-1 min-w-0">
               <p className="portal-label font-semibold text-ink">
                 {t("storefront.domain.status") || "Domain Status"}
               </p>
@@ -905,7 +905,10 @@ export default function StorefrontCustomize() {
               </p>
             </div>
             {storeSettings.custom_domain && !storeSettings.domain_verified && (
-              <button onClick={handleDomainVerify} className="portal-pill-btn">
+              <button
+                onClick={handleDomainVerify}
+                className="portal-pill-btn w-full sm:w-auto justify-center shrink-0"
+              >
                 <Shield size={16} />{" "}
                 {t("storefront.domain.verify") || "Verify Domain"}
               </button>
@@ -932,12 +935,12 @@ export default function StorefrontCustomize() {
                 <p>
                   {t("storefront.domain.dnsStep2") || "2. Add a CNAME record:"}
                 </p>
-                <div className="bg-ground border hairline rounded-lg p-3 font-mono text-amber ml-4">
+                <div className="bg-ground border hairline rounded-lg p-3 font-mono text-amber text-xs sm:text-sm break-all overflow-x-auto">
                   {t("storefront.domain.cnameLabel") || "Name"}:{" "}
                   <strong>@</strong> or <strong>www</strong>
                   <br />
                   {t("storefront.domain.cnameTarget") || "Target"}:{" "}
-                  <strong>{window.location.hostname}</strong>
+                  <strong className="break-all">{window.location.hostname}</strong>
                 </div>
                 <p>
                   {t("storefront.domain.dnsStep3") ||
@@ -955,37 +958,40 @@ export default function StorefrontCustomize() {
             <h4 className="portal-label font-semibold mb-3">
               {t("storefront.sections.storefrontUrl") || "Your Storefront URL"}
             </h4>
-            <div className="flex items-center gap-3 flex-wrap">
-              <span className="bg-ground border hairline rounded-xl px-4 py-3 font-mono text-sm text-amber flex-1 min-w-[250px] text-center">
+            <div className="flex flex-col sm:flex-row sm:items-center gap-3">
+              <span className="bg-ground border hairline rounded-xl px-4 py-3 font-mono text-xs sm:text-sm text-amber w-full sm:flex-1 min-w-0 text-center break-all">
                 {storeSettings.custom_domain && storeSettings.domain_verified
                   ? `https://${storeSettings.custom_domain}`
                   : `${window.location.origin}/storefront/${storefrontUserId}`}
               </span>
-              <button
-                className="portal-pill-btn"
-                onClick={() =>
-                  navigator.clipboard.writeText(
+              <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 w-full sm:w-auto">
+                <button
+                  className="portal-pill-btn justify-center"
+                  onClick={() =>
+                    navigator.clipboard.writeText(
+                      storeSettings.custom_domain &&
+                        storeSettings.domain_verified
+                        ? `https://${storeSettings.custom_domain}`
+                        : `${window.location.origin}/storefront/${storefrontUserId}`,
+                    )
+                  }
+                >
+                  <Copy size={16} /> {t("storefront.copyUrl") || "Copy URL"}
+                </button>
+                <a
+                  href={
                     storeSettings.custom_domain && storeSettings.domain_verified
                       ? `https://${storeSettings.custom_domain}`
-                      : `${window.location.origin}/storefront/${storefrontUserId}`,
-                  )
-                }
-              >
-                <Copy size={16} /> {t("storefront.copyUrl") || "Copy URL"}
-              </button>
-              <a
-                href={
-                  storeSettings.custom_domain && storeSettings.domain_verified
-                    ? `https://${storeSettings.custom_domain}`
-                    : `/storefront/${storefrontUserId}`
-                }
-                target="_blank"
-                rel="noopener noreferrer"
-                className="portal-pill-btn"
-              >
-                <ExternalLink size={16} />{" "}
-                {t("storefront.visitStore") || "Visit Store"}
-              </a>
+                      : `/storefront/${storefrontUserId}`
+                  }
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="portal-pill-btn justify-center"
+                >
+                  <ExternalLink size={16} />{" "}
+                  {t("storefront.visitStore") || "Visit Store"}
+                </a>
+              </div>
             </div>
           </div>
         </div>
@@ -995,7 +1001,7 @@ export default function StorefrontCustomize() {
 
   const renderSocialTab = () => (
     <div className="space-y-6">
-      <div className="bg-ground-secondary border hairline rounded-xl p-6">
+      <div className="bg-ground-secondary border hairline rounded-xl p-4 sm:p-6">
         <h3 className="portal-heading text-lg mb-6 flex items-center gap-2">
           <MessageCircle size={20} className="text-amber" />
           {t("storefront.sections.socialLinks") || "Social Media Links"}
@@ -1030,10 +1036,12 @@ export default function StorefrontCustomize() {
           ].map((social) => (
             <div
               key={social.field}
-              className="flex items-center gap-4 p-4 bg-ground/50 border hairline rounded-xl"
+              className="flex items-start sm:items-center gap-3 sm:gap-4 p-3 sm:p-4 bg-ground/50 border hairline rounded-xl min-w-0"
             >
-              <span className="text-2xl w-12 text-center">{social.icon}</span>
-              <div className="flex-1">
+              <span className="text-2xl w-10 sm:w-12 text-center shrink-0 pt-6 sm:pt-0">
+                {social.icon}
+              </span>
+              <div className="flex-1 min-w-0">
                 <label className="block portal-label mb-1">
                   {social.label}
                 </label>
@@ -1055,7 +1063,7 @@ export default function StorefrontCustomize() {
   const renderAnalyticsTab = () => {
     if (analyticsLoading) {
       return (
-        <div className="bg-ground-secondary border hairline rounded-xl p-8 text-center">
+        <div className="bg-ground-secondary border hairline rounded-xl p-6 sm:p-8 text-center">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-amber mx-auto mb-4"></div>
           <p className="portal-label">
             {t("storefront.loadingAnalytics") || "Loading analytics..."}
@@ -1066,7 +1074,7 @@ export default function StorefrontCustomize() {
 
     if (!analytics) {
       return (
-        <div className="bg-ground-secondary border hairline rounded-xl p-8 text-center">
+        <div className="bg-ground-secondary border hairline rounded-xl p-6 sm:p-8 text-center">
           <p className="portal-label text-muted">
             {t("storefront.noAnalytics") || "No analytics data available yet"}
           </p>
@@ -1079,12 +1087,12 @@ export default function StorefrontCustomize() {
     return (
       <div className="space-y-6">
         <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
-          <div className="bg-ground-secondary border hairline rounded-xl p-5">
-            <div className="flex items-center gap-4">
-              <div className="w-12 h-12 bg-amber/15 rounded-xl flex items-center justify-center">
+          <div className="bg-ground-secondary border hairline rounded-xl p-4 sm:p-5">
+            <div className="flex items-center gap-3 sm:gap-4 min-w-0">
+              <div className="w-12 h-12 bg-amber/15 rounded-xl flex items-center justify-center shrink-0">
                 <Package size={20} className="text-amber" />
               </div>
-              <div>
+              <div className="min-w-0">
                 <p className="portal-label text-muted">
                   {t("storefront.analytics.totalProducts") || "Total Products"}
                 </p>
@@ -1101,12 +1109,12 @@ export default function StorefrontCustomize() {
             </div>
           </div>
 
-          <div className="bg-ground-secondary border hairline rounded-xl p-5">
-            <div className="flex items-center gap-4">
-              <div className="w-12 h-12 bg-teal/15 rounded-xl flex items-center justify-center">
+          <div className="bg-ground-secondary border hairline rounded-xl p-4 sm:p-5">
+            <div className="flex items-center gap-3 sm:gap-4 min-w-0">
+              <div className="w-12 h-12 bg-teal/15 rounded-xl flex items-center justify-center shrink-0">
                 <Star size={20} className="text-teal" />
               </div>
-              <div>
+              <div className="min-w-0">
                 <p className="portal-label text-muted">
                   {t("storefront.analytics.totalReviews") || "Total Reviews"}
                 </p>
@@ -1121,12 +1129,12 @@ export default function StorefrontCustomize() {
             </div>
           </div>
 
-          <div className="bg-ground-secondary border hairline rounded-xl p-5">
-            <div className="flex items-center gap-4">
-              <div className="w-12 h-12 bg-purple/15 rounded-xl flex items-center justify-center">
+          <div className="bg-ground-secondary border hairline rounded-xl p-4 sm:p-5">
+            <div className="flex items-center gap-3 sm:gap-4 min-w-0">
+              <div className="w-12 h-12 bg-purple/15 rounded-xl flex items-center justify-center shrink-0">
                 <BarChart3 size={20} className="text-purple-400" />
               </div>
-              <div>
+              <div className="min-w-0">
                 <p className="portal-label text-muted">
                   {t("storefront.analytics.categories") || "Categories"}
                 </p>
@@ -1141,12 +1149,12 @@ export default function StorefrontCustomize() {
             </div>
           </div>
 
-          <div className="bg-ground-secondary border hairline rounded-xl p-5">
-            <div className="flex items-center gap-4">
-              <div className="w-12 h-12 bg-pink/15 rounded-xl flex items-center justify-center">
+          <div className="bg-ground-secondary border hairline rounded-xl p-4 sm:p-5">
+            <div className="flex items-center gap-3 sm:gap-4 min-w-0">
+              <div className="w-12 h-12 bg-pink/15 rounded-xl flex items-center justify-center shrink-0">
                 <TrendingUp size={20} className="text-pink-400" />
               </div>
-              <div>
+              <div className="min-w-0">
                 <p className="portal-label text-muted">
                   {t("storefront.analytics.topProducts") || "Top Products"}
                 </p>
@@ -1162,7 +1170,7 @@ export default function StorefrontCustomize() {
         </div>
 
         {categories && categories.length > 0 && (
-          <div className="bg-ground-secondary border hairline rounded-xl p-5">
+          <div className="bg-ground-secondary border hairline rounded-xl p-4 sm:p-5">
             <h3 className="portal-heading text-base mb-4">
               {t("storefront.analytics.productsByCategory") ||
                 "Products by Category"}
@@ -1171,12 +1179,12 @@ export default function StorefrontCustomize() {
               {categories.map((cat, i) => (
                 <div
                   key={i}
-                  className="flex items-center justify-between p-3 bg-ground/50 border hairline rounded-lg"
+                  className="flex items-center justify-between gap-3 p-3 bg-ground/50 border hairline rounded-lg min-w-0"
                 >
-                  <span className="portal-label font-medium">
+                  <span className="portal-label font-medium truncate min-w-0">
                     {cat.category}
                   </span>
-                  <span className="portal-heading font-bold text-amber">
+                  <span className="portal-heading font-bold text-amber text-sm sm:text-base text-right shrink-0">
                     {cat.count}{" "}
                     {t("storefront.analytics.products") || "products"}
                   </span>
@@ -1187,7 +1195,7 @@ export default function StorefrontCustomize() {
         )}
 
         {top_products && top_products.length > 0 && (
-          <div className="bg-ground-secondary border hairline rounded-xl p-5">
+          <div className="bg-ground-secondary border hairline rounded-xl p-4 sm:p-5">
             <h3 className="portal-heading text-base mb-4">
               {t("storefront.analytics.topProductsList") ||
                 "Top Performing Products"}
@@ -1196,9 +1204,9 @@ export default function StorefrontCustomize() {
               {top_products.map((product, i) => (
                 <div
                   key={product.id}
-                  className="flex items-center gap-4 p-3 bg-ground/50 border hairline rounded-lg"
+                  className="flex items-center gap-3 p-3 bg-ground/50 border hairline rounded-lg min-w-0"
                 >
-                  <span className="w-8 h-8 bg-amber/15 text-amber rounded-lg flex items-center justify-center font-bold text-sm">
+                  <span className="w-8 h-8 bg-amber/15 text-amber rounded-lg flex items-center justify-center font-bold text-sm shrink-0">
                     {i + 1}
                   </span>
                   <div className="flex-1 min-w-0">
@@ -1209,8 +1217,8 @@ export default function StorefrontCustomize() {
                       {product.sold} {t("storefront.analytics.sold") || "sold"}
                     </p>
                   </div>
-                  <div className="text-right">
-                    <p className="portal-heading font-bold text-ink">
+                  <div className="text-right shrink-0">
+                    <p className="portal-heading font-bold text-ink text-sm sm:text-base whitespace-nowrap">
                       {product.revenue} DA
                     </p>
                   </div>
@@ -1220,12 +1228,15 @@ export default function StorefrontCustomize() {
           </div>
         )}
 
-        <div className="flex gap-3">
-          <button onClick={loadAnalytics} className="portal-pill-btn">
+        <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
+          <button
+            onClick={loadAnalytics}
+            className="portal-pill-btn justify-center"
+          >
             <RefreshCw size={16} />{" "}
             {t("storefront.refreshAnalytics") || "Refresh Analytics"}
           </button>
-          <a href="/reports" className="portal-pill-btn">
+          <a href="/reports" className="portal-pill-btn justify-center">
             <BarChart3 size={16} />{" "}
             {t("storefront.viewFullReports") || "View Full Reports"}
           </a>
@@ -1236,13 +1247,13 @@ export default function StorefrontCustomize() {
 
   const renderPreviewTab = () => (
     <div className="space-y-6">
-      <div className="bg-ground-secondary border hairline rounded-xl p-6">
-        <div className="flex items-center justify-between mb-6">
+      <div className="bg-ground-secondary border hairline rounded-xl p-4 sm:p-6">
+        <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:justify-between mb-6">
           <h3 className="portal-heading text-lg flex items-center gap-2">
-            <Eye size={20} className="text-amber" />
+            <Eye size={20} className="text-amber shrink-0" />
             {t("storefront.sections.livePreview") || "Live Preview"}
           </h3>
-          <label className="flex items-center gap-2 cursor-pointer">
+          <label className="flex items-center gap-2 cursor-pointer shrink-0">
             <input
               type="checkbox"
               checked={previewMode}
@@ -1289,21 +1300,21 @@ export default function StorefrontCustomize() {
             </div>
           </div>
 
-          <div className="p-6">
+          <div className="p-4 sm:p-6 min-w-0">
             {storeSettings.description && (
-              <p className="portal-text mb-6 text-ink-secondary">
+              <p className="portal-text mb-6 text-ink-secondary break-words">
                 {storeSettings.description}
               </p>
             )}
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 mb-6">
               {storeSettings.contact_email && (
                 <a
                   href={`mailto:${storeSettings.contact_email}`}
-                  className="flex items-center gap-2 p-3 bg-ground-secondary border hairline rounded-lg hover:border-amber/50 transition-colors"
+                  className="flex items-center gap-2 p-3 bg-ground-secondary border hairline rounded-lg hover:border-amber/50 transition-colors min-w-0"
                 >
-                  <Mail size={18} className="text-amber" />
-                  <span className="portal-label text-ink">
+                  <Mail size={18} className="text-amber shrink-0" />
+                  <span className="portal-label text-ink truncate min-w-0">
                     {storeSettings.contact_email}
                   </span>
                 </a>
@@ -1311,18 +1322,18 @@ export default function StorefrontCustomize() {
               {storeSettings.contact_phone && (
                 <a
                   href={`tel:${storeSettings.contact_phone}`}
-                  className="flex items-center gap-2 p-3 bg-ground-secondary border hairline rounded-lg hover:border-amber/50 transition-colors"
+                  className="flex items-center gap-2 p-3 bg-ground-secondary border hairline rounded-lg hover:border-amber/50 transition-colors min-w-0"
                 >
-                  <Phone size={18} className="text-amber" />
-                  <span className="portal-label text-ink">
+                  <Phone size={18} className="text-amber shrink-0" />
+                  <span className="portal-label text-ink truncate min-w-0">
                     {storeSettings.contact_phone}
                   </span>
                 </a>
               )}
               {storeSettings.address && (
-                <div className="flex items-center gap-2 p-3 bg-ground-secondary border hairline rounded-lg">
-                  <MapPin size={18} className="text-amber" />
-                  <span className="portal-label text-ink">
+                <div className="flex items-center gap-2 p-3 bg-ground-secondary border hairline rounded-lg min-w-0 sm:col-span-2 lg:col-span-1">
+                  <MapPin size={18} className="text-amber shrink-0" />
+                  <span className="portal-label text-ink break-words min-w-0">
                     {storeSettings.address}, {storeSettings.city},{" "}
                     {storeSettings.country}
                   </span>
@@ -1330,7 +1341,7 @@ export default function StorefrontCustomize() {
               )}
             </div>
 
-            <div className="flex items-center gap-4 pt-4 border-t hairline">
+            <div className="flex items-center gap-3 sm:gap-4 pt-4 border-t hairline flex-wrap">
               {storeSettings.facebook_url && (
                 <a
                   href={storeSettings.facebook_url}
@@ -1415,12 +1426,14 @@ export default function StorefrontCustomize() {
         </title>
       </Head>
 
-      <div className="max-w-6xl mx-auto">
-        <div className="mb-6 flex items-center justify-between">
-          <div>
-            <h1 className="portal-heading text-2xl flex items-center gap-2">
-              <ShoppingBag size={28} className="text-amber" />
-              {t("storefront.title") || "Customize Your Store"}
+      <div className="max-w-6xl mx-auto w-full min-w-0">
+        <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <div className="min-w-0">
+            <h1 className="portal-heading text-xl sm:text-2xl flex items-center gap-2 flex-wrap">
+              <ShoppingBag size={28} className="text-amber shrink-0" />
+              <span className="break-words">
+                {t("storefront.title") || "Customize Your Store"}
+              </span>
             </h1>
             <p className="portal-label text-muted mt-1">
               {t("storefront.subtitle") ||
@@ -1430,7 +1443,7 @@ export default function StorefrontCustomize() {
           <button
             onClick={handleSave}
             disabled={saving}
-            className="portal-pill-btn"
+            className="portal-pill-btn w-full sm:w-auto justify-center shrink-0"
           >
             {saving ? (
               <>
@@ -1446,15 +1459,37 @@ export default function StorefrontCustomize() {
         </div>
 
         <div className="bg-ground-secondary border hairline rounded-xl overflow-hidden">
-          <div className="border-b hairline overflow-x-auto">
-            <nav className="flex gap-1 p-1 min-w-max" role="tablist">
+          <div className="border-b hairline">
+            {/* Mobile tab picker */}
+            <div className="p-3 sm:hidden">
+              <label htmlFor="storefront-tab-select" className="sr-only">
+                Select section
+              </label>
+              <select
+                id="storefront-tab-select"
+                value={activeTab}
+                onChange={(e) => setActiveTab(e.target.value)}
+                className="w-full bg-ground border hairline rounded-xl px-3 py-2.5 text-ink text-sm"
+              >
+                {tabs.map((tab) => (
+                  <option key={tab.id} value={tab.id}>
+                    {tab.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+            {/* Desktop / tablet scrollable tabs */}
+            <nav
+              className="hidden sm:flex gap-1 p-1.5 overflow-x-auto max-w-full"
+              role="tablist"
+            >
               {tabs.map((tab) => (
                 <button
                   key={tab.id}
                   role="tab"
                   aria-selected={activeTab === tab.id}
                   onClick={() => setActiveTab(tab.id)}
-                  className={`portal-nav-link flex items-center gap-2 px-4 py-3 rounded-lg transition-all duration-200 font-medium whitespace-nowrap ${
+                  className={`portal-nav-link flex items-center gap-2 px-3 lg:px-4 py-3 rounded-lg transition-all duration-200 font-medium whitespace-nowrap shrink-0 ${
                     activeTab === tab.id
                       ? "bg-amber/10 text-amber border hairline"
                       : "text-ink-secondary hover:text-ink hover:bg-ground/50"
@@ -1467,7 +1502,7 @@ export default function StorefrontCustomize() {
             </nav>
           </div>
 
-          <div className="p-6">{renderTabContent()}</div>
+          <div className="p-4 sm:p-6 min-w-0">{renderTabContent()}</div>
         </div>
       </div>
     </Layout>
