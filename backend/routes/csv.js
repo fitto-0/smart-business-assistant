@@ -1,216 +1,96 @@
-/**
- * Routes CSV - Upload, analyse et import de fichiers CSV via IA
- */
-
-const router = require("express").Router();
-const auth = require("../middleware/auth");
+const express = require("express");
 const multer = require("multer");
-const axios = require("axios");
-const FormData = require("form-data");
-const csvParser = require("csv-parser");
-const { Readable } = require("stream");
-const pool = require("../config/db");
+const router = express.Router();
+const auth = require("../middleware/auth");
+const ai = require("../lib/aiClient");
+const pool = require("../db/pool");
 
-// Configuration de multer pour le stockage en mémoire
-const upload = multer({ storage: multer.memoryStorage() });
+const upload = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 5 * 1024 * 1024 }, // 5 Mo max
+});
 
-const AI_SERVICE_URL = process.env.AI_SERVICE_URL || "http://localhost:8000";
+router.use(auth);
+router.use(auth.requireOrganization);
 
-// =====================================================
+// ---------------------------------------------------------
 // POST /api/csv/analyze
-// =====================================================
-router.post("/analyze", auth, upload.single("file"), async (req, res) => {
-  console.log("CSV analyze route hit");
+// Analyse un CSV via l'IA (sans persistance).
+// ---------------------------------------------------------
+router.post("/analyze", upload.single("file"), async (req, res) => {
   try {
-    console.log("Request body:", req.body);
-    console.log("Request file:", req.file);
-    
-    if (!req.file) {
-      return res.status(400).json({ error: "No file provided" });
-    }
+    if (!req.file) return res.status(400).json({ error: "Fichier requis." });
 
-    if (!req.file.originalname.endsWith(".csv")) {
-      return res.status(400).json({ error: "File must be a CSV" });
-    }
-
-    // Créer FormData pour envoyer à l'AI service
+    // Envoyer au service IA
     const formData = new FormData();
-    formData.append("file", req.file.buffer, {
-      filename: req.file.originalname,
-      contentType: "text/csv",
-    });
-
-    // Envoyer à l'AI service
-    const response = await axios.post(
-      `${AI_SERVICE_URL}/analyze-csv`,
-      formData,
-      {
-        headers: formData.getHeaders(),
-      }
+    formData.append(
+      "file",
+      new Blob([req.file.buffer], { type: "text/csv" }),
+      req.file.originalname,
     );
 
-    return res.json(response.data);
-  } catch (error) {
-    console.error("Erreur POST /csv/analyze:", error);
-    
-    if (error.response) {
-      return res.status(error.response.status).json(error.response.data);
+    const response = await fetch(
+      `${process.env.AI_SERVICE_URL || "http://ai:8000"}/analyze-csv`,
+      { method: "POST", body: formData },
+    );
+
+    if (!response.ok) {
+      const errText = await response.text();
+      return res
+        .status(response.status)
+        .json({ error: `AI: ${errText || "Erreur"}` });
     }
-    
-    return res.status(500).json({ error: "Erreur serveur" });
+
+    const result = await response.json();
+    return res.json(result);
+  } catch (err) {
+    console.error("[csv/analyze]", err);
+    return res.status(500).json({ error: "Erreur d'analyse CSV." });
   }
 });
 
-// =====================================================
+// ---------------------------------------------------------
 // POST /api/csv/import
-// =====================================================
-router.post("/import", auth, upload.single("file"), async (req, res) => {
-  console.log("CSV import route hit");
+// Importe les produits depuis un CSV validé dans PostgreSQL.
+// ---------------------------------------------------------
+router.post("/import", upload.single("file"), async (req, res) => {
   try {
-    if (!req.file) {
-      return res.status(400).json({ error: "No file provided" });
-    }
+    if (!req.file) return res.status(400).json({ error: "Fichier requis." });
 
-    if (!req.file.originalname.endsWith(".csv")) {
-      return res.status(400).json({ error: "File must be a CSV" });
-    }
+    const content = req.file.buffer.toString("utf-8");
+    const lines = content.split("\n").filter((l) => l.trim());
+    const header = lines[0].split(",").map((h) => h.trim().toLowerCase());
+    const idxName = header.indexOf("name");
+    const idxPrice = header.indexOf("price");
+    const idxStock = header.indexOf("stock");
 
-    // Parse CSV from buffer
-    const results = [];
-    const readableStream = Readable.from(req.file.buffer.toString('utf-8'));
-
-    await new Promise((resolve, reject) => {
-      readableStream
-        .pipe(csvParser())
-        .on('data', (data) => results.push(data))
-        .on('end', resolve)
-        .on('error', reject);
-    });
-
-    if (results.length === 0) {
-      return res.status(400).json({ error: "CSV file is empty" });
-    }
-
-    // Validate required columns
-    const requiredColumns = ['name', 'category', 'price', 'stock'];
-    const firstRow = results[0];
-    const missingColumns = requiredColumns.filter(col => !firstRow.hasOwnProperty(col));
-
-    if (missingColumns.length > 0) {
-      return res.status(400).json({ 
-        error: `Missing required columns: ${missingColumns.join(', ')}`,
-        requiredColumns,
-        foundColumns: Object.keys(firstRow)
+    if (idxName < 0 || idxPrice < 0 || idxStock < 0) {
+      return res.status(400).json({
+        error: "Colonnes 'name', 'price' et 'stock' requises.",
       });
     }
 
-    // Process and validate each row
-    const validProducts = [];
-    const errors = [];
-    const warnings = [];
+    let imported = 0;
+    for (let i = 1; i < lines.length; i++) {
+      const cols = lines[i].split(",");
+      const name = cols[idxName]?.trim();
+      const price = parseFloat(cols[idxPrice]);
+      const stock = parseInt(cols[idxStock], 10);
 
-    for (let i = 0; i < results.length; i++) {
-      const row = results[i];
-      const rowNumber = i + 2; // +2 because header is row 1
+      if (!name || Number.isNaN(price) || Number.isNaN(stock)) continue;
 
-      try {
-        // Validate required fields
-        if (!row.name || row.name.trim() === '') {
-          errors.push({ row: rowNumber, error: 'Name is required' });
-          continue;
-        }
-
-        if (!row.category || row.category.trim() === '') {
-          errors.push({ row: rowNumber, error: 'Category is required' });
-          continue;
-        }
-
-        const price = parseFloat(row.price);
-        if (isNaN(price) || price < 0) {
-          errors.push({ row: rowNumber, error: 'Invalid price' });
-          continue;
-        }
-
-        const stock = parseInt(row.stock);
-        if (isNaN(stock) || stock < 0) {
-          errors.push({ row: rowNumber, error: 'Invalid stock' });
-          continue;
-        }
-
-        // Build product object
-        const product = {
-          name: row.name.trim(),
-          category: row.category.trim(),
-          price: price,
-          stock: stock,
-          description: row.description ? row.description.trim() : null,
-          sku: row.sku ? row.sku.trim() : null,
-          cost_price: row.cost_price ? parseFloat(row.cost_price) : null,
-          user_id: req.user.id,
-          storefront_enabled: true,
-          storefront_order: 0
-        };
-
-        // Validate cost price if provided
-        if (product.cost_price !== null && (isNaN(product.cost_price) || product.cost_price < 0)) {
-          warnings.push({ row: rowNumber, warning: 'Invalid cost price, set to null' });
-          product.cost_price = null;
-        }
-
-        validProducts.push(product);
-      } catch (err) {
-        errors.push({ row: rowNumber, error: 'Failed to process row' });
-      }
+      await pool.query(
+        `INSERT INTO products (organization_id, name, price, stock, created_at)
+         VALUES ($1, $2, $3, $4, NOW())`,
+        [req.organizationId, name, price, stock],
+      );
+      imported++;
     }
 
-    // Insert valid products into database
-    let insertedCount = 0;
-    if (validProducts.length > 0) {
-      const client = await pool.connect();
-      try {
-        await client.query('BEGIN');
-
-        for (const product of validProducts) {
-          await client.query(
-            `INSERT INTO products (name, category, price, cost_price, stock, description, sku, user_id, storefront_enabled, storefront_order)
-             VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
-             RETURNING id`,
-            [
-              product.name,
-              product.category,
-              product.price,
-              product.cost_price,
-              product.stock,
-              product.description,
-              product.sku,
-              product.user_id,
-              product.storefront_enabled,
-              product.storefront_order
-            ]
-          );
-          insertedCount++;
-        }
-
-        await client.query('COMMIT');
-      } catch (err) {
-        await client.query('ROLLBACK');
-        console.error('Database insertion error:', err);
-        return res.status(500).json({ error: 'Failed to insert products into database' });
-      } finally {
-        client.release();
-      }
-    }
-
-    return res.json({
-      success: true,
-      imported: insertedCount,
-      total: results.length,
-      errors,
-      warnings
-    });
-  } catch (error) {
-    console.error("Erreur POST /csv/import:", error);
-    return res.status(500).json({ error: "Erreur serveur" });
+    return res.json({ imported });
+  } catch (err) {
+    console.error("[csv/import]", err);
+    return res.status(500).json({ error: "Erreur d'import." });
   }
 });
 

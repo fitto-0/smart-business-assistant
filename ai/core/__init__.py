@@ -1,0 +1,1 @@
+"""Package core : validation, exceptions, chargement des données."""

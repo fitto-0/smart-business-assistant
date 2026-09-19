@@ -52,3 +52,4 @@ smart_businessassistant_before_db_refactor.dump
 smart_businessassistant_before_multitenant.backup
 
 /uploads
+venv

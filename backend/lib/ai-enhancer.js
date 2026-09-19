@@ -1,181 +1,83 @@
 /**
- * AI Enhancement Library for Storefront Products
- * Handles AI-powered product description enhancement, categorization, and SEO
+ * AI Enhancer — utilitaires d'enrichissement de texte.
+ *
+ * NOTE : ces fonctions sont utilisées par ai-copilot.js.
+ * Elles fournissent des fallbacks simples sans dépendance externe.
+ *
+ * Si tu veux de la vraie génération de texte IA, remplace le contenu
+ * par un appel à un service LLM. Pour l'instant, on garde des
+ * transformations déterministes et utiles.
  */
-
-const axios = require("axios");
-
-const AI_SERVICE_URL = process.env.AI_SERVICE_URL || "http://localhost:8000";
 
 /**
- * Enhance product description using AI
+ * Enrichit une description produit.
  */
-async function enhanceDescription(product) {
-  try {
-    const response = await axios.post(`${AI_SERVICE_URL}/enhance-description`, {
-      productName: product.name,
-      currentDescription: product.description || "",
-      category: product.category,
-      price: product.price,
-    });
+function enhanceDescription(name, description = "") {
+  if (!name) return { enhanced: "" };
 
+  const base = (description || "").trim();
+  if (base.length > 0) {
     return {
-      success: true,
-      enhancedDescription: response.data.enhanced_description,
-      originalDescription: product.description,
-    };
-  } catch (error) {
-    console.error("AI description enhancement error:", error);
-    return {
-      success: false,
-      error: "AI service unavailable",
-      enhancedDescription: product.description,
+      enhanced: `${name} — ${base}`,
     };
   }
+
+  return {
+    enhanced: `${name} — produit de qualité, adapté à un usage professionnel.`,
+  };
 }
 
 /**
- * Suggest category for a product using AI
+ * Suggère une catégorie à partir du nom du produit.
+ * Simple matching de mots-clés.
  */
-async function suggestCategory(product) {
-  try {
-    const response = await axios.post(`${AI_SERVICE_URL}/suggest-category`, {
-      productName: product.name,
-      description: product.description || "",
-      currentCategory: product.category,
-    });
+function suggestCategory(name = "") {
+  const lower = name.toLowerCase();
 
-    return {
-      success: true,
-      suggestedCategory: response.data.category,
-      confidence: response.data.confidence,
-    };
-  } catch (error) {
-    console.error("AI category suggestion error:", error);
-    return {
-      success: false,
-      error: "AI service unavailable",
-      suggestedCategory: product.category,
-    };
-  }
-}
+  const map = {
+    Électronique: [
+      "laptop",
+      "pc",
+      "ordinateur",
+      "écran",
+      "souris",
+      "clavier",
+      "casque",
+      "iphone",
+      "samsung",
+      "macbook",
+    ],
+    Maison: ["lampe", "chaise", "table", "canapé", "tapis", "cuisine"],
+    Vêtements: ["t-shirt", "chemise", "pantalon", "robe", "veste", "chaussure"],
+    Alimentation: ["café", "thé", "sucre", "huile", "pain", "lait"],
+    Sport: ["ballon", "raquette", "vélo", "tapis de course", "haltère"],
+  };
 
-/**
- * Generate SEO keywords for a product
- */
-async function generateSEOKeywords(product) {
-  try {
-    const response = await axios.post(`${AI_SERVICE_URL}/generate-seo-keywords`, {
-      productName: product.name,
-      description: product.description || "",
-      category: product.category,
-    });
-
-    return {
-      success: true,
-      keywords: response.data.keywords,
-    };
-  } catch (error) {
-    console.error("AI SEO keywords generation error:", error);
-    return {
-      success: false,
-      error: "AI service unavailable",
-      keywords: [],
-    };
-  }
-}
-
-/**
- * Batch enhance multiple products
- */
-async function batchEnhance(products) {
-  const results = [];
-  
-  for (const product of products) {
-    const enhancement = await enhanceProduct(product);
-    results.push({
-      productId: product.id,
-      ...enhancement,
-    });
-  }
-  
-  return results;
-}
-
-/**
- * Complete product enhancement (description, category, SEO)
- */
-async function enhanceProduct(product) {
-  try {
-    const [descriptionResult, categoryResult, seoResult] = await Promise.all([
-      enhanceDescription(product),
-      suggestCategory(product),
-      generateSEOKeywords(product),
-    ]);
-
-    return {
-      success: true,
-      description: descriptionResult,
-      category: categoryResult,
-      seo: seoResult,
-    };
-  } catch (error) {
-    console.error("Complete product enhancement error:", error);
-    return {
-      success: false,
-      error: "Enhancement failed",
-    };
-  }
-}
-
-/**
- * Get product recommendations based on similar products
- */
-async function getRecommendations(productId, userProducts, limit = 5) {
-  try {
-    const currentProduct = userProducts.find(p => p.id === productId);
-    if (!currentProduct) {
-      return { success: false, error: "Product not found" };
+  for (const [category, keywords] of Object.entries(map)) {
+    if (keywords.some((kw) => lower.includes(kw))) {
+      return { category, confidence: 0.8 };
     }
-
-    const response = await axios.post(`${AI_SERVICE_URL}/recommend-products`, {
-      currentProduct: {
-        name: currentProduct.name,
-        category: currentProduct.category,
-        description: currentProduct.description,
-        price: currentProduct.price,
-      },
-      availableProducts: userProducts
-        .filter(p => p.id !== productId)
-        .map(p => ({
-          id: p.id,
-          name: p.name,
-          category: p.category,
-          description: p.description,
-          price: p.price,
-        })),
-      limit,
-    });
-
-    return {
-      success: true,
-      recommendations: response.data.recommendations,
-    };
-  } catch (error) {
-    console.error("AI recommendations error:", error);
-    return {
-      success: false,
-      error: "AI service unavailable",
-      recommendations: [],
-    };
   }
+
+  return { category: "Autre", confidence: 0.3 };
+}
+
+/**
+ * Génère des mots-clés SEO simples à partir du nom et de la description.
+ */
+function generateSeoKeywords(name = "", description = "") {
+  const text = `${name} ${description}`.toLowerCase();
+  const words = text
+    .replace(/[^\wàâäéèêëïîôöùûüç\s]/gi, " ")
+    .split(/\s+/)
+    .filter((w) => w.length > 3);
+
+  const unique = [...new Set(words)].slice(0, 10);
+  return { keywords: unique };
 }
 
 module.exports = {
   enhanceDescription,
   suggestCategory,
-  generateSEOKeywords,
-  batchEnhance,
-  enhanceProduct,
-  getRecommendations,
+  generateSeoKeywords,
 };
