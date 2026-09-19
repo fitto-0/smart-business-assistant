@@ -36,6 +36,15 @@ import {
 } from "lucide-react";
 import Chatbot from "./Chatbot";
 
+const API_ORIGIN = (
+  process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api"
+).replace(/\/api\/?$/, "");
+
+const getAssetUrl = (url) => {
+  if (!url) return "";
+  return url.startsWith("http") ? url : `${API_ORIGIN}${url}`;
+};
+
 const userNavItems = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
   { href: "/sales", label: "Sales", icon: ShoppingCart },
@@ -436,9 +445,12 @@ export default function Layout({
                 >
                   {user.avatar_url ? (
                     <img
-                      src={`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000"}${user.avatar_url}`}
+                      src={getAssetUrl(user.avatar_url)}
                       alt="Avatar"
                       className="w-full h-full rounded-full object-cover"
+                      onError={(e) => {
+                        e.currentTarget.style.display = "none";
+                      }}
                     />
                   ) : (
                     user.name?.[0]?.toUpperCase()

@@ -7,6 +7,15 @@ import Cookies from 'js-cookie';
 import toast from 'react-hot-toast';
 import { User, Mail, Building, Save, Shield, Bell, Lock, X, Globe, Camera, Upload } from 'lucide-react';
 
+const API_ORIGIN = (
+  process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api'
+).replace(/\/api\/?$/, '');
+
+const getAssetUrl = (url) => {
+  if (!url) return '';
+  return url.startsWith('http') ? url : `${API_ORIGIN}${url}`;
+};
+
 export default function ProfilePage() {
   const { language, setLanguage, t } = useLanguage();
   const [user, setUser] = useState(null);
@@ -241,7 +250,14 @@ export default function ProfilePage() {
           <div className="relative">
             <div className="w-20 h-20 rounded-2xl bg-amber flex items-center justify-center text-ground text-3xl font-bold overflow-hidden">
               {avatarUrl ? (
-                <img src={`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'}${avatarUrl}`} alt="Avatar" className="w-full h-full object-cover" />
+                <img
+                  src={getAssetUrl(avatarUrl)}
+                  alt="Avatar"
+                  className="w-full h-full object-cover"
+                  onError={(e) => {
+                    e.currentTarget.style.display = 'none';
+                  }}
+                />
               ) : (
                 user.name?.[0]?.toUpperCase()
               )}
