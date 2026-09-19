@@ -67,3 +67,20 @@ def get_intensifier(tokens: list, index: int, window: int = 2) -> float:
         if tok in INTENSIFIERS:
             multiplier *= INTENSIFIERS[tok]
     return multiplier
+
+def simple_stem(word: str) -> str:
+    """
+    Stemmer anglais simplifié.
+    Retire les suffixes courants (s, es, ed, ing) pour matcher les variantes.
+    """
+    if len(word) <= 4:
+        return word
+
+    # Ordre important : plus long d'abord
+    for suffix in ("ing", "ies", "ied", "ed", "es", "s"):
+        if word.endswith(suffix):
+            stem = word[: -len(suffix)]
+            # Sécurité : ne pas produire un mot trop court
+            if len(stem) >= 3:
+                return stem
+    return word

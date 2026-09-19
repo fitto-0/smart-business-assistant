@@ -7,41 +7,46 @@ Améliorations vs version initiale :
 - Normalisation des accents et de la ponctuation
 - Support français + anglais
 - Confidence heuristic explicite
+Analyse de sentiments basée sur des mots-clés pondérés.
+Support français + anglais avec stemming simple.
 """
 from utils.text_utils import (
-    normalize, tokenize, has_negation_before, get_intensifier
+    normalize, tokenize, has_negation_before, get_intensifier, simple_stem
 )
 
 
 class SentimentAnalyzer:
-    POSITIVE_WORDS = {
+    # Verbes et adjectifs positifs (formes de base)
+    POSITIVE_STEMS = {
         # Français
-        "excellent", "parfait", "magnifique", "super", "genial", "formidable",
-        "extraordinaire", "exceptionnel", "remarquable", "impeccable",
-        "satisfait", "content", "heureux", "ravi", "enchante",
-        "bon", "bien", "agreable", "plaisant", "sympathique",
-        "rapide", "efficace", "fiable", "solide", "durable",
-        "recommande", "recommander", "adore", "aime", "top", "nickel",
+        "excellent", "parfait", "magnifiqu", "super", "genial", "formidabl",
+        "extraordinair", "exceptionnel", "remarquabl", "impeccabl",
+        "satisfait", "satisf", "content", "heureu", "ravi", "enchant",
+        "bon", "bien", "agreabl", "plaisant", "sympathiqu",
+        "rapid", "efficac", "fiabl", "solid", "durabl",
+        "recommand", "adore", "ador", "aim", "top", "nickel",
         # Anglais
-        "great", "good", "excellent", "amazing", "awesome", "wonderful",
-        "fantastic", "perfect", "superb", "outstanding", "brilliant",
-        "happy", "satisfied", "pleased", "love", "like", "recommend",
-        "fast", "reliable", "quality", "worth",
+        "great", "good", "excellent", "amaz", "awesom", "wonderful",
+        "fantast", "perfect", "superb", "outstand", "brilliant",
+        "happi", "satisfi", "pleas", "love", "lov", "like", "lik",
+        "recommend", "nice", "qualiti", "worth", "fast", "reliabl",
+        "impress", "exceed", "expect", "help", "clean", "beauti",
     }
 
-    NEGATIVE_WORDS = {
+    # Verbes et adjectifs négatifs (formes de base)
+    NEGATIVE_STEMS = {
         # Français
-        "decu", "mauvais", "terrible", "horrible", "catastrophique",
-        "nul", "mediocre", "insuffisant", "defectueux", "casse",
-        "lent", "cher", "trop cher", "inutile", "inefficace",
-        "faux", "trompeur", "arnaque", "escroquerie",
-        "deteste", "naime pas", "regrette", "plaindre",
-        "probleme", "erreur", "defaut", "panne", "retard",
+        "decu", "mauvai", "terribl", "horribl", "catastroph",
+        "nul", "mediocr", "insuffic", "defectueu", "cass",
+        "lent", "cher", "inutil", "inefficac", "faux",
+        "trompeur", "arnaqu", "escroqu", "detest", "regrett", "plain",
+        "problem", "erreur", "defaut", "pann", "retard",
         # Anglais
-        "bad", "terrible", "awful", "horrible", "disappointing",
-        "poor", "useless", "broken", "slow", "expensive", "overpriced",
-        "fake", "scam", "hate", "dislike", "regret", "complaint",
-        "problem", "issue", "defect", "failure", "delay",
+        "bad", "terribl", "aw", "horribl", "disappoint", "disappointing",
+        "poor", "useless", "broken", "slow", "expensive", "overpric",
+        "fake", "scam", "hate", "hat", "dislik", "regret", "complain",
+        "problem", "issu", "defect", "fail", "delay", "wrong",
+        "uncomfortabl", "unhappi", "confus", "difficult",
     }
 
     def __init__(self, positive_threshold: float = 0.65,
@@ -52,18 +57,10 @@ class SentimentAnalyzer:
         self.negation_window = negation_window
 
     def analyze(self, text: str) -> dict:
-        """
-        Analyse un texte et retourne :
-        - sentiment : "positif" | "négatif" | "neutre"
-        - score : float entre 0 et 1
-        - confidence : float entre 0 et 1 (heuristique)
-        - details : décomposition (mots positifs/négatifs détectés)
-        """
         if not text or not isinstance(text, str):
             return self._empty_result()
 
         tokens = tokenize(text)
-
         if not tokens:
             return self._empty_result()
 
@@ -76,7 +73,13 @@ class SentimentAnalyzer:
             negated = has_negation_before(tokens, i, self.negation_window)
             intensifier = get_intensifier(tokens, i)
 
-            if token in self.POSITIVE_WORDS:
+            stem = simple_stem(token)
+
+            # Vérifier si le token ou son stem matche les listes
+            pos_match = (token in self.POSITIVE_STEMS) or (stem in self.POSITIVE_STEMS)
+            neg_match = (token in self.NEGATIVE_STEMS) or (stem in self.NEGATIVE_STEMS)
+
+            if pos_match and not neg_match:
                 if negated:
                     negative_score += 1.0 * intensifier
                     negative_matches.append(f"not_{token}")
@@ -84,7 +87,7 @@ class SentimentAnalyzer:
                     positive_score += 1.0 * intensifier
                     positive_matches.append(token)
 
-            elif token in self.NEGATIVE_WORDS:
+            elif neg_match and not pos_match:
                 if negated:
                     positive_score += 1.0 * intensifier
                     positive_matches.append(f"not_{token}")
@@ -94,7 +97,6 @@ class SentimentAnalyzer:
 
         total = positive_score + negative_score
 
-        # Aucun mot-clé détecté → neutre avec confiance faible
         if total == 0:
             return {
                 "sentiment": "neutre",
@@ -116,8 +118,6 @@ class SentimentAnalyzer:
         else:
             sentiment = "neutre"
 
-        # Confidence heuristique : plus on a de mots-clés, plus on est sûr
-        # Plus le score s'éloigne de 0.5, plus on est sûr
         distance_from_neutral = abs(score - 0.5) * 2
         keyword_density = min(total / max(len(tokens) * 0.2, 1), 1.0)
         confidence = round(min(0.4 + distance_from_neutral * 0.4 + keyword_density * 0.2, 1.0), 3)
