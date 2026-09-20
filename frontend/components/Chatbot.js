@@ -7,7 +7,7 @@ export default function Chatbot() {
   const [messages, setMessages] = useState([
     {
       role: "bot",
-      text: "Hello! I can help you with questions about your products, inventory, sales, and trends. What would you like to know?",
+      text: "Bonjour ! Je suis votre assistant. Posez-moi une question sur vos produits, votre stock, vos ventes ou vos tendances.",
     },
   ]);
   const [input, setInput] = useState("");
@@ -48,18 +48,21 @@ export default function Chatbot() {
     setLoading(true);
 
     try {
+      const history = messages.slice(-6).map((message) => ({
+        role: message.role === "bot" ? "assistant" : "user",
+        content: message.text,
+      }));
+
       const data = await apiPost("/chatbot", {
         question,
-        products,
-        history: messages.slice(-8).map((message) => ({
-          role: message.role === "bot" ? "assistant" : message.role,
-          content: message.text,
-        })),
+        history,
       });
       const botMessage = {
         role: "bot",
         text:
-          data.answer || "I could not find enough information to answer that.",
+          data.reply ||
+          data.answer ||
+          "Je n'ai pas compris. Pouvez-vous reformuler ?",
       };
       setMessages((prev) => [...prev, botMessage]);
     } catch (error) {
@@ -131,7 +134,7 @@ export default function Chatbot() {
               </div>
             )}
             <div
-              className={`max-w-[80%] p-3 rounded-xl ${
+              className={`max-w-[80%] p-3 rounded-xl whitespace-pre-wrap ${
                 msg.role === "user"
                   ? "bg-amber text-ground portal-text"
                   : "bg-ground border hairline portal-text"

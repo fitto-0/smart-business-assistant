@@ -1,22 +1,37 @@
-const router = require("express").Router();
+const express = require("express");
+const router = express.Router();
 const auth = require("../middleware/auth");
-const axios = require("axios");
+const ai = require("../lib/aiClient");
+const agg = require("../lib/dataAggregator");
 
-const AI_SERVICE_URL = process.env.AI_SERVICE_URL || "http://ai:8000";
+router.use(auth);
+router.use(auth.requireOrganization);
 
-router.post("/", auth, async (req, res) => {
+router.post("/", async (req, res) => {
   try {
-    const response = await axios.post(`${AI_SERVICE_URL}/chatbot`, {
-      question: String(req.body.question || "").trim(),
-      products: Array.isArray(req.body.products) ? req.body.products : [],
-      history: Array.isArray(req.body.history) ? req.body.history.slice(-8) : [],
-    }, { timeout: 15000 });
+    const { question, history } = req.body;
 
-    return res.json(response.data);
-  } catch (error) {
-    console.error("Erreur POST /chatbot:", error.message);
-    return res.status(error.response?.status || 502).json({
-      error: "Service IA indisponible",
+    if (!question || question.trim().length < 2) {
+      return res.status(400).json({ error: "Question trop courte." });
+    }
+
+    const [products, salesStats] = await Promise.all([
+      agg.getProductsWithStock(req.organizationId),
+      agg.getSalesStats(req.organizationId),
+    ]);
+
+    const result = await ai.chatbot({
+      question: question.trim(),
+      products,
+      sales_stats: salesStats,
+      history: Array.isArray(history) ? history.slice(-6) : [],
+    });
+
+    return res.json(result);
+  } catch (err) {
+    console.error("[chatbot]", err);
+    return res.status(err.statusCode || 500).json({
+      error: err.message || "Erreur du chatbot.",
     });
   }
 });

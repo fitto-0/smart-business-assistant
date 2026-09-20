@@ -16,7 +16,7 @@ from models.prediction import SalesPredictionModel
 from models.sentiment import SentimentAnalyzer
 from models.anomaly import AnomalyDetector
 from models.recommendation import RecommendationEngine
-from services.chatbot_service import BusinessChatbot
+from services.llm_chatbot import LLMChatbot
 from services.csv_service import CSVAnalyzer
 
 app = Flask(__name__)
@@ -34,7 +34,7 @@ anomaly_detector = AnomalyDetector(
     min_data_points=Config.ANOMALY_MIN_DATA_POINTS,
 )
 recommendation_engine = RecommendationEngine()
-chatbot = BusinessChatbot()
+chatbot = LLMChatbot()
 csv_analyzer = CSVAnalyzer()
 
 
@@ -132,8 +132,11 @@ def chatbot_route():
 
     products = data.get("products", [])
     sales_stats = data.get("sales_stats")
+    history = data.get("history", [])
 
-    return jsonify(chatbot.respond(question, products, sales_stats)), 200
+    return jsonify(
+        chatbot.respond(question, products, sales_stats, history)
+    ), 200
 
 
 # ---------- CSV ----------
