@@ -15,19 +15,19 @@ import {
 const PRIORITY_CONFIG = {
   critique: {
     label: "Critical",
-    cls: "text-red-400",
-    border: "hairline bg-red-400/5",
+    cls: "text-clay",
+    border: "hairline bg-clay/5",
   },
-  haute: { label: "High", cls: "text-amber", border: "hairline bg-amber/5" },
-  moyenne: { label: "Medium", cls: "text-teal", border: "hairline bg-teal/5" },
-  basse: { label: "Low", cls: "portal-label text-muted", border: "hairline" },
+  haute: { label: "High", cls: "text-ember-500", border: "hairline bg-ember-500/5" },
+  moyenne: { label: "Medium", cls: "text-olive", border: "hairline bg-olive/5" },
+  basse: { label: "Low", cls: "portal-label text-ink-3", border: "hairline" },
 };
 
 const CATEGORY_CONFIG = {
-  stock: { icon: Package, color: "bg-amber/20 text-amber" },
-  promotion: { icon: Tag, color: "bg-teal/20 text-teal" },
-  service_client: { icon: Star, color: "bg-amber/20 text-amber" },
-  analyse: { icon: BarChart2, color: "bg-teal/20 text-teal" },
+  stock: { icon: Package, color: "bg-ember-500/20 text-ember-500" },
+  promotion: { icon: Tag, color: "bg-olive/20 text-olive" },
+  service_client: { icon: Star, color: "bg-ember-500/20 text-ember-500" },
+  analyse: { icon: BarChart2, color: "bg-olive/20 text-olive" },
 };
 
 export default function RecommendationsPage() {
@@ -65,7 +65,7 @@ export default function RecommendationsPage() {
         ),
       );
       toast.success(
-        updated.done ? "Action marked as done! 🎉" : "Action marked as pending",
+        updated.done ? "Action marked as done! Ã°Å¸Å½â€°" : "Action marked as pending",
       );
     } catch (error) {
       toast.error(error.message || "Failed to update");
@@ -92,9 +92,9 @@ export default function RecommendationsPage() {
   return (
     <Layout title="AI Recommendations">
       {/* Header */}
-      <div className="bg-ground-secondary border hairline rounded-xl p-5 mb-6">
+      <div className="bg-surface border hairline rounded-xs p-5 mb-6">
         <div className="flex items-start gap-4">
-          <div className="w-12 h-12 rounded-xl bg-amber flex items-center justify-center flex-shrink-0">
+          <div className="w-12 h-12 rounded-xs bg-ember-500 flex items-center justify-center flex-shrink-0">
             <Lightbulb size={24} className="text-ground" />
           </div>
           <div>
@@ -108,14 +108,14 @@ export default function RecommendationsPage() {
             </p>
             <div className="flex items-center gap-3 mt-3">
               <div className="flex items-center gap-1.5">
-                <div className="w-2 h-2 rounded-full bg-teal" />
+                <div className="w-2 h-2 rounded-full bg-olive" />
                 <span className="portal-label">
                   {done}/{recs.length} actions completed
                 </span>
               </div>
-              <div className="flex-1 max-w-32 bg-ground rounded-full h-2">
+              <div className="flex-1 max-w-32 bg-canvas rounded-full h-2">
                 <div
-                  className="h-2 rounded-full bg-teal transition-all"
+                  className="h-2 rounded-full bg-olive transition-colors"
                   style={{ width: `${(done / recs.length) * 100}%` }}
                 />
               </div>
@@ -130,18 +130,18 @@ export default function RecommendationsPage() {
           {
             label: "Total Recommendations",
             value: recs.length,
-            color: "bg-amber",
+            color: "bg-ember-500",
           },
-          { label: "Critical Pending", value: critiques, color: "bg-red-400" },
-          { label: "High Priority", value: hautes, color: "bg-amber" },
-          { label: "Actions Completed", value: done, color: "bg-teal" },
+          { label: "Critical Pending", value: critiques, color: "bg-clay" },
+          { label: "High Priority", value: hautes, color: "bg-ember-500" },
+          { label: "Actions Completed", value: done, color: "bg-olive" },
         ].map((s, i) => (
           <div
             key={i}
-            className="bg-ground-secondary border hairline rounded-xl p-4 flex items-center gap-4"
+            className="bg-surface border hairline rounded-xs p-4 flex items-center gap-4"
           >
             <div
-              className={`w-11 h-11 rounded-xl ${s.color} flex items-center justify-center`}
+              className={`w-11 h-11 rounded-xs ${s.color} flex items-center justify-center`}
             >
               <Lightbulb size={20} className="text-ground" />
             </div>
@@ -154,23 +154,23 @@ export default function RecommendationsPage() {
       </div>
 
       {/* Filters */}
-      <div className="bg-ground-secondary border hairline rounded-xl p-4 mb-6">
+      <div className="bg-surface border hairline rounded-xs p-4 mb-6">
         <div className="flex items-center gap-2 flex-wrap">
-          <Filter size={14} className="text-muted" />
+          <Filter size={14} className="text-ink-3" />
           {[
             { key: "tous", label: "All" },
-            { key: "critique", label: "🔴 Critical" },
-            { key: "haute", label: "🟡 High" },
-            { key: "stock", label: "📦 Stock" },
-            { key: "promotion", label: "🏷️ Promotion" },
-            { key: "service_client", label: "⭐ Customer Service" },
+            { key: "critique", label: "Ã°Å¸â€Â´ Critical" },
+            { key: "haute", label: "Ã°Å¸Å¸Â¡ High" },
+            { key: "stock", label: "Ã°Å¸â€œÂ¦ Stock" },
+            { key: "promotion", label: "Ã°Å¸ÂÂ·Ã¯Â¸Â Promotion" },
+            { key: "service_client", label: "Ã¢Â­Â Customer Service" },
             { key: "pending", label: "Pending" },
-            { key: "done", label: "✅ Completed" },
+            { key: "done", label: "Ã¢Å“â€¦ Completed" },
           ].map((f) => (
             <button
               key={f.key}
               onClick={() => setFilter(f.key)}
-              className={`portal-label px-3 py-1.5 rounded-lg font-medium transition-all ${filter === f.key ? "bg-amber text-ground" : "bg-ground text-ink-secondary hover:bg-ground/50"}`}
+              className={`portal-label px-3 py-1.5 rounded-xs font-medium transition-colors ${filter === f.key ? "bg-ember-500 text-ground" : "bg-canvas text-ink-2 hover:bg-canvas/50"}`}
             >
               {f.label}
             </button>
@@ -179,8 +179,8 @@ export default function RecommendationsPage() {
       </div>
 
       {loading && (
-        <div className="bg-ground-secondary border hairline rounded-xl text-center py-12 portal-text">
-          Loading recommendations…
+        <div className="bg-surface border hairline rounded-xs text-center py-12 portal-text">
+          Loading recommendationsÃ¢â‚¬Â¦
         </div>
       )}
 
@@ -193,7 +193,7 @@ export default function RecommendationsPage() {
           return (
             <div
               key={rec.id}
-              className={`bg-ground-secondary border transition-all duration-300 rounded-xl p-4 ${rec.done ? "opacity-60 hairline" : prio.border} hover:shadow-lg animate-slide-up`}
+              className={`bg-surface border transition-colors duration-300 rounded-xs p-4 ${rec.done ? "opacity-60 hairline" : prio.border} hover: animate-rise-in`}
             >
               <div className="flex flex-col sm:flex-row gap-4">
                 <div className="flex items-start gap-4 flex-1">
@@ -201,7 +201,7 @@ export default function RecommendationsPage() {
                   <div className="flex-1">
                     <div className="flex flex-wrap items-center gap-2 mb-2">
                       <h3
-                        className={`portal-label font-bold ${rec.done ? "line-through text-muted" : "text-ink"}`}
+                        className={`portal-label font-bold ${rec.done ? "line-through text-ink-3" : "text-ink"}`}
                       >
                         {rec.title}
                       </h3>
@@ -219,15 +219,15 @@ export default function RecommendationsPage() {
                       {rec.description}
                     </p>
                     <div className="flex flex-wrap gap-3">
-                      <div className="flex items-center gap-2 p-2.5 rounded-xl bg-ground/60 border hairline">
-                        <span className="portal-label text-muted">Action:</span>
+                      <div className="flex items-center gap-2 p-2.5 rounded-xs bg-canvas/60 border hairline">
+                        <span className="portal-label text-ink-3">Action:</span>
                         <span className="portal-label font-medium text-ink">
                           {rec.action}
                         </span>
                       </div>
-                      <div className="flex items-center gap-2 p-2.5 rounded-xl bg-teal/10 border hairline">
-                        <span className="portal-label text-muted">Impact:</span>
-                        <span className="portal-label font-bold text-teal">
+                      <div className="flex items-center gap-2 p-2.5 rounded-xs bg-olive/10 border hairline">
+                        <span className="portal-label text-ink-3">Impact:</span>
+                        <span className="portal-label font-bold text-olive">
                           {rec.impact}
                         </span>
                       </div>
@@ -237,14 +237,14 @@ export default function RecommendationsPage() {
                 <div className="flex-shrink-0">
                   <button
                     onClick={() => markDone(rec.id)}
-                    className={`flex items-center gap-2 portal-label px-4 py-2 rounded-xl font-semibold transition-all ${
+                    className={`flex items-center gap-2 portal-label px-4 py-2 rounded-xs font-semibold transition-colors ${
                       rec.done
-                        ? "bg-teal/20 text-teal hover:bg-red-400/20 hover:text-red-400"
-                        : "bg-ground text-ink-secondary hover:bg-teal/20 hover:text-teal"
+                        ? "bg-olive/20 text-olive hover:bg-clay/20 hover:text-clay"
+                        : "bg-canvas text-ink-2 hover:bg-olive/20 hover:text-olive"
                     }`}
                   >
                     <CheckCircle size={14} />
-                    {rec.done ? "Done ✓" : "Mark Done"}
+                    {rec.done ? "Done Ã¢Å“â€œ" : "Mark Done"}
                   </button>
                 </div>
               </div>
@@ -252,10 +252,10 @@ export default function RecommendationsPage() {
           );
         })}
         {filtered.length === 0 && (
-          <div className="bg-ground-secondary border hairline rounded-xl text-center py-16">
+          <div className="bg-surface border hairline rounded-xs text-center py-16">
             <CheckCircle
               size={48}
-              className="mx-auto mb-3 text-teal opacity-60"
+              className="mx-auto mb-3 text-olive opacity-60"
             />
             <p className="portal-label font-semibold text-ink">
               No recommendations in this category

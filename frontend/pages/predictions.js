@@ -12,7 +12,7 @@ const fmt = (n) => new Intl.NumberFormat('fr-FR').format(n);
 const CustomTooltip = ({ active, payload, label }) => {
   if (!active || !payload?.length) return null;
   return (
-    <div className="bg-ground-secondary border hairline rounded-xl p-3">
+    <div className="bg-surface border hairline rounded-xs p-3">
       <p className="portal-label mb-2 font-semibold">{label}</p>
       {payload.map((p, i) => p.value && (
         <p key={i} className="portal-text font-semibold" style={{ color: p.color }}>
@@ -52,7 +52,7 @@ export default function PredictionsPage() {
   const lastYearTotal = (monthlySales || []).reduce((s, m) => s + Number(m.actual || 0), 0);
   const growth = lastYearTotal ? (((totalPredicted - lastYearTotal) / lastYearTotal) * 100).toFixed(1) : '0.0';
 
-  // Fusionner historique réel + prédictions pour le graphique
+  // Fusionner historique rÃƒÂ©el + prÃƒÂ©dictions pour le graphique
   const displayData = [
     ...(monthlySales || []).map((m) => ({
       month: m.month,
@@ -67,27 +67,27 @@ export default function PredictionsPage() {
   ].slice(-(12 + horizon));
 
   if (loading) {
-    return <Layout title="AI Predictions"><div className="bg-ground-secondary border hairline rounded-xl text-center py-16 portal-text">Loading predictions…</div></Layout>;
+    return <Layout title="AI Predictions"><div className="bg-surface border hairline rounded-xs text-center py-16 portal-text">Loading predictionsÃ¢â‚¬Â¦</div></Layout>;
   }
 
   return (
     <Layout title="AI Predictions">
       {/* Header Banner */}
-      <div className="bg-ground-secondary border hairline rounded-xl p-5 mb-6">
+      <div className="bg-surface border hairline rounded-xs p-5 mb-6">
         <div className="flex items-start gap-4">
-          <div className="w-12 h-12 rounded-xl bg-amber flex items-center justify-center flex-shrink-0">
+          <div className="w-12 h-12 rounded-xs bg-ember-500 flex items-center justify-center flex-shrink-0">
             <Brain size={24} className="text-ground" />
           </div>
           <div>
-            <h3 className="portal-heading text-base mb-1">AI Prediction Engine — Regression Model</h3>
+            <h3 className="portal-heading text-base mb-1">AI Prediction Engine Ã¢â‚¬â€ Regression Model</h3>
             <p className="portal-text leading-relaxed">
               Our model uses historical data from the last 12 months to predict future sales.
               The algorithm integrates seasonality, trends, and external factors for optimal accuracy.
             </p>
             <div className="flex flex-wrap gap-2 mt-3">
-              <span className="portal-label bg-teal/10 text-teal px-2 py-1 rounded">Scikit-learn LinearRegression</span>
-              <span className="portal-label bg-teal/10 text-teal px-2 py-1 rounded">Seasonality Analysis</span>
-              <span className="portal-label bg-teal/10 text-teal px-2 py-1 rounded">Historical data + regression</span>
+              <span className="portal-label bg-olive/10 text-olive px-2 py-1 rounded">Scikit-learn LinearRegression</span>
+              <span className="portal-label bg-olive/10 text-olive px-2 py-1 rounded">Seasonality Analysis</span>
+              <span className="portal-label bg-olive/10 text-olive px-2 py-1 rounded">Historical data + regression</span>
             </div>
           </div>
         </div>
@@ -95,8 +95,8 @@ export default function PredictionsPage() {
 
       {/* KPIs */}
       <div className="grid grid-cols-2 xl:grid-cols-4 gap-4 mb-6">
-        <div className="bg-ground-secondary border hairline rounded-xl p-4 flex items-center gap-4">
-          <div className="w-11 h-11 rounded-xl bg-amber flex items-center justify-center">
+        <div className="bg-surface border hairline rounded-xs p-4 flex items-center gap-4">
+          <div className="w-11 h-11 rounded-xs bg-ember-500 flex items-center justify-center">
             <Target size={20} className="text-ground" />
           </div>
           <div>
@@ -104,17 +104,17 @@ export default function PredictionsPage() {
             <p className="portal-heading text-xl">{fmt(totalPredicted)} DA</p>
           </div>
         </div>
-        <div className="bg-ground-secondary border hairline rounded-xl p-4 flex items-center gap-4">
-          <div className="w-11 h-11 rounded-xl bg-teal flex items-center justify-center">
+        <div className="bg-surface border hairline rounded-xs p-4 flex items-center gap-4">
+          <div className="w-11 h-11 rounded-xs bg-olive flex items-center justify-center">
             <TrendingUp size={20} className="text-ground" />
           </div>
           <div>
             <p className="portal-label">Predicted Growth</p>
-            <p className="portal-heading text-xl text-teal">+{growth}%</p>
+            <p className="portal-heading text-xl text-olive">+{growth}%</p>
           </div>
         </div>
-        <div className="bg-ground-secondary border hairline rounded-xl p-4 flex items-center gap-4">
-          <div className="w-11 h-11 rounded-xl bg-amber flex items-center justify-center">
+        <div className="bg-surface border hairline rounded-xs p-4 flex items-center gap-4">
+          <div className="w-11 h-11 rounded-xs bg-ember-500 flex items-center justify-center">
             <Zap size={20} className="text-ground" />
           </div>
           <div>
@@ -122,8 +122,8 @@ export default function PredictionsPage() {
             <p className="portal-heading text-xl">{horizon} months</p>
           </div>
         </div>
-        <div className="bg-ground-secondary border hairline rounded-xl p-4 flex items-center gap-4">
-          <div className="w-11 h-11 rounded-xl bg-amber flex items-center justify-center">
+        <div className="bg-surface border hairline rounded-xs p-4 flex items-center gap-4">
+          <div className="w-11 h-11 rounded-xs bg-ember-500 flex items-center justify-center">
             <Brain size={20} className="text-ground" />
           </div>
           <div>
@@ -134,7 +134,7 @@ export default function PredictionsPage() {
       </div>
 
       {/* Prediction Chart */}
-      <div className="bg-ground-secondary border hairline rounded-xl p-5 mb-6">
+      <div className="bg-surface border hairline rounded-xs p-5 mb-6">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-5">
           <div>
             <h3 className="portal-heading text-base">Sales Prediction</h3>
@@ -144,7 +144,7 @@ export default function PredictionsPage() {
             <span className="portal-label">Horizon:</span>
             {[3, 6].map(h => (
               <button key={h} onClick={() => setHorizon(h)}
-                className={`portal-label px-3 py-1.5 rounded-lg font-medium transition-all ${horizon === h ? 'bg-amber text-ground' : 'bg-ground text-ink-secondary hover:bg-ground/50'}`}>
+                className={`portal-label px-3 py-1.5 rounded-xs font-medium transition-colors ${horizon === h ? 'bg-ember-500 text-ground' : 'bg-canvas text-ink-2 hover:bg-canvas/50'}`}>
                 {h} months
               </button>
             ))}
@@ -154,28 +154,27 @@ export default function PredictionsPage() {
           <ComposedChart data={displayData}>
             <defs>
               <linearGradient id="histGrad" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor="#6366f1" stopOpacity={0.25} />
-                <stop offset="95%" stopColor="#6366f1" stopOpacity={0} />
+                <stop offset="5%" stopColor="#E2703A" stopOpacity={0.22} />
+                <stop offset="95%" stopColor="#E2703A" stopOpacity={0} />
               </linearGradient>
               <linearGradient id="predGrad" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor="#10b981" stopOpacity={0.25} />
-                <stop offset="95%" stopColor="#10b981" stopOpacity={0} />
+                <stop offset="5%" stopColor="#7E9C6B" stopOpacity={0.18} />
+                <stop offset="95%" stopColor="#7E9C6B" stopOpacity={0} />
               </linearGradient>
             </defs>
-            <CartesianGrid strokeDasharray="3 3" stroke="rgba(237,231,220,0.13)" />
-            <XAxis dataKey="month" tick={{ fill: '#9EA5A8', fontSize: 10 }} axisLine={false} tickLine={false} />
-            <YAxis tick={{ fill: '#9EA5A8', fontSize: 11 }} axisLine={false} tickLine={false} tickFormatter={v => `${v / 1000}k`} />
-            <Tooltip content={<CustomTooltip />} />
-            <Legend wrapperStyle={{ fontSize: '12px', paddingTop: '16px' }} />
-            <ReferenceLine x="Dec" stroke="rgba(237,231,220,0.13)" strokeDasharray="4 4" label={{ value: 'Today', fill: '#9EA5A8', fontSize: 10 }} />
-            <Area type="monotone" dataKey="historique" name="History (DA)" stroke="#E8913C" strokeWidth={2.5} fill="url(#histGrad)" connectNulls={false} dot={false} />
-            <Area type="monotone" dataKey="prediction" name="Prediction (DA)" stroke="#2E6B72" strokeWidth={2.5} strokeDasharray="6 3" fill="url(#predGrad)" connectNulls={false} dot={{ fill: '#2E6B72', r: 4 }} />
+            <CartesianGrid vertical={false} strokeDasharray="3 3" stroke="rgb(242 236 228 / 0.06)" />
+            <XAxis dataKey="month" tick={{ fill: '#847B74', fontSize: 10, fontFamily: "'JetBrains Mono', monospace" }} axisLine={false} tickLine={false} tickMargin={12} />
+            <YAxis tick={{ fill: '#847B74', fontSize: 10, fontFamily: "'JetBrains Mono', monospace" }} axisLine={false} tickLine={false} tickFormatter={v => `${v / 1000}k`} width={44} />
+            <Tooltip content={<CustomTooltip />} cursor={{ stroke: 'rgb(242 236 228 / 0.15)' }} />
+            <ReferenceLine x="Dec" stroke="rgb(242 236 228 / 0.15)" strokeDasharray="4 4" label={{ value: 'Today', fill: '#847B74', fontSize: 10, fontFamily: "'JetBrains Mono', monospace" }} />
+            <Area type="monotone" dataKey="historique" name="History (DA)" stroke="#E2703A" strokeWidth={2.5} fill="url(#histGrad)" connectNulls={false} dot={false} />
+            <Area type="monotone" dataKey="prediction" name="Prediction (DA)" stroke="#7E9C6B" strokeWidth={2.5} strokeDasharray="6 3" fill="url(#predGrad)" connectNulls={false} dot={{ fill: '#7E9C6B', r: 4 }} />
           </ComposedChart>
         </ResponsiveContainer>
       </div>
 
       {/* Prediction Details Table */}
-      <div className="bg-ground-secondary border hairline rounded-xl p-5">
+      <div className="bg-surface border hairline rounded-xs p-5">
         <h3 className="portal-heading text-base mb-5">Monthly Prediction Details</h3>
         <div className="overflow-x-auto">
           <table className="w-full">
@@ -193,11 +192,11 @@ export default function PredictionsPage() {
                 const prev = monthlySales[i]?.actual || monthlySales[11]?.actual || 0;
                 const change = prev ? (((Number(p.value || 0) - prev) / prev) * 100).toFixed(1) : '0.0';
                 return (
-                  <tr key={p.month} className="hover:bg-ground/50 transition-colors">
+                  <tr key={p.month} className="hover:bg-canvas/50 transition-colors">
                     <td className="portal-dates-cell portal-dates-cell-primary">{p.month}</td>
-                    <td className="portal-dates-cell"><span className="portal-label bg-teal/10 text-teal px-2 py-1 rounded">AI Prediction</span></td>
-                    <td className="portal-dates-cell font-bold text-teal">{fmt(Number(p.value || 0))} DA</td>
-                    <td className={`portal-dates-cell font-semibold ${parseFloat(change) >= 0 ? 'text-teal' : 'text-red-400'}`}>
+                    <td className="portal-dates-cell"><span className="portal-label bg-olive/10 text-olive px-2 py-1 rounded">AI Prediction</span></td>
+                    <td className="portal-dates-cell font-bold text-olive">{fmt(Number(p.value || 0))} DA</td>
+                    <td className={`portal-dates-cell font-semibold ${parseFloat(change) >= 0 ? 'text-olive' : 'text-clay'}`}>
                       {parseFloat(change) >= 0 ? '+' : ''}{change}%
                     </td>
                     <td className="portal-dates-cell portal-label">Monthly PostgreSQL aggregates</td>
@@ -207,9 +206,9 @@ export default function PredictionsPage() {
             </tbody>
           </table>
         </div>
-        <div className="mt-4 p-3 rounded-xl bg-ground/50 flex items-start gap-2 border hairline">
-          <Info size={14} className="text-muted flex-shrink-0 mt-0.5" />
-          <p className="portal-label text-muted">
+        <div className="mt-4 p-3 rounded-xs bg-canvas/50 flex items-start gap-2 border hairline">
+          <Info size={14} className="text-ink-3 flex-shrink-0 mt-0.5" />
+          <p className="portal-label text-ink-3">
             Predictions are generated by a linear regression model trained on the last 12 months. Accuracy naturally decreases over longer horizons. Use these data as an indicator, not as absolute certainty.
           </p>
         </div>

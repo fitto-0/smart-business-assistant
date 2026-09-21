@@ -127,7 +127,7 @@ export default function Reports() {
   if (loading) {
     return (
       <Layout title="Custom Reports">
-        <div className="bg-ground-secondary border hairline rounded-xl text-center py-16 portal-text">
+        <div className="bg-surface border hairline rounded-xs text-center py-16 portal-text">
           Loading...
         </div>
       </Layout>
@@ -140,12 +140,12 @@ export default function Reports() {
         {/* Header */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-amber/15 flex items-center justify-center">
-              <FileText className="w-5 h-5 text-amber" />
+            <div className="w-10 h-10 rounded-xs bg-ember-500/15 flex items-center justify-center">
+              <FileText className="w-5 h-5 text-ember-500" />
             </div>
             <div>
               <h3 className="portal-heading text-lg">Custom Reports</h3>
-              <p className="portal-label text-muted">{reports.length} report(s)</p>
+              <p className="portal-label text-ink-3">{reports.length} report(s)</p>
             </div>
           </div>
           <button
@@ -153,7 +153,7 @@ export default function Reports() {
               setShowCreateModal(true);
               loadAvailableColumns('sales');
             }}
-            className="px-4 py-2 bg-amber text-ground rounded-lg portal-label font-semibold hover:bg-amber/90 flex items-center gap-2"
+            className="px-4 py-2 bg-ember-500 text-ground rounded-xs portal-label font-semibold hover:bg-ember-500/90 flex items-center gap-2"
           >
             <Plus size={18} />
             Create Report
@@ -162,15 +162,15 @@ export default function Reports() {
 
         {/* Reports List */}
         {reports.length === 0 ? (
-          <div className="bg-ground-secondary border hairline rounded-xl p-8 text-center">
-            <FileText className="w-12 h-12 text-muted mx-auto mb-4" />
-            <p className="portal-label text-muted mb-4">No custom reports yet</p>
+          <div className="bg-surface border hairline rounded-xs p-8 text-center">
+            <FileText className="w-12 h-12 text-ink-3 mx-auto mb-4" />
+            <p className="portal-label text-ink-3 mb-4">No custom reports yet</p>
             <button
               onClick={() => {
                 setShowCreateModal(true);
                 loadAvailableColumns('sales');
               }}
-              className="px-4 py-2 bg-amber text-ground rounded-lg portal-label font-semibold hover:bg-amber/90"
+              className="px-4 py-2 bg-ember-500 text-ground rounded-xs portal-label font-semibold hover:bg-ember-500/90"
             >
               Create Your First Report
             </button>
@@ -178,13 +178,13 @@ export default function Reports() {
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {reports.map((report) => (
-              <div key={report.id} className="bg-ground-secondary border hairline rounded-xl p-5 hover:border-amber/30 transition-all">
+              <div key={report.id} className="bg-surface border hairline rounded-xs p-5 hover:border-ember-500/30 transition-colors">
                 <div className="flex items-start justify-between mb-3">
                   <div className="flex-1">
                     <h4 className="portal-heading font-semibold">{report.name}</h4>
-                    <p className="portal-label text-muted text-sm mt-1">{report.description || 'No description'}</p>
+                    <p className="portal-label text-ink-3 text-sm mt-1">{report.description || 'No description'}</p>
                   </div>
-                  <span className="px-2 py-1 bg-amber/15 text-amber rounded text-xs portal-label">
+                  <span className="px-2 py-1 bg-ember-500/15 text-ember-500 rounded text-xs portal-label">
                     {report.type}
                   </span>
                 </div>
@@ -192,14 +192,14 @@ export default function Reports() {
                   <button
                     onClick={() => runReport(report.id)}
                     disabled={running}
-                    className="flex-1 px-3 py-2 bg-teal/20 text-teal rounded-lg portal-label font-semibold hover:bg-teal/30 flex items-center justify-center gap-2 disabled:opacity-50"
+                    className="flex-1 px-3 py-2 bg-olive/20 text-olive rounded-xs portal-label font-semibold hover:bg-olive/30 flex items-center justify-center gap-2 disabled:opacity-50"
                   >
                     <Play size={16} />
                     Run
                   </button>
                   <button
                     onClick={() => deleteReport(report.id)}
-                    className="p-2 text-red-400 hover:bg-red-400/10 rounded-lg"
+                    className="p-2 text-clay hover:bg-clay/10 rounded-xs"
                   >
                     <Trash2 size={18} />
                   </button>
@@ -212,14 +212,14 @@ export default function Reports() {
         {/* Create Report Modal */}
         {showCreateModal && (
           <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-            <div className="bg-ground-secondary border hairline rounded-xl p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+            <div className="bg-surface border hairline rounded-xs p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
               <div className="flex items-center justify-between mb-6">
                 <h3 className="portal-heading text-lg">Create Custom Report</h3>
                 <button
                   onClick={() => setShowCreateModal(false)}
-                  className="p-2 hover:bg-ground rounded-lg"
+                  className="p-2 hover:bg-canvas rounded-xs"
                 >
-                  ✕
+                  Ã¢Å“â€¢
                 </button>
               </div>
 
@@ -230,7 +230,7 @@ export default function Reports() {
                     type="text"
                     value={newReport.name}
                     onChange={(e) => setNewReport(prev => ({ ...prev, name: e.target.value }))}
-                    className="w-full bg-ground border hairline rounded-lg px-4 py-2 portal-text focus:outline-none focus:border-amber"
+                    className="w-full bg-canvas border hairline rounded-xs px-4 py-2 portal-text focus:outline-none focus:border-ember-500"
                   />
                 </div>
 
@@ -239,7 +239,7 @@ export default function Reports() {
                   <textarea
                     value={newReport.description}
                     onChange={(e) => setNewReport(prev => ({ ...prev, description: e.target.value }))}
-                    className="w-full bg-ground border hairline rounded-lg px-4 py-2 portal-text focus:outline-none focus:border-amber resize-none"
+                    className="w-full bg-canvas border hairline rounded-xs px-4 py-2 portal-text focus:outline-none focus:border-ember-500 resize-none"
                     rows={2}
                   />
                 </div>
@@ -249,7 +249,7 @@ export default function Reports() {
                   <select
                     value={newReport.type}
                     onChange={(e) => handleTypeChange(e.target.value)}
-                    className="w-full bg-ground border hairline rounded-lg px-4 py-2 portal-text focus:outline-none focus:border-amber"
+                    className="w-full bg-canvas border hairline rounded-xs px-4 py-2 portal-text focus:outline-none focus:border-ember-500"
                   >
                     <option value="sales">Sales</option>
                     <option value="products">Products</option>
@@ -260,15 +260,15 @@ export default function Reports() {
 
                 <div>
                   <label className="portal-label block mb-2">Select Columns *</label>
-                  <div className="grid grid-cols-2 gap-2 max-h-40 overflow-y-auto bg-ground p-3 rounded-lg border hairline">
+                  <div className="grid grid-cols-2 gap-2 max-h-40 overflow-y-auto bg-canvas p-3 rounded-xs border hairline">
                     {availableColumns.map((column) => (
                       <button
                         key={column}
                         onClick={() => toggleColumn(column)}
-                        className={`flex items-center gap-2 p-2 rounded-lg text-left portal-label transition-all ${
+                        className={`flex items-center gap-2 p-2 rounded-xs text-left portal-label transition-colors ${
                           newReport.columns.includes(column)
-                            ? 'bg-amber/20 text-amber'
-                            : 'hover:bg-ground/50'
+                            ? 'bg-ember-500/20 text-ember-500'
+                            : 'hover:bg-canvas/50'
                         }`}
                       >
                         {newReport.columns.includes(column) && <Check size={14} />}
@@ -284,7 +284,7 @@ export default function Reports() {
                     <select
                       value={newReport.groupBy}
                       onChange={(e) => setNewReport(prev => ({ ...prev, groupBy: e.target.value }))}
-                      className="w-full bg-ground border hairline rounded-lg px-4 py-2 portal-text focus:outline-none focus:border-amber"
+                      className="w-full bg-canvas border hairline rounded-xs px-4 py-2 portal-text focus:outline-none focus:border-ember-500"
                     >
                       <option value="">None</option>
                       {newReport.columns.map((col) => (
@@ -297,7 +297,7 @@ export default function Reports() {
                     <select
                       value={newReport.sortBy}
                       onChange={(e) => setNewReport(prev => ({ ...prev, sortBy: e.target.value }))}
-                      className="w-full bg-ground border hairline rounded-lg px-4 py-2 portal-text focus:outline-none focus:border-amber"
+                      className="w-full bg-canvas border hairline rounded-xs px-4 py-2 portal-text focus:outline-none focus:border-ember-500"
                     >
                       <option value="">None</option>
                       {newReport.columns.map((col) => (
@@ -312,16 +312,16 @@ export default function Reports() {
                   <div className="flex gap-3">
                     <button
                       onClick={() => setNewReport(prev => ({ ...prev, sortOrder: 'ASC' }))}
-                      className={`flex-1 px-4 py-2 rounded-lg portal-label font-semibold ${
-                        newReport.sortOrder === 'ASC' ? 'bg-amber text-ground' : 'bg-ground border hairline'
+                      className={`flex-1 px-4 py-2 rounded-xs portal-label font-semibold ${
+                        newReport.sortOrder === 'ASC' ? 'bg-ember-500 text-ground' : 'bg-canvas border hairline'
                       }`}
                     >
                       Ascending
                     </button>
                     <button
                       onClick={() => setNewReport(prev => ({ ...prev, sortOrder: 'DESC' }))}
-                      className={`flex-1 px-4 py-2 rounded-lg portal-label font-semibold ${
-                        newReport.sortOrder === 'DESC' ? 'bg-amber text-ground' : 'bg-ground border hairline'
+                      className={`flex-1 px-4 py-2 rounded-xs portal-label font-semibold ${
+                        newReport.sortOrder === 'DESC' ? 'bg-ember-500 text-ground' : 'bg-canvas border hairline'
                       }`}
                     >
                       Descending
@@ -332,13 +332,13 @@ export default function Reports() {
                 <div className="flex gap-3 pt-4">
                   <button
                     onClick={createReport}
-                    className="flex-1 px-4 py-2 bg-amber text-ground rounded-lg portal-label font-semibold hover:bg-amber/90"
+                    className="flex-1 px-4 py-2 bg-ember-500 text-ground rounded-xs portal-label font-semibold hover:bg-ember-500/90"
                   >
                     Create Report
                   </button>
                   <button
                     onClick={() => setShowCreateModal(false)}
-                    className="px-4 py-2 bg-ground border hairline rounded-lg portal-label font-semibold hover:bg-ground/50"
+                    className="px-4 py-2 bg-canvas border hairline rounded-xs portal-label font-semibold hover:bg-canvas/50"
                   >
                     Cancel
                   </button>
@@ -351,17 +351,17 @@ export default function Reports() {
         {/* Report Results Modal */}
         {showRunModal && reportData && (
           <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-            <div className="bg-ground-secondary border hairline rounded-xl p-6 w-full max-w-4xl max-h-[90vh] overflow-y-auto">
+            <div className="bg-surface border hairline rounded-xs p-6 w-full max-w-4xl max-h-[90vh] overflow-y-auto">
               <div className="flex items-center justify-between mb-6">
                 <div>
                   <h3 className="portal-heading text-lg">{reportData.reportName}</h3>
-                  <p className="portal-label text-muted">{reportData.rowCount} rows</p>
+                  <p className="portal-label text-ink-3">{reportData.rowCount} rows</p>
                 </div>
                 <button
                   onClick={() => setShowRunModal(false)}
-                  className="p-2 hover:bg-ground rounded-lg"
+                  className="p-2 hover:bg-canvas rounded-xs"
                 >
-                  ✕
+                  Ã¢Å“â€¢
                 </button>
               </div>
 

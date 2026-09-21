@@ -88,102 +88,107 @@ export default function Chatbot() {
 
   if (!isOpen) {
     return (
-      <button
-        onClick={() => setIsOpen(true)}
-        className="fixed bottom-6 right-6 w-14 h-14 bg-amber rounded-full flex items-center justify-center shadow-lg hover:bg-amber/80 transition-all z-50"
-        title="Open AI Assistant"
-      >
-        <MessageSquare size={24} className="text-ground" />
-      </button>
+      <div className="fixed bottom-6 end-6 z-50 flex flex-col items-end gap-2">
+        <span className="micro">Assist</span>
+        <button
+          onClick={() => setIsOpen(true)}
+          aria-label="Open assistant"
+          title="Open assistant"
+          className="w-12 h-12 rounded-xs bg-ink text-canvas hover:bg-ember-100 flex items-center justify-center transition-colors"
+        >
+          <MessageSquare size={18} strokeWidth={2} />
+        </button>
+      </div>
     );
   }
 
   return (
-    <div className="fixed bottom-6 right-6 w-96 max-h-[600px] bg-ground-secondary border hairline rounded-2xl shadow-2xl flex flex-col z-50">
-      {/* Header */}
-      <div className="flex items-center justify-between p-4 border-b hairline">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 bg-amber rounded-xl flex items-center justify-center">
-            <Bot size={20} className="text-ground" />
-          </div>
-          <div>
-            <h3 className="portal-heading text-sm">AI Assistant</h3>
-            <p className="portal-label text-muted text-xs">
-              Powered by Smart Business AI
-            </p>
+    <div className="fixed bottom-6 end-6 w-[380px] max-w-[calc(100vw-2rem)] max-h-[600px] bg-surface border border-line rounded-none flex flex-col z-50">
+      {/* Header — hairline, square ember marker, status LED */}
+      <div className="flex items-center justify-between gap-3 px-4 py-3 border-b border-line bg-surface">
+        <div className="flex items-center gap-3 min-w-0">
+          <span aria-hidden="true" className="w-1.5 h-1.5 shrink-0 bg-ember-500" />
+          <div className="min-w-0">
+            <p className="micro">Assist — 00</p>
+            <h3 className="text-[14px] font-medium text-ink leading-tight mt-0.5">Assistant</h3>
           </div>
         </div>
-        <button
-          onClick={() => setIsOpen(false)}
-          className="w-8 h-8 rounded-lg hover:bg-ground flex items-center justify-center transition-colors"
-        >
-          <X size={18} className="text-muted" />
-        </button>
+        <div className="flex items-center gap-2 shrink-0">
+          <span className="status text-olive">
+            <span aria-hidden="true" className="w-[5px] h-[5px] bg-olive" />
+            Online
+          </span>
+          <button
+            onClick={() => setIsOpen(false)}
+            aria-label="Close assistant"
+            className="w-8 h-8 rounded-xs flex items-center justify-center text-ink-3 hover:text-ink hover:bg-canvas transition-colors"
+          >
+            <X size={16} />
+          </button>
+        </div>
       </div>
 
-      {/* Messages */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-4">
+      {/* Messages — hairline ledger rows */}
+      <div className="flex-1 overflow-y-auto px-4 py-4 space-y-4 bg-canvas">
         {messages.map((msg, i) => (
           <div
             key={i}
-            className={`flex gap-3 ${msg.role === "user" ? "justify-end" : "justify-start"}`}
+            className={`flex gap-2.5 ${msg.role === "user" ? "justify-end" : "justify-start"}`}
           >
             {msg.role === "bot" && (
-              <div className="w-8 h-8 bg-amber rounded-lg flex items-center justify-center flex-shrink-0">
-                <Bot size={16} className="text-ground" />
+              <div className="w-6 h-6 rounded-xs bg-ink text-canvas flex items-center justify-center flex-shrink-0 mt-0.5">
+                <Bot size={13} />
               </div>
             )}
             <div
-              className={`max-w-[80%] p-3 rounded-xl whitespace-pre-wrap ${
+              className={`max-w-[82%] px-3 py-2.5 text-[13.5px] leading-relaxed whitespace-pre-wrap rounded-xs border ${
                 msg.role === "user"
-                  ? "bg-amber text-ground portal-text"
-                  : "bg-ground border hairline portal-text"
+                  ? "bg-ink text-canvas border-ink"
+                  : "bg-surface text-ink-2 border-line border-s-2 border-s-ember-500"
               }`}
             >
               {msg.text}
             </div>
             {msg.role === "user" && (
-              <div className="w-8 h-8 bg-teal rounded-lg flex items-center justify-center flex-shrink-0">
-                <User size={16} className="text-ground" />
+              <div className="w-6 h-6 rounded-xs bg-surface-2 border border-line flex items-center justify-center flex-shrink-0 mt-0.5">
+                <User size={13} className="text-ink-2" />
               </div>
             )}
           </div>
         ))}
         {loading && (
-          <div className="flex gap-3 justify-start">
-            <div className="w-8 h-8 bg-amber rounded-lg flex items-center justify-center flex-shrink-0">
-              <Bot size={16} className="text-ground" />
+          <div className="flex gap-2.5 justify-start">
+            <div className="w-6 h-6 rounded-xs bg-ink text-canvas flex items-center justify-center flex-shrink-0 mt-0.5">
+              <Bot size={13} />
             </div>
-            <div className="bg-ground border hairline p-3 rounded-xl">
-              <div className="flex gap-1">
-                <div className="w-2 h-2 bg-amber rounded-full animate-bounce" />
-                <div className="w-2 h-2 bg-amber rounded-full animate-bounce delay-100" />
-                <div className="w-2 h-2 bg-amber rounded-full animate-bounce delay-200" />
-              </div>
+            <div className="bg-surface border border-line rounded-xs px-4 py-3">
+              {/* shimmer hairline replaces bouncing dots */}
+              <div className="h-px w-16 bg-ember-500/60 animate-shimmer" />
             </div>
           </div>
         )}
         <div ref={messagesEndRef} />
       </div>
 
-      {/* Input */}
-      <div className="p-4 border-t hairline">
+      {/* Input — square hairline field */}
+      <div className="px-4 py-3 border-t border-line bg-surface">
         <div className="flex gap-2">
           <input
             type="text"
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyPress={handleKeyPress}
-            placeholder="Ask about products, stock, sales..."
-            className="flex-1 bg-ground border hairline rounded-xl px-4 py-2 text-ink placeholder-muted focus:outline-none focus:border-amber transition-colors portal-text"
+            placeholder="Ask about products, stock, sales…"
+            className="flex-1 bg-canvas border border-line rounded-xs px-3 py-2 text-[13px] text-ink placeholder:text-ink-3 focus:outline-none focus:border-ember-500/70 transition-colors"
             disabled={loading}
           />
           <button
             onClick={handleSend}
             disabled={loading || !input.trim()}
-            className="w-10 h-10 bg-amber rounded-xl flex items-center justify-center hover:bg-amber/80 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            aria-label="Send message"
+            className="w-9 h-9 shrink-0 bg-ink text-canvas rounded-xs flex items-center justify-center hover:bg-ember-100 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
           >
-            <Send size={18} className="text-ground" />
+            <Send size={15} />
           </button>
         </div>
       </div>

@@ -19,12 +19,21 @@ export const LanguageProvider = ({ children, userLanguage }) => {
     // Priority: userLanguage from backend > cookie > localStorage > default
     const savedLanguage = userLanguage || Cookies.get("language") || localStorage.getItem("language") || "en";
     setLanguageState(savedLanguage);
+    if (typeof document !== "undefined") {
+      document.documentElement.lang = savedLanguage;
+      document.documentElement.dir = savedLanguage === "ar" ? "rtl" : "ltr";
+    }
   }, [userLanguage]);
 
   const setLanguage = (lang) => {
     setLanguageState(lang);
     Cookies.set("language", lang, { expires: 365 });
     localStorage.setItem("language", lang);
+    if (typeof document !== "undefined") {
+      // Logical-property layouts mirror from this single attribute.
+      document.documentElement.lang = lang;
+      document.documentElement.dir = lang === "ar" ? "rtl" : "ltr";
+    }
   };
 
   const t = (key) => {

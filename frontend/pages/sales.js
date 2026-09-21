@@ -4,20 +4,24 @@ import { apiGet, apiPost } from '../lib/api';
 import { useLanguage } from '../lib/LanguageContext';
 import {
   AreaChart, Area, BarChart, Bar, LineChart, Line,
-  XAxis, YAxis, CartesianGrid, Tooltip, Legend,
+  XAxis, YAxis, Tooltip,
   ResponsiveContainer, ComposedChart
 } from 'recharts';
+import { CHART, SERIES, axisProps, tooltipStyle, tooltipLabelStyle, tooltipCursor, barProps, EmberAreaFill, emberUrl } from '../lib/chartTheme';
+import { fmt, fmtDA } from '../lib/format';
+import PageHeader, { Ledger, Section, NoirTable, Status, Segmented, Empty } from '../components/PageHeader';
 import { TrendingUp, TrendingDown, ShoppingCart, DollarSign, BarChart2, Plus, X } from 'lucide-react';
 
 const fmt = (n) => new Intl.NumberFormat('fr-FR').format(n);
 const CustomTooltip = ({ active, payload, label }) => {
   if (!active || !payload?.length) return null;
   return (
-    <div className="bg-ground-secondary border hairline rounded-xl p-3">
-      <p className="portal-label mb-2 font-semibold">{label}</p>
+    <div className="panel px-3 py-2.5 min-w-[160px]">
+      <p className="micro-2 mb-2">{label}</p>
       {payload.map((p, i) => (
-        <p key={i} className="portal-text" style={{ color: p.color }}>
-          {p.name}: <strong>{fmt(p.value)}</strong>
+        <p key={i} className="flex items-baseline justify-between gap-4 font-mono text-[11px] tabular-nums">
+          <span className="text-ink-3">{p.name}</span>
+          <strong className="font-medium" style={{ color: p.color || CHART.ink }}>{fmt(p.value)}</strong>
         </p>
       ))}
     </div>
@@ -131,171 +135,150 @@ export default function SalesPage() {
   const bestMonthVentes = bestMonth.actual || 0;
 
   if (loading) {
-    return <Layout title={t('sales.title')}><div className="bg-ground-secondary border hairline rounded-xl text-center py-16 portal-text">{t('sales.loading')}</div></Layout>;
+    return <Layout title={t('sales.title')}><div className="panel px-4 py-16 text-center micro-2">{t('sales.loading')}</div></Layout>;
   }
 
   return (
     <Layout title={t('sales.title')}>
-      {/* Header with Add Sale Button */}
-      <div className="flex items-center justify-between mb-6">
-        <div>
-          <h2 className="portal-heading text-2xl">{t('sales.title')}</h2>
-          <p className="portal-label text-muted">{t('sales.trackManageSales')}</p>
-        </div>
-        <button
-          onClick={openSaleModal}
-          className="bg-amber text-ground px-4 py-2 rounded-xl portal-label font-semibold flex items-center gap-2 hover:bg-amber/90 transition-colors"
-        >
-          <Plus size={18} />
-          {t('sales.recordSale')}
-        </button>
-      </div>
+      <PageHeader
+        index="02"
+        eyebrow={t('sales.title')}
+        title={t('sales.trackManageSales')}
+        actions={(
+          <button
+            onClick={openSaleModal}
+            className="btn-ember"
+          >
+            <Plus size={15} strokeWidth={2} />
+            {t('sales.recordSale')}
+          </button>
+        )}
+      />
 
-      {/* Summary KPIs */}
-      <div className="grid grid-cols-2 xl:grid-cols-4 gap-4 mb-6">
-        {[
-          { label: t('sales.totalAnnualRevenue'), value: totalSales, suffix: ' DA', icon: DollarSign, color: 'bg-amber', change: '+18.4%' },
-          { label: t('sales.totalOrders'), value: totalOrders, icon: ShoppingCart, color: 'bg-teal', change: '+12.7%' },
-          { label: t('sales.monthlyAverage'), value: avgMonthly, suffix: ' DA', icon: BarChart2, color: 'bg-teal' },
-          { label: t('sales.bestMonth'), value: bestMonth.month, icon: TrendingUp, color: 'bg-amber', sub: `${fmt(bestMonthVentes)} DA` },
-        ].map((kpi, i) => (
-          <div key={i} className="bg-ground-secondary border hairline rounded-xl p-4 flex items-center gap-4">
-            <div className={`w-11 h-11 rounded-xl ${kpi.color} flex items-center justify-center`}>
-              <kpi.icon size={20} className="text-ground" />
-            </div>
-            <div>
-              <p className="portal-label">{kpi.label}</p>
-              <p className="portal-heading text-xl">{typeof kpi.value === 'number' ? fmt(kpi.value) : kpi.value}{kpi.suffix || ''}</p>
-              {kpi.change && <p className="portal-label text-teal font-semibold">{kpi.change}</p>}
-              {kpi.sub && <p className="portal-label text-muted">{kpi.sub}</p>}
-            </div>
-          </div>
-        ))}
-      </div>
+      {/* Ledger strip — one divided band, tabular numerals */}
+      <Ledger
+        items={[
+          { label: t('sales.totalAnnualRevenue'), value: `${fmt(totalSales)} DA` },
+          { label: t('sales.totalOrders'), value: fmt(totalOrders) },
+          { label: t('sales.monthlyAverage'), value: `${fmt(avgMonthly)} DA` },
+          { label: `${t('sales.bestMonth')} — ${bestMonth.month}`, value: `${fmt(bestMonthVentes)} DA` },
+        ]}
+      />
 
+      <div className="mt-6">
       {/* Sales vs Objective */}
-      <div className="bg-ground-secondary border hairline rounded-xl p-5 mb-6">
-        <h3 className="portal-heading text-base mb-1">{t('sales.salesVsTargets')}</h3>
-        <p className="portal-label mb-5">{t('sales.monthlyComparison')}</p>
-        <ResponsiveContainer width="100%" height={300}>
-          <ComposedChart data={monthlySales}>
-            <defs>
-              <linearGradient id="sg" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor="#6366f1" stopOpacity={0.3} />
-                <stop offset="95%" stopColor="#6366f1" stopOpacity={0} />
-              </linearGradient>
-            </defs>
-            <CartesianGrid strokeDasharray="3 3" stroke="rgba(237,231,220,0.13)" />
-            <XAxis dataKey="month" tick={{ fill: '#9EA5A8', fontSize: 11 }} axisLine={false} tickLine={false} />
-            <YAxis tick={{ fill: '#9EA5A8', fontSize: 11 }} axisLine={false} tickLine={false} tickFormatter={v => `${v / 1000}k`} />
-            <Tooltip content={<CustomTooltip />} />
-            <Legend wrapperStyle={{ fontSize: '12px', paddingTop: '16px' }} />
-            <Area type="monotone" dataKey="actual" name={t('sales.sales')} stroke="#E8913C" strokeWidth={2.5} fill="url(#sg)" />
-            <Line type="monotone" dataKey="target" name={t('sales.target')} stroke="#2E6B72" strokeWidth={2} strokeDasharray="6 4" dot={false} />
-          </ComposedChart>
-        </ResponsiveContainer>
-      </div>
-
-      <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 mb-6">
-        {/* Monthly Orders */}
-        <div className="bg-ground-secondary border hairline rounded-xl p-5">
-          <h3 className="portal-heading text-base mb-1">{t('sales.monthlyOrders')}</h3>
-          <p className="portal-label mb-5">{t('sales.monthlyOrderVolume')}</p>
-          <ResponsiveContainer width="100%" height={220}>
-            <BarChart data={monthlySales} barSize={22}>
-              <CartesianGrid strokeDasharray="3 3" stroke="rgba(237,231,220,0.13)" vertical={false} />
-              <XAxis dataKey="month" tick={{ fill: '#9EA5A8', fontSize: 10 }} axisLine={false} tickLine={false} />
-              <YAxis tick={{ fill: '#9EA5A8', fontSize: 11 }} axisLine={false} tickLine={false} />
-              <Tooltip content={<CustomTooltip />} />
-              <Bar dataKey="orders" name={t('sales.orders')} fill="#2E6B72" radius={[5, 5, 0, 0]} />
-            </BarChart>
+      <Section
+        eyebrow={t('sales.salesVsTargets')}
+        title={t('sales.monthlyComparison')}
+      >
+        <div className="px-4 pt-4">
+          <ResponsiveContainer width="100%" height={280}>
+            <ComposedChart data={monthlySales} margin={{ top: 4, right: 4, bottom: 0, left: -8 }}>
+              <EmberAreaFill id="salesArea" />
+              <XAxis dataKey="month" {...axisProps} />
+              <YAxis {...axisProps} width={48} tickFormatter={v => `${v / 1000}k`} />
+              <Tooltip content={<CustomTooltip />} cursor={tooltipCursor} />
+              <Area type="monotone" dataKey="actual" name={t('sales.sales')} stroke={CHART.ember} strokeWidth={2} fill={emberUrl('salesArea')} />
+              <Line type="monotone" dataKey="target" name={t('sales.target')} stroke={CHART.olive} strokeWidth={1.5} strokeDasharray="6 4" dot={false} />
+            </ComposedChart>
           </ResponsiveContainer>
+          {/* inline series key — replaces Legend */}
+          <div className="flex flex-wrap items-center gap-5 border-t border-line px-4 py-3">
+            <span className="micro flex items-center gap-2"><span aria-hidden="true" className="w-[5px] h-[5px] bg-ember-500" />{t('sales.sales')}</span>
+            <span className="micro flex items-center gap-2"><span aria-hidden="true" className="w-[5px] h-[5px] bg-olive" />{t('sales.target')}</span>
+          </div>
         </div>
+      </Section>
 
-        {/* Top Products by Revenue */}
-        <div className="bg-ground-secondary border hairline rounded-xl p-5">
-          <h3 className="portal-heading text-base mb-1">{t('sales.top5Products')}</h3>
-          <p className="portal-label mb-4">{t('sales.bestPerforming')}</p>
-          <div className="space-y-3">
+      <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 mb-6 mt-6">
+        {/* Monthly Orders */}
+        <Section
+          eyebrow={t('sales.monthlyOrders')}
+          title={t('sales.monthlyOrderVolume')}
+        >
+          <div className="px-4 pt-4">
+            <ResponsiveContainer width="100%" height={220}>
+              <BarChart data={monthlySales} margin={{ top: 4, right: 4, bottom: 0, left: -8 }} {...barProps}>
+                <XAxis dataKey="month" {...axisProps} />
+                <YAxis {...axisProps} width={40} />
+                <Tooltip content={<CustomTooltip />} cursor={{ fill: CHART.cursor }} />
+                <Bar dataKey="orders" name={t('sales.orders')} fill={CHART.olive} radius={[2, 2, 0, 0]} barSize={12} />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        </Section>
+
+        {/* Top Products by Revenue — ranked ledger rows */}
+        <Section
+          eyebrow={t('sales.top5Products')}
+          title={t('sales.bestPerforming')}
+        >
+          <div className="divide-y divide-line">
             {topProducts.map((p, i) => (
-              <div key={p.id} className="flex items-center gap-3">
-                <span className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0
-                  ${i === 0 ? 'bg-amber text-ground' : i === 1 ? 'bg-ink-secondary text-ground' : i === 2 ? 'bg-amber/70 text-ground' : 'bg-muted text-ink'}`}>
-                  {i + 1}
+              <div key={p.id} className="ledger-row flex items-center gap-4 !py-3">
+                <span className="font-mono text-micro uppercase text-ink-3 tabular-nums w-6 shrink-0">
+                  {String(i + 1).padStart(2, "0")}
                 </span>
                 <div className="flex-1 min-w-0">
-                  <div className="flex items-center justify-between mb-1">
-                    <span className="portal-label font-semibold text-ink truncate">{p.name}</span>
-                    <span className="portal-label font-bold text-ink ml-2 flex-shrink-0">{fmt(p.revenue)} DA</span>
+                  <div className="flex items-baseline justify-between gap-3">
+                    <span className="text-[13px] text-ink truncate">{p.name}</span>
+                    <span className="font-mono text-[11px] tabular-nums text-ink shrink-0">{fmt(p.revenue)} DA</span>
                   </div>
-                  <div className="w-full bg-ground rounded-full h-1.5">
-                    <div className="h-1.5 rounded-full bg-amber"
-                      style={{ width: `${(p.revenue / topProducts[0].revenue) * 100}%` }} />
+                  <div className="mt-1.5 h-[3px] w-full bg-canvas">
+                    <div className="h-[3px] bg-ember-500/80"
+                      style={{ width: `${topProducts[0]?.revenue ? (p.revenue / topProducts[0].revenue) * 100 : 0}%` }} />
                   </div>
                 </div>
-                <span className={`portal-label font-semibold flex-shrink-0 ${p.trend >= 0 ? 'text-teal' : 'text-red-400'}`}>
+                <span className={`font-mono text-[11px] tabular-nums shrink-0 ${p.trend >= 0 ? 'text-olive' : 'text-clay'}`}>
                   {p.trend >= 0 ? '+' : ''}{p.trend}%
                 </span>
               </div>
             ))}
           </div>
-        </div>
+        </Section>
       </div>
 
       {/* Detailed Monthly Table */}
-      <div className="bg-ground-secondary border hairline rounded-xl p-5">
-        <h3 className="portal-heading text-base mb-5">{t('sales.detailedMonthlySummary')}</h3>
-        <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead>
-              <tr className="border-b hairline">
-                <th className="portal-dates-header">{t('sales.month')}</th>
-                <th className="portal-dates-header">{t('sales.actual')}</th>
-                <th className="portal-dates-header">{t('sales.targetSales')}</th>
-                <th className="portal-dates-header">{t('sales.ordersCount')}</th>
-                <th className="portal-dates-header">{t('sales.revenue')}</th>
-                <th className="portal-dates-header">{t('sales.trend')}</th>
-              </tr>
-            </thead>
-            <tbody>
-              {monthlySales.map((row) => {
-                const ventes = Number(row.actual || 0);
+      <Section
+        eyebrow={t('sales.detailedMonthlySummary')}
+        title={t('sales.month')}
+        className="mt-6"
+      >
+        <NoirTable
+          columns={[
+            { key: "month", label: t('sales.month') },
+            { key: "actual", label: t('sales.actual'), numeric: true, render: (row) => <span className="text-ember-300">{fmt(row.actual || 0)} DA</span> },
+            { key: "target", label: t('sales.targetSales'), numeric: true, render: (row) => fmt(row.target || 0) },
+            { key: "orders", label: t('sales.ordersCount'), numeric: true, render: (row) => row.orders },
+            {
+              key: "gap", label: t('sales.revenue'), numeric: true,
+              render: (row) => {
+                const ecart = Number(row.actual || 0) - Number(row.target || 0);
+                return <span className={ecart >= 0 ? 'text-olive' : 'text-clay'}>{ecart >= 0 ? '+' : ''}{fmt(ecart)} DA</span>;
+              },
+            },
+            {
+              key: "perf", label: t('sales.trend'), numeric: true,
+              render: (row) => {
                 const objectif = Number(row.target || 0);
-                const ecart = ventes - objectif;
-                const perf = objectif ? ((ventes / objectif) * 100).toFixed(1) : '0.0';
-                return (
-                  <tr key={row.month} className="hover:bg-ground/50 transition-colors">
-                    <td className="portal-dates-cell portal-dates-cell-primary">{row.month}</td>
-                    <td className="portal-dates-cell font-semibold text-amber">{fmt(row.actual || 0)} DA</td>
-                    <td className="portal-dates-cell text-muted">{fmt(row.target || 0)} DA</td>
-                    <td className="portal-dates-cell text-teal">{row.orders}</td>
-                    <td className={`portal-dates-cell font-semibold ${ecart >= 0 ? 'text-teal' : 'text-red-400'}`}>
-                      {ecart >= 0 ? '+' : ''}{fmt(ecart)} DA
-                    </td>
-                    <td className="portal-dates-cell">
-                      <div className="flex items-center gap-2">
-                        <div className="w-16 bg-ground rounded-full h-1.5">
-                          <div className={`h-1.5 rounded-full ${parseFloat(perf) >= 100 ? 'bg-teal' : 'bg-amber'}`}
-                            style={{ width: `${Math.min(parseFloat(perf), 100)}%` }} />
-                        </div>
-                        <span className={`portal-label font-bold ${parseFloat(perf) >= 100 ? 'text-teal' : 'text-amber'}`}>{perf}%</span>
-                      </div>
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </div>
-      </div>
+                const perf = objectif ? ((Number(row.actual || 0) / objectif) * 100).toFixed(1) : '0.0';
+                return <span className={parseFloat(perf) >= 100 ? 'text-olive' : 'text-ember-300'}>{perf}%</span>;
+              },
+            },
+          ]}
+          rows={monthlySales}
+          rowKey="month"
+          emptyLabel={t('sales.loading')}
+        />
+      </Section>
 
       {/* Sale Modal */}
       {showSaleModal && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-ground border hairline rounded-xl p-6 w-full max-w-md">
+          <div className="bg-canvas border hairline rounded-xs p-6 w-full max-w-md">
             <div className="flex items-center justify-between mb-4">
               <h3 className="portal-heading text-xl">{t('sales.recordSale')}</h3>
-              <button onClick={closeSaleModal} className="text-muted hover:text-ink">
+              <button onClick={closeSaleModal} className="text-ink-3 hover:text-ink">
                 <X size={20} />
               </button>
             </div>
@@ -306,7 +289,7 @@ export default function SalesPage() {
                 <select
                   value={saleForm.product_id}
                   onChange={(e) => handleProductChange(e.target.value)}
-                  className="w-full bg-ground-secondary border hairline rounded-lg px-3 py-2 portal-text"
+                  className="w-full bg-surface border hairline rounded-xs px-3 py-2 portal-text"
                   required
                 >
                   <option value="">{t('sales.selectProduct')}</option>
@@ -326,7 +309,7 @@ export default function SalesPage() {
                     min="1"
                     value={saleForm.quantity}
                     onChange={(e) => setSaleForm({ ...saleForm, quantity: parseInt(e.target.value) })}
-                    className="w-full bg-ground-secondary border hairline rounded-lg px-3 py-2 portal-text"
+                    className="w-full bg-surface border hairline rounded-xs px-3 py-2 portal-text"
                     required
                   />
                 </div>
@@ -339,7 +322,7 @@ export default function SalesPage() {
                     step="0.01"
                     value={saleForm.unit_price}
                     onChange={(e) => setSaleForm({ ...saleForm, unit_price: parseFloat(e.target.value) })}
-                    className="w-full bg-ground-secondary border hairline rounded-lg px-3 py-2 portal-text"
+                    className="w-full bg-surface border hairline rounded-xs px-3 py-2 portal-text"
                     required
                   />
                 </div>
@@ -351,7 +334,7 @@ export default function SalesPage() {
                   type="date"
                   value={saleForm.date}
                   onChange={(e) => setSaleForm({ ...saleForm, date: e.target.value })}
-                  className="w-full bg-ground-secondary border hairline rounded-lg px-3 py-2 portal-text"
+                  className="w-full bg-surface border hairline rounded-xs px-3 py-2 portal-text"
                   required
                 />
               </div>
@@ -362,7 +345,7 @@ export default function SalesPage() {
                   type="text"
                   value={saleForm.customer_name}
                   onChange={(e) => setSaleForm({ ...saleForm, customer_name: e.target.value })}
-                  className="w-full bg-ground-secondary border hairline rounded-lg px-3 py-2 portal-text"
+                  className="w-full bg-surface border hairline rounded-xs px-3 py-2 portal-text"
                   placeholder="Optional"
                 />
               </div>
@@ -372,12 +355,12 @@ export default function SalesPage() {
                 <select
                   value={saleForm.payment_method}
                   onChange={(e) => setSaleForm({ ...saleForm, payment_method: e.target.value })}
-                  className="w-full bg-ground-secondary border hairline rounded-lg px-3 py-2 portal-text"
+                  className="w-full bg-surface border hairline rounded-xs px-3 py-2 portal-text"
                 >
                   <option value="carte">{t('sales.card')}</option>
-                  <option value="espèces">{t('sales.cash')}</option>
+                  <option value="espÃƒÂ¨ces">{t('sales.cash')}</option>
                   <option value="virement">{t('sales.transfer')}</option>
-                  <option value="chèque">Check</option>
+                  <option value="chÃƒÂ¨que">Check</option>
                   <option value="autre">Other</option>
                 </select>
               </div>
@@ -387,7 +370,7 @@ export default function SalesPage() {
                 <textarea
                   value={saleForm.notes}
                   onChange={(e) => setSaleForm({ ...saleForm, notes: e.target.value })}
-                  className="w-full bg-ground-secondary border hairline rounded-lg px-3 py-2 portal-text"
+                  className="w-full bg-surface border hairline rounded-xs px-3 py-2 portal-text"
                   rows="2"
                   placeholder="Optional notes"
                 />
@@ -397,14 +380,14 @@ export default function SalesPage() {
                 <button
                   type="button"
                   onClick={closeSaleModal}
-                  className="flex-1 bg-ground-secondary border hairline rounded-lg px-4 py-2 portal-label font-semibold hover:bg-ground/50 transition-colors"
+                  className="flex-1 bg-surface border hairline rounded-xs px-4 py-2 portal-label font-semibold hover:bg-canvas/50 transition-colors"
                 >
                   {t('sales.cancel')}
                 </button>
                 <button
                   type="submit"
                   disabled={submitting}
-                  className="flex-1 bg-amber text-ground rounded-lg px-4 py-2 portal-label font-semibold hover:bg-amber/90 transition-colors disabled:opacity-50"
+                  className="flex-1 bg-ember-500 text-ground rounded-xs px-4 py-2 portal-label font-semibold hover:bg-ember-500/90 transition-colors disabled:opacity-50"
                 >
                   {submitting ? t('sales.record') + '...' : t('sales.recordSale')}
                 </button>

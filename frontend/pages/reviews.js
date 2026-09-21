@@ -9,31 +9,31 @@ import toast from "react-hot-toast";
 import { format } from "date-fns";
 
 const SentimentIcon = ({ s }) => {
-  if (s === "positif") return <ThumbsUp size={14} className="text-teal" />;
-  if (s === "négatif") return <ThumbsDown size={14} className="text-red-400" />;
-  return <Minus size={14} className="text-amber" />;
+  if (s === "positif") return <ThumbsUp size={14} className="text-olive" />;
+  if (s === "nÃƒÂ©gatif") return <ThumbsDown size={14} className="text-clay" />;
+  return <Minus size={14} className="text-ember-500" />;
 };
 
 const SentimentBadge = ({ s }) => {
-  const cls = s === "positif" ? "text-teal" : s === "négatif" ? "text-red-400" : "text-amber";
+  const cls = s === "positif" ? "text-olive" : s === "nÃƒÂ©gatif" ? "text-clay" : "text-ember-500";
   return <span className={`portal-label ${cls}`}>{s}</span>;
 };
 
 const Stars = ({ n }) => (
   <div className="flex gap-0.5">
     {[1, 2, 3, 4, 5].map((i) => (
-      <Star key={i} size={12} className={i <= n ? "text-amber fill-amber" : "text-muted"} />
+      <Star key={i} size={12} className={i <= n ? "text-ember-500 fill-amber" : "text-ink-3"} />
     ))}
   </div>
 );
 
 const ScoreBar = ({ score }) => {
   const pct = Math.round(score * 100);
-  const color = score >= 0.7 ? "#2E6B72" : score >= 0.4 ? "#E8913C" : "#ef4444";
+  const color = score >= 0.7 ? "#7E9C6B" : score >= 0.4 ? "#E2703A" : "#B3392B";
   return (
     <div className="flex items-center gap-2">
-      <div className="flex-1 bg-ground rounded-full h-1.5">
-        <div className="h-1.5 rounded-full transition-all" style={{ width: `${pct}%`, background: color }} />
+      <div className="flex-1 bg-canvas rounded-full h-1.5">
+        <div className="h-1.5 rounded-full transition-colors" style={{ width: `${pct}%`, background: color }} />
       </div>
       <span className="portal-label font-semibold w-8 text-right" style={{ color }}>{pct}%</span>
     </div>
@@ -134,21 +134,21 @@ export default function ReviewsPage() {
       value: Number(
         stats.find((s) => s.sentiment === "positif")?.percentage || 0,
       ),
-      color: "#10b981",
+      color: "#7E9C6B",
     },
     {
       name: "Neutre",
       value: Number(
         stats.find((s) => s.sentiment === "neutre")?.percentage || 0,
       ),
-      color: "#f59e0b",
+      color: "#D9A05B",
     },
     {
-      name: "Négatif",
+      name: "NÃƒÂ©gatif",
       value: Number(
-        stats.find((s) => s.sentiment === "négatif")?.percentage || 0,
+        stats.find((s) => s.sentiment === "nÃƒÂ©gatif")?.percentage || 0,
       ),
-      color: "#ef4444",
+      color: "#B3392B",
     },
   ];
 
@@ -163,7 +163,7 @@ export default function ReviewsPage() {
   if (loading) {
     return (
       <Layout title={t('reviews.title')}>
-        <div className="bg-ground-secondary border hairline rounded-xl text-center py-16 portal-text">
+        <div className="bg-surface border hairline rounded-xs text-center py-16 portal-text">
           {t('reviews.loading')}
         </div>
       </Layout>
@@ -176,7 +176,7 @@ export default function ReviewsPage() {
       <div className="flex gap-3 mb-6">
         <button
           onClick={() => setShowReviewForm(true)}
-          className="flex items-center gap-2 px-4 py-2.5 bg-amber text-ground rounded-lg portal-label font-semibold hover:bg-amber/90 transition-colors"
+          className="flex items-center gap-2 px-4 py-2.5 bg-ember-500 text-ground rounded-xs portal-label font-semibold hover:bg-ember-500/90 transition-colors"
         >
           <Plus size={18} />
           {t('reviews.addReview')}
@@ -192,7 +192,7 @@ export default function ReviewsPage() {
           />
           <label
             htmlFor="csv-upload"
-            className="flex items-center gap-2 px-4 py-2.5 border hairline rounded-lg portal-label hover:border-amber/50 transition-colors cursor-pointer"
+            className="flex items-center gap-2 px-4 py-2.5 border hairline rounded-xs portal-label hover:border-ember-500/50 transition-colors cursor-pointer"
           >
             <Upload size={18} />
             {csvFile ? csvFile.name : t('reviews.importCSV')}
@@ -201,7 +201,7 @@ export default function ReviewsPage() {
             <button
               onClick={handleCSVImport}
               disabled={uploading}
-              className="px-4 py-2.5 bg-teal text-ground rounded-lg portal-label font-semibold hover:bg-teal/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              className="px-4 py-2.5 bg-olive text-ground rounded-xs portal-label font-semibold hover:bg-olive/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {uploading ? t('reviews.importing') : t('reviews.import')}
             </button>
@@ -220,8 +220,8 @@ export default function ReviewsPage() {
 
       {/* Stats Row */}
       <div className="grid grid-cols-2 xl:grid-cols-4 gap-4 mb-6">
-        <div className="bg-ground-secondary border hairline rounded-xl p-4 flex items-center gap-4">
-          <div className="w-11 h-11 rounded-xl bg-amber flex items-center justify-center">
+        <div className="bg-surface border hairline rounded-xs p-4 flex items-center gap-4">
+          <div className="w-11 h-11 rounded-xs bg-ember-500 flex items-center justify-center">
             <Star size={20} className="text-ground" />
           </div>
           <div>
@@ -232,38 +232,38 @@ export default function ReviewsPage() {
             </p>
           </div>
         </div>
-        <div className="bg-ground-secondary border hairline rounded-xl p-4 flex items-center gap-4">
-          <div className="w-11 h-11 rounded-xl bg-teal flex items-center justify-center">
+        <div className="bg-surface border hairline rounded-xs p-4 flex items-center gap-4">
+          <div className="w-11 h-11 rounded-xs bg-olive flex items-center justify-center">
             <ThumbsUp size={20} className="text-ground" />
           </div>
           <div>
             <p className="portal-label">{t('reviews.positiveReviews')}</p>
             <p className="portal-heading text-2xl">
               {stats.find((s) => s.sentiment === "positif")?.count || 0}{" "}
-              <span className="portal-label text-teal">
+              <span className="portal-label text-olive">
                 ({stats.find((s) => s.sentiment === "positif")?.percentage || 0}
                 %)
               </span>
             </p>
           </div>
         </div>
-        <div className="bg-ground-secondary border hairline rounded-xl p-4 flex items-center gap-4">
-          <div className="w-11 h-11 rounded-xl bg-red-400 flex items-center justify-center">
+        <div className="bg-surface border hairline rounded-xs p-4 flex items-center gap-4">
+          <div className="w-11 h-11 rounded-xs bg-clay flex items-center justify-center">
             <ThumbsDown size={20} className="text-ground" />
           </div>
           <div>
             <p className="portal-label">{t('reviews.negativeReviews')}</p>
             <p className="portal-heading text-2xl">
-              {stats.find((s) => s.sentiment === "négatif")?.count || 0}{" "}
-              <span className="portal-label text-red-400">
-                ({stats.find((s) => s.sentiment === "négatif")?.percentage || 0}
+              {stats.find((s) => s.sentiment === "nÃƒÂ©gatif")?.count || 0}{" "}
+              <span className="portal-label text-clay">
+                ({stats.find((s) => s.sentiment === "nÃƒÂ©gatif")?.percentage || 0}
                 %)
               </span>
             </p>
           </div>
         </div>
-        <div className="bg-ground-secondary border hairline rounded-xl p-4 flex items-center gap-4">
-          <div className="w-11 h-11 rounded-xl bg-amber flex items-center justify-center">
+        <div className="bg-surface border hairline rounded-xs p-4 flex items-center gap-4">
+          <div className="w-11 h-11 rounded-xs bg-ember-500 flex items-center justify-center">
             <MessageSquare size={20} className="text-ground" />
           </div>
           <div>
@@ -278,7 +278,7 @@ export default function ReviewsPage() {
 
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-6 mb-6">
         {/* Sentiment Pie */}
-        <div className="bg-ground-secondary border hairline rounded-xl p-5 flex flex-col items-center">
+        <div className="bg-surface border hairline rounded-xs p-5 flex flex-col items-center">
           <h3 className="portal-heading text-base mb-1 self-start">
             {t('reviews.sentimentDistribution')}
           </h3>
@@ -303,9 +303,11 @@ export default function ReviewsPage() {
               <Tooltip
                 formatter={(v, n) => [`${v}%`, n]}
                 contentStyle={{
-                  background: "#101317",
-                  border: "1px solid rgba(237,231,220,0.13)",
-                  borderRadius: "12px",
+                  background: "#100C0B",
+                  border: "1px solid rgb(242 236 228 / 0.10)",
+                  borderRadius: "2px",
+                  fontFamily: "'JetBrains Mono', monospace",
+                  fontSize: 11,
                 }}
               />
             </PieChart>
@@ -323,7 +325,7 @@ export default function ReviewsPage() {
         </div>
 
         {/* Rating Distribution */}
-        <div className="bg-ground-secondary border hairline rounded-xl p-5 xl:col-span-2">
+        <div className="bg-surface border hairline rounded-xs p-5 xl:col-span-2">
           <h3 className="portal-heading text-base mb-1">
             {t('reviews.ratingDistribution')}
           </h3>
@@ -341,13 +343,13 @@ export default function ReviewsPage() {
               return (
                 <div key={star} className="flex items-center gap-3">
                   <div className="flex items-center gap-1 w-14">
-                    <Star size={12} className="text-amber fill-amber" />
+                    <Star size={12} className="text-ember-500 fill-amber" />
                     <span className="portal-label font-semibold">
                       {star}
                     </span>
                   </div>
-                  <div className="flex-1 bg-ground rounded-full h-2.5">
-                    <div className="h-2.5 rounded-full bg-amber transition-all" style={{ width: `${pct}%` }} />
+                  <div className="flex-1 bg-canvas rounded-full h-2.5">
+                    <div className="h-2.5 rounded-full bg-ember-500 transition-colors" style={{ width: `${pct}%` }} />
                   </div>
                   <span className="portal-label w-10 text-right">
                     {count} ({pct}%)
@@ -356,8 +358,8 @@ export default function ReviewsPage() {
               );
             })}
           </div>
-          <div className="mt-5 p-3 rounded-xl bg-amber/10 border hairline flex items-center gap-3">
-            <Star size={20} className="text-amber fill-amber flex-shrink-0" />
+          <div className="mt-5 p-3 rounded-xs bg-ember-500/10 border hairline flex items-center gap-3">
+            <Star size={20} className="text-ember-500 fill-amber flex-shrink-0" />
             <div>
               <p className="portal-heading text-sm">
                 {t('reviews.overallRating').replace('{rating}', averageRating.toFixed(1))}
@@ -371,23 +373,23 @@ export default function ReviewsPage() {
       </div>
 
       {/* Reviews List */}
-      <div className="bg-ground-secondary border hairline rounded-xl p-5">
+      <div className="bg-surface border hairline rounded-xs p-5">
         <h3 className="portal-heading text-base mb-5">
           {t('reviews.allReviews')}
         </h3>
         <div className="space-y-4">
           {reviews.map((review) => (
-            <div key={review.id} className="p-4 rounded-xl bg-ground/50 border hairline hover:border-amber/30 transition-all">
+            <div key={review.id} className="p-4 rounded-xs bg-canvas/50 border hairline hover:border-ember-500/30 transition-colors">
               <div className="flex items-start justify-between gap-3 mb-3">
                 <div className="flex items-center gap-3">
-                  <div className="w-9 h-9 rounded-full bg-amber flex items-center justify-center text-ground font-bold text-sm flex-shrink-0">
+                  <div className="w-9 h-9 rounded-full bg-ember-500 flex items-center justify-center text-ground font-bold text-sm flex-shrink-0">
                     {review.customer_name?.[0] || "C"}
                   </div>
                   <div>
                     <p className="portal-label font-semibold text-ink">
                       {review.customer_name}
                     </p>
-                    <p className="portal-label text-muted">
+                    <p className="portal-label text-ink-3">
                       {review.product_name || t('reviews.product')}
                     </p>
                   </div>
@@ -401,12 +403,12 @@ export default function ReviewsPage() {
                 "{review.comment}"
               </p>
               <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2 portal-label text-muted">
+                <div className="flex items-center gap-2 portal-label text-ink-3">
                   <SentimentIcon s={review.sentiment} />
                   <span>{review.date ? format(new Date(review.date), 'yyyy-MM-dd') : 'N/A'}</span>
                 </div>
                 <div className="w-40">
-                  <p className="portal-label text-muted mb-1">
+                  <p className="portal-label text-ink-3 mb-1">
                     AI Score: {Math.round(Number(review.score || 0) * 100)}%
                   </p>
                   <ScoreBar score={review.score} />

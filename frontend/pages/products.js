@@ -32,11 +32,11 @@ const getStatusLabel = (status, t) => {
 
 const getStatusClass = (status) => {
   const classes = {
-    actif: "text-teal",
-    stock_faible: "text-amber",
-    rupture: "text-red-400",
+    actif: "text-olive",
+    stock_faible: "text-ember-500",
+    rupture: "text-clay",
   };
-  return classes[status] || "text-muted";
+  return classes[status] || "text-ink-3";
 };
 
 export default function ProductsPage() {
@@ -44,7 +44,7 @@ export default function ProductsPage() {
   const [products, setProducts] = useState([]);
   const [categories, setCategories] = useState([]);
   const [newCategory, setNewCategory] = useState("");
-  const [newCategoryColor, setNewCategoryColor] = useState("#E8913C");
+  const [newCategoryColor, setNewCategoryColor] = useState("#E2703A");
   const [search, setSearch] = useState("");
   const [catFilter, setCatFilter] = useState("All");
   const [showModal, setShowModal] = useState(false);
@@ -279,26 +279,26 @@ export default function ProductsPage() {
           {
             label: t("products.totalProducts") || "Total Products",
             value: totalProducts,
-            color: "bg-amber",
+            color: "bg-ember-500",
           },
           {
             label: t("products.inStock") || "In Stock",
             value: inStock,
-            color: "bg-teal",
+            color: "bg-olive",
           },
-          { label: t("products.lowStock"), value: lowStock, color: "bg-amber" },
+          { label: t("products.lowStock"), value: lowStock, color: "bg-ember-500" },
           {
             label: t("products.outOfStock"),
             value: outStock,
-            color: "bg-red-400",
+            color: "bg-clay",
           },
         ].map((s, i) => (
           <div
             key={i}
-            className="bg-ground-secondary border hairline rounded-xl p-4 flex items-center gap-4"
+            className="bg-surface border hairline rounded-xs p-4 flex items-center gap-4"
           >
             <div
-              className={`w-11 h-11 rounded-xl ${s.color} flex items-center justify-center`}
+              className={`w-11 h-11 rounded-xs ${s.color} flex items-center justify-center`}
             >
               <Package size={20} className="text-ground" />
             </div>
@@ -311,20 +311,20 @@ export default function ProductsPage() {
       </div>
 
       {/* Toolbar */}
-      <div className="bg-ground-secondary border hairline rounded-xl p-4 mb-6">
+      <div className="bg-surface border hairline rounded-xs p-4 mb-6">
         <div className="flex flex-col sm:flex-row gap-3 items-start sm:items-center justify-between">
           <div className="flex flex-col sm:flex-row gap-3 flex-1">
             <div className="relative flex-1 max-w-xs">
               <Search
                 size={16}
-                className="absolute left-3 top-1/2 -translate-y-1/2 text-muted"
+                className="absolute left-3 top-1/2 -translate-y-1/2 text-ink-3"
               />
               <input
                 type="text"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 placeholder={t("products.searchPlaceholder")}
-                className="w-full bg-ground border hairline rounded-xl px-4 py-2 pl-9 text-ink placeholder-muted focus:outline-none focus:border-amber transition-colors"
+                className="w-full bg-canvas border hairline rounded-xs px-4 py-2 pl-9 text-ink placeholder-muted focus:outline-none focus:border-ember-500 transition-colors"
               />
             </div>
             <div className="flex gap-2 flex-wrap">
@@ -332,7 +332,7 @@ export default function ProductsPage() {
                 <button
                   key={c}
                   onClick={() => setCatFilter(c)}
-                  className={`portal-label px-3 py-1.5 rounded-lg font-medium transition-all ${catFilter === c ? "bg-amber text-ground" : "bg-ground text-ink-secondary hover:bg-ground/50"}`}
+                  className={`portal-label px-3 py-1.5 rounded-xs font-medium transition-colors ${catFilter === c ? "bg-ember-500 text-ground" : "bg-canvas text-ink-2 hover:bg-canvas/50"}`}
                 >
                   {c}
                 </button>
@@ -353,10 +353,10 @@ export default function ProductsPage() {
         </div>
       </div>
 
-      <div className="bg-ground-secondary border hairline rounded-xl p-4 mb-6">
+      <div className="bg-surface border hairline rounded-xs p-4 mb-6">
         <div className="flex flex-col lg:flex-row lg:items-center gap-3">
           <div className="flex items-center gap-2">
-            <Palette size={16} className="text-amber" />
+            <Palette size={16} className="text-ember-500" />
             <span className="portal-heading text-sm">
               {t("products.manageCategories")}
             </span>
@@ -367,14 +367,14 @@ export default function ProductsPage() {
               onChange={(e) => setNewCategory(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && addCategory()}
               placeholder={t("products.newCategoryName")}
-              className="flex-1 bg-ground border hairline rounded-xl px-3 py-2 portal-text text-ink placeholder-muted focus:outline-none focus:border-amber"
+              className="flex-1 bg-canvas border hairline rounded-xs px-3 py-2 portal-text text-ink placeholder-muted focus:outline-none focus:border-ember-500"
             />
             <input
               type="color"
               value={newCategoryColor}
               onChange={(e) => setNewCategoryColor(e.target.value)}
               title={t("products.chooseCategoryColor")}
-              className="h-10 w-12 bg-ground border hairline rounded-xl p-1 cursor-pointer"
+              className="h-10 w-12 bg-canvas border hairline rounded-xs p-1 cursor-pointer"
             />
             <button
               onClick={addCategory}
@@ -388,7 +388,7 @@ export default function ProductsPage() {
           {categories.map((category) => (
             <div
               key={category.id}
-              className="flex items-center gap-2 bg-ground border hairline rounded-lg px-2.5 py-1.5"
+              className="flex items-center gap-2 bg-canvas border hairline rounded-xs px-2.5 py-1.5"
             >
               <span
                 className="w-2.5 h-2.5 rounded-full"
@@ -398,7 +398,7 @@ export default function ProductsPage() {
               <button
                 onClick={() => deleteCategory(category)}
                 title={t("products.deleteCategory")}
-                className="text-muted hover:text-red-400 transition-colors"
+                className="text-ink-3 hover:text-clay transition-colors"
               >
                 <X size={13} />
               </button>
@@ -408,13 +408,13 @@ export default function ProductsPage() {
       </div>
 
       {loading && (
-        <div className="bg-ground-secondary border hairline rounded-xl text-center py-8 portal-text">
+        <div className="bg-surface border hairline rounded-xs text-center py-8 portal-text">
           {t("products.loading")}
         </div>
       )}
 
       {/* Products Table */}
-      <div className="bg-ground-secondary border hairline rounded-xl p-5">
+      <div className="bg-surface border hairline rounded-xs p-5">
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead>
@@ -437,23 +437,23 @@ export default function ProductsPage() {
                 return (
                   <tr
                     key={p.id}
-                    className="hover:bg-ground/50 transition-colors"
+                    className="hover:bg-canvas/50 transition-colors"
                   >
                     <td className="portal-dates-cell portal-dates-cell-primary">
                       {p.name}
                     </td>
                     <td className="portal-dates-cell">
-                      <span className="portal-label bg-teal/10 text-teal px-2 py-1 rounded">
+                      <span className="portal-label bg-olive/10 text-olive px-2 py-1 rounded">
                         {p.category}
                       </span>
                     </td>
                     <td className="portal-dates-cell font-medium text-ink">
                       {p.promotion_price ? (
                         <div>
-                          <span className="line-through text-muted mr-2">
+                          <span className="line-through text-ink-3 mr-2">
                             {fmt(p.price)} DA
                           </span>
-                          <span className="text-amber">
+                          <span className="text-ember-500">
                             {fmt(p.promotion_price)} DA
                           </span>
                         </div>
@@ -462,21 +462,21 @@ export default function ProductsPage() {
                       )}
                     </td>
                     <td
-                      className={`portal-dates-cell font-semibold ${p.stock === 0 ? "text-red-400" : p.stock <= 10 ? "text-amber" : "text-teal"}`}
+                      className={`portal-dates-cell font-semibold ${p.stock === 0 ? "text-clay" : p.stock <= 10 ? "text-ember-500" : "text-olive"}`}
                     >
                       {p.stock === 0
-                        ? `⚠ ${t("products.outOfStock")}`
+                        ? `Ã¢Å¡Â  ${t("products.outOfStock")}`
                         : p.stock}
                     </td>
-                    <td className="portal-dates-cell text-ink-secondary">
+                    <td className="portal-dates-cell text-ink-2">
                       {p.sold}
                     </td>
-                    <td className="portal-dates-cell font-semibold text-amber">
+                    <td className="portal-dates-cell font-semibold text-ember-500">
                       {fmt(p.revenue)} DA
                     </td>
                     <td className="portal-dates-cell">
                       <div
-                        className={`flex items-center gap-1 font-semibold portal-label ${p.trend >= 0 ? "text-teal" : "text-red-400"}`}
+                        className={`flex items-center gap-1 font-semibold portal-label ${p.trend >= 0 ? "text-olive" : "text-clay"}`}
                       >
                         {p.trend >= 0 ? (
                           <TrendingUp size={12} />
@@ -496,13 +496,13 @@ export default function ProductsPage() {
                       <div className="flex items-center gap-2">
                         <button
                           onClick={() => openEdit(p)}
-                          className="p-1.5 rounded-lg hover:bg-amber/20 text-amber transition-colors"
+                          className="p-1.5 rounded-xs hover:bg-ember-500/20 text-ember-500 transition-colors"
                         >
                           <Edit2 size={14} />
                         </button>
                         <button
                           onClick={() => handleDelete(p.id)}
-                          className="p-1.5 rounded-lg hover:bg-red-400/20 text-red-400 transition-colors"
+                          className="p-1.5 rounded-xs hover:bg-clay/20 text-clay transition-colors"
                         >
                           <Trash2 size={14} />
                         </button>
@@ -525,7 +525,7 @@ export default function ProductsPage() {
       {/* Product Add/Edit Modal */}
       {showModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-          <div className="bg-ground-secondary border hairline rounded-2xl p-6 w-full max-w-md shadow-2xl animate-slide-up">
+          <div className="bg-surface border hairline rounded-xs p-6 w-full max-w-md  animate-rise-in">
             <div className="flex items-center justify-between mb-5">
               <h3 className="portal-heading text-lg">
                 {editProduct
@@ -534,7 +534,7 @@ export default function ProductsPage() {
               </h3>
               <button
                 onClick={() => setShowModal(false)}
-                className="p-2 rounded-lg hover:bg-ground text-muted"
+                className="p-2 rounded-xs hover:bg-canvas text-ink-3"
               >
                 <X size={18} />
               </button>
@@ -548,7 +548,7 @@ export default function ProductsPage() {
                   type="text"
                   value={form.name}
                   onChange={(e) => setForm({ ...form, name: e.target.value })}
-                  className="w-full bg-ground border hairline rounded-xl px-4 py-2 text-ink placeholder-muted focus:outline-none focus:border-amber transition-colors"
+                  className="w-full bg-canvas border hairline rounded-xs px-4 py-2 text-ink placeholder-muted focus:outline-none focus:border-ember-500 transition-colors"
                   placeholder={t("products.productNamePlaceholder")}
                 />
               </div>
@@ -561,7 +561,7 @@ export default function ProductsPage() {
                   onChange={(e) =>
                     setForm({ ...form, category: e.target.value })
                   }
-                  className="w-full bg-ground border hairline rounded-xl px-4 py-2 text-ink focus:outline-none focus:border-amber transition-colors"
+                  className="w-full bg-canvas border hairline rounded-xs px-4 py-2 text-ink focus:outline-none focus:border-ember-500 transition-colors"
                 >
                   <option value="">{t("products.selectCategory")}</option>
                   {categoryOptions.map((c) => (
@@ -579,7 +579,7 @@ export default function ProductsPage() {
                   type="number"
                   value={form.price}
                   onChange={(e) => setForm({ ...form, price: e.target.value })}
-                  className="w-full bg-ground border hairline rounded-xl px-4 py-2 text-ink placeholder-muted focus:outline-none focus:border-amber transition-colors"
+                  className="w-full bg-canvas border hairline rounded-xs px-4 py-2 text-ink placeholder-muted focus:outline-none focus:border-ember-500 transition-colors"
                   placeholder="0"
                 />
               </div>
@@ -591,7 +591,7 @@ export default function ProductsPage() {
                   type="number"
                   value={form.stock}
                   onChange={(e) => setForm({ ...form, stock: e.target.value })}
-                  className="w-full bg-ground border hairline rounded-xl px-4 py-2 text-ink placeholder-muted focus:outline-none focus:border-amber transition-colors"
+                  className="w-full bg-canvas border hairline rounded-xs px-4 py-2 text-ink placeholder-muted focus:outline-none focus:border-ember-500 transition-colors"
                   placeholder="0"
                 />
               </div>
@@ -607,7 +607,7 @@ export default function ProductsPage() {
                   onChange={(e) =>
                     setForm({ ...form, promotionPrice: e.target.value })
                   }
-                  className="w-full bg-ground border hairline rounded-xl px-4 py-2 text-ink placeholder-muted focus:outline-none focus:border-amber transition-colors"
+                  className="w-full bg-canvas border hairline rounded-xs px-4 py-2 text-ink placeholder-muted focus:outline-none focus:border-ember-500 transition-colors"
                   placeholder={
                     t("products.promotionPricePlaceholder") ||
                     "Leave empty for no promotion"
@@ -622,9 +622,9 @@ export default function ProductsPage() {
                   type="file"
                   accept="image/*"
                   onChange={(e) => setImageFile(e.target.files?.[0] || null)}
-                  className="w-full bg-ground border hairline rounded-xl px-4 py-2 text-ink file:mr-3 file:rounded-lg file:border-0 file:bg-amber file:px-3 file:py-1 file:text-ground"
+                  className="w-full bg-canvas border hairline rounded-xs px-4 py-2 text-ink file:mr-3 file:rounded-xs file:border-0 file:bg-ember-500 file:px-3 file:py-1 file:text-ground"
                 />
-                <p className="portal-label text-muted mt-1">
+                <p className="portal-label text-ink-3 mt-1">
                   PNG, JPG, or WEBP up to 8MB.
                 </p>
               </div>
@@ -650,14 +650,14 @@ export default function ProductsPage() {
       {/* CSV Import Modal */}
       {showCsvModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-          <div className="bg-ground-secondary border hairline rounded-2xl p-6 w-full max-w-lg shadow-2xl animate-slide-up">
+          <div className="bg-surface border hairline rounded-xs p-6 w-full max-w-lg  animate-rise-in">
             <div className="flex items-center justify-between mb-5">
               <h3 className="portal-heading text-lg">
                 {t("products.importFromCSV")}
               </h3>
               <button
                 onClick={() => setShowCsvModal(false)}
-                className="p-2 rounded-lg hover:bg-ground text-muted"
+                className="p-2 rounded-xs hover:bg-canvas text-ink-3"
               >
                 <X size={18} />
               </button>
@@ -673,45 +673,45 @@ export default function ProductsPage() {
                     type="file"
                     accept=".csv"
                     onChange={handleCsvFileChange}
-                    className="w-full bg-ground border hairline rounded-xl px-4 py-3 text-ink file:mr-4 file:py-1 file:px-3 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-amber file:text-ground hover:file:bg-amber/80"
+                    className="w-full bg-canvas border hairline rounded-xs px-4 py-3 text-ink file:mr-4 file:py-1 file:px-3 file:rounded-xs file:border-0 file:text-sm file:font-medium file:bg-ember-500 file:text-ground hover:file:bg-ember-500/80"
                   />
                 </div>
-                <p className="portal-label text-muted mt-2 text-xs">
+                <p className="portal-label text-ink-3 mt-2 text-xs">
                   {t("products.requiredColumns")}
                 </p>
               </div>
 
               {csvAnalysis && (
-                <div className="bg-ground border hairline rounded-xl p-4">
+                <div className="bg-canvas border hairline rounded-xs p-4">
                   <div className="flex items-center gap-2 mb-3">
-                    <Check size={18} className="text-teal" />
-                    <span className="portal-heading text-sm text-teal">
+                    <Check size={18} className="text-olive" />
+                    <span className="portal-heading text-sm text-olive">
                       {t("products.analysisComplete")}
                     </span>
                   </div>
                   <div className="space-y-2 portal-text text-sm">
                     <p>
-                      <span className="text-muted">
+                      <span className="text-ink-3">
                         {t("products.totalProducts")}
                       </span>{" "}
                       {csvAnalysis.total}
                     </p>
                     <p>
-                      <span className="text-muted">
+                      <span className="text-ink-3">
                         {t("products.detectedColumns")}
                       </span>{" "}
                       {Object.keys(csvAnalysis.column_mapping).join(", ")}
                     </p>
                     {csvAnalysis.preview && csvAnalysis.preview.length > 0 && (
                       <div className="mt-3">
-                        <p className="text-muted mb-2">
+                        <p className="text-ink-3 mb-2">
                           {t("products.preview")}
                         </p>
                         <div className="space-y-1">
                           {csvAnalysis.preview.map((p, i) => (
                             <div
                               key={i}
-                              className="bg-ground-secondary p-2 rounded text-xs"
+                              className="bg-surface p-2 rounded text-xs"
                             >
                               {p.name} - {p.category} - {p.price} DA
                             </div>
@@ -726,7 +726,7 @@ export default function ProductsPage() {
               <div className="flex gap-3 mt-6">
                 <button
                   onClick={() => setShowCsvModal(false)}
-                  className="w-full bg-ground border hairline rounded-xl px-4 py-2 portal-label text-ink-secondary hover:bg-ground/50 transition-colors justify-center"
+                  className="w-full bg-canvas border hairline rounded-xs px-4 py-2 portal-label text-ink-2 hover:bg-canvas/50 transition-colors justify-center"
                 >
                   {t("products.cancel")}
                 </button>

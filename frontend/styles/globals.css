@@ -1,16 +1,34 @@
-@import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap");
-@import url("https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&display=swap");
-@import url("https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600&display=swap");
+/* Ember Noir type: one neutral grotesk (display + UI) + one mono (micro labels, figures).
+   Inter is kept for the storefront theme (merchant default font) and legacy weights. */
+@import url("https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap");
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 @layer base {
   body {
-    @apply bg-dark-900 text-slate-100 font-sans;
+    @apply bg-canvas text-ink font-sans;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
   }
-  * {
-    @apply border-slate-700;
+
+  /* Every unstyled border becomes a warm translucent hairline (never cool #3A3330) */
+  *,
+  ::before,
+  ::after {
+    border-color: var(--hairline);
+  }
+
+  h1,
+  h2,
+  h3 {
+    text-wrap: balance;
+  }
+
+  ::selection {
+    background: var(--ember-500);
+    color: var(--canvas);
   }
 
   /* Portal landing page styles */
@@ -73,7 +91,7 @@
   /* Portal landing components */
   .portal-nav {
     @apply fixed top-0 left-0 right-0 h-[58px] z-50;
-    background: rgba(10, 12, 14, 0.85);
+    background: rgba(10, 8, 7, 0.85);
     backdrop-filter: blur(14px);
     border-bottom: 1px solid rgba(237, 231, 220, 0.13);
   }
@@ -87,7 +105,7 @@
   }
 
   .hairline {
-    border-color: rgba(237, 231, 220, 0.13);
+    border-color: var(--hairline);
   }
 
   .portal-wordmark {
@@ -107,21 +125,204 @@
   }
 }
 
-/* Scrollbar */
+/* Scrollbar — warm, near-invisible until hover */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
 }
 ::-webkit-scrollbar-track {
-  background: #0f172a;
+  background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background: #334155;
-  border-radius: 10px;
+  background: #3a3330;
+  border-radius: 0;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #475569;
+  background: #847b74;
 }
+html {
+  scrollbar-width: thin;
+  scrollbar-color: #3a3330 transparent;
+}
+
+/* ================================================================
+   EMBER NOIR — Phase 0 system layer
+   ================================================================ */
+
+:root {
+  --canvas: #0a0807;
+  --surface: #100c0b;
+  --surface-2: #16100e;
+  --surface-3: #1c1513;
+  --hairline: rgb(242 236 228 / 0.1);
+  --hairline-strong: rgb(242 236 228 / 0.18);
+  --ink: #ede7dc;
+  --ink-2: #a79f95;
+  --ink-3: #847b74;
+  --ember-100: #f7e3c4;
+  --ember-300: #f0a85c;
+  --ember-500: #e2703a;
+  --ember-600: #c2452a;
+  --ember-700: #8e2a20;
+  --ease-ui: cubic-bezier(0.22, 0.61, 0.36, 1);
+  --ease-enter: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* ---- Ambient bloom: the single warm light source. Use once per page, max.
+   Mirrors the reference (soft, out-of-focus ember light on near-black) but
+   is pure CSS, so unlike the WebGL shader it is safe on every app route. */
+.aurora {
+  position: absolute;
+  inset: -15%;
+  z-index: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(58% 42% at 24% 76%, rgb(194 69 42 / 0.55), transparent 62%),
+    radial-gradient(44% 36% at 72% 26%, rgb(226 112 58 / 0.4), transparent 64%),
+    radial-gradient(26% 24% at 50% 10%, rgb(247 227 196 / 0.18), transparent 60%),
+    var(--canvas);
+  filter: blur(28px) saturate(115%);
+  animation: auroraDrift 42s ease-in-out infinite;
+}
+
+.aurora-soft {
+  opacity: 0.45;
+}
+
+/* ---- Film grain: the finish that stops a dark UI reading as "rendered" ---- */
+.grain,
+.aurora::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  opacity: 0.035;
+  mix-blend-mode: overlay;
+  pointer-events: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* Page-wide grain for app routes (keep content at z-index >= 1) */
+.grain-fixed {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  opacity: 0.025;
+  mix-blend-mode: overlay;
+  pointer-events: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+@keyframes auroraDrift {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  50% {
+    transform: translate3d(-2%, 1.5%, 0) scale(1.06);
+  }
+}
+
+/* ================================================================
+   EMBER NOIR — component layer (use these in new/refactored markup)
+   ================================================================ */
+@layer components {
+  /* ---- micro typography: mono, 10px, wide tracking, dimmed ---- */
+  .micro {
+    @apply font-mono text-micro uppercase text-ink-3;
+  }
+  .micro-2 {
+    @apply font-mono text-micro uppercase text-ink-2;
+  }
+  .mono-num {
+    @apply font-mono tabular-nums;
+  }
+
+  /* ---- structure comes from rules and space, not cards ---- */
+  .rule {
+    @apply relative h-px w-full bg-line;
+  }
+  /* crosshair ticks at both ends — the small detail that reads "art directed" */
+  .rule::before,
+  .rule::after {
+    content: "";
+    position: absolute;
+    top: -2px;
+    width: 1px;
+    height: 5px;
+    background: var(--hairline-strong);
+  }
+  .rule::before {
+    left: 0;
+  }
+  .rule::after {
+    right: 0;
+  }
+
+  .panel {
+    @apply bg-surface border border-line rounded-none;
+  }
+
+  .ledger-row {
+    @apply border-t border-line py-4 transition-colors duration-200;
+  }
+  .ledger-row:hover {
+    @apply bg-surface;
+  }
+
+  /* ---- figures: tabular, tight, no icon chip needed ---- */
+  .stat-value {
+    @apply font-display text-[2.5rem] leading-none tracking-[-0.02em] tabular-nums;
+  }
+  .stat-delta {
+    @apply font-mono text-micro tabular-nums;
+  }
+
+  /* ---- status: a 5px LED + mono label, never a pastel pill ---- */
+  .status {
+    @apply font-mono text-micro uppercase inline-flex items-center gap-2;
+  }
+  .status::before {
+    content: "";
+    @apply block h-[5px] w-[5px] bg-current;
+  }
+
+  /* ---- controls: 2px radius, hairline, no glow, no gradient ---- */
+  .btn,
+  .btn-paper,
+  .btn-outline,
+  .btn-ember,
+  .btn-ghost {
+    @apply inline-flex items-center gap-2 rounded-xs px-4 py-2.5 text-[13px] font-medium transition-colors duration-200 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ember-500/60 disabled:opacity-40 disabled:cursor-not-allowed;
+  }
+  .btn-paper {
+    @apply bg-ink text-canvas hover:bg-ember-100;
+  }
+  .btn-outline {
+    @apply border border-line text-ink hover:bg-surface-2;
+  }
+  .btn-ember {
+    @apply bg-ember-500 text-canvas hover:bg-ember-300;
+  }
+  .btn-ghost {
+    @apply px-0 text-ink-2 hover:text-ink hover:underline underline-offset-4;
+  }
+
+  .field {
+    @apply w-full rounded-xs border border-line bg-surface px-3 py-2.5 text-[15px] text-ink placeholder:text-ink-3 transition-colors duration-200 focus:outline-none focus:border-ember-500/70;
+  }
+
+  /* ---- editorial page furniture ---- */
+  .kicker {
+    @apply font-mono text-micro uppercase text-ember-500;
+  }
+  .page-title {
+    @apply font-display text-section font-medium text-ink;
+  }
+  .breadcrumb {
+    @apply font-mono text-micro uppercase text-ink-3;
+  }
+}
+
 
 /* Animations */
 .animate-fade-in {
@@ -252,7 +453,7 @@
   text-transform: lowercase;
 }
 .not-found-brand span {
-  color: #f5a623;
+  color: #E2703A;
 }
 .not-found-content {
   flex: 1;
@@ -312,7 +513,7 @@
     800 11px Syne,
     sans-serif;
   letter-spacing: 0.06em;
-  box-shadow: 5px 7px 0 #f5a623;
+  box-shadow: 5px 7px 0 #E2703A;
 }
 .sticker-top {
   top: 25%;
@@ -335,7 +536,7 @@
   animation: notFoundRise 1s 0.25s both;
 }
 .not-found-kicker {
-  color: #f5a623;
+  color: #E2703A;
   font:
     600 10px Sora,
     sans-serif;
@@ -374,7 +575,7 @@
 }
 .not-found-home-link:hover {
   transform: translateY(-3px);
-  box-shadow: 0 8px 0 #f5a623;
+  box-shadow: 0 8px 0 #E2703A;
 }
 .not-found-footer {
   color: #777;
@@ -393,7 +594,7 @@
   width: 74px;
   height: 74px;
   border-radius: 50%;
-  background: #ff4d0a;
+  background: #E2703A;
   color: #fff;
   display: grid;
   place-items: center;
@@ -465,10 +666,10 @@
 @keyframes notFoundPulse {
   0%,
   100% {
-    box-shadow: 0 0 0 0 rgba(255, 77, 10, 0.35);
+    box-shadow: 0 0 0 0 rgba(226, 112, 58, 0.35);
   }
   50% {
-    box-shadow: 0 0 0 13px rgba(255, 77, 10, 0);
+    box-shadow: 0 0 0 13px rgba(226, 112, 58, 0);
   }
 }
 @media (max-width: 640px) {
@@ -536,7 +737,7 @@ html {
   top: 0;
   height: 100%;
   width: 55%;
-  background: #0a0c0e;
+  background: #0A0807;
   z-index: 10;
   transition: transform 0.1s linear;
 }
@@ -593,19 +794,19 @@ html {
 .portal-accent-dot-left {
   top: 50%;
   left: calc(50% - 6px);
-  background: #e8913c;
+  background: #E2703A;
   box-shadow:
-    0 0 20px #e8913c,
-    0 0 40px rgba(232, 145, 60, 0.5);
+    0 0 20px #E2703A,
+    0 0 40px rgba(226, 112, 58, 0.5);
 }
 
 .portal-accent-dot-right {
   top: 50%;
   right: calc(50% - 6px);
-  background: #2e6b72;
+  background: #7E9C6B;
   box-shadow:
-    0 0 20px #2e6b72,
-    0 0 40px rgba(46, 107, 114, 0.5);
+    0 0 20px #7E9C6B,
+    0 0 40px rgba(126, 156, 107, 0.5);
 }
 
 /* Portal background layers */
@@ -623,8 +824,8 @@ html {
   inset: 0;
   background: linear-gradient(
     135deg,
-    rgba(232, 145, 60, 0.1) 0%,
-    rgba(46, 107, 114, 0.1) 100%
+    rgba(226, 112, 58, 0.1) 0%,
+    rgba(126, 156, 107, 0.1) 100%
   );
   mix-blend-mode: overlay;
   opacity: 0;
@@ -637,7 +838,7 @@ html {
   background: radial-gradient(
     ellipse at center,
     transparent 30%,
-    rgba(10, 12, 14, 0.4) 100%
+    rgba(10, 8, 7, 0.4) 100%
   );
   z-index: 3;
 }
@@ -686,7 +887,7 @@ html {
 }
 
 .portal-statement-accent {
-  color: #e8913c;
+  color: #E2703A;
 }
 
 .portal-statement-index {
@@ -724,7 +925,7 @@ html {
   position: absolute;
   width: 100%;
   height: 100%;
-  background: #101317;
+  background: #100C0B;
   border: 1px solid rgba(237, 231, 220, 0.13);
   border-radius: 8px;
   cursor: grab;
@@ -778,7 +979,7 @@ html {
 }
 
 .portal-progress-dot.active {
-  background: #e8913c;
+  background: #E2703A;
 }
 
 /* Roster section */
@@ -795,7 +996,7 @@ html {
   font-size: 10.5px;
   letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: #e8913c;
+  color: #E2703A;
 }
 
 .portal-roster-name {
@@ -1053,14 +1254,14 @@ html {
 }
 .blob::before {
   background:
-    radial-gradient(circle at 30% 30%, #ff5c39 0%, transparent 60%),
-    radial-gradient(circle at 70% 70%, #4f46e5 0%, transparent 60%);
+    radial-gradient(circle at 30% 30%, #e2703a 0%, transparent 60%),
+    radial-gradient(circle at 70% 70%, #8e2a20 0%, transparent 60%);
   animation: blobMorph 12s ease-in-out infinite alternate;
 }
 .blob::after {
   background:
-    radial-gradient(circle at 65% 35%, #ef4444 0%, transparent 55%),
-    radial-gradient(circle at 35% 70%, #6366f1 0%, transparent 60%);
+    radial-gradient(circle at 65% 35%, #c2452a 0%, transparent 55%),
+    radial-gradient(circle at 35% 70%, #f0a85c 0%, transparent 60%);
   animation: blobMorph 16s ease-in-out infinite alternate-reverse;
 }
 @keyframes blobMorph {
@@ -1095,43 +1296,24 @@ html {
   animation: floatY 7s ease-in-out 1.2s infinite;
 }
 
-/* Gradient accent button (orange/red) */
+/* Accent button — solid ember. No gradient, no glow, 2px radius. */
 .btn-accent {
-  background: linear-gradient(135deg, #ff5c39 0%, #ef4444 50%, #dc2626 100%);
-  color: #fff;
-  font-weight: 700;
-  border-radius: 9999px;
-  padding: 0.8rem 1.75rem;
+  background: var(--ember-500);
+  color: var(--canvas);
+  font-weight: 500;
+  border-radius: 2px;
+  padding: 0.75rem 1.5rem;
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
-  box-shadow: 0 12px 32px -8px rgba(239, 68, 68, 0.55);
-  transition: all 0.25s ease;
+  font-size: 13px;
+  transition: background-color 0.2s var(--ease-ui);
 }
 .btn-accent:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 18px 40px -8px rgba(239, 68, 68, 0.7);
+  background: var(--ember-300);
 }
 .btn-accent:active {
-  transform: translateY(0);
-}
-
-/* Outlined ghost button */
-.btn-ghost {
-  border: 1px solid rgba(255, 255, 255, 0.25);
-  color: #fff;
-  font-weight: 600;
-  border-radius: 9999px;
-  padding: 0.8rem 1.75rem;
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-  transition: all 0.25s ease;
-  background: transparent;
-}
-.btn-ghost:hover {
-  border-color: rgba(255, 255, 255, 0.6);
-  background: rgba(255, 255, 255, 0.06);
+  background: var(--ember-600);
 }
 
 /* Landing nav */
@@ -1152,31 +1334,35 @@ html {
   }
 }
 
-/* Auth pages shell */
+/* Auth pages shell — same bloom as the landing, quieter */
 .auth-shell {
   min-height: 100vh;
   background:
     radial-gradient(
-      1200px 600px at 85% -10%,
-      rgba(79, 70, 229, 0.25),
+      1100px 600px at 82% -10%,
+      rgb(194 69 42 / 0.28),
       transparent 60%
     ),
     radial-gradient(
-      1000px 600px at 0% 100%,
-      rgba(255, 92, 57, 0.18),
+      900px 560px at 0% 100%,
+      rgb(226 112 58 / 0.16),
       transparent 55%
     ),
-    #020617;
+    var(--canvas);
 }
 .auth-card {
-  background: rgba(15, 23, 42, 0.75);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 1.5rem;
+  background: rgb(16 12 11 / 0.75);
+  border: 1px solid var(--hairline);
+  border-radius: 2px;
   backdrop-filter: blur(20px);
-  box-shadow: 0 24px 64px -16px rgba(0, 0, 0, 0.7);
 }
 .text-gradient-warm {
-  background: linear-gradient(135deg, #ffb199 0%, #ff5c39 50%, #f97316 100%);
+  background: linear-gradient(
+    96deg,
+    var(--ember-100) 0%,
+    var(--ember-300) 46%,
+    var(--ember-500) 100%
+  );
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
@@ -1208,4 +1394,24 @@ html {
 }
 .logo-strip:hover {
   opacity: 0.9;
+}
+
+/* ================================================================
+   EMBER NOIR — reduced-motion hygiene
+   ================================================================ */
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+  .aurora {
+    animation: none;
+  }
 }

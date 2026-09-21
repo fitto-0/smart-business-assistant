@@ -15,39 +15,39 @@ import {
 const SEVERITY_CONFIG = {
   critique: {
     label: "Critical",
-    cls: "text-red-400",
-    dot: "bg-red-400",
-    border: "hairline bg-red-400/5",
+    cls: "text-clay",
+    dot: "bg-clay",
+    border: "hairline bg-clay/5",
   },
   haute: {
     label: "High",
-    cls: "text-amber",
-    dot: "bg-amber",
-    border: "hairline bg-amber/5",
+    cls: "text-ember-500",
+    dot: "bg-ember-500",
+    border: "hairline bg-ember-500/5",
   },
   moyenne: {
     label: "Medium",
-    cls: "text-teal",
-    dot: "bg-teal",
-    border: "hairline bg-teal/5",
+    cls: "text-olive",
+    dot: "bg-olive",
+    border: "hairline bg-olive/5",
   },
 };
 
 const STATUS_CONFIG = {
-  non_résolu: { label: "Unresolved", icon: XCircle, cls: "text-red-400" },
-  en_cours: { label: "In Progress", icon: Clock, cls: "text-amber" },
-  résolu: { label: "Resolved", icon: CheckCircle, cls: "text-teal" },
+  non_rÃƒÂ©solu: { label: "Unresolved", icon: XCircle, cls: "text-clay" },
+  en_cours: { label: "In Progress", icon: Clock, cls: "text-ember-500" },
+  rÃƒÂ©solu: { label: "Resolved", icon: CheckCircle, cls: "text-olive" },
 };
 
 const TYPE_ICONS = {
   baisse_ventes: TrendingDown,
   rupture_stock: Package,
   stock_faible: Package,
-  avis_négatifs: Star,
+  avis_nÃƒÂ©gatifs: Star,
 };
 
 const formatDetectedDate = (value) => {
-  if (!value) return "—";
+  if (!value) return "Ã¢â‚¬â€";
 
   const datePart = String(value).slice(0, 10);
   const date = new Date(`${datePart}T12:00:00`);
@@ -86,9 +86,9 @@ export default function AnomaliesPage() {
     try {
       await apiPut(`/analysis/anomalies/${id}/resolve`);
       setAnomalies((current) =>
-        current.map((a) => (a.id === id ? { ...a, status: "résolu" } : a)),
+        current.map((a) => (a.id === id ? { ...a, status: "rÃƒÂ©solu" } : a)),
       );
-      toast.success("Anomaly marked as resolved ✓");
+      toast.success("Anomaly marked as resolved Ã¢Å“â€œ");
     } catch (error) {
       toast.error(error.message || "Failed to update");
     }
@@ -109,19 +109,19 @@ export default function AnomaliesPage() {
     filter === "tous"
       ? anomalies
       : anomalies.filter((a) =>
-          filter === "non_résolu"
-            ? a.status === "non_résolu"
+          filter === "non_rÃƒÂ©solu"
+            ? a.status === "non_rÃƒÂ©solu"
             : filter === "en_cours"
               ? a.status === "en_cours"
-              : filter === "résolu"
-                ? a.status === "résolu"
+              : filter === "rÃƒÂ©solu"
+                ? a.status === "rÃƒÂ©solu"
                 : a.severity === filter,
         );
 
   const critiques = anomalies.filter((a) => a.severity === "critique").length;
   const hautes = anomalies.filter((a) => a.severity === "haute").length;
-  const nonResolus = anomalies.filter((a) => a.status === "non_résolu").length;
-  const resolus = anomalies.filter((a) => a.status === "résolu").length;
+  const nonResolus = anomalies.filter((a) => a.status === "non_rÃƒÂ©solu").length;
+  const resolus = anomalies.filter((a) => a.status === "rÃƒÂ©solu").length;
 
   return (
     <Layout title="Anomaly Detection">
@@ -131,34 +131,34 @@ export default function AnomaliesPage() {
           {
             label: "Critical Anomalies",
             value: critiques,
-            color: "bg-red-400",
+            color: "bg-clay",
             icon: AlertTriangle,
           },
           {
             label: "High Priority",
             value: hautes,
-            color: "bg-amber",
+            color: "bg-ember-500",
             icon: AlertTriangle,
           },
           {
             label: "Unresolved",
             value: nonResolus,
-            color: "bg-amber",
+            color: "bg-ember-500",
             icon: XCircle,
           },
           {
             label: "Resolved",
             value: resolus,
-            color: "bg-teal",
+            color: "bg-olive",
             icon: CheckCircle,
           },
         ].map((s, i) => (
           <div
             key={i}
-            className="bg-ground-secondary border hairline rounded-xl p-4 flex items-center gap-4"
+            className="bg-surface border hairline rounded-xs p-4 flex items-center gap-4"
           >
             <div
-              className={`w-11 h-11 rounded-xl ${s.color} flex items-center justify-center`}
+              className={`w-11 h-11 rounded-xs ${s.color} flex items-center justify-center`}
             >
               <s.icon size={20} className="text-ground" />
             </div>
@@ -171,21 +171,21 @@ export default function AnomaliesPage() {
       </div>
 
       {/* Filters */}
-      <div className="bg-ground-secondary border hairline rounded-xl p-4 mb-6">
+      <div className="bg-surface border hairline rounded-xs p-4 mb-6">
         <div className="flex flex-wrap gap-2">
           {[
             { key: "tous", label: "All" },
-            { key: "critique", label: "🔴 Critical" },
-            { key: "haute", label: "🟡 High" },
-            { key: "moyenne", label: "🔵 Medium" },
-            { key: "non_résolu", label: "Unresolved" },
+            { key: "critique", label: "Ã°Å¸â€Â´ Critical" },
+            { key: "haute", label: "Ã°Å¸Å¸Â¡ High" },
+            { key: "moyenne", label: "Ã°Å¸â€Âµ Medium" },
+            { key: "non_rÃƒÂ©solu", label: "Unresolved" },
             { key: "en_cours", label: "In Progress" },
-            { key: "résolu", label: "Resolved" },
+            { key: "rÃƒÂ©solu", label: "Resolved" },
           ].map((f) => (
             <button
               key={f.key}
               onClick={() => setFilter(f.key)}
-              className={`portal-label px-3 py-1.5 rounded-lg font-medium transition-all ${filter === f.key ? "bg-amber text-ground" : "bg-ground text-ink-secondary hover:bg-ground/50"}`}
+              className={`portal-label px-3 py-1.5 rounded-xs font-medium transition-colors ${filter === f.key ? "bg-ember-500 text-ground" : "bg-canvas text-ink-2 hover:bg-canvas/50"}`}
             >
               {f.label}
             </button>
@@ -194,23 +194,23 @@ export default function AnomaliesPage() {
       </div>
 
       {loading && (
-        <div className="bg-ground-secondary border hairline rounded-xl text-center py-12 portal-text">
-          Loading anomalies…
+        <div className="bg-surface border hairline rounded-xs text-center py-12 portal-text">
+          Loading anomaliesÃ¢â‚¬Â¦
         </div>
       )}
 
       {/* Anomalies List */}
       <div className="space-y-4">
         {filtered.length === 0 && (
-          <div className="bg-ground-secondary border hairline rounded-xl text-center py-16">
+          <div className="bg-surface border hairline rounded-xs text-center py-16">
             <CheckCircle
               size={48}
-              className="mx-auto mb-3 text-teal opacity-60"
+              className="mx-auto mb-3 text-olive opacity-60"
             />
             <p className="portal-label font-semibold text-ink">
               No anomalies in this category
             </p>
-            <p className="portal-label text-muted mt-1">
+            <p className="portal-label text-ink-3 mt-1">
               Everything looks good!
             </p>
           </div>
@@ -222,20 +222,20 @@ export default function AnomaliesPage() {
           return (
             <div
               key={a.id}
-              className={`bg-ground-secondary border ${sev.border} rounded-xl p-4 transition-all hover:shadow-lg animate-slide-up`}
+              className={`bg-surface border ${sev.border} rounded-xs p-4 transition-colors hover: animate-rise-in`}
             >
               <div className="flex flex-col sm:flex-row sm:items-start gap-4">
                 <div
-                  className={`w-12 h-12 rounded-xl ${a.severity === "critique" ? "bg-red-400/20" : a.severity === "haute" ? "bg-amber/20" : "bg-teal/20"} flex items-center justify-center flex-shrink-0`}
+                  className={`w-12 h-12 rounded-xs ${a.severity === "critique" ? "bg-clay/20" : a.severity === "haute" ? "bg-ember-500/20" : "bg-olive/20"} flex items-center justify-center flex-shrink-0`}
                 >
                   <TypeIcon
                     size={22}
                     className={
                       a.severity === "critique"
-                        ? "text-red-400"
+                        ? "text-clay"
                         : a.severity === "haute"
-                          ? "text-amber"
-                          : "text-teal"
+                          ? "text-ember-500"
+                          : "text-olive"
                     }
                   />
                 </div>
@@ -253,31 +253,31 @@ export default function AnomaliesPage() {
                     </div>
                   </div>
                   <p className="portal-text mb-1">{a.description}</p>
-                  <p className="portal-label text-muted">
+                  <p className="portal-label text-ink-3">
                     Detected {formatDetectedDate(a.detected_at || a.detected)}
                   </p>
                 </div>
                 <div className="flex sm:flex-col gap-2 flex-shrink-0">
-                  {a.status !== "résolu" && (
+                  {a.status !== "rÃƒÂ©solu" && (
                     <>
-                      {a.status === "non_résolu" && (
+                      {a.status === "non_rÃƒÂ©solu" && (
                         <button
                           onClick={() => markInProgress(a.id)}
-                          className="portal-label px-3 py-1.5 rounded-lg bg-amber/20 text-amber hover:bg-amber/30 transition-all font-medium flex items-center gap-1"
+                          className="portal-label px-3 py-1.5 rounded-xs bg-ember-500/20 text-ember-500 hover:bg-ember-500/30 transition-colors font-medium flex items-center gap-1"
                         >
                           <Clock size={12} /> In Progress
                         </button>
                       )}
                       <button
                         onClick={() => markResolved(a.id)}
-                        className="portal-label px-3 py-1.5 rounded-lg bg-teal/20 text-teal hover:bg-teal/30 transition-all font-medium flex items-center gap-1"
+                        className="portal-label px-3 py-1.5 rounded-xs bg-olive/20 text-olive hover:bg-olive/30 transition-colors font-medium flex items-center gap-1"
                       >
                         <CheckCircle size={12} /> Resolve
                       </button>
                     </>
                   )}
-                  {a.status === "résolu" && (
-                    <span className="portal-label px-3 py-1.5 rounded-lg bg-teal/10 text-teal font-medium flex items-center gap-1">
+                  {a.status === "rÃƒÂ©solu" && (
+                    <span className="portal-label px-3 py-1.5 rounded-xs bg-olive/10 text-olive font-medium flex items-center gap-1">
                       <CheckCircle size={12} /> Resolved
                     </span>
                   )}

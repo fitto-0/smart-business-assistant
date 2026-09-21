@@ -20,13 +20,16 @@ export default function App({ Component, pageProps }) {
           position="top-right"
           toastOptions={{
             style: {
-              background: '#1e293b',
-              color: '#f1f5f9',
-              border: '1px solid #334155',
-              borderRadius: '12px',
+              background: '#100C0B',
+              color: '#EDE7DC',
+              border: '1px solid rgb(242 236 228 / 0.10)',
+              borderRadius: '2px',
+              fontSize: '13px',
+              padding: '10px 14px',
+              boxShadow: 'none',
             },
-            success: { iconTheme: { primary: '#10b981', secondary: '#1e293b' } },
-            error: { iconTheme: { primary: '#ef4444', secondary: '#1e293b' } },
+            success: { iconTheme: { primary: '#7E9C6B', secondary: '#100C0B' } },
+            error: { iconTheme: { primary: '#B3392B', secondary: '#100C0B' } },
           }}
         />
       </LanguageProvider>
