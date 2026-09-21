@@ -12,7 +12,6 @@ import { fmt, fmtDA } from '../lib/format';
 import PageHeader, { Ledger, Section, NoirTable, Status, Segmented, Empty } from '../components/PageHeader';
 import { TrendingUp, TrendingDown, ShoppingCart, DollarSign, BarChart2, Plus, X } from 'lucide-react';
 
-const fmt = (n) => new Intl.NumberFormat('fr-FR').format(n);
 const CustomTooltip = ({ active, payload, label }) => {
   if (!active || !payload?.length) return null;
   return (
@@ -165,7 +164,7 @@ export default function SalesPage() {
         ]}
       />
 
-      <div className="mt-6">
+      <div className="mt-6 space-y-6">
       {/* Sales vs Objective */}
       <Section
         eyebrow={t('sales.salesVsTargets')}
@@ -190,7 +189,7 @@ export default function SalesPage() {
         </div>
       </Section>
 
-      <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 mb-6 mt-6">
+      <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 mt-6">
         {/* Monthly Orders */}
         <Section
           eyebrow={t('sales.monthlyOrders')}
