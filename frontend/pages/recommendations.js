@@ -3,266 +3,266 @@ import Layout from "../components/Layout";
 import { apiGet, apiPost, apiPut } from "../lib/api";
 import toast from "react-hot-toast";
 import {
-  Lightbulb,
-  CheckCircle,
-  Package,
-  Tag,
-  Star,
-  BarChart2,
-  Filter,
+ Lightbulb,
+ CheckCircle,
+ Package,
+ Tag,
+ Star,
+ BarChart2,
+ Filter,
 } from "lucide-react";
 
 const PRIORITY_CONFIG = {
-  critique: {
-    label: "Critical",
-    cls: "text-clay",
-    border: "hairline bg-clay/5",
-  },
-  haute: { label: "High", cls: "text-ember-500", border: "hairline bg-ember-500/5" },
-  moyenne: { label: "Medium", cls: "text-olive", border: "hairline bg-olive/5" },
-  basse: { label: "Low", cls: "portal-label text-ink-3", border: "hairline" },
+ critique: {
+ label: "Critical",
+ cls: "text-clay",
+ border: "hairline bg-clay/5",
+ },
+ haute: { label: "High", cls: "text-ember-500", border: "hairline bg-ember-500/5" },
+ moyenne: { label: "Medium", cls: "text-olive", border: "hairline bg-olive/5" },
+ basse: { label: "Low", cls: "portal-label text-ink-3", border: "hairline" },
 };
 
 const CATEGORY_CONFIG = {
-  stock: { icon: Package, color: "bg-ember-500/20 text-ember-500" },
-  promotion: { icon: Tag, color: "bg-olive/20 text-olive" },
-  service_client: { icon: Star, color: "bg-ember-500/20 text-ember-500" },
-  analyse: { icon: BarChart2, color: "bg-olive/20 text-olive" },
+ stock: { icon: Package, color: "bg-ember-500/20 text-ember-500" },
+ promotion: { icon: Tag, color: "bg-olive/20 text-olive" },
+ service_client: { icon: Star, color: "bg-ember-500/20 text-ember-500" },
+ analyse: { icon: BarChart2, color: "bg-olive/20 text-olive" },
 };
 
 export default function RecommendationsPage() {
-  const [recs, setRecs] = useState([]);
-  const [filter, setFilter] = useState("tous");
-  const [loading, setLoading] = useState(true);
+ const [recs, setRecs] = useState([]);
+ const [filter, setFilter] = useState("tous");
+ const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    const loadRecs = async () => {
-      try {
-        await apiPost("/analysis/detect-anomalies", {});
-        const data = await apiGet("/analysis/recommendations");
-        setRecs(
-          (data.recommendations || []).map((r) => ({
-            ...r,
-            done: Boolean(r.done),
-          })),
-        );
-      } catch (error) {
-        toast.error(error.message || "Failed to load recommendations");
-      } finally {
-        setLoading(false);
-      }
-    };
+ useEffect(() => {
+ const loadRecs = async () => {
+ try {
+ await apiPost("/analysis/detect-anomalies", {});
+ const data = await apiGet("/analysis/recommendations");
+ setRecs(
+ (data.recommendations || []).map((r) => ({
+ ...r,
+ done: Boolean(r.done),
+ })),
+ );
+ } catch (error) {
+ toast.error(error.message || "Failed to load recommendations");
+ } finally {
+ setLoading(false);
+ }
+ };
 
-    loadRecs();
-  }, []);
+ loadRecs();
+ }, []);
 
-  const markDone = async (id) => {
-    try {
-      const updated = await apiPut(`/analysis/recommendations/${id}/toggle`);
-      setRecs((current) =>
-        current.map((r) =>
-          r.id === id ? { ...r, ...updated, done: Boolean(updated.done) } : r,
-        ),
-      );
-      toast.success(
-        updated.done ? "Action marked as done! Ã°Å¸Å½â€°" : "Action marked as pending",
-      );
-    } catch (error) {
-      toast.error(error.message || "Failed to update");
-    }
-  };
+ const markDone = async (id) => {
+ try {
+ const updated = await apiPut(`/analysis/recommendations/${id}/toggle`);
+ setRecs((current) =>
+ current.map((r) =>
+ r.id === id ? { ...r, ...updated, done: Boolean(updated.done) } : r,
+ ),
+ );
+ toast.success(
+ updated.done ? "Action marked as done! " : "Action marked as pending",
+ );
+ } catch (error) {
+ toast.error(error.message || "Failed to update");
+ }
+ };
 
-  const filtered =
-    filter === "tous"
-      ? recs
-      : recs.filter((r) =>
-          filter === "done"
-            ? r.done
-            : filter === "pending"
-              ? !r.done
-              : r.category === filter || r.priority === filter,
-        );
+ const filtered =
+ filter === "tous"
+ ? recs
+ : recs.filter((r) =>
+ filter === "done"
+ ? r.done
+ : filter === "pending"
+ ? !r.done
+ : r.category === filter || r.priority === filter,
+ );
 
-  const done = recs.filter((r) => r.done).length;
-  const critiques = recs.filter(
-    (r) => r.priority === "critique" && !r.done,
-  ).length;
-  const hautes = recs.filter((r) => r.priority === "haute" && !r.done).length;
+ const done = recs.filter((r) => r.done).length;
+ const critiques = recs.filter(
+ (r) => r.priority === "critique" && !r.done,
+ ).length;
+ const hautes = recs.filter((r) => r.priority === "haute" && !r.done).length;
 
-  return (
-    <Layout title="AI Recommendations">
-      {/* Header */}
-      <div className="bg-surface border hairline rounded-xs p-5 mb-6">
-        <div className="flex items-start gap-4">
-          <div className="w-12 h-12 rounded-xs bg-ember-500 flex items-center justify-center flex-shrink-0">
-            <Lightbulb size={24} className="text-ground" />
-          </div>
-          <div>
-            <h3 className="portal-heading text-base mb-1">
-              AI-Generated Recommendations
-            </h3>
-            <p className="portal-text leading-relaxed">
-              These recommendations are automatically generated by analyzing
-              your sales, stock, and customer review data. Follow them to
-              optimize your business performance.
-            </p>
-            <div className="flex items-center gap-3 mt-3">
-              <div className="flex items-center gap-1.5">
-                <div className="w-2 h-2 rounded-full bg-olive" />
-                <span className="portal-label">
-                  {done}/{recs.length} actions completed
-                </span>
-              </div>
-              <div className="flex-1 max-w-32 bg-canvas rounded-full h-2">
-                <div
-                  className="h-2 rounded-full bg-olive transition-colors"
-                  style={{ width: `${(done / recs.length) * 100}%` }}
-                />
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
+ return (
+ <Layout title="AI Recommendations">
+ {/* Header */}
+ <div className="bg-surface border hairline rounded-xs p-5 mb-6">
+ <div className="flex items-start gap-4">
+ <div className="w-12 h-12 rounded-xs bg-ember-500 flex items-center justify-center flex-shrink-0">
+ <Lightbulb size={24} className="text-ground" />
+ </div>
+ <div>
+ <h3 className="portal-heading text-base mb-1">
+ AI-Generated Recommendations
+ </h3>
+ <p className="portal-text leading-relaxed">
+ These recommendations are automatically generated by analyzing
+ your sales, stock, and customer review data. Follow them to
+ optimize your business performance.
+ </p>
+ <div className="flex items-center gap-3 mt-3">
+ <div className="flex items-center gap-1.5">
+ <div className="w-2 h-2 rounded-full bg-olive" />
+ <span className="portal-label">
+ {done}/{recs.length} actions completed
+ </span>
+ </div>
+ <div className="flex-1 max-w-32 bg-canvas rounded-full h-2">
+ <div
+ className="h-2 rounded-full bg-olive transition-colors"
+ style={{ width: `${(done / recs.length) * 100}%` }}
+ />
+ </div>
+ </div>
+ </div>
+ </div>
+ </div>
 
-      {/* Stats */}
-      <div className="grid grid-cols-2 xl:grid-cols-4 gap-4 mb-6">
-        {[
-          {
-            label: "Total Recommendations",
-            value: recs.length,
-            color: "bg-ember-500",
-          },
-          { label: "Critical Pending", value: critiques, color: "bg-clay" },
-          { label: "High Priority", value: hautes, color: "bg-ember-500" },
-          { label: "Actions Completed", value: done, color: "bg-olive" },
-        ].map((s, i) => (
-          <div
-            key={i}
-            className="bg-surface border hairline rounded-xs p-4 flex items-center gap-4"
-          >
-            <div
-              className={`w-11 h-11 rounded-xs ${s.color} flex items-center justify-center`}
-            >
-              <Lightbulb size={20} className="text-ground" />
-            </div>
-            <div>
-              <p className="portal-label">{s.label}</p>
-              <p className="portal-heading text-2xl">{s.value}</p>
-            </div>
-          </div>
-        ))}
-      </div>
+ {/* Stats */}
+ <div className="grid grid-cols-2 xl:grid-cols-4 gap-4 mb-6">
+ {[
+ {
+ label: "Total Recommendations",
+ value: recs.length,
+ color: "bg-ember-500",
+ },
+ { label: "Critical Pending", value: critiques, color: "bg-clay" },
+ { label: "High Priority", value: hautes, color: "bg-ember-500" },
+ { label: "Actions Completed", value: done, color: "bg-olive" },
+ ].map((s, i) => (
+ <div
+ key={i}
+ className="bg-surface border hairline rounded-xs p-4 flex items-center gap-4"
+ >
+ <div
+ className={`w-11 h-11 rounded-xs ${s.color} flex items-center justify-center`}
+ >
+ <Lightbulb size={20} className="text-ground" />
+ </div>
+ <div>
+ <p className="portal-label">{s.label}</p>
+ <p className="portal-heading text-2xl">{s.value}</p>
+ </div>
+ </div>
+ ))}
+ </div>
 
-      {/* Filters */}
-      <div className="bg-surface border hairline rounded-xs p-4 mb-6">
-        <div className="flex items-center gap-2 flex-wrap">
-          <Filter size={14} className="text-ink-3" />
-          {[
-            { key: "tous", label: "All" },
-            { key: "critique", label: "Ã°Å¸â€Â´ Critical" },
-            { key: "haute", label: "Ã°Å¸Å¸Â¡ High" },
-            { key: "stock", label: "Ã°Å¸â€œÂ¦ Stock" },
-            { key: "promotion", label: "Ã°Å¸ÂÂ·Ã¯Â¸Â Promotion" },
-            { key: "service_client", label: "Ã¢Â­Â Customer Service" },
-            { key: "pending", label: "Pending" },
-            { key: "done", label: "Ã¢Å“â€¦ Completed" },
-          ].map((f) => (
-            <button
-              key={f.key}
-              onClick={() => setFilter(f.key)}
-              className={`portal-label px-3 py-1.5 rounded-xs font-medium transition-colors ${filter === f.key ? "bg-ember-500 text-ground" : "bg-canvas text-ink-2 hover:bg-canvas/50"}`}
-            >
-              {f.label}
-            </button>
-          ))}
-        </div>
-      </div>
+ {/* Filters */}
+ <div className="bg-surface border hairline rounded-xs p-4 mb-6">
+ <div className="flex items-center gap-2 flex-wrap">
+ <Filter size={14} className="text-ink-3" />
+ {[
+ { key: "tous", label: "All" },
+ { key: "critique", label: " Critical" },
+ { key: "haute", label: " High" },
+ { key: "stock", label: " Stock" },
+ { key: "promotion", label: " Promotion" },
+ { key: "service_client", label: " Customer Service" },
+ { key: "pending", label: "Pending" },
+ { key: "done", label: "✓ Completed" },
+ ].map((f) => (
+ <button
+ key={f.key}
+ onClick={() => setFilter(f.key)}
+ className={`portal-label px-3 py-1.5 rounded-xs font-medium transition-colors ${filter === f.key ? "bg-ember-500 text-ground" : "bg-canvas text-ink-2 hover:bg-canvas/50"}`}
+ >
+ {f.label}
+ </button>
+ ))}
+ </div>
+ </div>
 
-      {loading && (
-        <div className="bg-surface border hairline rounded-xs text-center py-12 portal-text">
-          Loading recommendationsÃ¢â‚¬Â¦
-        </div>
-      )}
+ {loading && (
+ <div className="bg-surface border hairline rounded-xs text-center py-12 portal-text">
+ Loading recommendations…
+ </div>
+ )}
 
-      {/* Recommendations */}
-      <div className="space-y-4">
-        {filtered.map((rec) => {
-          const prio = PRIORITY_CONFIG[rec.priority];
-          const cat = CATEGORY_CONFIG[rec.category];
-          const CatIcon = cat?.icon || Lightbulb;
-          return (
-            <div
-              key={rec.id}
-              className={`bg-surface border transition-colors duration-300 rounded-xs p-4 ${rec.done ? "opacity-60 hairline" : prio.border} hover: animate-rise-in`}
-            >
-              <div className="flex flex-col sm:flex-row gap-4">
-                <div className="flex items-start gap-4 flex-1">
-                  <span className="text-3xl flex-shrink-0">{rec.icon}</span>
-                  <div className="flex-1">
-                    <div className="flex flex-wrap items-center gap-2 mb-2">
-                      <h3
-                        className={`portal-label font-bold ${rec.done ? "line-through text-ink-3" : "text-ink"}`}
-                      >
-                        {rec.title}
-                      </h3>
-                      <span className={prio.cls}>{prio.label}</span>
-                      <div
-                        className={`flex items-center gap-1 portal-label px-2 py-0.5 rounded-full ${cat?.color}`}
-                      >
-                        <CatIcon size={11} />
-                        <span className="capitalize">
-                          {rec.category.replace("_", " ")}
-                        </span>
-                      </div>
-                    </div>
-                    <p className="portal-text mb-3 leading-relaxed">
-                      {rec.description}
-                    </p>
-                    <div className="flex flex-wrap gap-3">
-                      <div className="flex items-center gap-2 p-2.5 rounded-xs bg-canvas/60 border hairline">
-                        <span className="portal-label text-ink-3">Action:</span>
-                        <span className="portal-label font-medium text-ink">
-                          {rec.action}
-                        </span>
-                      </div>
-                      <div className="flex items-center gap-2 p-2.5 rounded-xs bg-olive/10 border hairline">
-                        <span className="portal-label text-ink-3">Impact:</span>
-                        <span className="portal-label font-bold text-olive">
-                          {rec.impact}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                <div className="flex-shrink-0">
-                  <button
-                    onClick={() => markDone(rec.id)}
-                    className={`flex items-center gap-2 portal-label px-4 py-2 rounded-xs font-semibold transition-colors ${
-                      rec.done
-                        ? "bg-olive/20 text-olive hover:bg-clay/20 hover:text-clay"
-                        : "bg-canvas text-ink-2 hover:bg-olive/20 hover:text-olive"
-                    }`}
-                  >
-                    <CheckCircle size={14} />
-                    {rec.done ? "Done Ã¢Å“â€œ" : "Mark Done"}
-                  </button>
-                </div>
-              </div>
-            </div>
-          );
-        })}
-        {filtered.length === 0 && (
-          <div className="bg-surface border hairline rounded-xs text-center py-16">
-            <CheckCircle
-              size={48}
-              className="mx-auto mb-3 text-olive opacity-60"
-            />
-            <p className="portal-label font-semibold text-ink">
-              No recommendations in this category
-            </p>
-          </div>
-        )}
-      </div>
-    </Layout>
-  );
+ {/* Recommendations */}
+ <div className="space-y-4">
+ {filtered.map((rec) => {
+ const prio = PRIORITY_CONFIG[rec.priority];
+ const cat = CATEGORY_CONFIG[rec.category];
+ const CatIcon = cat?.icon || Lightbulb;
+ return (
+ <div
+ key={rec.id}
+ className={`bg-surface border transition-colors duration-300 rounded-xs p-4 ${rec.done ? "opacity-60 hairline" : prio.border} hover: animate-rise-in`}
+ >
+ <div className="flex flex-col sm:flex-row gap-4">
+ <div className="flex items-start gap-4 flex-1">
+ <span className="text-3xl flex-shrink-0">{rec.icon}</span>
+ <div className="flex-1">
+ <div className="flex flex-wrap items-center gap-2 mb-2">
+ <h3
+ className={`portal-label font-bold ${rec.done ? "line-through text-ink-3" : "text-ink"}`}
+ >
+ {rec.title}
+ </h3>
+ <span className={prio.cls}>{prio.label}</span>
+ <div
+ className={`flex items-center gap-1 portal-label px-2 py-0.5 rounded-full ${cat?.color}`}
+ >
+ <CatIcon size={11} />
+ <span className="capitalize">
+ {rec.category.replace("_", " ")}
+ </span>
+ </div>
+ </div>
+ <p className="portal-text mb-3 leading-relaxed">
+ {rec.description}
+ </p>
+ <div className="flex flex-wrap gap-3">
+ <div className="flex items-center gap-2 p-2.5 rounded-xs bg-canvas/60 border hairline">
+ <span className="portal-label text-ink-3">Action:</span>
+ <span className="portal-label font-medium text-ink">
+ {rec.action}
+ </span>
+ </div>
+ <div className="flex items-center gap-2 p-2.5 rounded-xs bg-olive/10 border hairline">
+ <span className="portal-label text-ink-3">Impact:</span>
+ <span className="portal-label font-bold text-olive">
+ {rec.impact}
+ </span>
+ </div>
+ </div>
+ </div>
+ </div>
+ <div className="flex-shrink-0">
+ <button
+ onClick={() => markDone(rec.id)}
+ className={`flex items-center gap-2 portal-label px-4 py-2 rounded-xs font-semibold transition-colors ${
+ rec.done
+ ? "bg-olive/20 text-olive hover:bg-clay/20 hover:text-clay"
+ : "bg-canvas text-ink-2 hover:bg-olive/20 hover:text-olive"
+ }`}
+ >
+ <CheckCircle size={14} />
+ {rec.done ? "Done ✓" : "Mark Done"}
+ </button>
+ </div>
+ </div>
+ </div>
+ );
+ })}
+ {filtered.length === 0 && (
+ <div className="bg-surface border hairline rounded-xs text-center py-16">
+ <CheckCircle
+ size={48}
+ className="mx-auto mb-3 text-olive opacity-60"
+ />
+ <p className="portal-label font-semibold text-ink">
+ No recommendations in this category
+ </p>
+ </div>
+ )}
+ </div>
+ </Layout>
+ );
 }
