@@ -14,7 +14,7 @@ const translations = {
       contact: "Contact",
       logout: "Logout",
       login: "Login",
-      register: "Register"
+      register: "Register",
     },
     // Dashboard
     dashboard: {
@@ -29,7 +29,7 @@ const translations = {
       detectedAnomalies: "Detected Anomalies",
       aiRecommendations: "AI Recommendations",
       noAnomalies: "No anomalies detected",
-      noRecommendations: "No recommendations available"
+      noRecommendations: "No recommendations available",
     },
     // Products
     products: {
@@ -53,7 +53,7 @@ const translations = {
       restock: "Restock",
       active: "Active",
       lowStock: "Low Stock",
-      outOfStock: "Out of Stock"
+      outOfStock: "Out of Stock",
     },
     // Sales
     sales: {
@@ -72,7 +72,7 @@ const translations = {
       cash: "Cash",
       transfer: "Transfer",
       check: "Check",
-      other: "Other"
+      other: "Other",
     },
     // Reviews
     reviews: {
@@ -93,7 +93,7 @@ const translations = {
       aiScore: "AI Score",
       positive: "Positive",
       neutral: "Neutral",
-      negative: "Negative"
+      negative: "Negative",
     },
     // Profile
     profile: {
@@ -118,7 +118,7 @@ const translations = {
       arabic: "Arabic",
       save: "Save",
       cancel: "Cancel",
-      updateProfile: "Update Profile"
+      updateProfile: "Update Profile",
     },
     // Common
     common: {
@@ -141,7 +141,7 @@ const translations = {
       close: "Close",
       yes: "Yes",
       no: "No",
-      menu: "Menu"
+      menu: "Menu",
     },
     // Landing Page
     landing: {
@@ -152,31 +152,37 @@ const translations = {
         docs: "Docs",
         contact: "Contact",
         login: "Login",
-        getStarted: "Get Started"
+        getStarted: "Get Started",
       },
       hero: {
         subtitle: "AI-POWERED BUSINESS INTELLIGENCE",
-        tagline: "Turn your business data into your next decision."
+        tagline: "Turn your business data into your next decision.",
       },
       features: {
         salesAnalytics: "Sales Analytics",
         salesAnalyticsSubtitle: "Revenue & KPIs",
-        salesAnalyticsDesc: "Track revenue, orders and product performance in real time with beautiful dashboards.",
+        salesAnalyticsDesc:
+          "Track revenue, orders and product performance in real time with beautiful dashboards.",
         stockManagement: "Stock Management",
         stockManagementSubtitle: "Inventory alerts",
-        stockManagementDesc: "Monitor inventory, low-stock warnings and restock alerts before they hurt sales.",
+        stockManagementDesc:
+          "Monitor inventory, low-stock warnings and restock alerts before they hurt sales.",
         aiPredictions: "AI Predictions",
         aiPredictionsSubtitle: "Forecast revenue",
-        aiPredictionsDesc: "Forecast future revenue with machine learning models trained on your history.",
+        aiPredictionsDesc:
+          "Forecast future revenue with machine learning models trained on your history.",
         reviewSentiment: "Review Sentiment",
         reviewSentimentSubtitle: "Understand users",
-        reviewSentimentDesc: "Understand what customers think with automatic NLP sentiment analysis.",
+        reviewSentimentDesc:
+          "Understand what customers think with automatic NLP sentiment analysis.",
         anomalyDetection: "Anomaly Detection",
         anomalyDetectionSubtitle: "Detect problems",
-        anomalyDetectionDesc: "Get alerted on stock ruptures and sales drops the moment they happen.",
+        anomalyDetectionDesc:
+          "Get alerted on stock ruptures and sales drops the moment they happen.",
         smartRecommendations: "Smart Recommendations",
         smartRecommendationsSubtitle: "Grow your sales",
-        smartRecommendationsDesc: "Actionable AI suggestions to boost sales and optimize your inventory."
+        smartRecommendationsDesc:
+          "Actionable AI suggestions to boost sales and optimize your inventory.",
       },
       intelligence: {
         salesIntelligence: "Sales Intelligence",
@@ -186,7 +192,7 @@ const translations = {
         customerSentiment: "Customer Sentiment",
         customerSentimentDesc: "Understand your customers",
         businessAlerts: "Business Alerts",
-        businessAlertsDesc: "Detect problems instantly"
+        businessAlertsDesc: "Detect problems instantly",
       },
       howItWorks: {
         uploadData: "Upload your data",
@@ -196,29 +202,31 @@ const translations = {
         getInsights: "Get insights",
         getInsightsDesc: "Predictions, anomalies & sentiment",
         takeAction: "Take action",
-        takeActionDesc: "Follow AI recommendations"
+        takeActionDesc: "Follow AI recommendations",
       },
       about: {
         heading: "Business data shouldn't just tell you what happened.",
         subheading: "It should tell you what happens next.",
         ready: "Ready?",
-        description: "Smart Business Assistant transforms sales, inventory and customer data into actionable decisions.",
+        description:
+          "Smart Business Assistant transforms sales, inventory and customer data into actionable decisions.",
         realTimeAnalytics: "Real-time analytics",
         aiPoweredPredictions: "AI-powered predictions",
-        actionableInsights: "Actionable insights"
+        actionableInsights: "Actionable insights",
       },
       cta: {
         heading: "Ready to transform your business?",
-        description: "Start using AI-powered business intelligence today and make data-driven decisions that grow your business.",
+        description:
+          "Start using AI-powered business intelligence today and make data-driven decisions that grow your business.",
         getStarted: "Get Started",
-        login: "Login"
+        login: "Login",
       },
       footer: {
         copyright: "© {year} Smart Business Assistant",
         privacy: "Privacy",
         terms: "Terms",
-        contact: "Contact"
-      }
+        contact: "Contact",
+      },
     },
     // Dashboard
     dashboard: {
@@ -229,7 +237,7 @@ const translations = {
         totalOrders: "Total Orders",
         customerSatisfaction: "Customer Satisfaction",
         stockAlerts: "Stock Alerts",
-        thisMonth: "this month"
+        thisMonth: "this month",
       },
       charts: {
         salesEvolution: "Sales Evolution",
@@ -238,16 +246,16 @@ const translations = {
         salesByCategory: "Sales by Category",
         revenueDistribution: "Revenue distribution",
         weeklyRevenue: "Weekly Revenue",
-        thisWeek: "This week"
+        thisWeek: "This week",
       },
       anomalies: {
         detectedAnomalies: "Detected Anomalies",
-        viewAll: "View all"
+        viewAll: "View all",
       },
       recommendations: {
         aiRecommendations: "AI Recommendations",
-        viewAll: "View all"
-      }
+        viewAll: "View all",
+      },
     },
     // Storefront
     storefront: {
@@ -264,7 +272,7 @@ const translations = {
         domain: "Domain",
         social: "Social",
         analytics: "Analytics",
-        preview: "Preview"
+        preview: "Preview",
       },
       sections: {
         visualIdentity: "Visual Identity",
@@ -272,7 +280,7 @@ const translations = {
         customDomain: "Custom Domain",
         socialLinks: "Social Media Links",
         colorPreview: "Color Preview",
-        livePreview: "Live Preview"
+        livePreview: "Live Preview",
       },
       fields: {
         logo: "Store Logo",
@@ -287,7 +295,7 @@ const translations = {
         address: "Address",
         city: "City",
         country: "Country",
-        customDomain: "Custom Domain"
+        customDomain: "Custom Domain",
       },
       placeholders: {
         storeName: "My Awesome Store",
@@ -298,7 +306,7 @@ const translations = {
         address: "123 Main Street",
         city: "Tagier",
         country: "Morocco",
-        domain: "store.example.com"
+        domain: "store.example.com",
       },
       domain: {
         status: "Domain Status",
@@ -312,10 +320,11 @@ const translations = {
         cnameLabel: "Name",
         cnameTarget: "Target",
         dnsStep3: "3. Save changes and click Verify Domain above",
-        dnsStep4: "4. DNS propagation may take up to 24-48 hours"
+        dnsStep4: "4. DNS propagation may take up to 24-48 hours",
       },
       help: {
-        domain: "Configure your custom domain. You'll need to add a CNAME record pointing to your storefront URL."
+        domain:
+          "Configure your custom domain. You'll need to add a CNAME record pointing to your storefront URL.",
       },
       copyUrl: "Copy URL",
       visitStore: "Visit Store",
@@ -348,13 +357,13 @@ const translations = {
         noAnalytics: "No analytics data available yet",
         loadingAnalytics: "Loading analytics...",
         refreshAnalytics: "Refresh Analytics",
-        viewFullReports: "View Full Reports"
+        viewFullReports: "View Full Reports",
       },
       preview: {
         storeName: "Your Store Name",
         note: "This is a preview of how your storefront will appear to customers.",
-        previewMode: "Preview Mode"
-      }
+        previewMode: "Preview Mode",
+      },
     },
     // Reviews
     reviews: {
@@ -389,7 +398,7 @@ const translations = {
       overallRating: "Overall rating: {rating}/5",
       basedOnReviews: "Based on {count} customer reviews",
       allReviews: "All Customer Reviews",
-      product: "Product"
+      product: "Product",
     },
     // Products
     products: {
@@ -453,14 +462,15 @@ const translations = {
       cancel: "Cancel",
       importFromCSV: "Import Products from CSV",
       selectCSVFile: "Select CSV File",
-      requiredColumns: "Required columns: name, category, price, stock. Optional: sold, revenue, description",
+      requiredColumns:
+        "Required columns: name, category, price, stock. Optional: sold, revenue, description",
       analysisComplete: "Analysis Complete",
       totalProducts: "Total products:",
       detectedColumns: "Detected columns:",
       preview: "Preview (first 3):",
       analyzing: "Analyzing...",
       importProducts: "Import Products",
-      importing: "Importing..."
+      importing: "Importing...",
     },
     // Sales
     sales: {
@@ -502,7 +512,7 @@ const translations = {
       saleFailed: "Failed to record sale",
       card: "Card",
       cash: "Cash",
-      transfer: "Transfer"
+      transfer: "Transfer",
     },
     // Profile
     profile: {
@@ -556,7 +566,7 @@ const translations = {
       totalAnalyses: "Total Analyses",
       activeDays: "Active Days",
       cancel: "Cancel",
-      languagePreference: "Language Preference"
+      languagePreference: "Language Preference",
     },
     // Login
     login: {
@@ -580,7 +590,8 @@ const translations = {
       aiPredictions: "Advanced AI predictions",
       anomalyDetection: "Automatic anomaly detection",
       intelligentDashboard: "Welcome back to your intelligent dashboard",
-      salesDescription: "Sales analytics, AI predictions and anomaly detection — all in one secure place."
+      salesDescription:
+        "Sales analytics, AI predictions and anomaly detection — all in one secure place.",
     },
     // Register
     register: {
@@ -601,13 +612,15 @@ const translations = {
       accountCreated: "Account created successfully!",
       accountCreateError: "Error creating account",
       startGrowing: "Start growing with AI-powered insights",
-      dataPrivate: "Create your free account. Your data stays private and isolated — only you can see it."
+      dataPrivate:
+        "Create your free account. Your data stays private and isolated — only you can see it.",
     },
     // Contact
     contact: {
       title: "Contact",
       getInTouch: "Get in touch",
-      description: "Have questions about Smart Business Assistant? We'd love to hear from you. Send us a message and we'll respond as soon as possible.",
+      description:
+        "Have questions about Smart Business Assistant? We'd love to hear from you. Send us a message and we'll respond as soon as possible.",
       sendMessage: "Send a message",
       messageSent: "Message sent successfully! We'll get back to you soon.",
       name: "Name",
@@ -631,7 +644,7 @@ const translations = {
       home: "Home",
       login: "Login",
       privacy: "Privacy",
-      terms: "Terms"
+      terms: "Terms",
     },
     // Privacy
     privacy: {
@@ -639,7 +652,8 @@ const translations = {
       legal: "Legal",
       lastUpdated: "Last updated: August 2026",
       infoCollect: "1. Information We Collect",
-      collectDescription: "We collect information you provide directly to us, including:",
+      collectDescription:
+        "We collect information you provide directly to us, including:",
       accountInfo: "Account information (name, email address)",
       businessData: "Business data (products, sales, inventory)",
       csvFiles: "CSV files uploaded for analysis",
@@ -653,20 +667,24 @@ const translations = {
       communicateAccount: "Communicate with you about your account",
       ensureSecurity: "Ensure security and prevent fraud",
       dataSecurity: "3. Data Security",
-      securityDescription: "We implement industry-standard security measures to protect your data:",
+      securityDescription:
+        "We implement industry-standard security measures to protect your data:",
       encryption: "Encryption at rest and in transit",
       secureAuth: "Secure authentication with JWT tokens",
       dataIsolation: "User data isolation (each user's data is separate)",
       securityAudits: "Regular security audits and updates",
       accessControls: "Access controls and authentication",
       dataSharing: "4. Data Sharing",
-      sharingDescription: "We do not sell, rent, or share your personal data with third parties for marketing purposes. We may share data only in the following circumstances:",
+      sharingDescription:
+        "We do not sell, rent, or share your personal data with third parties for marketing purposes. We may share data only in the following circumstances:",
       explicitConsent: "With your explicit consent",
       legalObligations: "To comply with legal obligations",
       protectRights: "To protect our rights and property",
-      serviceProviders: "With service providers who assist our operations (under strict confidentiality)",
+      serviceProviders:
+        "With service providers who assist our operations (under strict confidentiality)",
       dataRetention: "5. Data Retention",
-      retentionDescription: "We retain your data for as long as your account is active or as needed to provide our services. You may request deletion of your account and all associated data at any time through your profile settings. Upon deletion, all data is permanently removed from our systems within 30 days.",
+      retentionDescription:
+        "We retain your data for as long as your account is active or as needed to provide our services. You may request deletion of your account and all associated data at any time through your profile settings. Upon deletion, all data is permanently removed from our systems within 30 days.",
       yourRights: "6. Your Rights",
       rightsDescription: "You have the right to:",
       accessData: "Access your personal data",
@@ -675,18 +693,24 @@ const translations = {
       exportData: "Export your data",
       optOut: "Opt out of non-essential data processing",
       cookies: "7. Cookies and Tracking",
-      cookiesDescription: "We use cookies and similar technologies to improve user experience, analyze usage patterns, and maintain security. You can control cookie settings through your browser preferences.",
+      cookiesDescription:
+        "We use cookies and similar technologies to improve user experience, analyze usage patterns, and maintain security. You can control cookie settings through your browser preferences.",
       thirdParty: "8. Third-Party Services",
-      thirdPartyDescription: "Our service may integrate with third-party AI services for data analysis and predictions. These services are bound by strict data protection agreements and do not retain your data beyond the duration of the analysis.",
+      thirdPartyDescription:
+        "Our service may integrate with third-party AI services for data analysis and predictions. These services are bound by strict data protection agreements and do not retain your data beyond the duration of the analysis.",
       childrenPrivacy: "9. Children's Privacy",
-      childrenDescription: "Our service is not intended for children under 13. We do not knowingly collect personal information from children under 13. If we become aware of such collection, we will take steps to delete it.",
+      childrenDescription:
+        "Our service is not intended for children under 13. We do not knowingly collect personal information from children under 13. If we become aware of such collection, we will take steps to delete it.",
       internationalTransfers: "10. International Data Transfers",
-      transfersDescription: "Your data may be processed and stored on servers located in various countries. We ensure appropriate safeguards are in place to protect your data in accordance with this privacy policy and applicable laws.",
+      transfersDescription:
+        "Your data may be processed and stored on servers located in various countries. We ensure appropriate safeguards are in place to protect your data in accordance with this privacy policy and applicable laws.",
       policyChanges: "11. Changes to Privacy Policy",
-      changesDescription: "We may update this privacy policy from time to time. We will notify users of significant changes via email or through the platform. Continued use of the service after changes constitutes acceptance of the new policy.",
+      changesDescription:
+        "We may update this privacy policy from time to time. We will notify users of significant changes via email or through the platform. Continued use of the service after changes constitutes acceptance of the new policy.",
       contactSection: "12. Contact",
-      contactDescription: "For questions about this privacy policy or your data, please contact us at",
-      contactEmail: "contact@smartbusiness.ai"
+      contactDescription:
+        "For questions about this privacy policy or your data, please contact us at",
+      contactEmail: "contact@smartbusiness.ai",
     },
     // Docs
     docs: {
@@ -699,31 +723,40 @@ const translations = {
       aiFeatures: "AI Features",
       security: "Security",
       welcome: "Welcome to Smart Business Assistant",
-      welcomeDescription: "Smart Business Assistant is an AI-powered platform that helps you manage your business data, analyze sales trends, and make data-driven decisions. This guide will help you get started with the platform.",
+      welcomeDescription:
+        "Smart Business Assistant is an AI-powered platform that helps you manage your business data, analyze sales trends, and make data-driven decisions. This guide will help you get started with the platform.",
       creatingAccount: "Creating an Account",
-      step1: "Click the \"Get Started\" button on the landing page",
+      step1: 'Click the "Get Started" button on the landing page',
       step2: "Fill in your email, name, and create a password",
       step3: "Verify your email address",
       step4: "Log in to access your dashboard",
       dashboardOverview: "Dashboard Overview",
-      dashboardDescription: "After logging in, you'll see the main dashboard with:",
+      dashboardDescription:
+        "After logging in, you'll see the main dashboard with:",
       salesAnalyticsFeature: "Sales Analytics: Revenue charts and KPIs",
       productsFeature: "Products: Inventory management and stock levels",
       aiChatbot: "AI Chatbot: Ask questions about your business data",
       csvImport: "CSV Import: Bulk import products from CSV files",
       platformFeatures: "Platform Features",
-      featuresDescription: "Smart Business Assistant offers a comprehensive suite of tools to help you manage and grow your business.",
-      salesAnalyticsDesc: "Track revenue, orders, and product performance in real-time with beautiful dashboards and interactive charts.",
+      featuresDescription:
+        "Smart Business Assistant offers a comprehensive suite of tools to help you manage and grow your business.",
+      salesAnalyticsDesc:
+        "Track revenue, orders, and product performance in real-time with beautiful dashboards and interactive charts.",
       stockManagement: "Stock Management",
-      stockManagementDesc: "Monitor inventory levels, receive low-stock warnings, and get restock alerts before they impact your sales.",
+      stockManagementDesc:
+        "Monitor inventory levels, receive low-stock warnings, and get restock alerts before they impact your sales.",
       aiPredictionsFeature: "AI Predictions",
-      aiPredictionsDesc: "Forecast future revenue with machine learning models trained on your historical data.",
+      aiPredictionsDesc:
+        "Forecast future revenue with machine learning models trained on your historical data.",
       reviewSentiment: "Review Sentiment",
-      reviewSentimentDesc: "Understand what customers think with automatic NLP sentiment analysis of reviews and feedback.",
+      reviewSentimentDesc:
+        "Understand what customers think with automatic NLP sentiment analysis of reviews and feedback.",
       anomalyDetectionFeature: "Anomaly Detection",
-      anomalyDetectionDesc: "Get alerted on stock ruptures and sales drops the moment they happen with real-time monitoring.",
+      anomalyDetectionDesc:
+        "Get alerted on stock ruptures and sales drops the moment they happen with real-time monitoring.",
       smartRecommendations: "Smart Recommendations",
-      smartRecommendationsDesc: "Receive actionable AI suggestions to boost sales and optimize your inventory based on data patterns.",
+      smartRecommendationsDesc:
+        "Receive actionable AI suggestions to boost sales and optimize your inventory based on data patterns.",
       keyMetrics: "Key Metrics",
       totalRevenue: "Total Revenue: Overall sales revenue for selected period",
       totalOrders: "Total Orders: Number of orders processed",
@@ -731,10 +764,10 @@ const translations = {
       topProducts: "Top Products: Best-selling products by revenue",
       recordingSales: "Recording Sales",
       navigateSales: "Navigate to the Sales page",
-      clickRecordSale: "Click \"Record Sale\" button",
+      clickRecordSale: 'Click "Record Sale" button',
       selectProduct: "Select product from inventory",
       enterDetails: "Enter quantity, price, and date",
-      clickSave: "Click \"Save\" to record the transaction",
+      clickSave: 'Click "Save" to record the transaction',
       timePeriods: "Time Periods",
       filterPeriods: "Filter your sales data by different time periods:",
       last7Days: "Last 7 days: Recent sales trends",
@@ -742,36 +775,44 @@ const translations = {
       last90Days: "Last 90 days: Quarterly overview",
       customRange: "Custom range: Select specific dates",
       inventoryManagement: "Inventory Management",
-      inventoryDescription: "Manage your product inventory efficiently with our comprehensive inventory system.",
+      inventoryDescription:
+        "Manage your product inventory efficiently with our comprehensive inventory system.",
       addingProducts: "Adding Products",
       goToProducts: "Go to the Products page",
       csvImportDesc: "Bulk import products from CSV files",
       csvStep1: "Prepare CSV with columns: name, price, stock, category",
       csvStep2: "Go to Products page",
-      csvStep3: "Click \"Import CSV\" button",
+      csvStep3: 'Click "Import CSV" button',
       csvStep4: "Select your CSV file",
       csvStep5: "Review and confirm import",
       stockAlerts: "Stock Alerts",
-      stockAlertsDesc: "The system automatically alerts you when products are running low on stock. Set minimum stock levels for each product to receive timely notifications.",
+      stockAlertsDesc:
+        "The system automatically alerts you when products are running low on stock. Set minimum stock levels for each product to receive timely notifications.",
       aiPoweredFeatures: "AI-Powered Features",
-      aiIntro: "Leverage artificial intelligence to gain deeper insights into your business data.",
-      aiChatbotDesc: "Ask questions about your business data in natural language",
+      aiIntro:
+        "Leverage artificial intelligence to gain deeper insights into your business data.",
+      aiChatbotDesc:
+        "Ask questions about your business data in natural language",
       example1: "What are my top-selling products?",
       example2: "How much revenue did I make last month?",
       example3: "Which products are low on stock?",
       example4: "Predict next month's revenue",
       csvAnalysis: "CSV Analysis",
-      csvAnalysisDesc: "When importing CSV files, our AI analyzes the data and provides",
+      csvAnalysisDesc:
+        "When importing CSV files, our AI analyzes the data and provides",
       dataQuality: "Data quality assessment",
       categorySuggestions: "Category suggestions",
       priceRecommendations: "Price recommendations",
       anomalyDetection: "Anomaly detection",
       revenuePredictions: "Revenue Predictions",
-      revenuePredictionsDesc: "Our machine learning models analyze your historical sales data to forecast future revenue trends. These predictions help you make informed business decisions and plan accordingly.",
+      revenuePredictionsDesc:
+        "Our machine learning models analyze your historical sales data to forecast future revenue trends. These predictions help you make informed business decisions and plan accordingly.",
       sentimentAnalysis: "Sentiment Analysis",
-      sentimentAnalysisDesc: "Automatically analyze customer reviews and feedback to understand sentiment trends. Identify areas for improvement and track customer satisfaction over time.",
+      sentimentAnalysisDesc:
+        "Automatically analyze customer reviews and feedback to understand sentiment trends. Identify areas for improvement and track customer satisfaction over time.",
       securityPrivacy: "Security & Privacy",
-      securityIntro: "Your data security is our top priority. Learn about our security measures and how we protect your information.",
+      securityIntro:
+        "Your data security is our top priority. Learn about our security measures and how we protect your information.",
       dataProtection: "Data Protection",
       encryption: "Encryption",
       encryptionDesc: "All data is encrypted at rest and in transit",
@@ -787,11 +828,13 @@ const translations = {
       securityTip3: "Log out after each session",
       securityTip4: "Keep your browser updated",
       privacyPolicy: "Privacy Policy",
-      privacyPolicyDesc: "We do not sell or share your data with third parties. Your business data remains yours alone. We only use data to provide and improve our services.",
+      privacyPolicyDesc:
+        "We do not sell or share your data with third parties. Your business data remains yours alone. We only use data to provide and improve our services.",
       dataRetention: "Data Retention",
-      dataRetentionDesc: "You can delete your account and all associated data at any time through the profile settings. Upon deletion, all data is permanently removed from our systems.",
-      searchDocs: "Search documentation..."
-    }
+      dataRetentionDesc:
+        "You can delete your account and all associated data at any time through the profile settings. Upon deletion, all data is permanently removed from our systems.",
+      searchDocs: "Search documentation...",
+    },
   },
   fr: {
     // Navigation
@@ -808,7 +851,7 @@ const translations = {
       contact: "Contact",
       logout: "Déconnexion",
       login: "Connexion",
-      register: "Inscription"
+      register: "Inscription",
     },
     // Dashboard
     dashboard: {
@@ -823,7 +866,7 @@ const translations = {
       detectedAnomalies: "Anomalies détectées",
       aiRecommendations: "Recommandations IA",
       noAnomalies: "Aucune anomalie détectée",
-      noRecommendations: "Aucune recommandation disponible"
+      noRecommendations: "Aucune recommandation disponible",
     },
     // Products
     products: {
@@ -845,7 +888,7 @@ const translations = {
       restock: "Réapprovisionner",
       active: "Actif",
       lowStock: "Stock faible",
-      outOfStock: "Rupture de stock"
+      outOfStock: "Rupture de stock",
     },
     // Sales
     sales: {
@@ -864,7 +907,7 @@ const translations = {
       cash: "Espèces",
       transfer: "Virement",
       check: "Chèque",
-      other: "Autre"
+      other: "Autre",
     },
     // Reviews
     reviews: {
@@ -885,7 +928,7 @@ const translations = {
       aiScore: "Score IA",
       positive: "Positif",
       neutral: "Neutre",
-      negative: "Négatif"
+      negative: "Négatif",
     },
     // Profile
     profile: {
@@ -910,7 +953,7 @@ const translations = {
       arabic: "Arabe",
       save: "Enregistrer",
       cancel: "Annuler",
-      updateProfile: "Mettre à jour le profil"
+      updateProfile: "Mettre à jour le profil",
     },
     // Common
     common: {
@@ -933,7 +976,7 @@ const translations = {
       close: "Fermer",
       yes: "Oui",
       no: "Non",
-      menu: "Menu"
+      menu: "Menu",
     },
     // Landing Page
     landing: {
@@ -944,31 +987,38 @@ const translations = {
         docs: "Docs",
         contact: "Contact",
         login: "Connexion",
-        getStarted: "Commencer"
+        getStarted: "Commencer",
       },
       hero: {
         subtitle: "INTELLIGENCE COMMERCIALE ALIMENTÉE PAR L'IA",
-        tagline: "Transformez vos données commerciales en votre prochaine décision."
+        tagline:
+          "Transformez vos données commerciales en votre prochaine décision.",
       },
       features: {
         salesAnalytics: "Analyse des ventes",
         salesAnalyticsSubtitle: "Revenus & KPIs",
-        salesAnalyticsDesc: "Suivez les revenus, les commandes et les performances des produits en temps réel avec des tableaux de bord magnifiques.",
+        salesAnalyticsDesc:
+          "Suivez les revenus, les commandes et les performances des produits en temps réel avec des tableaux de bord magnifiques.",
         stockManagement: "Gestion des stocks",
         stockManagementSubtitle: "Alertes d'inventaire",
-        stockManagementDesc: "Surveillez l'inventaire, les alertes de stock faible et les réapprovisionnements avant qu'ils ne nuisent aux ventes.",
+        stockManagementDesc:
+          "Surveillez l'inventaire, les alertes de stock faible et les réapprovisionnements avant qu'ils ne nuisent aux ventes.",
         aiPredictions: "Prédictions IA",
         aiPredictionsSubtitle: "Prévoir les revenus",
-        aiPredictionsDesc: "Prévoyez les revenus futurs avec des modèles d'apprentissage automatique formés sur votre historique.",
+        aiPredictionsDesc:
+          "Prévoyez les revenus futurs avec des modèles d'apprentissage automatique formés sur votre historique.",
         reviewSentiment: "Sentiment des avis",
         reviewSentimentSubtitle: "Comprendre les utilisateurs",
-        reviewSentimentDesc: "Comprenez ce que pensent les clients avec l'analyse de sentiment NLP automatique.",
+        reviewSentimentDesc:
+          "Comprenez ce que pensent les clients avec l'analyse de sentiment NLP automatique.",
         anomalyDetection: "Détection d'anomalies",
         anomalyDetectionSubtitle: "Détecter les problèmes",
-        anomalyDetectionDesc: "Soyez alerté des ruptures de stock et des chutes de ventes dès qu'elles se produisent.",
+        anomalyDetectionDesc:
+          "Soyez alerté des ruptures de stock et des chutes de ventes dès qu'elles se produisent.",
         smartRecommendations: "Recommandations intelligentes",
         smartRecommendationsSubtitle: "Augmenter vos ventes",
-        smartRecommendationsDesc: "Suggestions d'IA exploitables pour stimuler les ventes et optimiser votre inventaire."
+        smartRecommendationsDesc:
+          "Suggestions d'IA exploitables pour stimuler les ventes et optimiser votre inventaire.",
       },
       intelligence: {
         salesIntelligence: "Intelligence des ventes",
@@ -978,7 +1028,7 @@ const translations = {
         customerSentiment: "Sentiment client",
         customerSentimentDesc: "Comprendre vos clients",
         businessAlerts: "Alertes commerciales",
-        businessAlertsDesc: "Détecter les problèmes instantanément"
+        businessAlertsDesc: "Détecter les problèmes instantanément",
       },
       howItWorks: {
         uploadData: "Téléchargez vos données",
@@ -988,29 +1038,32 @@ const translations = {
         getInsights: "Obtenez des informations",
         getInsightsDesc: "Prédictions, anomalies et sentiment",
         takeAction: "Passez à l'action",
-        takeActionDesc: "Suivez les recommandations de l'IA"
+        takeActionDesc: "Suivez les recommandations de l'IA",
       },
       about: {
-        heading: "Les données commerciales ne devraient pas seulement vous dire ce qui s'est passé.",
+        heading:
+          "Les données commerciales ne devraient pas seulement vous dire ce qui s'est passé.",
         subheading: "Elles devraient vous dire ce qui va se passer.",
         ready: "Prêt?",
-        description: "Smart Business Assistant transforme les données de ventes, d'inventaire et de clients en décisions exploitables.",
+        description:
+          "Smart Business Assistant transforme les données de ventes, d'inventaire et de clients en décisions exploitables.",
         realTimeAnalytics: "Analyse en temps réel",
         aiPoweredPredictions: "Prédictions alimentées par l'IA",
-        actionableInsights: "Informations exploitables"
+        actionableInsights: "Informations exploitables",
       },
       cta: {
         heading: "Prêt à transformer votre entreprise?",
-        description: "Commencez à utiliser l'intelligence commerciale alimentée par l'IA aujourd'hui et prenez des décisions basées sur les données qui font croître votre entreprise.",
+        description:
+          "Commencez à utiliser l'intelligence commerciale alimentée par l'IA aujourd'hui et prenez des décisions basées sur les données qui font croître votre entreprise.",
         getStarted: "Commencer",
-        login: "Connexion"
+        login: "Connexion",
       },
       footer: {
         copyright: "© {year} Smart Business Assistant",
         privacy: "Confidentialité",
         terms: "Conditions",
-        contact: "Contact"
-      }
+        contact: "Contact",
+      },
     },
     // Dashboard
     dashboard: {
@@ -1021,7 +1074,7 @@ const translations = {
         totalOrders: "Commandes totales",
         customerSatisfaction: "Satisfaction client",
         stockAlerts: "Alertes de stock",
-        thisMonth: "ce mois"
+        thisMonth: "ce mois",
       },
       charts: {
         salesEvolution: "Évolution des ventes",
@@ -1030,21 +1083,22 @@ const translations = {
         salesByCategory: "Ventes par catégorie",
         revenueDistribution: "Distribution des revenus",
         weeklyRevenue: "Revenu hebdomadaire",
-        thisWeek: "Cette semaine"
+        thisWeek: "Cette semaine",
       },
       anomalies: {
         detectedAnomalies: "Anomalies détectées",
-        viewAll: "Voir tout"
+        viewAll: "Voir tout",
       },
       recommendations: {
         aiRecommendations: "Recommandations IA",
-        viewAll: "Voir tout"
-      }
+        viewAll: "Voir tout",
+      },
     },
     // Storefront
     storefront: {
       title: "Personnaliser votre boutique",
-      subtitle: "Gérez le branding, le domaine et les analyses de votre vitrine",
+      subtitle:
+        "Gérez le branding, le domaine et les analyses de votre vitrine",
       loading: "Chargement des paramètres de la boutique...",
       loadError: "Échec du chargement des paramètres de la boutique",
       saveError: "Échec de l'enregistrement des paramètres",
@@ -1056,7 +1110,7 @@ const translations = {
         domain: "Domaine",
         social: "Réseaux sociaux",
         analytics: "Analyses",
-        preview: "Aperçu"
+        preview: "Aperçu",
       },
       sections: {
         visualIdentity: "Identité visuelle",
@@ -1064,7 +1118,7 @@ const translations = {
         customDomain: "Domaine personnalisé",
         socialLinks: "Liens réseaux sociaux",
         colorPreview: "Aperçu des couleurs",
-        livePreview: "Aperçu en direct"
+        livePreview: "Aperçu en direct",
       },
       fields: {
         logo: "Logo de la boutique",
@@ -1079,7 +1133,7 @@ const translations = {
         address: "Adresse",
         city: "Ville",
         country: "Pays",
-        customDomain: "Domaine personnalisé"
+        customDomain: "Domaine personnalisé",
       },
       placeholders: {
         storeName: "Ma super boutique",
@@ -1090,7 +1144,7 @@ const translations = {
         address: "123 Rue Principale",
         city: "Alger",
         country: "Algérie",
-        domain: "boutique.exemple.com"
+        domain: "boutique.exemple.com",
       },
       domain: {
         status: "Statut du domaine",
@@ -1099,15 +1153,18 @@ const translations = {
         notConfigured: "Non configuré",
         verify: "Vérifier le domaine",
         dnsInstructions: "Configuration DNS",
-        dnsStep1: "1. Allez dans les paramètres DNS de votre registraire de domaine",
+        dnsStep1:
+          "1. Allez dans les paramètres DNS de votre registraire de domaine",
         dnsStep2: "2. Ajoutez un enregistrement CNAME :",
         cnameLabel: "Nom",
         cnameTarget: "Cible",
-        dnsStep3: "3. Sauvegardez les changements et cliquez sur Vérifier le domaine ci-dessus",
-        dnsStep4: "4. La propagation DNS peut prendre jusqu'à 24-48 heures"
+        dnsStep3:
+          "3. Sauvegardez les changements et cliquez sur Vérifier le domaine ci-dessus",
+        dnsStep4: "4. La propagation DNS peut prendre jusqu'à 24-48 heures",
       },
       help: {
-        domain: "Configurez votre domaine personnalisé. Vous devrez ajouter un enregistrement CNAME pointant vers l'URL de votre vitrine."
+        domain:
+          "Configurez votre domaine personnalisé. Vous devrez ajouter un enregistrement CNAME pointant vers l'URL de votre vitrine.",
       },
       copyUrl: "Copier l'URL",
       visitStore: "Visiter la boutique",
@@ -1140,13 +1197,13 @@ const translations = {
         noAnalytics: "Aucune donnée d'analyse disponible pour le moment",
         loadingAnalytics: "Chargement des analyses...",
         refreshAnalytics: "Actualiser les analyses",
-        viewFullReports: "Voir les rapports complets"
+        viewFullReports: "Voir les rapports complets",
       },
       preview: {
         storeName: "Nom de votre boutique",
         note: "Ceci est un aperçu de l'apparence de votre vitrine pour les clients.",
-        previewMode: "Mode aperçu"
-      }
+        previewMode: "Mode aperçu",
+      },
     },
     // Reviews
     reviews: {
@@ -1181,7 +1238,7 @@ const translations = {
       overallRating: "Note globale: {rating}/5",
       basedOnReviews: "Basé sur {count} avis clients",
       allReviews: "Tous les avis clients",
-      product: "Produit"
+      product: "Produit",
     },
     // Products
     products: {
@@ -1243,14 +1300,15 @@ const translations = {
       cancel: "Annuler",
       importFromCSV: "Importer des produits depuis CSV",
       selectCSVFile: "Sélectionner un fichier CSV",
-      requiredColumns: "Colonnes requises: name, category, price, stock. Optionnel: sold, revenue, description",
+      requiredColumns:
+        "Colonnes requises: name, category, price, stock. Optionnel: sold, revenue, description",
       analysisComplete: "Analyse terminée",
       totalProducts: "Total des produits:",
       detectedColumns: "Colonnes détectées:",
       preview: "Aperçu (3 premiers):",
       analyzing: "Analyse en cours...",
       importProducts: "Importer les produits",
-      importing: "Importation..."
+      importing: "Importation...",
     },
     // Sales
     sales: {
@@ -1263,7 +1321,8 @@ const translations = {
       monthlyAverage: "Moyenne mensuelle",
       bestMonth: "Meilleur mois",
       salesVsTargets: "Ventes vs Objectifs — 2026",
-      monthlyComparison: "Comparaison mensuelle des ventes réelles par rapport aux objectifs",
+      monthlyComparison:
+        "Comparaison mensuelle des ventes réelles par rapport aux objectifs",
       sales: "Ventes (DA)",
       target: "Objectif (DA)",
       monthlyOrders: "Commandes mensuelles",
@@ -1292,7 +1351,7 @@ const translations = {
       saleFailed: "Échec de l'enregistrement de la vente",
       card: "Carte",
       cash: "Espèces",
-      transfer: "Virement"
+      transfer: "Virement",
     },
     // Profile
     profile: {
@@ -1346,7 +1405,7 @@ const translations = {
       totalAnalyses: "Total des analyses",
       activeDays: "Jours actifs",
       cancel: "Annuler",
-      languagePreference: "Préférence de langue"
+      languagePreference: "Préférence de langue",
     },
     // Login
     login: {
@@ -1370,12 +1429,14 @@ const translations = {
       aiPredictions: "Prédictions IA avancées",
       anomalyDetection: "Détection automatique d'anomalies",
       intelligentDashboard: "Bon retour sur votre tableau de bord intelligent",
-      salesDescription: "Analyse des ventes, prédictions IA et détection d'anomalies — tout en un seul endroit sécurisé."
+      salesDescription:
+        "Analyse des ventes, prédictions IA et détection d'anomalies — tout en un seul endroit sécurisé.",
     },
     // Register
     register: {
       createAccount: "Créer un compte",
-      startIntelligentAnalytics: "Commencez votre analyse d'affaires intelligente",
+      startIntelligentAnalytics:
+        "Commencez votre analyse d'affaires intelligente",
       fullName: "Nom complet",
       company: "Entreprise",
       email: "E-mail",
@@ -1391,13 +1452,15 @@ const translations = {
       accountCreated: "Compte créé avec succès!",
       accountCreateError: "Erreur lors de la création du compte",
       startGrowing: "Commencez à grandir avec des insights alimentés par l'IA",
-      dataPrivate: "Créez votre compte gratuit. Vos données restent privées et isolées — seul vous pouvez les voir."
+      dataPrivate:
+        "Créez votre compte gratuit. Vos données restent privées et isolées — seul vous pouvez les voir.",
     },
     // Contact
     contact: {
       title: "Contact",
       getInTouch: "Contactez-nous",
-      description: "Avez-vous des questions sur Smart Business Assistant? Nous aimerions avoir de vos nouvelles. Envoyez-nous un message et nous vous répondrons dès que possible.",
+      description:
+        "Avez-vous des questions sur Smart Business Assistant? Nous aimerions avoir de vos nouvelles. Envoyez-nous un message et nous vous répondrons dès que possible.",
       sendMessage: "Envoyer un message",
       messageSent: "Message envoyé avec succès! Nous vous répondrons bientôt.",
       name: "Nom",
@@ -1421,7 +1484,7 @@ const translations = {
       home: "Accueil",
       login: "Connexion",
       privacy: "Confidentialité",
-      terms: "Conditions"
+      terms: "Conditions",
     },
     // Privacy
     privacy: {
@@ -1429,7 +1492,8 @@ const translations = {
       legal: "Légal",
       lastUpdated: "Dernière mise à jour: Août 2026",
       infoCollect: "1. Informations que nous collectons",
-      collectDescription: "Nous collectons les informations que vous nous fournissez directement, y compris:",
+      collectDescription:
+        "Nous collectons les informations que vous nous fournissez directement, y compris:",
       accountInfo: "Informations de compte (nom, adresse e-mail)",
       businessData: "Données d'affaires (produits, ventes, inventaire)",
       csvFiles: "Fichiers CSV téléchargés pour analyse",
@@ -1443,20 +1507,25 @@ const translations = {
       communicateAccount: "Communiquer avec vous au sujet de votre compte",
       ensureSecurity: "Assurer la sécurité et prévenir la fraude",
       dataSecurity: "3. Sécurité des données",
-      securityDescription: "Nous mettons en œuvre des mesures de sécurité standard de l'industrie pour protéger vos données:",
+      securityDescription:
+        "Nous mettons en œuvre des mesures de sécurité standard de l'industrie pour protéger vos données:",
       encryption: "Chiffrement au repos et en transit",
       secureAuth: "Authentification sécurisée avec jetons JWT",
-      dataIsolation: "Isolation des données utilisateur (les données de chaque utilisateur sont séparées)",
+      dataIsolation:
+        "Isolation des données utilisateur (les données de chaque utilisateur sont séparées)",
       securityAudits: "Audits et mises à jour de sécurité réguliers",
       accessControls: "Contrôles d'accès et authentification",
       dataSharing: "4. Partage des données",
-      sharingDescription: "Nous ne vendons, ne louons ni ne partageons vos données personnelles avec des tiers à des fins marketing. Nous pouvons partager des données uniquement dans les circonstances suivantes:",
+      sharingDescription:
+        "Nous ne vendons, ne louons ni ne partageons vos données personnelles avec des tiers à des fins marketing. Nous pouvons partager des données uniquement dans les circonstances suivantes:",
       explicitConsent: "Avec votre consentement explicite",
       legalObligations: "Pour se conformer aux obligations légales",
       protectRights: "Pour protéger nos droits et biens",
-      serviceProviders: "Avec les fournisseurs de services qui assistent nos opérations (sous stricte confidentialité)",
+      serviceProviders:
+        "Avec les fournisseurs de services qui assistent nos opérations (sous stricte confidentialité)",
       dataRetention: "5. Rétention des données",
-      retentionDescription: "Nous conservons vos données tant que votre compte est actif ou selon les besoins pour fournir nos services. Vous pouvez demander la suppression de votre compte et de toutes les données associées à tout moment via vos paramètres de profil. Lors de la suppression, toutes les données sont définitivement supprimées de nos systèmes dans les 30 jours.",
+      retentionDescription:
+        "Nous conservons vos données tant que votre compte est actif ou selon les besoins pour fournir nos services. Vous pouvez demander la suppression de votre compte et de toutes les données associées à tout moment via vos paramètres de profil. Lors de la suppression, toutes les données sont définitivement supprimées de nos systèmes dans les 30 jours.",
       yourRights: "6. Vos droits",
       rightsDescription: "Vous avez le droit de:",
       accessData: "Accéder à vos données personnelles",
@@ -1465,18 +1534,24 @@ const translations = {
       exportData: "Exporter vos données",
       optOut: "Refuser le traitement non essentiel des données",
       cookies: "7. Cookies et suivi",
-      cookiesDescription: "Nous utilisons des cookies et technologies similaires pour améliorer l'expérience utilisateur, analyser les modèles d'utilisation et maintenir la sécurité. Vous pouvez contrôler les paramètres des cookies via les préférences de votre navigateur.",
+      cookiesDescription:
+        "Nous utilisons des cookies et technologies similaires pour améliorer l'expérience utilisateur, analyser les modèles d'utilisation et maintenir la sécurité. Vous pouvez contrôler les paramètres des cookies via les préférences de votre navigateur.",
       thirdParty: "8. Services tiers",
-      thirdPartyDescription: "Notre service peut s'intégrer à des services d'IA tiers pour l'analyse de données et les prédictions. Ces services sont liés par des accords stricts de protection des données et ne conservent pas vos données au-delà de la durée de l'analyse.",
+      thirdPartyDescription:
+        "Notre service peut s'intégrer à des services d'IA tiers pour l'analyse de données et les prédictions. Ces services sont liés par des accords stricts de protection des données et ne conservent pas vos données au-delà de la durée de l'analyse.",
       childrenPrivacy: "9. Confidentialité des enfants",
-      childrenDescription: "Notre service n'est pas destiné aux enfants de moins de 13 ans. Nous ne collectons pas sciemment d'informations personnelles d'enfants de moins de 13 ans. Si nous prenons connaissance d'une telle collecte, nous prendrons des mesures pour la supprimer.",
+      childrenDescription:
+        "Notre service n'est pas destiné aux enfants de moins de 13 ans. Nous ne collectons pas sciemment d'informations personnelles d'enfants de moins de 13 ans. Si nous prenons connaissance d'une telle collecte, nous prendrons des mesures pour la supprimer.",
       internationalTransfers: "10. Transferts internationaux de données",
-      transfersDescription: "Vos données peuvent être traitées et stockées sur des situés dans divers pays. Nous nous assurons que des sauvegardes appropriées sont en place pour protéger vos données conformément à cette politique de confidentialité et aux lois applicables.",
+      transfersDescription:
+        "Vos données peuvent être traitées et stockées sur des situés dans divers pays. Nous nous assurons que des sauvegardes appropriées sont en place pour protéger vos données conformément à cette politique de confidentialité et aux lois applicables.",
       policyChanges: "11. Modifications de la politique de confidentialité",
-      changesDescription: "Nous pouvons mettre à jour cette politique de confidentialité de temps à autre. Nous informerons les utilisateurs des modifications importantes par e-mail ou via la plateforme. L'utilisation continue du service après les modifications constitue une acceptation de la nouvelle politique.",
+      changesDescription:
+        "Nous pouvons mettre à jour cette politique de confidentialité de temps à autre. Nous informerons les utilisateurs des modifications importantes par e-mail ou via la plateforme. L'utilisation continue du service après les modifications constitue une acceptation de la nouvelle politique.",
       contactSection: "12. Contact",
-      contactDescription: "Pour des questions sur cette politique de confidentialité ou vos données, veuillez nous contacter à",
-      contactEmail: "contact@smartbusiness.ai"
+      contactDescription:
+        "Pour des questions sur cette politique de confidentialité ou vos données, veuillez nous contacter à",
+      contactEmail: "contact@smartbusiness.ai",
     },
     // Docs
     docs: {
@@ -1489,42 +1564,54 @@ const translations = {
       aiFeatures: "Fonctionnalités IA",
       security: "Sécurité",
       welcome: "Bienvenue sur Smart Business Assistant",
-      welcomeDescription: "Smart Business Assistant est une plateforme alimentée par l'IA qui vous aide à gérer vos données d'affaires, analyser les tendances de vente et prendre des décisions basées sur les données. Ce guide vous aidera à démarrer avec la plateforme.",
+      welcomeDescription:
+        "Smart Business Assistant est une plateforme alimentée par l'IA qui vous aide à gérer vos données d'affaires, analyser les tendances de vente et prendre des décisions basées sur les données. Ce guide vous aidera à démarrer avec la plateforme.",
       creatingAccount: "Création d'un compte",
-      step1: "Cliquez sur le bouton \"Commencer\" sur la page d'accueil",
+      step1: 'Cliquez sur le bouton "Commencer" sur la page d\'accueil',
       step2: "Remplissez votre e-mail, nom et créez un mot de passe",
       step3: "Vérifiez votre adresse e-mail",
       step4: "Connectez-vous pour accéder à votre tableau de bord",
       dashboardOverview: "Aperçu du tableau de bord",
-      dashboardDescription: "Après vous être connecté, vous verrez le tableau de bord principal avec:",
-      salesAnalyticsFeature: "Analyse des ventes: Graphiques de revenus et KPIs",
+      dashboardDescription:
+        "Après vous être connecté, vous verrez le tableau de bord principal avec:",
+      salesAnalyticsFeature:
+        "Analyse des ventes: Graphiques de revenus et KPIs",
       productsFeature: "Produits: Gestion de l'inventaire et niveaux de stock",
       aiChatbot: "Chatbot IA: Posez des questions sur vos données d'affaires",
-      csvImport: "Import CSV: Import en masse de produits depuis des fichiers CSV",
+      csvImport:
+        "Import CSV: Import en masse de produits depuis des fichiers CSV",
       platformFeatures: "Fonctionnalités de la plateforme",
-      featuresDescription: "Smart Business Assistant offre une suite complète d'outils pour vous aider à gérer et développer votre entreprise.",
-      salesAnalyticsDesc: "Suivez les revenus, les commandes et la performance des produits en temps réel avec des tableaux de bord magnifiques et des graphiques interactifs.",
+      featuresDescription:
+        "Smart Business Assistant offre une suite complète d'outils pour vous aider à gérer et développer votre entreprise.",
+      salesAnalyticsDesc:
+        "Suivez les revenus, les commandes et la performance des produits en temps réel avec des tableaux de bord magnifiques et des graphiques interactifs.",
       stockManagement: "Gestion des stocks",
-      stockManagementDesc: "Surveillez les niveaux d'inventaire, recevez des alertes de stock faible et obtenez des alertes de réapprovisionnement avant qu'elles n'affectent vos ventes.",
+      stockManagementDesc:
+        "Surveillez les niveaux d'inventaire, recevez des alertes de stock faible et obtenez des alertes de réapprovisionnement avant qu'elles n'affectent vos ventes.",
       aiPredictionsFeature: "Prédictions IA",
-      aiPredictionsDesc: "Prévoyez les revenus futurs avec des modèles d'apprentissage automatique formés sur vos données historiques.",
+      aiPredictionsDesc:
+        "Prévoyez les revenus futurs avec des modèles d'apprentissage automatique formés sur vos données historiques.",
       reviewSentiment: "Sentiment des avis",
-      reviewSentimentDesc: "Comprenez ce que pensent les clients avec l'analyse de sentiment NLP automatique des avis et commentaires.",
+      reviewSentimentDesc:
+        "Comprenez ce que pensent les clients avec l'analyse de sentiment NLP automatique des avis et commentaires.",
       anomalyDetectionFeature: "Détection d'anomalies",
-      anomalyDetectionDesc: "Soyez alerté sur les ruptures de stock et les chutes de ventes dès qu'elles se produisent avec une surveillance en temps réel.",
+      anomalyDetectionDesc:
+        "Soyez alerté sur les ruptures de stock et les chutes de ventes dès qu'elles se produisent avec une surveillance en temps réel.",
       smartRecommendations: "Recommandations intelligentes",
-      smartRecommendationsDesc: "Recevez des suggestions IA actionnables pour stimuler les ventes et optimiser votre inventaire basé sur les modèles de données.",
+      smartRecommendationsDesc:
+        "Recevez des suggestions IA actionnables pour stimuler les ventes et optimiser votre inventaire basé sur les modèles de données.",
       keyMetrics: "Métriques clés",
-      totalRevenue: "Revenu total: Revenu global des ventes pour la période sélectionnée",
+      totalRevenue:
+        "Revenu total: Revenu global des ventes pour la période sélectionnée",
       totalOrders: "Commandes totales: Nombre de commandes traitées",
       avgOrderValue: "Valeur moyenne des commandes: Revenu moyen par commande",
       topProducts: "Meilleurs produits: Produits les plus vendus par revenu",
       recordingSales: "Enregistrement des ventes",
       navigateSales: "Naviguez vers la page Ventes",
-      clickRecordSale: "Cliquez sur le bouton \"Enregistrer une vente\"",
+      clickRecordSale: 'Cliquez sur le bouton "Enregistrer une vente"',
       selectProduct: "Sélectionnez un produit dans l'inventaire",
       enterDetails: "Entrez la quantité, le prix et la date",
-      clickSave: "Cliquez sur \"Enregistrer\" pour enregistrer la transaction",
+      clickSave: 'Cliquez sur "Enregistrer" pour enregistrer la transaction',
       timePeriods: "Périodes de temps",
       filterPeriods: "Filtrez vos données de ventes par différentes périodes:",
       last7Days: "7 derniers jours: Tendances récentes des ventes",
@@ -1532,55 +1619,69 @@ const translations = {
       last90Days: "90 derniers jours: Aperçu trimestriel",
       customRange: "Personnalisé: Sélectionnez des dates spécifiques",
       inventoryManagement: "Gestion de l'inventaire",
-      inventoryDescription: "Gérez efficacement votre inventaire de produits avec notre système complet de gestion d'inventaire.",
+      inventoryDescription:
+        "Gérez efficacement votre inventaire de produits avec notre système complet de gestion d'inventaire.",
       addingProducts: "Ajout de produits",
       goToProducts: "Allez à la page Produits",
       csvImportDesc: "Import en masse de produits depuis des fichiers CSV",
-      csvStep1: "Préparez un CSV avec les colonnes: nom, prix, stock, catégorie",
+      csvStep1:
+        "Préparez un CSV avec les colonnes: nom, prix, stock, catégorie",
       csvStep2: "Allez à la page Produits",
-      csvStep3: "Cliquez sur le bouton \"Importer CSV\"",
+      csvStep3: 'Cliquez sur le bouton "Importer CSV"',
       csvStep4: "Sélectionnez votre fichier CSV",
       csvStep5: "Examinez et confirmez l'importation",
       stockAlerts: "Alertes de stock",
-      stockAlertsDesc: "Le système vous alerte automatiquement lorsque les produits sont en rupture de stock. Définissez des niveaux de stock minimum pour chaque produit pour recevoir des notifications en temps opportun.",
+      stockAlertsDesc:
+        "Le système vous alerte automatiquement lorsque les produits sont en rupture de stock. Définissez des niveaux de stock minimum pour chaque produit pour recevoir des notifications en temps opportun.",
       aiPoweredFeatures: "Fonctionnalités alimentées par l'IA",
-      aiIntro: "Exploitez l'intelligence artificielle pour obtenir des informations plus approfondies sur vos données d'affaires.",
-      aiChatbotDesc: "Posez des questions sur vos données d'affaires en langage naturel",
+      aiIntro:
+        "Exploitez l'intelligence artificielle pour obtenir des informations plus approfondies sur vos données d'affaires.",
+      aiChatbotDesc:
+        "Posez des questions sur vos données d'affaires en langage naturel",
       example1: "Quels sont mes produits les plus vendus?",
       example2: "Combien de revenus ai-je réalisé le mois dernier?",
       example3: "Quels produits sont en rupture de stock?",
       example4: "Prédire les revenus du mois prochain",
       csvAnalysis: "Analyse CSV",
-      csvAnalysisDesc: "Lors de l'importation de fichiers CSV, notre IA analyse les données et fournit",
+      csvAnalysisDesc:
+        "Lors de l'importation de fichiers CSV, notre IA analyse les données et fournit",
       dataQuality: "Évaluation de la qualité des données",
       categorySuggestions: "Suggestions de catégories",
       priceRecommendations: "Recommandations de prix",
       anomalyDetection: "Détection d'anomalies",
       revenuePredictions: "Prédictions de revenus",
-      revenuePredictionsDesc: "Nos modèles d'apprentissage automatique analysent vos données de ventes historiques pour prévoir les tendances de revenus futurs. Ces prédictions vous aident à prendre des décisions commerciales éclairées et à planifier en conséquence.",
+      revenuePredictionsDesc:
+        "Nos modèles d'apprentissage automatique analysent vos données de ventes historiques pour prévoir les tendances de revenus futurs. Ces prédictions vous aident à prendre des décisions commerciales éclairées et à planifier en conséquence.",
       sentimentAnalysis: "Analyse des sentiments",
-      sentimentAnalysisDesc: "Analysez automatiquement les avis et commentaires des clients pour comprendre les tendances de sentiment. Identifiez les domaines d'amélioration et suivez la satisfaction client au fil du temps.",
+      sentimentAnalysisDesc:
+        "Analysez automatiquement les avis et commentaires des clients pour comprendre les tendances de sentiment. Identifiez les domaines d'amélioration et suivez la satisfaction client au fil du temps.",
       securityPrivacy: "Sécurité et confidentialité",
-      securityIntro: "La sécurité de vos données est notre priorité absolue. Découvrez nos mesures de sécurité et comment nous protégeons vos informations.",
+      securityIntro:
+        "La sécurité de vos données est notre priorité absolue. Découvrez nos mesures de sécurité et comment nous protégeons vos informations.",
       dataProtection: "Protection des données",
       encryption: "Chiffrement",
-      encryptionDesc: "Toutes les données sont chiffrées au repos et en transit",
+      encryptionDesc:
+        "Toutes les données sont chiffrées au repos et en transit",
       authentication: "Authentification",
       authenticationDesc: "Authentification sécurisée basée sur JWT",
       userIsolation: "Isolation utilisateur",
-      userIsolationDesc: "Les données de chaque utilisateur sont complètement isolées",
+      userIsolationDesc:
+        "Les données de chaque utilisateur sont complètement isolées",
       secureApis: "API sécurisées",
       secureApisDesc: "Tous les points de terminaison API sont protégés",
-      accountSecurityDesc: "Meilleures pratiques pour garder votre compte sécurisé",
+      accountSecurityDesc:
+        "Meilleures pratiques pour garder votre compte sécurisé",
       securityTip1: "Utilisez un mot de passe fort et unique",
       securityTip2: "Ne partagez pas vos identifiants de connexion",
       securityTip3: "Déconnectez-vous après chaque session",
       securityTip4: "Gardez votre navigateur à jour",
       privacyPolicy: "Politique de confidentialité",
-      privacyPolicyDesc: "Nous ne vendons ni ne partageons vos données avec des tiers. Vos données d'affaires vous appartiennent uniquement. Nous n'utilisons les données que pour fournir et améliorer nos services.",
+      privacyPolicyDesc:
+        "Nous ne vendons ni ne partageons vos données avec des tiers. Vos données d'affaires vous appartiennent uniquement. Nous n'utilisons les données que pour fournir et améliorer nos services.",
       dataRetention: "Rétention des données",
-      dataRetentionDesc: "Vous pouvez supprimer votre compte et toutes les données associées à tout moment via les paramètres de profil. Lors de la suppression, toutes les données sont définitivement supprimées de nos systèmes."
-    }
+      dataRetentionDesc:
+        "Vous pouvez supprimer votre compte et toutes les données associées à tout moment via les paramètres de profil. Lors de la suppression, toutes les données sont définitivement supprimées de nos systèmes.",
+    },
   },
   ar: {
     // Navigation
@@ -1597,7 +1698,7 @@ const translations = {
       contact: "اتصل بنا",
       logout: "تسجيل الخروج",
       login: "تسجيل الدخول",
-      register: "التسجيل"
+      register: "التسجيل",
     },
     // Dashboard
     dashboard: {
@@ -1612,7 +1713,7 @@ const translations = {
       detectedAnomalies: "الشذوذ المكتشفة",
       aiRecommendations: "توصيات الذكاء الاصطناعي",
       noAnomalies: "لم يتم اكتشاف أي شذوذ",
-      noRecommendations: "لا توجد توصيات متاحة"
+      noRecommendations: "لا توجد توصيات متاحة",
     },
     // Products
     products: {
@@ -1634,7 +1735,7 @@ const translations = {
       restock: "إعادة التخزين",
       active: "نشط",
       lowStock: "مخزون منخفض",
-      outOfStock: "نفد المخزون"
+      outOfStock: "نفد المخزون",
     },
     // Sales
     sales: {
@@ -1653,7 +1754,7 @@ const translations = {
       cash: "نقداً",
       transfer: "تحويل",
       check: "شيك",
-      other: "أخرى"
+      other: "أخرى",
     },
     // Reviews
     reviews: {
@@ -1674,7 +1775,7 @@ const translations = {
       aiScore: "درجة الذكاء الاصطناعي",
       positive: "إيجابي",
       neutral: "محايد",
-      negative: "سلبي"
+      negative: "سلبي",
     },
     // Profile
     profile: {
@@ -1699,7 +1800,7 @@ const translations = {
       arabic: "العربية",
       save: "حفظ",
       cancel: "إلغاء",
-      updateProfile: "تحديث الملف الشخصي"
+      updateProfile: "تحديث الملف الشخصي",
     },
     // Common
     common: {
@@ -1722,7 +1823,7 @@ const translations = {
       close: "إغلاق",
       yes: "نعم",
       no: "لا",
-      menu: "القائمة"
+      menu: "القائمة",
     },
     // Landing Page
     landing: {
@@ -1733,31 +1834,37 @@ const translations = {
         docs: "التوثيق",
         contact: "اتصل بنا",
         login: "تسجيل الدخول",
-        getStarted: "ابدأ الآن"
+        getStarted: "ابدأ الآن",
       },
       hero: {
         subtitle: "الذكاء التجاري المدعوم بالذكاء الاصطناعي",
-        tagline: "حول بيانات عملك إلى قرارك التالي."
+        tagline: "حول بيانات عملك إلى قرارك التالي.",
       },
       features: {
         salesAnalytics: "تحليل المبيعات",
         salesAnalyticsSubtitle: "الإيرادات ومؤشرات الأداء",
-        salesAnalyticsDesc: "تتبع الإيرادات والطلبات وأداء المنتجات في الوقت الفعلي مع لوحات تحكم جميلة.",
+        salesAnalyticsDesc:
+          "تتبع الإيرادات والطلبات وأداء المنتجات في الوقت الفعلي مع لوحات تحكم جميلة.",
         stockManagement: "إدارة المخزون",
         stockManagementSubtitle: "تنبيهات المخزون",
-        stockManagementDesc: "راقب المخزون وتنبيهات انخفاض المخزون وإعادة التخزين قبل أن تضر بالمبيعات.",
+        stockManagementDesc:
+          "راقب المخزون وتنبيهات انخفاض المخزون وإعادة التخزين قبل أن تضر بالمبيعات.",
         aiPredictions: "تنبؤات الذكاء الاصطناعي",
         aiPredictionsSubtitle: "توقع الإيرادات",
-        aiPredictionsDesc: "توقع الإيرادات المستقبلية باستخدام نماذج التعلم الآلي المدربة على سجلك.",
+        aiPredictionsDesc:
+          "توقع الإيرادات المستقبلية باستخدام نماذج التعلم الآلي المدربة على سجلك.",
         reviewSentiment: "تحليل الآراء",
         reviewSentimentSubtitle: "فهم المستخدمين",
-        reviewSentimentDesc: "افهم ما يفكر فيه العملاء مع تحليل المشاعر NLP التلقائي.",
+        reviewSentimentDesc:
+          "افهم ما يفكر فيه العملاء مع تحليل المشاعر NLP التلقائي.",
         anomalyDetection: "كشف الشذوذ",
         anomalyDetectionSubtitle: "كشف المشاكل",
-        anomalyDetectionDesc: "احصل على تنبيهات حول انقطاع المخزون وانخفاض المبيعات في اللحظة التي تحدث فيها.",
+        anomalyDetectionDesc:
+          "احصل على تنبيهات حول انقطاع المخزون وانخفاض المبيعات في اللحظة التي تحدث فيها.",
         smartRecommendations: "التوصيات الذكية",
         smartRecommendationsSubtitle: "زيادة مبيعاتك",
-        smartRecommendationsDesc: "اقتراحات الذكاء الاصطناعي القابلة للتنفيذ لزيادة المبيعات وتحسين المخزون."
+        smartRecommendationsDesc:
+          "اقتراحات الذكاء الاصطناعي القابلة للتنفيذ لزيادة المبيعات وتحسين المخزون.",
       },
       intelligence: {
         salesIntelligence: "ذكاء المبيعات",
@@ -1767,7 +1874,7 @@ const translations = {
         customerSentiment: "مشاعر العملاء",
         customerSentimentDesc: "فهم عملائك",
         businessAlerts: "تنبيهات الأعمال",
-        businessAlertsDesc: "كشف المشاكل فوراً"
+        businessAlertsDesc: "كشف المشاكل فوراً",
       },
       howItWorks: {
         uploadData: "قم بتحميل بياناتك",
@@ -1777,29 +1884,31 @@ const translations = {
         getInsights: "احصل على رؤى",
         getInsightsDesc: "التنبؤات والشذوذ والمشاعر",
         takeAction: "اتخذ إجراء",
-        takeActionDesc: "اتبع توصيات الذكاء الاصطناعي"
+        takeActionDesc: "اتبع توصيات الذكاء الاصطناعي",
       },
       about: {
         heading: "بيانات الأعمال لا يجب أن تخبرك فقط بما حدث.",
         subheading: "يجب أن تخبرك بما سيحدث بعد ذلك.",
         ready: "جاهز؟",
-        description: "Smart Business Assistant يحول بيانات المبيعات والمخزون والعملاء إلى قرارات قابلة للتنفيذ.",
+        description:
+          "Smart Business Assistant يحول بيانات المبيعات والمخزون والعملاء إلى قرارات قابلة للتنفيذ.",
         realTimeAnalytics: "التحليل في الوقت الفعلي",
         aiPoweredPredictions: "التنبؤات المدعومة بالذكاء الاصطناعي",
-        actionableInsights: "رؤى قابلة للتنفيذ"
+        actionableInsights: "رؤى قابلة للتنفيذ",
       },
       cta: {
         heading: "جاهز لتحويل عملك؟",
-        description: "ابدأ في استخدام الذكاء التجاري المدعوم بالذكاء الاصطناعي اليوم واتخذ قرارات تعتمد على البيانات التي تنمي عملك.",
+        description:
+          "ابدأ في استخدام الذكاء التجاري المدعوم بالذكاء الاصطناعي اليوم واتخذ قرارات تعتمد على البيانات التي تنمي عملك.",
         getStarted: "ابدأ الآن",
-        login: "تسجيل الدخول"
+        login: "تسجيل الدخول",
       },
       footer: {
         copyright: "© {year} Smart Business Assistant",
         privacy: "الخصوصية",
         terms: "الشروط",
-        contact: "اتصل بنا"
-      }
+        contact: "اتصل بنا",
+      },
     },
     // Dashboard
     dashboard: {
@@ -1810,7 +1919,7 @@ const translations = {
         totalOrders: "إجمالي الطلبات",
         customerSatisfaction: "رضا العملاء",
         stockAlerts: "تنبيهات المخزون",
-        thisMonth: "هذا الشهر"
+        thisMonth: "هذا الشهر",
       },
       charts: {
         salesEvolution: "تطور المبيعات",
@@ -1819,16 +1928,16 @@ const translations = {
         salesByCategory: "المبيعات حسب الفئة",
         revenueDistribution: "توزيع الإيرادات",
         weeklyRevenue: "الإيراد الأسبوعي",
-        thisWeek: "هذا الأسبوع"
+        thisWeek: "هذا الأسبوع",
       },
       anomalies: {
         detectedAnomalies: "الشذوذ المكتشف",
-        viewAll: "عرض الكل"
+        viewAll: "عرض الكل",
       },
       recommendations: {
         aiRecommendations: "توصيات الذكاء الاصطناعي",
-        viewAll: "عرض الكل"
-      }
+        viewAll: "عرض الكل",
+      },
     },
     // Reviews
     reviews: {
@@ -1863,7 +1972,7 @@ const translations = {
       overallRating: "التقييم العام: {rating}/5",
       basedOnReviews: "بناءً على {count} رأي عميل",
       allReviews: "جميع آراء العملاء",
-      product: "منتج"
+      product: "منتج",
     },
     // Products
     products: {
@@ -1925,14 +2034,15 @@ const translations = {
       cancel: "إلغاء",
       importFromCSV: "استيراد المنتجات من CSV",
       selectCSVFile: "اختر ملف CSV",
-      requiredColumns: "الأعمدة المطلوبة: name, category, price, stock. اختياري: sold, revenue, description",
+      requiredColumns:
+        "الأعمدة المطلوبة: name, category, price, stock. اختياري: sold, revenue, description",
       analysisComplete: "اكتمل التحليل",
       totalProducts: "إجمالي المنتجات:",
       detectedColumns: "الأعمدة المكتشفة:",
       preview: "معاينة (أول 3):",
       analyzing: "جاري التحليل...",
       importProducts: "استيراد المنتجات",
-      importing: "جاري الاستيراد..."
+      importing: "جاري الاستيراد...",
     },
     // Sales
     sales: {
@@ -1974,7 +2084,7 @@ const translations = {
       saleFailed: "فشل تسجيل البيع",
       card: "بطاقة",
       cash: "نقد",
-      transfer: "تحويل"
+      transfer: "تحويل",
     },
     // Profile
     profile: {
@@ -2028,7 +2138,7 @@ const translations = {
       totalAnalyses: "إجمالي التحليلات",
       activeDays: "الأيام النشطة",
       cancel: "إلغاء",
-      languagePreference: "تفضيل اللغة"
+      languagePreference: "تفضيل اللغة",
     },
     // Login
     login: {
@@ -2052,7 +2162,8 @@ const translations = {
       aiPredictions: "تنبؤات الذكاء الاصطناعي المتقدمة",
       anomalyDetection: "الكشف التلقائي عن الشذوذ",
       intelligentDashboard: "أهلاً بك مجدداً في لوحة التحكم الذكية",
-      salesDescription: "تحليلات المبيعات، التنبؤات بالذكاء الاصطناعي والكشف عن الشذوذ — كل ذلك في مكان آمن واحد."
+      salesDescription:
+        "تحليلات المبيعات، التنبؤات بالذكاء الاصطناعي والكشف عن الشذوذ — كل ذلك في مكان آمن واحد.",
     },
     // Register
     register: {
@@ -2073,13 +2184,15 @@ const translations = {
       accountCreated: "تم إنشاء الحساب بنجاح!",
       accountCreateError: "خطأ في إنشاء الحساب",
       startGrowing: "ابدأ النمو مع رؤى مدعومة بالذكاء الاصطناعي",
-      dataPrivate: "أنشئ حسابك المجاني. بياناتك تبقى خاصة ومعزولة — أنت فقط يمكنه رؤيتها."
+      dataPrivate:
+        "أنشئ حسابك المجاني. بياناتك تبقى خاصة ومعزولة — أنت فقط يمكنه رؤيتها.",
     },
     // Contact
     contact: {
       title: "اتصل بنا",
       getInTouch: "تواصل معنا",
-      description: "لديك أسئلة عن مساعد الأعمال الذكي؟ نود سماعك منك. أرسل لنا رسالة وسنرد عليك في أقرب وقت ممكن.",
+      description:
+        "لديك أسئلة عن مساعد الأعمال الذكي؟ نود سماعك منك. أرسل لنا رسالة وسنرد عليك في أقرب وقت ممكن.",
       sendMessage: "إرسال رسالة",
       messageSent: "تم إرسال الرسالة بنجاح! سنرد عليك قريباً.",
       name: "الاسم",
@@ -2103,7 +2216,7 @@ const translations = {
       home: "الرئيسية",
       login: "تسجيل الدخول",
       privacy: "الخصوصية",
-      terms: "الشروط"
+      terms: "الشروط",
     },
     // Privacy
     privacy: {
@@ -2125,20 +2238,24 @@ const translations = {
       communicateAccount: "التواصل معك بخصوص حسابك",
       ensureSecurity: "ضمان الأمان ومنع الاحتيال",
       dataSecurity: "3. أمان البيانات",
-      securityDescription: "ننفذ تدابير أمان معيارية في الصناعة لحماية بياناتك:",
+      securityDescription:
+        "ننفذ تدابير أمان معيارية في الصناعة لحماية بياناتك:",
       encryption: "التشفير أثناء الراحة وأثناء النقل",
       secureAuth: "المصادقة الآمنة باستخدام رموز JWT",
       dataIsolation: "عزل بيانات المستخدم (بيانات كل مستخدم منفصلة)",
       securityAudits: "عمليات تدقيق أمنية وتحديثات منتظمة",
       accessControls: "ضوابط الوصول والمصادقة",
       dataSharing: "4. مشاركة البيانات",
-      sharingDescription: "لا نبيع أو نؤجر أو نشارك بياناتك الشخصية مع أطراف ثالثة لأغراض التسويق. قد نشارك البيانات فقط في الظروف التالية:",
+      sharingDescription:
+        "لا نبيع أو نؤجر أو نشارك بياناتك الشخصية مع أطراف ثالثة لأغراض التسويق. قد نشارك البيانات فقط في الظروف التالية:",
       explicitConsent: "بموافقتك الصريحة",
       legalObligations: "للامتثال للالتزامات القانونية",
       protectRights: "لحماية حقوقنا وممتلكاتنا",
-      serviceProviders: "مع مقدمي الخدمات الذين يساعدون عملياتنا (تحت سرية صارمة)",
+      serviceProviders:
+        "مع مقدمي الخدمات الذين يساعدون عملياتنا (تحت سرية صارمة)",
       dataRetention: "5. الاحتفاظ بالبيانات",
-      retentionDescription: "نحتفظ ببياناتك طالما كان حسابك نشطاً أو حسب الحاجة لتقديم خدماتنا. يمكنك طلب حذف حسابك وجميع البيانات المرتبطة به في أي وقت من خلال إعدادات ملفك الشخصي. عند الحذف، تتم إزالة جميع البيانات بشكل دائم من أنظمتنا خلال 30 يوماً.",
+      retentionDescription:
+        "نحتفظ ببياناتك طالما كان حسابك نشطاً أو حسب الحاجة لتقديم خدماتنا. يمكنك طلب حذف حسابك وجميع البيانات المرتبطة به في أي وقت من خلال إعدادات ملفك الشخصي. عند الحذف، تتم إزالة جميع البيانات بشكل دائم من أنظمتنا خلال 30 يوماً.",
       yourRights: "6. حقوقك",
       rightsDescription: "لديك الحق في:",
       accessData: "الوصول إلى بياناتك الشخصية",
@@ -2147,18 +2264,24 @@ const translations = {
       exportData: "تصدير بياناتك",
       optOut: "الانسحاب من معالجة البيانات غير الأساسية",
       cookies: "7. ملفات تعريف الارتباط والتتبع",
-      cookiesDescription: "نستخدم ملفات تعريف الارتباط والتقنيات المماثلة لتحسين تجربة المستخدم وتحليل أنماط الاستخدام والحفاظ على الأمان. يمكنك التحكم في إعدادات ملفات تعريف الارتباط من خلال تفضيلات المتصفح.",
+      cookiesDescription:
+        "نستخدم ملفات تعريف الارتباط والتقنيات المماثلة لتحسين تجربة المستخدم وتحليل أنماط الاستخدام والحفاظ على الأمان. يمكنك التحكم في إعدادات ملفات تعريف الارتباط من خلال تفضيلات المتصفح.",
       thirdParty: "8. خدمات الطرف الثالث",
-      thirdPartyDescription: "قد تتكامل خدمتنا مع خدمات ذكاء اصطناعي تابعة لطرف ثالث لتحليل البيانات والتنبؤات. هذه الخدمات ملزمة باتفاقيات حماية بيانات صارمة ولا تحتفظ ببياناتك بعد مدة التحليل.",
+      thirdPartyDescription:
+        "قد تتكامل خدمتنا مع خدمات ذكاء اصطناعي تابعة لطرف ثالث لتحليل البيانات والتنبؤات. هذه الخدمات ملزمة باتفاقيات حماية بيانات صارمة ولا تحتفظ ببياناتك بعد مدة التحليل.",
       childrenPrivacy: "9. خصوصية الأطفال",
-      childrenDescription: "خدمتنا ليست مخصصة للأطفال دون سن 13 عاماً. لا نجمع عمداً معلومات شخصية من الأطفال دون سن 13 عاماً. إذا علمنا بمثل هذا الجمع، سنتخذ خطوات لحذفه.",
+      childrenDescription:
+        "خدمتنا ليست مخصصة للأطفال دون سن 13 عاماً. لا نجمع عمداً معلومات شخصية من الأطفال دون سن 13 عاماً. إذا علمنا بمثل هذا الجمع، سنتخذ خطوات لحذفه.",
       internationalTransfers: "10. عمليات نقل البيانات الدولية",
-      transfersDescription: "قد تتم معالجة بياناتك وتخزينها على خوادم تقع في دول مختلفة. نضمن وجود ضمانات مناسبة لحماية بياناتك وفقاً لسياسة الخصوصية هذه والقوانين المعمول بها.",
+      transfersDescription:
+        "قد تتم معالجة بياناتك وتخزينها على خوادم تقع في دول مختلفة. نضمن وجود ضمانات مناسبة لحماية بياناتك وفقاً لسياسة الخصوصية هذه والقوانين المعمول بها.",
       policyChanges: "11. تغييرات سياسة الخصوصية",
-      changesDescription: "قد نقوم بتحديث سياسة الخصوصية هذه من وقت لآخر. سنقوم بإخطار المستخدمين بالتغييرات المهمة عبر البريد الإلكتروني أو من خلال المنصة. الاستمرار في استخدام الخدمة بعد التغييرات يشكل قبولاً للسياسة الجديدة.",
+      changesDescription:
+        "قد نقوم بتحديث سياسة الخصوصية هذه من وقت لآخر. سنقوم بإخطار المستخدمين بالتغييرات المهمة عبر البريد الإلكتروني أو من خلال المنصة. الاستمرار في استخدام الخدمة بعد التغييرات يشكل قبولاً للسياسة الجديدة.",
       contactSection: "12. الاتصال",
-      contactDescription: "للأسئلة حول سياسة الخصوصية هذه أو بياناتك، يرجى الاتصال بنا على",
-      contactEmail: "contact@smartbusiness.ai"
+      contactDescription:
+        "للأسئلة حول سياسة الخصوصية هذه أو بياناتك، يرجى الاتصال بنا على",
+      contactEmail: "contact@smartbusiness.ai",
     },
     // Docs
     docs: {
@@ -2171,31 +2294,40 @@ const translations = {
       aiFeatures: "ميزات الذكاء الاصطناعي",
       security: "الأمان",
       welcome: "مرحباً بك في مساعد الأعمال الذكي",
-      welcomeDescription: "مساعد الأعمال الذكي هو منصة مدعومة بالذكاء الاصطناعي تساعدك في إدارة بيانات أعمالك وتحليل اتجاهات المبيعات واتخاذ قرارات قائمة على البيانات. سيساعدك هذا الدليل في البدء باستخدام المنصة.",
+      welcomeDescription:
+        "مساعد الأعمال الذكي هو منصة مدعومة بالذكاء الاصطناعي تساعدك في إدارة بيانات أعمالك وتحليل اتجاهات المبيعات واتخاذ قرارات قائمة على البيانات. سيساعدك هذا الدليل في البدء باستخدام المنصة.",
       creatingAccount: "إنشاء حساب",
-      step1: "انقر على زر \"ابدأ\" في الصفحة الرئيسية",
+      step1: 'انقر على زر "ابدأ" في الصفحة الرئيسية',
       step2: "املأ بريدك الإلكتروني واسمك وأنشئ كلمة مرور",
       step3: "تحقق من عنوان بريدك الإلكتروني",
       step4: "سجّل الدخول للوصول إلى لوحة التحكم",
       dashboardOverview: "نظرة عامة على لوحة التحكم",
       dashboardDescription: "بعد تسجيل الدخول، سترى لوحة التحكم الرئيسية مع:",
-      salesAnalyticsFeature: "تحليلات المبيعات: رسوم الإيرادات ومؤشرات الأداء الرئيسية",
+      salesAnalyticsFeature:
+        "تحليلات المبيعات: رسوم الإيرادات ومؤشرات الأداء الرئيسية",
       productsFeature: "المنتجات: إدارة المخزون ومستويات المخزون",
       aiChatbot: "روبوت الدردشة بالذكاء الاصطناعي: اسأل عن بيانات أعمالك",
       csvImport: "استيراد CSV: استيراد المنتجات بالجملة من ملفات CSV",
       platformFeatures: "ميزات المنصة",
-      featuresDescription: "يقدم مساعد الأعمال الذكي مجموعة شاملة من الأدوات لمساعدتك في إدارة وتنمية عملك.",
-      salesAnalyticsDesc: "تتبع الإيرادات والطلبات وأداء المنتجات في الوقت الفعلي مع لوحات تحكم جميلة ورسوم بيانية تفاعلية.",
+      featuresDescription:
+        "يقدم مساعد الأعمال الذكي مجموعة شاملة من الأدوات لمساعدتك في إدارة وتنمية عملك.",
+      salesAnalyticsDesc:
+        "تتبع الإيرادات والطلبات وأداء المنتجات في الوقت الفعلي مع لوحات تحكم جميلة ورسوم بيانية تفاعلية.",
       stockManagement: "إدارة المخزون",
-      stockManagementDesc: "راقب مستويات المخزون وتلقى تحذيرات انخفاض المخزون والحصول على تنبيهات إعادة التخزين قبل أن تؤثر على مبيعاتك.",
+      stockManagementDesc:
+        "راقب مستويات المخزون وتلقى تحذيرات انخفاض المخزون والحصول على تنبيهات إعادة التخزين قبل أن تؤثر على مبيعاتك.",
       aiPredictionsFeature: "التنبؤات بالذكاء الاصطناعي",
-      aiPredictionsDesc: "تنبأ بالإيرادات المستقبلية مع نماذج تعلم الآلة المدربة على بياناتك التاريخية.",
+      aiPredictionsDesc:
+        "تنبأ بالإيرادات المستقبلية مع نماذج تعلم الآلة المدربة على بياناتك التاريخية.",
       reviewSentiment: "مشاعر المراجعات",
-      reviewSentimentDesc: "افهم ما يفكر فيه العملاء مع تحليل مشاعر NLP التلقائي للمراجعات والملاحظات.",
+      reviewSentimentDesc:
+        "افهم ما يفكر فيه العملاء مع تحليل مشاعر NLP التلقائي للمراجعات والملاحظات.",
       anomalyDetectionFeature: "الكشف عن الشذوذ",
-      anomalyDetectionDesc: "احصل على تنبيهات حول انقطاعات المخزون وانخفاضات المبيعات بمجرد حدوثها مع المراقبة في الوقت الفعلي.",
+      anomalyDetectionDesc:
+        "احصل على تنبيهات حول انقطاعات المخزون وانخفاضات المبيعات بمجرد حدوثها مع المراقبة في الوقت الفعلي.",
       smartRecommendations: "التوصيات الذكية",
-      smartRecommendationsDesc: "احصل على اقتراحات ذكاء اصطناعي قابلة للتنفيذ لتعزيز المبيعات وتحسين مخزونك بناءً على أنماط البيانات.",
+      smartRecommendationsDesc:
+        "احصل على اقتراحات ذكاء اصطناعي قابلة للتنفيذ لتعزيز المبيعات وتحسين مخزونك بناءً على أنماط البيانات.",
       keyMetrics: "المؤشرات الرئيسية",
       totalRevenue: "إجمالي الإيرادات: إجمالي إيرادات المبيعات للفترة المحددة",
       totalOrders: "إجمالي الطلبات: عدد الطلبات المعالجة",
@@ -2203,10 +2335,10 @@ const translations = {
       topProducts: "أفضل المنتجات: المنتجات الأكثر مبيعاً بالإيرادات",
       recordingSales: "تسجيل المبيعات",
       navigateSales: "انتقل إلى صفحة المبيعات",
-      clickRecordSale: "انقر على زر \"تسجيل بيع\"",
+      clickRecordSale: 'انقر على زر "تسجيل بيع"',
       selectProduct: "اختر منتجاً من المخزون",
       enterDetails: "أدخل الكمية والسعر والتاريخ",
-      clickSave: "انقر على \"حفظ\" لتسجيل المعاملة",
+      clickSave: 'انقر على "حفظ" لتسجيل المعاملة',
       timePeriods: "فترات الوقت",
       filterPeriods: "قم بتصفية بيانات المبيعات حسب فترات زمنية مختلفة:",
       last7Days: "آخر 7 أيام: اتجاهات المبيعات الأخيرة",
@@ -2214,36 +2346,43 @@ const translations = {
       last90Days: "آخر 90 يوم: نظرة عامة ربع سنوية",
       customRange: "مخصص: حدد تواريخ محددة",
       inventoryManagement: "إدارة المخزون",
-      inventoryDescription: "أدر مخزون منتجاتك بكفاءة مع نظام شامل لإدارة المخزون.",
+      inventoryDescription:
+        "أدر مخزون منتجاتك بكفاءة مع نظام شامل لإدارة المخزون.",
       addingProducts: "إضافة المنتجات",
       goToProducts: "اذهب إلى صفحة المنتجات",
       csvImportDesc: "استيراد المنتجات بالجملة من ملفات CSV",
       csvStep1: "قم بإعداد CSV مع الأعمدة: الاسم، السعر، المخزون، الفئة",
       csvStep2: "اذهب إلى صفحة المنتجات",
-      csvStep3: "انقر على زر \"استيراد CSV\"",
+      csvStep3: 'انقر على زر "استيراد CSV"',
       csvStep4: "حدد ملف CSV الخاص بك",
       csvStep5: "راجع وأكد الاستيراد",
       stockAlerts: "تنبيهات المخزون",
-      stockAlertsDesc: "يقوم النظام تلقائياً بإبلاغك عندما تكون المنتجات منخفضة المخزون. قم بتعيين مستويات مخزون دنياً لكل منتج لتلقي إشعارات في الوقت المناسب.",
+      stockAlertsDesc:
+        "يقوم النظام تلقائياً بإبلاغك عندما تكون المنتجات منخفضة المخزون. قم بتعيين مستويات مخزون دنياً لكل منتج لتلقي إشعارات في الوقت المناسب.",
       aiPoweredFeatures: "الميزات المدعومة بالذكاء الاصطناعي",
-      aiIntro: "استفد من الذكاء الاصطناعي للحصول على رؤى أعمق حول بيانات أعمالك.",
+      aiIntro:
+        "استفد من الذكاء الاصطناعي للحصول على رؤى أعمق حول بيانات أعمالك.",
       aiChatbotDesc: "اطرح أسئلة حول بيانات أعمالك باللغة الطبيعية",
       example1: "ما هي منتجاتي الأكثر مبيعاً؟",
       example2: "كم من الإيرادات حققت الشهر الماضي؟",
       example3: "ما هي المنتجات منخفضة المخزون؟",
       example4: "تنبأ بإيرادات الشهر القادم",
       csvAnalysis: "تحليل CSV",
-      csvAnalysisDesc: "عند استيراد ملفات CSV، يقوم الذكاء الاصطناعي بتحليل البيانات وتوفير",
+      csvAnalysisDesc:
+        "عند استيراد ملفات CSV، يقوم الذكاء الاصطناعي بتحليل البيانات وتوفير",
       dataQuality: "تقييم جودة البيانات",
       categorySuggestions: "اقتراحات الفئات",
       priceRecommendations: "توصيات الأسعار",
       anomalyDetection: "الكشف عن الشذوذ",
       revenuePredictions: "تنبؤات الإيرادات",
-      revenuePredictionsDesc: "تحلل نماذج تعلم الآلة بيانات المبيعات التاريخية الخاصة بك للتنبؤ باتجاهات الإيرادات المستقبلية. تساعدك هذه التنبؤات في اتخاذ قرارات تجارية مستنيرة والتخطيط وفقاً لذلك.",
+      revenuePredictionsDesc:
+        "تحلل نماذج تعلم الآلة بيانات المبيعات التاريخية الخاصة بك للتنبؤ باتجاهات الإيرادات المستقبلية. تساعدك هذه التنبؤات في اتخاذ قرارات تجارية مستنيرة والتخطيط وفقاً لذلك.",
       sentimentAnalysis: "تحليل المشاعر",
-      sentimentAnalysisDesc: "قم بتحليل مراجعات وملاحظات العملاء تلقائياً لفهم اتجاهات المشاعر. حدد مجالات التحسين وتتبع رضا العملاء بمرور الوقت.",
+      sentimentAnalysisDesc:
+        "قم بتحليل مراجعات وملاحظات العملاء تلقائياً لفهم اتجاهات المشاعر. حدد مجالات التحسين وتتبع رضا العملاء بمرور الوقت.",
       securityPrivacy: "الأمان والخصوصية",
-      securityIntro: "أمان بياناتك هو أولويتنا القصوى. تعرف على تدابير الأمان الخاصة بنا وكيف نحمي معلوماتك.",
+      securityIntro:
+        "أمان بياناتك هو أولويتنا القصوى. تعرف على تدابير الأمان الخاصة بنا وكيف نحمي معلوماتك.",
       dataProtection: "حماية البيانات",
       encryption: "التشفير",
       encryptionDesc: "جميع البيانات مشفرة أثناء الراحة وأثناء النقل",
@@ -2259,11 +2398,13 @@ const translations = {
       securityTip3: "سجل الخروج بعد كل جلسة",
       securityTip4: "احتفظ بمتصفحك محدثاً",
       privacyPolicy: "سياسة الخصوصية",
-      privacyPolicyDesc: "نحن لا نبيع ولا نشارك بياناتك مع أطراف ثالثة. بيانات أعمالك لك وحدك. نستخدم البيانات فقط لتوفير وتحسين خدماتنا.",
+      privacyPolicyDesc:
+        "نحن لا نبيع ولا نشارك بياناتك مع أطراف ثالثة. بيانات أعمالك لك وحدك. نستخدم البيانات فقط لتوفير وتحسين خدماتنا.",
       dataRetention: "احتفاظ البيانات",
-      dataRetentionDesc: "يمكنك حذف حسابك وجميع البيانات المرتبطة به في أي وقت من خلال إعدادات الملف الشخصي. عند الحذف، تتم إزالة جميع البيانات بشكل دائم من أنظمتنا."
-    }
-  }
+      dataRetentionDesc:
+        "يمكنك حذف حسابك وجميع البيانات المرتبطة به في أي وقت من خلال إعدادات الملف الشخصي. عند الحذف، تتم إزالة جميع البيانات بشكل دائم من أنظمتنا.",
+    },
+  },
 };
 
 export default translations;

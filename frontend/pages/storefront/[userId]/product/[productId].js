@@ -107,7 +107,8 @@ export default function ProductDetailPage() {
       existing.quantity += selectedQuantity;
     } else {
       const isOnPromotion =
-        product.promotion_price !== null && product.promotion_price !== undefined;
+        product.promotion_price !== null &&
+        product.promotion_price !== undefined;
       cart.push({
         ...product,
         price: isOnPromotion ? product.promotion_price : product.price,

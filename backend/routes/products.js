@@ -306,8 +306,7 @@ router.post("/", auth, async (req, res) => {
       stock,
       description,
       sku,
-    } =
-      req.body;
+    } = req.body;
 
     if (!name || !category || price === undefined || stock === undefined) {
       return res.status(400).json({
@@ -316,13 +315,17 @@ router.post("/", auth, async (req, res) => {
     }
 
     const promotionPrice =
-      promotion_price === undefined || promotion_price === null || promotion_price === ""
+      promotion_price === undefined ||
+      promotion_price === null ||
+      promotion_price === ""
         ? null
         : parseFloat(promotion_price);
 
     if (
       promotionPrice !== null &&
-      (!Number.isFinite(promotionPrice) || promotionPrice < 0 || promotionPrice >= parseFloat(price))
+      (!Number.isFinite(promotionPrice) ||
+        promotionPrice < 0 ||
+        promotionPrice >= parseFloat(price))
     ) {
       return res.status(400).json({
         error: "Promotion price must be lower than the regular price",
@@ -401,7 +404,10 @@ router.put("/:id", auth, async (req, res) => {
     const params = [];
     let idx = 1;
 
-    if (req.body.promotion_price !== undefined || req.body.price !== undefined) {
+    if (
+      req.body.promotion_price !== undefined ||
+      req.body.price !== undefined
+    ) {
       const current = await query(
         "SELECT price, promotion_price FROM products WHERE id = $1 AND user_id = $2 AND deleted_at IS NULL",
         [id, req.user.id],
@@ -415,11 +421,15 @@ router.put("/:id", auth, async (req, res) => {
       const nextPromotionPrice =
         req.body.promotion_price === null || req.body.promotion_price === ""
           ? null
-          : parseFloat(req.body.promotion_price ?? current.rows[0].promotion_price);
+          : parseFloat(
+              req.body.promotion_price ?? current.rows[0].promotion_price,
+            );
 
       if (
         nextPromotionPrice !== null &&
-        (!Number.isFinite(nextPromotionPrice) || nextPromotionPrice < 0 || nextPromotionPrice >= nextPrice)
+        (!Number.isFinite(nextPromotionPrice) ||
+          nextPromotionPrice < 0 ||
+          nextPromotionPrice >= nextPrice)
       ) {
         return res.status(400).json({
           error: "Promotion price must be lower than the regular price",

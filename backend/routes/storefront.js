@@ -24,20 +24,24 @@ router.get("/:userId", storefrontLimiter, async (req, res) => {
   try {
     const { userId } = req.params;
     const parsedUserId = parseInt(userId);
-    
+
     if (isNaN(parsedUserId)) {
       return res.status(400).json({ error: "Invalid user ID" });
     }
-    
-    const { 
-      category, 
-      search, 
+
+    const {
+      category,
+      search,
       featured = "false",
       limit = 50,
-      offset = 0 
+      offset = 0,
     } = req.query;
 
-    const where = ["user_id = $1", "storefront_enabled = true", "deleted_at IS NULL"];
+    const where = [
+      "user_id = $1",
+      "storefront_enabled = true",
+      "deleted_at IS NULL",
+    ];
     const params = [parsedUserId];
     let idx = 2;
 
@@ -48,7 +52,9 @@ router.get("/:userId", storefrontLimiter, async (req, res) => {
     }
 
     if (search) {
-      where.push(`(name ILIKE $${idx} OR COALESCE(description, '') ILIKE $${idx})`);
+      where.push(
+        `(name ILIKE $${idx} OR COALESCE(description, '') ILIKE $${idx})`,
+      );
       params.push(`%${search}%`);
       idx++;
     }
@@ -80,7 +86,10 @@ router.get("/:userId", storefrontLimiter, async (req, res) => {
       OFFSET $${idx + 1}
     `;
 
-    params.push(Math.max(1, parseInt(limit) || 50), Math.max(0, parseInt(offset) || 0));
+    params.push(
+      Math.max(1, parseInt(limit) || 50),
+      Math.max(0, parseInt(offset) || 0),
+    );
 
     const result = await query(sql, params);
 
@@ -90,18 +99,20 @@ router.get("/:userId", storefrontLimiter, async (req, res) => {
        FROM products 
        WHERE user_id = $1 AND storefront_enabled = true AND deleted_at IS NULL
        ORDER BY category`,
-      [parseInt(userId)]
+      [parseInt(userId)],
     );
 
     return res.json({
       products: result.rows,
-      categories: categoriesResult.rows.map(r => r.category),
+      categories: categoriesResult.rows.map((r) => r.category),
       total: result.rowCount,
     });
   } catch (err) {
     console.error("Error GET /storefront/:userId:", err);
     console.error("Error details:", err.message);
-    return res.status(500).json({ error: "Error fetching storefront", details: err.message });
+    return res
+      .status(500)
+      .json({ error: "Error fetching storefront", details: err.message });
   }
 });
 
@@ -109,18 +120,21 @@ router.get("/:userId", storefrontLimiter, async (req, res) => {
  * GET /api/storefront/:userId/products/:productId
  * Get single product details for storefront
  */
-router.get("/:userId/products/:productId", storefrontLimiter, async (req, res) => {
-  try {
-    const { userId, productId } = req.params;
-    const parsedUserId = parseInt(userId);
-    const parsedProductId = parseInt(productId);
-    
-    if (isNaN(parsedUserId) || isNaN(parsedProductId)) {
-      return res.status(400).json({ error: "Invalid user ID or product ID" });
-    }
+router.get(
+  "/:userId/products/:productId",
+  storefrontLimiter,
+  async (req, res) => {
+    try {
+      const { userId, productId } = req.params;
+      const parsedUserId = parseInt(userId);
+      const parsedProductId = parseInt(productId);
 
-    const result = await query(
-      `SELECT
+      if (isNaN(parsedUserId) || isNaN(parsedProductId)) {
+        return res.status(400).json({ error: "Invalid user ID or product ID" });
+      }
+
+      const result = await query(
+        `SELECT
         id,
         name,
         category,
@@ -138,19 +152,20 @@ router.get("/:userId/products/:productId", storefrontLimiter, async (req, res) =
         AND user_id = $2 
         AND storefront_enabled = true 
         AND deleted_at IS NULL`,
-      [parsedProductId, parsedUserId]
-    );
+        [parsedProductId, parsedUserId],
+      );
 
-    if (result.rowCount === 0) {
-      return res.status(404).json({ error: "Product not found" });
+      if (result.rowCount === 0) {
+        return res.status(404).json({ error: "Product not found" });
+      }
+
+      return res.json(result.rows[0]);
+    } catch (err) {
+      console.error("Error GET /storefront/:userId/products/:productId:", err);
+      return res.status(500).json({ error: "Error fetching product" });
     }
-
-    return res.json(result.rows[0]);
-  } catch (err) {
-    console.error("Error GET /storefront/:userId/products/:productId:", err);
-    return res.status(500).json({ error: "Error fetching product" });
-  }
-});
+  },
+);
 
 /**
  * GET /api/storefront/:userId/categories
@@ -160,7 +175,7 @@ router.get("/:userId/categories", storefrontLimiter, async (req, res) => {
   try {
     const { userId } = req.params;
     const parsedUserId = parseInt(userId);
-    
+
     if (isNaN(parsedUserId)) {
       return res.status(400).json({ error: "Invalid user ID" });
     }
@@ -171,7 +186,7 @@ router.get("/:userId/categories", storefrontLimiter, async (req, res) => {
        WHERE user_id = $1 AND storefront_enabled = true AND deleted_at IS NULL
        GROUP BY category
        ORDER BY category`,
-      [parsedUserId]
+      [parsedUserId],
     );
 
     return res.json({
@@ -191,11 +206,11 @@ router.get("/:userId/search", storefrontLimiter, async (req, res) => {
   try {
     const { userId } = req.params;
     const parsedUserId = parseInt(userId);
-    
+
     if (isNaN(parsedUserId)) {
       return res.status(400).json({ error: "Invalid user ID" });
     }
-    
+
     const { q, category, limit = 20, offset = 0 } = req.query;
 
     if (!q) {
@@ -206,7 +221,7 @@ router.get("/:userId/search", storefrontLimiter, async (req, res) => {
       "user_id = $1",
       "storefront_enabled = true",
       "deleted_at IS NULL",
-      "(name ILIKE $2 OR COALESCE(description, '') ILIKE $2 OR COALESCE(seo_keywords, '{}')::text ILIKE $2)"
+      "(name ILIKE $2 OR COALESCE(description, '') ILIKE $2 OR COALESCE(seo_keywords, '{}')::text ILIKE $2)",
     ];
     const params = [parsedUserId, `%${q}%`];
     let idx = 3;
@@ -239,7 +254,10 @@ router.get("/:userId/search", storefrontLimiter, async (req, res) => {
       OFFSET $${idx + 1}
     `;
 
-    params.push(Math.max(1, parseInt(limit) || 20), Math.max(0, parseInt(offset) || 0));
+    params.push(
+      Math.max(1, parseInt(limit) || 20),
+      Math.max(0, parseInt(offset) || 0),
+    );
 
     const result = await query(sql, params);
 
@@ -262,11 +280,11 @@ router.get("/:userId/featured", storefrontLimiter, async (req, res) => {
   try {
     const { userId } = req.params;
     const parsedUserId = parseInt(userId);
-    
+
     if (isNaN(parsedUserId)) {
       return res.status(400).json({ error: "Invalid user ID" });
     }
-    
+
     const { limit = 10 } = req.query;
 
     const result = await query(
@@ -288,7 +306,7 @@ router.get("/:userId/featured", storefrontLimiter, async (req, res) => {
         AND deleted_at IS NULL
       ORDER BY storefront_order ASC
       LIMIT $2`,
-      [parsedUserId, Math.max(1, parseInt(limit) || 10)]
+      [parsedUserId, Math.max(1, parseInt(limit) || 10)],
     );
 
     return res.json({

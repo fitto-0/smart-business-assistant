@@ -46,11 +46,13 @@ export default function ProductCard({
       cart.push({
         ...product,
         price:
-          product.promotion_price !== null && product.promotion_price !== undefined
+          product.promotion_price !== null &&
+          product.promotion_price !== undefined
             ? product.promotion_price
             : product.price,
         original_price:
-          product.promotion_price !== null && product.promotion_price !== undefined
+          product.promotion_price !== null &&
+          product.promotion_price !== undefined
             ? product.price
             : null,
         quantity: 1,
