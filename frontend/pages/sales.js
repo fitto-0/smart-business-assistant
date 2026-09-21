@@ -236,6 +236,7 @@ export default function SalesPage() {
           </div>
         </Section>
       </div>
+      </div>
 
       {/* Detailed Monthly Table */}
       <Section
