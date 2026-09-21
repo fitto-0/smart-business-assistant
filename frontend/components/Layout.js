@@ -616,7 +616,7 @@ export default function Layout({
       </div>
 
       {/* AI Chatbot */}
-      <Chatbot onOpenChange={Request error: {"error":{"message":"Insufficient Balance","type":"unknown_error","param":null,"code":"invalid_request_error"}}setChatOpen} />
+      <Chatbot />
     </div>
   );
 }
