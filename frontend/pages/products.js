@@ -53,6 +53,7 @@ export default function ProductsPage() {
     name: "",
     category: "",
     price: "",
+    promotionPrice: "",
     stock: "",
   });
   const [imageFile, setImageFile] = useState(null);
@@ -131,6 +132,7 @@ export default function ProductsPage() {
       name: "",
       category: categoryOptions[0] || "",
       price: "",
+      promotionPrice: "",
       stock: "",
     });
     setImageFile(null);
@@ -143,6 +145,7 @@ export default function ProductsPage() {
       name: p.name,
       category: p.category,
       price: p.price,
+      promotionPrice: p.promotion_price || "",
       stock: p.stock,
     });
     setImageFile(null);
@@ -160,6 +163,8 @@ export default function ProductsPage() {
         name: form.name,
         category: form.category,
         price: parseFloat(form.price),
+        promotion_price:
+          form.promotionPrice === "" ? null : parseFloat(form.promotionPrice),
         stock: parseInt(form.stock, 10),
       };
       let savedProduct;
@@ -443,7 +448,18 @@ export default function ProductsPage() {
                       </span>
                     </td>
                     <td className="portal-dates-cell font-medium text-ink">
-                      {fmt(p.price)} DA
+                      {p.promotion_price ? (
+                        <div>
+                          <span className="line-through text-muted mr-2">
+                            {fmt(p.price)} DA
+                          </span>
+                          <span className="text-amber">
+                            {fmt(p.promotion_price)} DA
+                          </span>
+                        </div>
+                      ) : (
+                        `${fmt(p.price)} DA`
+                      )}
                     </td>
                     <td
                       className={`portal-dates-cell font-semibold ${p.stock === 0 ? "text-red-400" : p.stock <= 10 ? "text-amber" : "text-teal"}`}
@@ -577,6 +593,25 @@ export default function ProductsPage() {
                   onChange={(e) => setForm({ ...form, stock: e.target.value })}
                   className="w-full bg-ground border hairline rounded-xl px-4 py-2 text-ink placeholder-muted focus:outline-none focus:border-amber transition-colors"
                   placeholder="0"
+                />
+              </div>
+              <div>
+                <label className="block portal-label mb-1.5">
+                  {t("products.promotionPrice") || "Promotion price"} (DA)
+                </label>
+                <input
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  value={form.promotionPrice}
+                  onChange={(e) =>
+                    setForm({ ...form, promotionPrice: e.target.value })
+                  }
+                  className="w-full bg-ground border hairline rounded-xl px-4 py-2 text-ink placeholder-muted focus:outline-none focus:border-amber transition-colors"
+                  placeholder={
+                    t("products.promotionPricePlaceholder") ||
+                    "Leave empty for no promotion"
+                  }
                 />
               </div>
               <div>

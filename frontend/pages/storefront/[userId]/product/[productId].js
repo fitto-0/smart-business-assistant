@@ -106,7 +106,14 @@ export default function ProductDetailPage() {
     if (existing) {
       existing.quantity += selectedQuantity;
     } else {
-      cart.push({ ...product, quantity: selectedQuantity });
+      const isOnPromotion =
+        product.promotion_price !== null && product.promotion_price !== undefined;
+      cart.push({
+        ...product,
+        price: isOnPromotion ? product.promotion_price : product.price,
+        original_price: isOnPromotion ? product.price : null,
+        quantity: selectedQuantity,
+      });
     }
 
     localStorage.setItem(`cart_${validUserId}`, JSON.stringify(cart));
@@ -186,6 +193,11 @@ export default function ProductDetailPage() {
   const images = product.image_url ? [product.image_url] : [];
   const inStock = product.stock > 0;
   const lowStock = product.stock > 0 && product.stock <= 10;
+  const isOnPromotion =
+    product.promotion_price !== null && product.promotion_price !== undefined;
+  const effectivePrice = isOnPromotion
+    ? product.promotion_price
+    : product.price;
 
   return (
     <StorefrontLayout
@@ -366,7 +378,12 @@ export default function ProductDetailPage() {
                     className="text-3xl font-bold"
                     style={{ color: accentColor }}
                   >
-                    {parseFloat(product.price).toFixed(2)} DA
+                    {isOnPromotion && (
+                      <span className="text-lg line-through opacity-60 mr-2">
+                        {parseFloat(product.price).toFixed(2)} DA
+                      </span>
+                    )}
+                    {parseFloat(effectivePrice).toFixed(2)} DA
                   </div>
                   <div
                     className={`flex items-center gap-2 px-3 py-1 rounded-full text-sm font-medium ${

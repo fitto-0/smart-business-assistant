@@ -43,7 +43,18 @@ export default function ProductCard({
     if (existing) {
       existing.quantity += 1;
     } else {
-      cart.push({ ...product, quantity: 1 });
+      cart.push({
+        ...product,
+        price:
+          product.promotion_price !== null && product.promotion_price !== undefined
+            ? product.promotion_price
+            : product.price,
+        original_price:
+          product.promotion_price !== null && product.promotion_price !== undefined
+            ? product.price
+            : null,
+        quantity: 1,
+      });
     }
 
     localStorage.setItem(`cart_${userId}`, JSON.stringify(cart));
@@ -56,6 +67,11 @@ export default function ProductCard({
 
   const inStock = product.stock > 0;
   const lowStock = product.stock > 0 && product.stock <= 10;
+  const isOnPromotion =
+    product.promotion_price !== null && product.promotion_price !== undefined;
+  const effectivePrice = isOnPromotion
+    ? product.promotion_price
+    : product.price;
 
   const isListView = layout === "list";
 
@@ -132,7 +148,12 @@ export default function ProductCard({
           >
             <div className="flex items-center gap-3">
               <div className="text-lg font-bold" style={{ color: accentColor }}>
-                {parseFloat(product.price).toFixed(2)} DA
+                {isOnPromotion && (
+                  <span className="text-sm line-through opacity-60 mr-2">
+                    {parseFloat(product.price).toFixed(2)} DA
+                  </span>
+                )}
+                {parseFloat(effectivePrice).toFixed(2)} DA
               </div>
               <div
                 className={`text-xs font-medium px-2 py-1 rounded-full ${inStock ? (lowStock ? "bg-yellow-100 text-yellow-800" : "bg-green-100 text-green-800") : "bg-red-100 text-red-800"}`}
@@ -288,7 +309,12 @@ export default function ProductCard({
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <div className="text-lg font-bold" style={{ color: accentColor }}>
-              {parseFloat(product.price).toFixed(2)} DA
+              {isOnPromotion && (
+                <span className="text-sm line-through opacity-60 mr-2">
+                  {parseFloat(product.price).toFixed(2)} DA
+                </span>
+              )}
+              {parseFloat(effectivePrice).toFixed(2)} DA
             </div>
             <div
               className={`text-xs font-medium px-2 py-1 rounded-full ${inStock ? (lowStock ? "bg-yellow-100 text-yellow-800" : "bg-green-100 text-green-800") : "bg-red-100 text-red-800"}`}

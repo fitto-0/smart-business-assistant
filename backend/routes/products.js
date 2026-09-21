@@ -96,6 +96,7 @@ router.get("/", auth, async (req, res) => {
         p.name,
         p.category,
         p.price,
+        p.promotion_price,
         p.cost_price,
         CASE WHEN p.cost_price IS NULL THEN NULL
           ELSE ROUND((p.price - p.cost_price) / NULLIF(p.price, 0) * 100, 2)
@@ -296,12 +297,35 @@ router.get("/:id", auth, async (req, res) => {
 // =====================================================
 router.post("/", auth, async (req, res) => {
   try {
-    const { name, category, price, cost_price, stock, description, sku } =
+    const {
+      name,
+      category,
+      price,
+      promotion_price,
+      cost_price,
+      stock,
+      description,
+      sku,
+    } =
       req.body;
 
     if (!name || !category || price === undefined || stock === undefined) {
       return res.status(400).json({
         error: "Champs requis : name, category, price, stock",
+      });
+    }
+
+    const promotionPrice =
+      promotion_price === undefined || promotion_price === null || promotion_price === ""
+        ? null
+        : parseFloat(promotion_price);
+
+    if (
+      promotionPrice !== null &&
+      (!Number.isFinite(promotionPrice) || promotionPrice < 0 || promotionPrice >= parseFloat(price))
+    ) {
+      return res.status(400).json({
+        error: "Promotion price must be lower than the regular price",
       });
     }
 
@@ -312,6 +336,7 @@ router.post("/", auth, async (req, res) => {
           name,
           category,
           price,
+          promotion_price,
           cost_price,
           stock,
           description,
@@ -319,13 +344,14 @@ router.post("/", auth, async (req, res) => {
           user_id
         )
       VALUES
-        ($1, $2, $3, $4, $5, $6, $7, $8)
+        ($1, $2, $3, $4, $5, $6, $7, $8, $9)
       RETURNING *
       `,
       [
         name.trim(),
         category,
         parseFloat(price),
+        promotionPrice,
         cost_price === undefined || cost_price === null
           ? null
           : parseFloat(cost_price),
@@ -357,6 +383,7 @@ router.put("/:id", auth, async (req, res) => {
       name: "name",
       category: "category",
       price: "price",
+      promotion_price: "promotion_price",
       stock: "stock",
       description: "description",
       sku: "sku",
@@ -373,6 +400,32 @@ router.put("/:id", auth, async (req, res) => {
     const updates = [];
     const params = [];
     let idx = 1;
+
+    if (req.body.promotion_price !== undefined || req.body.price !== undefined) {
+      const current = await query(
+        "SELECT price, promotion_price FROM products WHERE id = $1 AND user_id = $2 AND deleted_at IS NULL",
+        [id, req.user.id],
+      );
+
+      if (current.rowCount === 0) {
+        return res.status(404).json({ error: "Produit non trouvé" });
+      }
+
+      const nextPrice = parseFloat(req.body.price ?? current.rows[0].price);
+      const nextPromotionPrice =
+        req.body.promotion_price === null || req.body.promotion_price === ""
+          ? null
+          : parseFloat(req.body.promotion_price ?? current.rows[0].promotion_price);
+
+      if (
+        nextPromotionPrice !== null &&
+        (!Number.isFinite(nextPromotionPrice) || nextPromotionPrice < 0 || nextPromotionPrice >= nextPrice)
+      ) {
+        return res.status(400).json({
+          error: "Promotion price must be lower than the regular price",
+        });
+      }
+    }
 
     for (const [key, column] of Object.entries(fieldMap)) {
       if (req.body[key] !== undefined) {
