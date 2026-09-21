@@ -4,6 +4,7 @@ import Head from 'next/head';
 import axios from 'axios';
 import { ShoppingBag, Trash2, Plus, Minus, ArrowLeft, CreditCard, Shield, Truck, RotateCcw, CheckCircle } from 'lucide-react';
 import StorefrontLayout from '../../../../components/storefront/StorefrontLayout';
+import { assetUrl } from '../../../../lib/assetUrl';
 
 export default function StorefrontCartPage() {
   const router = useRouter();
@@ -156,7 +157,7 @@ export default function StorefrontCartPage() {
                 <div key={item.id} className="card p-4 flex gap-4" style={{ borderRadius: borderRadius, borderColor: borderColor }}>
                   {item.image_url && (
                     <img 
-                      src={item.image_url} 
+                      src={assetUrl(item.image_url)} 
                       alt={item.name} 
                       className="w-20 h-20 object-cover rounded-lg flex-shrink-0"
                       style={{ borderRadius: borderRadius }}

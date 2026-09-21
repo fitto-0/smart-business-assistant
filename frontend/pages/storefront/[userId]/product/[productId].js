@@ -24,6 +24,7 @@ import {
 } from "lucide-react";
 import { motion } from "framer-motion";
 import StorefrontLayout from "../../../../components/storefront/StorefrontLayout";
+import { assetUrl } from "../../../../lib/assetUrl";
 
 export default function ProductDetailPage() {
   const router = useRouter();
@@ -191,7 +192,7 @@ export default function ProductDetailPage() {
   const borderColor = storeSettings?.border_color || "#E5E7EB";
   const galleryLayout = storeSettings?.product_gallery_layout || "thumbnails";
 
-  const images = product.image_url ? [product.image_url] : [];
+  const images = product.image_url ? [assetUrl(product.image_url)] : [];
   const inStock = product.stock > 0;
   const lowStock = product.stock > 0 && product.stock <= 10;
   const isOnPromotion =
@@ -903,7 +904,7 @@ export default function ProductDetailPage() {
                       <div className="aspect-square relative overflow-hidden">
                         {relatedProduct.image_url ? (
                           <img
-                            src={relatedProduct.image_url}
+                            src={assetUrl(relatedProduct.image_url)}
                             alt={relatedProduct.name}
                             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                           />

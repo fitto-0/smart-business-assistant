@@ -1,6 +1,7 @@
 import { useRouter } from "next/router";
 import { Heart, Share2, ShoppingCart, Plus } from "lucide-react";
 import { motion } from "framer-motion";
+import { assetUrl } from "../../lib/assetUrl";
 
 export default function ProductCard({
   product,
@@ -95,7 +96,7 @@ export default function ProductCard({
         >
           {product.image_url ? (
             <img
-              src={product.image_url}
+              src={assetUrl(product.image_url)}
               alt={product.name}
               className="w-full h-full object-cover"
             />
@@ -215,7 +216,7 @@ export default function ProductCard({
       >
         {product.image_url ? (
           <img
-            src={product.image_url}
+            src={assetUrl(product.image_url)}
             alt={product.name}
             className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
           />

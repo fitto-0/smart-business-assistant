@@ -17,6 +17,7 @@ import {
 import StorefrontLayout from "../../components/storefront/StorefrontLayout";
 import ProductCard from "../../components/storefront/ProductCard";
 import CategoryCard from "../../components/storefront/CategoryCard";
+import { assetUrl } from "../../lib/assetUrl";
 
 export default function StorefrontHomePage() {
   const router = useRouter();
@@ -107,6 +108,24 @@ export default function StorefrontHomePage() {
   const containerWidth = storeSettings?.container_width || "max-w-7xl";
   const content = storeSettings?.content_overrides || {};
 
+  // Longhand properties only: mixing the `background` shorthand with
+  // `backgroundColor` makes React reset the color and warn on rerenders.
+  const hasBackgroundGradient =
+    backgroundType === "gradient" && Boolean(backgroundGradient);
+  const hasBackgroundImage =
+    backgroundType === "image" && Boolean(backgroundImageUrl);
+  const heroBackgroundStyles = {
+    backgroundColor:
+      backgroundType === "color" ? "transparent" : undefined,
+    backgroundImage: hasBackgroundGradient
+      ? backgroundGradient
+      : hasBackgroundImage
+        ? `url(${backgroundImageUrl})`
+        : undefined,
+    backgroundSize: hasBackgroundImage ? "cover" : undefined,
+    backgroundPosition: hasBackgroundImage ? "center" : undefined,
+  };
+
   const features = [
     { icon: Truck, title: "Free Shipping", description: "On orders over $50" },
     {
@@ -166,20 +185,7 @@ export default function StorefrontHomePage() {
       {/* Hero Section */}
       <section
         className="relative py-16 md:py-24 lg:py-32"
-        style={{
-          backgroundColor:
-            backgroundType === "color" ? "transparent" : undefined,
-          background:
-            backgroundType === "gradient" && backgroundGradient
-              ? backgroundGradient
-              : undefined,
-          backgroundImage:
-            backgroundType === "image" && backgroundImageUrl
-              ? `url(${backgroundImageUrl})`
-              : undefined,
-          backgroundSize: backgroundType === "image" ? "cover" : undefined,
-          backgroundPosition: backgroundType === "image" ? "center" : undefined,
-        }}
+        style={heroBackgroundStyles}
       >
         <div
           className={`${containerWidth} mx-auto px-4 sm:px-6 lg:px-8 relative`}
@@ -219,7 +225,7 @@ export default function StorefrontHomePage() {
               <div className="relative">
                 {storeSettings.hero_image_url && (
                   <img
-                    src={storeSettings.hero_image_url}
+                    src={assetUrl(storeSettings.hero_image_url)}
                     alt={storeSettings.store_name}
                     className="rounded-2xl shadow-2xl w-full"
                     style={{ borderRadius: storeSettings.border_radius }}
@@ -234,7 +240,7 @@ export default function StorefrontHomePage() {
             >
               {storeSettings.hero_image_url && (
                 <img
-                  src={storeSettings.hero_image_url}
+                  src={assetUrl(storeSettings.hero_image_url)}
                   alt={storeSettings.store_name}
                   className="w-full h-[500px] object-cover"
                 />
@@ -307,7 +313,7 @@ export default function StorefrontHomePage() {
                   style={{ borderRadius: storeSettings.border_radius }}
                 >
                   <img
-                    src={storeSettings.hero_image_url}
+                    src={assetUrl(storeSettings.hero_image_url)}
                     alt={storeSettings.store_name}
                     className="w-full"
                   />

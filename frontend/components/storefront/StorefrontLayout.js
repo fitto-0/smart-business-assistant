@@ -21,12 +21,7 @@ import {
   Moon,
 } from "lucide-react";
 import { useRouter } from "next/router";
-const API_ORIGIN = (
-  process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api"
-).replace(/\/api\/?$/, "");
-
-const assetUrl = (url) =>
-  url && !url.startsWith("http") ? `${API_ORIGIN}${url}` : url;
+import { assetUrl } from "../../lib/assetUrl";
 
 export default function StorefrontLayout({
   children,
@@ -75,6 +70,27 @@ export default function StorefrontLayout({
   const borderRadius = storeSettings?.border_radius || "0.75rem";
   const containerWidth = storeSettings?.container_width || "max-w-7xl";
 
+  // Background values are always applied with longhand properties (`background`
+  // shorthand next to `backgroundColor` makes React wipe the color again and
+  // triggers a "conflicting property" warning during rerenders).
+  const hasBackgroundGradient =
+    backgroundType === "gradient" && Boolean(backgroundGradient);
+  const hasBackgroundImage =
+    backgroundType === "image" && Boolean(backgroundImageUrl);
+  const resolvedBackgroundImage = hasBackgroundGradient
+    ? backgroundGradient
+    : hasBackgroundImage
+      ? `url(${backgroundImageUrl})`
+      : undefined;
+  const backgroundStyles = {
+    backgroundColor:
+      backgroundType === "color" ? backgroundColor : "transparent",
+    backgroundImage: resolvedBackgroundImage,
+    backgroundSize: hasBackgroundImage ? "cover" : undefined,
+    backgroundPosition: hasBackgroundImage ? "center" : undefined,
+    backgroundAttachment: hasBackgroundImage ? "fixed" : undefined,
+  };
+
   // Apply theme styles
   useEffect(() => {
     const root = document.documentElement;
@@ -91,17 +107,22 @@ export default function StorefrontLayout({
 
     document.body.style.fontFamily = fontFamily;
     document.body.style.color = textColor;
+    // Same longhand-only rule as the wrapper div, and stale values are cleared
+    // so switching background type doesn't keep the previous one.
     document.body.style.backgroundColor =
       backgroundType === "color" ? backgroundColor : "transparent";
-
-    if (backgroundType === "gradient" && backgroundGradient) {
-      document.body.style.background = backgroundGradient;
-    } else if (backgroundType === "image" && backgroundImageUrl) {
-      document.body.style.backgroundImage = `url(${backgroundImageUrl})`;
-      document.body.style.backgroundSize = "cover";
-      document.body.style.backgroundPosition = "center";
-      document.body.style.backgroundAttachment = "fixed";
-    }
+    document.body.style.backgroundImage =
+      backgroundType === "gradient" && backgroundGradient
+        ? backgroundGradient
+        : backgroundType === "image" && backgroundImageUrl
+          ? `url(${backgroundImageUrl})`
+          : "none";
+    document.body.style.backgroundSize =
+      backgroundType === "image" && backgroundImageUrl ? "cover" : "";
+    document.body.style.backgroundPosition =
+      backgroundType === "image" && backgroundImageUrl ? "center" : "";
+    document.body.style.backgroundAttachment =
+      backgroundType === "image" && backgroundImageUrl ? "fixed" : "";
   }, [
     primaryColor,
     secondaryColor,
@@ -212,7 +233,10 @@ export default function StorefrontLayout({
         )}
         {storeSettings?.og_image_url && (
           <>
-            <meta property="og:image" content={storeSettings.og_image_url} />
+            <meta
+              property="og:image"
+              content={assetUrl(storeSettings.og_image_url)}
+            />
             <meta
               property="og:title"
               content={
@@ -265,25 +289,7 @@ export default function StorefrontLayout({
         `}</style>
       </Head>
 
-      <div
-        className="min-h-screen flex flex-col"
-        style={{
-          backgroundColor:
-            backgroundType === "color" ? backgroundColor : "transparent",
-          background:
-            backgroundType === "gradient" && backgroundGradient
-              ? backgroundGradient
-              : undefined,
-          backgroundImage:
-            backgroundType === "image" && backgroundImageUrl
-              ? `url(${backgroundImageUrl})`
-              : undefined,
-          backgroundSize: backgroundType === "image" ? "cover" : undefined,
-          backgroundPosition: backgroundType === "image" ? "center" : undefined,
-          backgroundAttachment:
-            backgroundType === "image" ? "fixed" : undefined,
-        }}
-      >
+      <div className="min-h-screen flex flex-col" style={backgroundStyles}>
         {/* Header */}
         <header
           className="sticky top-0 z-50"
@@ -364,7 +370,7 @@ export default function StorefrontLayout({
               >
                 {storeSettings?.logo_url ? (
                   <img
-                    src={storeSettings.logo_url}
+                    src={assetUrl(storeSettings.logo_url)}
                     alt={storeSettings.store_name || "Logo"}
                     className="h-10 w-auto"
                   />
@@ -604,7 +610,7 @@ export default function StorefrontLayout({
                 >
                   {storeSettings?.logo_url ? (
                     <img
-                      src={storeSettings.logo_url}
+                      src={assetUrl(storeSettings.logo_url)}
                       alt={storeSettings.store_name || "Logo"}
                       className="h-10 w-auto"
                     />
@@ -849,7 +855,7 @@ export default function StorefrontLayout({
                     >
                       {item.image_url && (
                         <img
-                          src={item.image_url}
+                          src={assetUrl(item.image_url)}
                           alt={item.name}
                           className="w-16 h-16 object-cover rounded"
                           style={{ borderRadius: borderRadius }}
