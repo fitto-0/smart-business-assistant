@@ -483,21 +483,17 @@ export default function LandingPage() {
 
       {/* ===================== HERO SECTION ===================== */}
       <section ref={heroRef} className="relative min-h-screen overflow-visible">
-        {/* Vanta animation at the top */}
-        <div className="absolute top-0 left-0 right-0 h-[400px] -z-10">
-          <VantaTrunk />
-        </div>
-
         <div className="grain" />
 
         <div
-          className="relative z-10 max-w-[1200px] mx-auto px-5 pt-[78px] min-h-screen flex flex-col justify-center pb-20"
+          className="relative z-10 max-w-[1200px] mx-auto px-5 pt-[78px] min-h-screen flex flex-col lg:flex-row items-start justify-between pb-20"
           style={{
             transform: `translateY(${heroY}px)`,
             transition: "transform 120ms cubic-bezier(0.22, 0.61, 0.36, 1)",
           }}
         >
-          <div className="max-w-[920px]">
+          {/* Left side - Content */}
+          <div className="max-w-[920px] flex-1 pt-20">
             <div className="flex items-center gap-3 mb-8 group">
               <span className="font-mono text-micro uppercase text-ember-500/70">
                 {t("landing.hero.eyebrow")} · Morocco
@@ -580,6 +576,11 @@ export default function LandingPage() {
                 </p>
               </div>
             </Stagger>
+          </div>
+
+          {/* Right side - Vanta animation */}
+          <div className="hidden lg:block flex-1 h-full min-h-[600px] pt-10">
+            <VantaTrunk />
           </div>
         </div>
 

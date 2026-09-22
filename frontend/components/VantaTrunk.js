@@ -47,7 +47,7 @@ export default function VantaTrunk() {
     <div
       ref={vantaRef}
       className="w-full h-full"
-      style={{ minHeight: '400px', backgroundColor: '#0A0807' }}
+      style={{ minHeight: '600px', backgroundColor: '#0A0807' }}
     />
   );
 }
