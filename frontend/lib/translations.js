@@ -1225,8 +1225,8 @@ const translations = {
         email: "contact@boutique.com",
         phone: "+212 XXX XX XX XX",
         address: "123 Rue Principale",
-        city: "Alger",
-        country: "Algérie",
+        city: "Tanger",
+        country: "Maroc",
         domain: "boutique.exemple.com",
       },
       domain: {

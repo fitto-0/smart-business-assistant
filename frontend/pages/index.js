@@ -583,15 +583,6 @@ export default function LandingPage() {
             <VantaTrunk />
           </div>
         </div>
-
-        <div className="absolute bottom-10 inset-x-0 flex flex-col items-center gap-2 pointer-events-none">
-          <span className="font-mono text-micro uppercase text-ink-3">
-            {t("landing.hero.scroll") || "Scroll"}
-          </span>
-          <span className="relative block w-px h-6 bg-line overflow-hidden">
-            <span className="absolute inset-x-0 top-0 h-1 bg-ember-500 animate-pulse" />
-          </span>
-        </div>
       </section>
       {/* ===================== FEATURES SECTION ===================== */}
       <section
