@@ -35,19 +35,19 @@ export default function DocsPage() {
             <h4 className="portal-heading text-lg mb-3">{t('docs.creatingAccount')}</h4>
             <ol className="space-y-3 portal-text">
               <li className="flex gap-3">
-                <span className="text-[#F5A623] font-bold">1.</span>
+                <span className="text-ember-500 font-bold">1.</span>
                 <span>{t('docs.step1')}</span>
               </li>
               <li className="flex gap-3">
-                <span className="text-[#F5A623] font-bold">2.</span>
+                <span className="text-ember-500 font-bold">2.</span>
                 <span>{t('docs.step2')}</span>
               </li>
               <li className="flex gap-3">
-                <span className="text-[#F5A623] font-bold">3.</span>
+                <span className="text-ember-500 font-bold">3.</span>
                 <span>{t('docs.step3')}</span>
               </li>
               <li className="flex gap-3">
-                <span className="text-[#F5A623] font-bold">4.</span>
+                <span className="text-ember-500 font-bold">4.</span>
                 <span>{t('docs.step4')}</span>
               </li>
             </ol>
@@ -60,19 +60,19 @@ export default function DocsPage() {
             </p>
             <ul className="space-y-2 portal-text">
               <li className="flex items-start gap-2">
-                <ChevronRight size={16} className="text-[#F5A623] mt-0.5 flex-shrink-0" />
+                <ChevronRight size={16} className="text-ember-500 mt-0.5 flex-shrink-0" />
                 <span><strong>{t('docs.salesAnalyticsFeature')}</strong></span>
               </li>
               <li className="flex items-start gap-2">
-                <ChevronRight size={16} className="text-[#F5A623] mt-0.5 flex-shrink-0" />
+                <ChevronRight size={16} className="text-ember-500 mt-0.5 flex-shrink-0" />
                 <span><strong>{t('docs.productsFeature')}</strong></span>
               </li>
               <li className="flex items-start gap-2">
-                <ChevronRight size={16} className="text-[#F5A623] mt-0.5 flex-shrink-0" />
+                <ChevronRight size={16} className="text-ember-500 mt-0.5 flex-shrink-0" />
                 <span><strong>{t('docs.aiChatbot')}</strong></span>
               </li>
               <li className="flex items-start gap-2">
-                <ChevronRight size={16} className="text-[#F5A623] mt-0.5 flex-shrink-0" />
+                <ChevronRight size={16} className="text-ember-500 mt-0.5 flex-shrink-0" />
                 <span><strong>{t('docs.csvImport')}</strong></span>
               </li>
             </ul>
@@ -92,42 +92,42 @@ export default function DocsPage() {
           </div>
 
           <div className="grid gap-6">
-            <div className="bg-[#111111] border border-white/10 rounded-lg p-6">
+            <div className="bg-canvas border border-line rounded-lg p-6">
               <h4 className="portal-heading text-lg mb-2">{t('docs.salesAnalytics')}</h4>
               <p className="portal-text">
                 {t('docs.salesAnalyticsDesc')}
               </p>
             </div>
 
-            <div className="bg-[#111111] border border-white/10 rounded-lg p-6">
+            <div className="bg-canvas border border-line rounded-lg p-6">
               <h4 className="portal-heading text-lg mb-2">{t('docs.stockManagement')}</h4>
               <p className="portal-text">
                 {t('docs.stockManagementDesc')}
               </p>
             </div>
 
-            <div className="bg-[#111111] border border-white/10 rounded-lg p-6">
+            <div className="bg-canvas border border-line rounded-lg p-6">
               <h4 className="portal-heading text-lg mb-2">{t('docs.aiPredictionsFeature')}</h4>
               <p className="portal-text">
                 {t('docs.aiPredictionsDesc')}
               </p>
             </div>
 
-            <div className="bg-[#111111] border border-white/10 rounded-lg p-6">
+            <div className="bg-canvas border border-line rounded-lg p-6">
               <h4 className="portal-heading text-lg mb-2">{t('docs.reviewSentiment')}</h4>
               <p className="portal-text">
                 {t('docs.reviewSentimentDesc')}
               </p>
             </div>
 
-            <div className="bg-[#111111] border border-white/10 rounded-lg p-6">
+            <div className="bg-canvas border border-line rounded-lg p-6">
               <h4 className="portal-heading text-lg mb-2">{t('docs.anomalyDetectionFeature')}</h4>
               <p className="portal-text">
                 {t('docs.anomalyDetectionDesc')}
               </p>
             </div>
 
-            <div className="bg-[#111111] border border-white/10 rounded-lg p-6">
+            <div className="bg-canvas border border-line rounded-lg p-6">
               <h4 className="portal-heading text-lg mb-2">{t('docs.smartRecommendations')}</h4>
               <p className="portal-text">
                 {t('docs.smartRecommendationsDesc')}
@@ -152,19 +152,19 @@ export default function DocsPage() {
             <h4 className="portal-heading text-lg mb-3">{t('docs.keyMetrics')}</h4>
             <ul className="space-y-2 portal-text">
               <li className="flex items-start gap-2">
-                <ChevronRight size={16} className="text-[#F5A623] mt-0.5 flex-shrink-0" />
+                <ChevronRight size={16} className="text-ember-500 mt-0.5 flex-shrink-0" />
                 <span><strong>{t('docs.totalRevenue')}</strong></span>
               </li>
               <li className="flex items-start gap-2">
-                <ChevronRight size={16} className="text-[#F5A623] mt-0.5 flex-shrink-0" />
+                <ChevronRight size={16} className="text-ember-500 mt-0.5 flex-shrink-0" />
                 <span><strong>{t('docs.totalOrders')}</strong></span>
               </li>
               <li className="flex items-start gap-2">
-                <ChevronRight size={16} className="text-[#F5A623] mt-0.5 flex-shrink-0" />
+                <ChevronRight size={16} className="text-ember-500 mt-0.5 flex-shrink-0" />
                 <span><strong>{t('docs.avgOrderValue')}</strong></span>
               </li>
               <li className="flex items-start gap-2">
-                <ChevronRight size={16} className="text-[#F5A623] mt-0.5 flex-shrink-0" />
+                <ChevronRight size={16} className="text-ember-500 mt-0.5 flex-shrink-0" />
                 <span><strong>{t('docs.topProducts')}</strong></span>
               </li>
             </ul>
@@ -174,23 +174,23 @@ export default function DocsPage() {
             <h4 className="portal-heading text-lg mb-3">{t('docs.recordingSales')}</h4>
             <ol className="space-y-3 portal-text">
               <li className="flex gap-3">
-                <span className="text-[#F5A623] font-bold">1.</span>
+                <span className="text-ember-500 font-bold">1.</span>
                 <span>{t('docs.navigateSales')}</span>
               </li>
               <li className="flex gap-3">
-                <span className="text-[#F5A623] font-bold">2.</span>
+                <span className="text-ember-500 font-bold">2.</span>
                 <span>{t('docs.clickRecordSale')}</span>
               </li>
               <li className="flex gap-3">
-                <span className="text-[#F5A623] font-bold">3.</span>
+                <span className="text-ember-500 font-bold">3.</span>
                 <span>{t('docs.selectProduct')}</span>
               </li>
               <li className="flex gap-3">
-                <span className="text-[#F5A623] font-bold">4.</span>
+                <span className="text-ember-500 font-bold">4.</span>
                 <span>{t('docs.enterDetails')}</span>
               </li>
               <li className="flex gap-3">
-                <span className="text-[#F5A623] font-bold">5.</span>
+                <span className="text-ember-500 font-bold">5.</span>
                 <span>{t('docs.clickSave')}</span>
               </li>
             </ol>
@@ -203,19 +203,19 @@ export default function DocsPage() {
             </p>
             <ul className="space-y-2 portal-text">
               <li className="flex items-start gap-2">
-                <ChevronRight size={16} className="text-[#F5A623] mt-0.5 flex-shrink-0" />
+                <ChevronRight size={16} className="text-ember-500 mt-0.5 flex-shrink-0" />
                 <span><strong>{t('docs.last7Days')}</strong></span>
               </li>
               <li className="flex items-start gap-2">
-                <ChevronRight size={16} className="text-[#F5A623] mt-0.5 flex-shrink-0" />
+                <ChevronRight size={16} className="text-ember-500 mt-0.5 flex-shrink-0" />
                 <span><strong>{t('docs.last30Days')}</strong></span>
               </li>
               <li className="flex items-start gap-2">
-                <ChevronRight size={16} className="text-[#F5A623] mt-0.5 flex-shrink-0" />
+                <ChevronRight size={16} className="text-ember-500 mt-0.5 flex-shrink-0" />
                 <span><strong>{t('docs.last90Days')}</strong></span>
               </li>
               <li className="flex items-start gap-2">
-                <ChevronRight size={16} className="text-[#F5A623] mt-0.5 flex-shrink-0" />
+                <ChevronRight size={16} className="text-ember-500 mt-0.5 flex-shrink-0" />
                 <span><strong>{t('docs.customRange')}</strong></span>
               </li>
             </ul>
@@ -238,19 +238,19 @@ export default function DocsPage() {
             <h4 className="portal-heading text-lg mb-3">{t('docs.addingProducts')}</h4>
             <ol className="space-y-3 portal-text">
               <li className="flex gap-3">
-                <span className="text-[#F5A623] font-bold">1.</span>
+                <span className="text-ember-500 font-bold">1.</span>
                 <span>{t('docs.goToProducts')}</span>
               </li>
               <li className="flex gap-3">
-                <span className="text-[#F5A623] font-bold">2.</span>
+                <span className="text-ember-500 font-bold">2.</span>
                 <span>Click "Add Product" button</span>
               </li>
               <li className="flex gap-3">
-                <span className="text-[#F5A623] font-bold">3.</span>
+                <span className="text-ember-500 font-bold">3.</span>
                 <span>Fill in product details (name, price, stock, category)</span>
               </li>
               <li className="flex gap-3">
-                <span className="text-[#F5A623] font-bold">4.</span>
+                <span className="text-ember-500 font-bold">4.</span>
                 <span>Click "Save" to add the product</span>
               </li>
             </ol>
@@ -263,23 +263,23 @@ export default function DocsPage() {
             </p>
             <ol className="space-y-3 portal-text">
               <li className="flex gap-3">
-                <span className="text-[#F5A623] font-bold">1.</span>
+                <span className="text-ember-500 font-bold">1.</span>
                 <span>{t('docs.csvStep1')}</span>
               </li>
               <li className="flex gap-3">
-                <span className="text-[#F5A623] font-bold">2.</span>
+                <span className="text-ember-500 font-bold">2.</span>
                 <span>{t('docs.csvStep2')}</span>
               </li>
               <li className="flex gap-3">
-                <span className="text-[#F5A623] font-bold">3.</span>
+                <span className="text-ember-500 font-bold">3.</span>
                 <span>{t('docs.csvStep3')}</span>
               </li>
               <li className="flex gap-3">
-                <span className="text-[#F5A623] font-bold">4.</span>
+                <span className="text-ember-500 font-bold">4.</span>
                 <span>{t('docs.csvStep4')}</span>
               </li>
               <li className="flex gap-3">
-                <span className="text-[#F5A623] font-bold">5.</span>
+                <span className="text-ember-500 font-bold">5.</span>
                 <span>{t('docs.csvStep5')}</span>
               </li>
             </ol>
@@ -312,19 +312,19 @@ export default function DocsPage() {
             </p>
             <ul className="space-y-2 portal-text">
               <li className="flex items-start gap-2">
-                <ChevronRight size={16} className="text-[#F5A623] mt-0.5 flex-shrink-0" />
+                <ChevronRight size={16} className="text-ember-500 mt-0.5 flex-shrink-0" />
                 <span>"{t('docs.example1')}"</span>
               </li>
               <li className="flex items-start gap-2">
-                <ChevronRight size={16} className="text-[#F5A623] mt-0.5 flex-shrink-0" />
+                <ChevronRight size={16} className="text-ember-500 mt-0.5 flex-shrink-0" />
                 <span>"{t('docs.example2')}"</span>
               </li>
               <li className="flex items-start gap-2">
-                <ChevronRight size={16} className="text-[#F5A623] mt-0.5 flex-shrink-0" />
+                <ChevronRight size={16} className="text-ember-500 mt-0.5 flex-shrink-0" />
                 <span>"{t('docs.example3')}"</span>
               </li>
               <li className="flex items-start gap-2">
-                <ChevronRight size={16} className="text-[#F5A623] mt-0.5 flex-shrink-0" />
+                <ChevronRight size={16} className="text-ember-500 mt-0.5 flex-shrink-0" />
                 <span>"{t('docs.example4')}"</span>
               </li>
             </ul>
@@ -337,19 +337,19 @@ export default function DocsPage() {
             </p>
             <ul className="space-y-2 portal-text">
               <li className="flex items-start gap-2">
-                <ChevronRight size={16} className="text-[#F5A623] mt-0.5 flex-shrink-0" />
+                <ChevronRight size={16} className="text-ember-500 mt-0.5 flex-shrink-0" />
                 <span>{t('docs.dataQuality')}</span>
               </li>
               <li className="flex items-start gap-2">
-                <ChevronRight size={16} className="text-[#F5A623] mt-0.5 flex-shrink-0" />
+                <ChevronRight size={16} className="text-ember-500 mt-0.5 flex-shrink-0" />
                 <span>{t('docs.categorySuggestions')}</span>
               </li>
               <li className="flex items-start gap-2">
-                <ChevronRight size={16} className="text-[#F5A623] mt-0.5 flex-shrink-0" />
+                <ChevronRight size={16} className="text-ember-500 mt-0.5 flex-shrink-0" />
                 <span>{t('docs.priceRecommendations')}</span>
               </li>
               <li className="flex items-start gap-2">
-                <ChevronRight size={16} className="text-[#F5A623] mt-0.5 flex-shrink-0" />
+                <ChevronRight size={16} className="text-ember-500 mt-0.5 flex-shrink-0" />
                 <span>{t('docs.anomalyDetection')}</span>
               </li>
             </ul>
@@ -386,19 +386,19 @@ export default function DocsPage() {
             <h4 className="portal-heading text-lg mb-3">{t('docs.dataProtection')}</h4>
             <ul className="space-y-2 portal-text">
               <li className="flex items-start gap-2">
-                <ChevronRight size={16} className="text-[#F5A623] mt-0.5 flex-shrink-0" />
+                <ChevronRight size={16} className="text-ember-500 mt-0.5 flex-shrink-0" />
                 <span><strong>{t('docs.encryption')}:</strong> {t('docs.encryptionDesc')}</span>
               </li>
               <li className="flex items-start gap-2">
-                <ChevronRight size={16} className="text-[#F5A623] mt-0.5 flex-shrink-0" />
+                <ChevronRight size={16} className="text-ember-500 mt-0.5 flex-shrink-0" />
                 <span><strong>{t('docs.authentication')}:</strong> {t('docs.authenticationDesc')}</span>
               </li>
               <li className="flex items-start gap-2">
-                <ChevronRight size={16} className="text-[#F5A623] mt-0.5 flex-shrink-0" />
+                <ChevronRight size={16} className="text-ember-500 mt-0.5 flex-shrink-0" />
                 <span><strong>{t('docs.userIsolation')}:</strong> {t('docs.userIsolationDesc')}</span>
               </li>
               <li className="flex items-start gap-2">
-                <ChevronRight size={16} className="text-[#F5A623] mt-0.5 flex-shrink-0" />
+                <ChevronRight size={16} className="text-ember-500 mt-0.5 flex-shrink-0" />
                 <span><strong>{t('docs.secureApis')}:</strong> {t('docs.secureApisDesc')}</span>
               </li>
             </ul>
@@ -411,19 +411,19 @@ export default function DocsPage() {
             </p>
             <ul className="space-y-2 portal-text">
               <li className="flex items-start gap-2">
-                <ChevronRight size={16} className="text-[#F5A623] mt-0.5 flex-shrink-0" />
+                <ChevronRight size={16} className="text-ember-500 mt-0.5 flex-shrink-0" />
                 <span>{t('docs.securityTip1')}</span>
               </li>
               <li className="flex items-start gap-2">
-                <ChevronRight size={16} className="text-[#F5A623] mt-0.5 flex-shrink-0" />
+                <ChevronRight size={16} className="text-ember-500 mt-0.5 flex-shrink-0" />
                 <span>{t('docs.securityTip2')}</span>
               </li>
               <li className="flex items-start gap-2">
-                <ChevronRight size={16} className="text-[#F5A623] mt-0.5 flex-shrink-0" />
+                <ChevronRight size={16} className="text-ember-500 mt-0.5 flex-shrink-0" />
                 <span>{t('docs.securityTip3')}</span>
               </li>
               <li className="flex items-start gap-2">
-                <ChevronRight size={16} className="text-[#F5A623] mt-0.5 flex-shrink-0" />
+                <ChevronRight size={16} className="text-ember-500 mt-0.5 flex-shrink-0" />
                 <span>{t('docs.securityTip4')}</span>
               </li>
             </ul>
@@ -458,7 +458,7 @@ export default function DocsPage() {
         <meta name="description" content={t('docs.title')} />
       </Head>
 
-      <div className="min-h-screen bg-[#080808]">
+      <div className="min-h-screen bg-canvas">
         {/* Navigation */}
         <nav className="portal-nav">
           <div className="max-w-7xl mx-auto px-5 h-full flex items-center justify-between">
@@ -477,26 +477,26 @@ export default function DocsPage() {
                 </button>
                 
                 {showLanguageMenu && (
-                  <div className="absolute right-0 top-full mt-2 bg-ground-secondary border hairline rounded-lg shadow-xl py-2 min-w-[140px] z-50">
+                  <div className="absolute right-0 top-full mt-2 bg-ground-secondary border hairline  py-2 min-w-[140px] z-50">
                     <button
                       onClick={() => { setLanguage('en'); setShowLanguageMenu(false); }}
-                      className={`w-full px-4 py-2 text-left text-sm hover:bg-ground transition-colors flex items-center gap-2 ${language === 'en' ? 'text-amber' : 'text-[#8A8A8A]'}`}
+                      className={`w-full px-4 py-2 text-left text-sm hover:bg-ground transition-colors flex items-center gap-2 ${language === 'en' ? 'text-amber' : 'text-[var(--ink-3)]'}`}
                     >
-                      <span>🇬🇧</span>
+                      <span className="font-mono text-micro uppercase">EN</span>
                       <span>English</span>
                     </button>
                     <button
                       onClick={() => { setLanguage('fr'); setShowLanguageMenu(false); }}
-                      className={`w-full px-4 py-2 text-left text-sm hover:bg-ground transition-colors flex items-center gap-2 ${language === 'fr' ? 'text-amber' : 'text-[#8A8A8A]'}`}
+                      className={`w-full px-4 py-2 text-left text-sm hover:bg-ground transition-colors flex items-center gap-2 ${language === 'fr' ? 'text-amber' : 'text-[var(--ink-3)]'}`}
                     >
-                      <span>🇫🇷</span>
+                      <span className="font-mono text-micro uppercase">FR</span>
                       <span>Français</span>
                     </button>
                     <button
                       onClick={() => { setLanguage('ar'); setShowLanguageMenu(false); }}
-                      className={`w-full px-4 py-2 text-left text-sm hover:bg-ground transition-colors flex items-center gap-2 ${language === 'ar' ? 'text-amber' : 'text-[#8A8A8A]'}`}
+                      className={`w-full px-4 py-2 text-left text-sm hover:bg-ground transition-colors flex items-center gap-2 ${language === 'ar' ? 'text-amber' : 'text-[var(--ink-3)]'}`}
                     >
-                      <span>🇸🇦</span>
+                      <span className="font-mono text-micro uppercase">AR</span>
                       <span>العربية</span>
                     </button>
                   </div>
@@ -535,7 +535,7 @@ export default function DocsPage() {
                 placeholder={t('docs.searchDocs')}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full bg-[#111111] border border-white/10 rounded-lg pl-12 pr-4 py-3 text-white placeholder-gray-400 focus:outline-none focus:border-[#F5A623] transition-colors"
+                className="w-full bg-canvas border border-line rounded-lg pl-12 pr-4 py-3 text-white placeholder-gray-400 focus:outline-none focus:border-[var(--ember-500)] transition-colors"
               />
             </div>
           </div>
@@ -546,7 +546,7 @@ export default function DocsPage() {
           <div className="max-w-7xl mx-auto grid lg:grid-cols-4 gap-8">
             {/* Sidebar Navigation */}
             <div className="lg:col-span-1">
-              <div className="bg-[#111111] border border-white/10 rounded-lg p-4 sticky top-24">
+              <div className="bg-canvas border border-line rounded-lg p-4 sticky top-24">
                 <h3 className="portal-heading text-sm mb-4">Sections</h3>
                 <nav className="space-y-1">
                   {(searchQuery ? filteredSections : sections).map((section) => {
@@ -557,7 +557,7 @@ export default function DocsPage() {
                         onClick={() => setActiveSection(section.id)}
                         className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-left transition-colors ${
                           activeSection === section.id
-                            ? 'bg-[#F5A623]/10 text-[#F5A623]'
+                            ? 'bg-[var(--ember-500)]/10 text-ember-500'
                             : 'text-gray-400 hover:text-white hover:bg-white/5'
                         }`}
                       >
@@ -572,7 +572,7 @@ export default function DocsPage() {
 
             {/* Main Content */}
             <div className="lg:col-span-3">
-              <div className="bg-[#111111] border border-white/10 rounded-lg p-8">
+              <div className="bg-canvas border border-line rounded-lg p-8">
                 {content[activeSection]?.content}
               </div>
             </div>

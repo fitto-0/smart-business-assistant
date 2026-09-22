@@ -246,7 +246,7 @@ export default function ProfilePage() {
     <Layout title={t('profile.title')}>
       <div className="max-w-3xl mx-auto space-y-6">
         {/* Profile Header */}
-        <div className="bg-ground-secondary border hairline rounded-xl p-6 flex items-center gap-6">
+        <div className="bg-ground-secondary border hairline rounded-xs p-6 flex items-center gap-6">
           <div className="relative">
             <div className="w-20 h-20 rounded-2xl bg-amber flex items-center justify-center text-ground text-3xl font-bold overflow-hidden">
               {avatarUrl ? (
@@ -279,7 +279,7 @@ export default function ProfilePage() {
         </div>
 
         {/* Edit Form */}
-        <div className="bg-ground-secondary border hairline rounded-xl p-5">
+        <div className="bg-ground-secondary border hairline rounded-xs p-5">
           <h3 className="portal-heading text-base mb-5 flex items-center gap-2">
             <User size={18} className="text-amber" /> {t('profile.personalInfo')}
           </h3>
@@ -289,7 +289,7 @@ export default function ProfilePage() {
               <div className="relative">
                 <User size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted" />
                 <input type="text" value={form.name} onChange={e => setForm({ ...form, name: e.target.value })}
-                  className="w-full bg-ground border hairline rounded-xl px-4 py-2 pl-10 text-ink placeholder-muted focus:outline-none focus:border-amber transition-colors" placeholder={t('profile.yourName')} />
+                  className="w-full bg-ground border hairline rounded-xs px-4 py-2 pl-10 text-ink placeholder-muted focus:outline-none focus:border-amber transition-colors" placeholder={t('profile.yourName')} />
               </div>
             </div>
             <div>
@@ -297,7 +297,7 @@ export default function ProfilePage() {
               <div className="relative">
                 <Mail size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted" />
                 <input type="email" value={form.email} disabled
-                  className="w-full bg-ground border hairline rounded-xl px-4 py-2 pl-10 text-ink opacity-50 cursor-not-allowed" />
+                  className="w-full bg-ground border hairline rounded-xs px-4 py-2 pl-10 text-ink opacity-50 cursor-not-allowed" />
               </div>
               <p className="portal-label text-muted mt-1">{t('profile.emailCannotChange')}</p>
             </div>
@@ -306,7 +306,7 @@ export default function ProfilePage() {
               <div className="relative">
                 <Building size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted" />
                 <input type="text" value={form.company} onChange={e => setForm({ ...form, company: e.target.value })}
-                  className="w-full bg-ground border hairline rounded-xl px-4 py-2 pl-10 text-ink placeholder-muted focus:outline-none focus:border-amber transition-colors" placeholder={t('profile.yourCompany')} />
+                  className="w-full bg-ground border hairline rounded-xs px-4 py-2 pl-10 text-ink placeholder-muted focus:outline-none focus:border-amber transition-colors" placeholder={t('profile.yourCompany')} />
               </div>
             </div>
             <button onClick={handleSave} disabled={loading} className="portal-pill-btn">
@@ -317,12 +317,12 @@ export default function ProfilePage() {
         </div>
 
         {/* Security */}
-        <div className="bg-ground-secondary border hairline rounded-xl p-5">
+        <div className="bg-ground-secondary border hairline rounded-xs p-5">
           <h3 className="portal-heading text-base mb-5 flex items-center gap-2">
             <Shield size={18} className="text-teal" /> {t('profile.security')}
           </h3>
           <div className="space-y-3">
-            <div className="flex items-center justify-between p-4 rounded-xl bg-ground/50 border hairline hover:border-amber/30 transition-all">
+            <div className="flex items-center justify-between p-4 rounded-xs bg-ground/50 border hairline hover:border-amber/30 transition-all">
               <div className="flex items-center gap-3">
                 <div className="w-9 h-9 rounded-lg bg-ground flex items-center justify-center">
                   <Lock size={16} className="text-muted" />
@@ -334,9 +334,9 @@ export default function ProfilePage() {
                   </p>
                 </div>
               </div>
-              <button onClick={() => setShowPasswordModal(true)} className="w-full bg-ground border hairline rounded-xl px-3 py-1.5 portal-label text-ink-secondary hover:bg-ground/50 transition-colors text-xs">{t('common.edit')}</button>
+              <button onClick={() => setShowPasswordModal(true)} className="w-full bg-ground border hairline rounded-xs px-3 py-1.5 portal-label text-ink-secondary hover:bg-ground/50 transition-colors text-xs">{t('common.edit')}</button>
             </div>
-            <div className="flex items-center justify-between p-4 rounded-xl bg-ground/50 border hairline hover:border-amber/30 transition-all">
+            <div className="flex items-center justify-between p-4 rounded-xs bg-ground/50 border hairline hover:border-amber/30 transition-all">
               <div className="flex items-center gap-3">
                 <div className="w-9 h-9 rounded-lg bg-ground flex items-center justify-center">
                   <Bell size={16} className="text-muted" />
@@ -348,11 +348,11 @@ export default function ProfilePage() {
                   </p>
                 </div>
               </div>
-              <button onClick={handleToggleNotifications} className="w-full bg-ground border hairline rounded-xl px-3 py-1.5 portal-label text-ink-secondary hover:bg-ground/50 transition-colors text-xs">
+              <button onClick={handleToggleNotifications} className="w-full bg-ground border hairline rounded-xs px-3 py-1.5 portal-label text-ink-secondary hover:bg-ground/50 transition-colors text-xs">
                 {security.emailNotificationsEnabled ? t('common.disable') : t('common.enable')}
               </button>
             </div>
-            <div className="flex items-center justify-between p-4 rounded-xl bg-ground/50 border hairline hover:border-amber/30 transition-all">
+            <div className="flex items-center justify-between p-4 rounded-xs bg-ground/50 border hairline hover:border-amber/30 transition-all">
               <div className="flex items-center gap-3">
                 <div className="w-9 h-9 rounded-lg bg-ground flex items-center justify-center">
                   <Shield size={16} className="text-muted" />
@@ -364,7 +364,7 @@ export default function ProfilePage() {
                   </p>
                 </div>
               </div>
-              <button onClick={handleToggle2FA} className="w-full bg-ground border hairline rounded-xl px-3 py-1.5 portal-label text-ink-secondary hover:bg-ground/50 transition-colors text-xs">
+              <button onClick={handleToggle2FA} className="w-full bg-ground border hairline rounded-xs px-3 py-1.5 portal-label text-ink-secondary hover:bg-ground/50 transition-colors text-xs">
                 {security.twoFactorEnabled ? t('profile.disable2FA') : t('profile.enable2FA')}
               </button>
             </div>
@@ -372,14 +372,14 @@ export default function ProfilePage() {
         </div>
 
         {/* Language Preference */}
-        <div className="bg-ground-secondary border hairline rounded-xl p-5">
+        <div className="bg-ground-secondary border hairline rounded-xs p-5">
           <h3 className="portal-heading text-base mb-5 flex items-center gap-2">
             <Globe size={18} className="text-amber" /> {t('profile.languagePreference')}
           </h3>
           <div className="space-y-3">
             <button
               onClick={() => setLanguage('en')}
-              className={`w-full flex items-center gap-3 p-4 rounded-xl border hairline transition-all ${language === 'en' ? 'bg-amber/10 border-amber' : 'bg-ground/50 hover:bg-ground'}`}
+              className={`w-full flex items-center gap-3 p-4 rounded-xs border hairline transition-all ${language === 'en' ? 'bg-amber/10 border-amber' : 'bg-ground/50 hover:bg-ground'}`}
             >
               <span className="text-2xl">🇺🇸</span>
               <div className="flex-1 text-left">
@@ -390,7 +390,7 @@ export default function ProfilePage() {
             </button>
             <button
               onClick={() => setLanguage('fr')}
-              className={`w-full flex items-center gap-3 p-4 rounded-xl border hairline transition-all ${language === 'fr' ? 'bg-amber/10 border-amber' : 'bg-ground/50 hover:bg-ground'}`}
+              className={`w-full flex items-center gap-3 p-4 rounded-xs border hairline transition-all ${language === 'fr' ? 'bg-amber/10 border-amber' : 'bg-ground/50 hover:bg-ground'}`}
             >
               <span className="text-2xl">🇫🇷</span>
               <div className="flex-1 text-left">
@@ -401,7 +401,7 @@ export default function ProfilePage() {
             </button>
             <button
               onClick={() => setLanguage('ar')}
-              className={`w-full flex items-center gap-3 p-4 rounded-xl border hairline transition-all ${language === 'ar' ? 'bg-amber/10 border-amber' : 'bg-ground/50 hover:bg-ground'}`}
+              className={`w-full flex items-center gap-3 p-4 rounded-xs border hairline transition-all ${language === 'ar' ? 'bg-amber/10 border-amber' : 'bg-ground/50 hover:bg-ground'}`}
             >
               <span className="text-2xl">🇲🇦</span>
               <div className="flex-1 text-right">
@@ -414,18 +414,18 @@ export default function ProfilePage() {
         </div>
 
         {/* Stats */}
-        <div className="bg-ground-secondary border hairline rounded-xl p-5">
+        <div className="bg-ground-secondary border hairline rounded-xs p-5">
           <h3 className="portal-heading text-base mb-4">{t('profile.yourStats')}</h3>
           <div className="grid grid-cols-3 gap-4 text-center">
-            <div className="p-3 rounded-xl bg-ground/50 border hairline">
+            <div className="p-3 rounded-xs bg-ground/50 border hairline">
               <p className="portal-heading text-2xl text-amber">{stats.logins}</p>
               <p className="portal-label mt-0.5">{t('profile.totalLogins')}</p>
             </div>
-            <div className="p-3 rounded-xl bg-ground/50 border hairline">
+            <div className="p-3 rounded-xs bg-ground/50 border hairline">
               <p className="portal-heading text-2xl text-amber">{stats.analyses}</p>
               <p className="portal-label mt-0.5">{t('profile.totalAnalyses')}</p>
             </div>
-            <div className="p-3 rounded-xl bg-ground/50 border hairline">
+            <div className="p-3 rounded-xs bg-ground/50 border hairline">
               <p className="portal-heading text-2xl text-amber">{stats.activeDays}</p>
               <p className="portal-label mt-0.5">{t('profile.activeDays')}</p>
             </div>
@@ -435,7 +435,7 @@ export default function ProfilePage() {
         {/* Password Change Modal */}
         {showPasswordModal && (
           <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-            <div className="bg-ground-secondary border hairline rounded-xl p-6 w-full max-w-md mx-4">
+            <div className="bg-ground-secondary border hairline rounded-xs p-6 w-full max-w-md mx-4">
               <div className="flex items-center justify-between mb-5">
                 <h3 className="portal-heading text-lg">{t('profile.changePassword')}</h3>
                 <button onClick={() => setShowPasswordModal(false)} className="text-muted hover:text-ink">
@@ -449,7 +449,7 @@ export default function ProfilePage() {
                     type="password"
                     value={passwordForm.oldPassword}
                     onChange={(e) => setPasswordForm({ ...passwordForm, oldPassword: e.target.value })}
-                    className="w-full bg-ground border hairline rounded-xl px-4 py-2 text-ink placeholder-muted focus:outline-none focus:border-amber transition-colors"
+                    className="w-full bg-ground border hairline rounded-xs px-4 py-2 text-ink placeholder-muted focus:outline-none focus:border-amber transition-colors"
                     placeholder={t('profile.oldPassword')}
                   />
                 </div>
@@ -459,7 +459,7 @@ export default function ProfilePage() {
                     type="password"
                     value={passwordForm.newPassword}
                     onChange={(e) => setPasswordForm({ ...passwordForm, newPassword: e.target.value })}
-                    className="w-full bg-ground border hairline rounded-xl px-4 py-2 text-ink placeholder-muted focus:outline-none focus:border-amber transition-colors"
+                    className="w-full bg-ground border hairline rounded-xs px-4 py-2 text-ink placeholder-muted focus:outline-none focus:border-amber transition-colors"
                     placeholder={t('profile.newPassword')}
                   />
                 </div>
@@ -469,14 +469,14 @@ export default function ProfilePage() {
                     type="password"
                     value={passwordForm.confirmPassword}
                     onChange={(e) => setPasswordForm({ ...passwordForm, confirmPassword: e.target.value })}
-                    className="w-full bg-ground border hairline rounded-xl px-4 py-2 text-ink placeholder-muted focus:outline-none focus:border-amber transition-colors"
+                    className="w-full bg-ground border hairline rounded-xs px-4 py-2 text-ink placeholder-muted focus:outline-none focus:border-amber transition-colors"
                     placeholder={t('profile.confirmPassword')}
                   />
                 </div>
                 <div className="flex gap-3 pt-2">
                   <button
                     onClick={() => setShowPasswordModal(false)}
-                    className="flex-1 bg-ground border hairline rounded-xl px-4 py-2 portal-label text-ink hover:bg-ground/50 transition-colors"
+                    className="flex-1 bg-ground border hairline rounded-xs px-4 py-2 portal-label text-ink hover:bg-ground/50 transition-colors"
                   >
                     {t('profile.cancel')}
                   </button>
@@ -500,7 +500,7 @@ export default function ProfilePage() {
         {/* 2FA Setup Modal */}
         {show2FAModal && (
           <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-            <div className="bg-ground-secondary border hairline rounded-xl p-6 w-full max-w-md mx-4">
+            <div className="bg-ground-secondary border hairline rounded-xs p-6 w-full max-w-md mx-4">
               <div className="flex items-center justify-between mb-5">
                 <h3 className="portal-heading text-lg">{t('profile.setup2FA')}</h3>
                 <button onClick={() => setShow2FAModal(false)} className="text-muted hover:text-ink">
@@ -512,7 +512,7 @@ export default function ProfilePage() {
                   <>
                     <div className="text-center">
                       <p className="portal-label mb-4">{t('profile.scanQR')}</p>
-                      <div className="inline-block p-4 bg-white rounded-xl">
+                      <div className="inline-block p-4 bg-white rounded-xs">
                         <img src={qrCode} alt="QR Code" className="w-48 h-48" />
                       </div>
                     </div>
@@ -532,7 +532,7 @@ export default function ProfilePage() {
                         type="text"
                         value={twoFactorToken}
                         onChange={(e) => setTwoFactorToken(e.target.value.replace(/\D/g, '').slice(0, 6))}
-                        className="w-full bg-ground border hairline rounded-xl px-4 py-3 text-ink text-center text-2xl tracking-widest placeholder-muted focus:outline-none focus:border-amber transition-colors"
+                        className="w-full bg-ground border hairline rounded-xs px-4 py-3 text-ink text-center text-2xl tracking-widest placeholder-muted focus:outline-none focus:border-amber transition-colors"
                         placeholder="000000"
                         maxLength={6}
                       />
@@ -540,7 +540,7 @@ export default function ProfilePage() {
                     <div className="flex gap-3 pt-2">
                       <button
                         onClick={() => setTwoFactorStep('setup')}
-                        className="flex-1 bg-ground border hairline rounded-xl px-4 py-2 portal-label text-ink hover:bg-ground/50 transition-colors"
+                        className="flex-1 bg-ground border hairline rounded-xs px-4 py-2 portal-label text-ink hover:bg-ground/50 transition-colors"
                       >
                         {t('common.back')}
                       </button>
@@ -566,7 +566,7 @@ export default function ProfilePage() {
         {/* Disable 2FA Modal */}
         {showDisable2FAModal && (
           <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-            <div className="bg-ground-secondary border hairline rounded-xl p-6 w-full max-w-md mx-4">
+            <div className="bg-ground-secondary border hairline rounded-xs p-6 w-full max-w-md mx-4">
               <div className="flex items-center justify-between mb-5">
                 <h3 className="portal-heading text-lg">Disable Two-Factor Authentication</h3>
                 <button onClick={() => setShowDisable2FAModal(false)} className="text-muted hover:text-ink">
@@ -581,14 +581,14 @@ export default function ProfilePage() {
                     type="password"
                     value={disable2FAPassword}
                     onChange={(e) => setDisable2FAPassword(e.target.value)}
-                    className="w-full bg-ground border hairline rounded-xl px-4 py-2 text-ink placeholder-muted focus:outline-none focus:border-amber transition-colors"
+                    className="w-full bg-ground border hairline rounded-xs px-4 py-2 text-ink placeholder-muted focus:outline-none focus:border-amber transition-colors"
                     placeholder="Enter your password"
                   />
                 </div>
                 <div className="flex gap-3 pt-2">
                   <button
                     onClick={() => setShowDisable2FAModal(false)}
-                    className="flex-1 bg-ground border hairline rounded-xl px-4 py-2 portal-label text-ink hover:bg-ground/50 transition-colors"
+                    className="flex-1 bg-ground border hairline rounded-xs px-4 py-2 portal-label text-ink hover:bg-ground/50 transition-colors"
                   >
                     Cancel
                   </button>

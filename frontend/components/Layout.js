@@ -57,7 +57,11 @@ const userNavItems = [
 ];
 
 const storefrontNavItems = [
-  { href: "/dashboard/storefront", label: "Customize Store", icon: ShoppingBag },
+  {
+    href: "/dashboard/storefront",
+    label: "Customize Store",
+    icon: ShoppingBag,
+  },
 ];
 
 const adminNavItems = [
@@ -107,7 +111,8 @@ export default function Layout({
     return { index: "00", fallback: title };
   })();
   const routeIndex = routeMeta.index;
-  const pageLabel = title && title !== "Smart Business Assistant" ? title : routeMeta.fallback;
+  const pageLabel =
+    title && title !== "Smart Business Assistant" ? title : routeMeta.fallback;
 
   useEffect(() => {
     const loadUser = async () => {
@@ -200,13 +205,6 @@ export default function Layout({
             Smart Business
           </span>
         </Link>
-        <p className="micro mt-2.5">
-          {language === "ar"
-            ? "مساعد الأعمال"
-            : language === "fr"
-              ? "Alger · Ops"
-              : "Algiers · Ops"}
-        </p>
       </div>
 
       {/* square monogram ledger row */}
@@ -254,7 +252,11 @@ export default function Layout({
                   aria-current={active ? "page" : undefined}
                   className={ledgerLink(active)}
                 >
-                  <Icon size={15} strokeWidth={active ? 2 : 1.75} className={ledgerIcon(active)} />
+                  <Icon
+                    size={15}
+                    strokeWidth={active ? 2 : 1.75}
+                    className={ledgerIcon(active)}
+                  />
                   <span className="truncate">{label}</span>
                   {href === "/anomalies" && unreadCount > 0 && (
                     <span className="ms-auto font-mono text-[10px] tabular-nums text-clay border border-clay/40 rounded-xs px-1.5 py-0.5 leading-none">
@@ -270,7 +272,9 @@ export default function Layout({
           <>
             <p className="micro px-3 mt-5 mb-2">Store</p>
             {storefrontNavItems.map(({ href, label, icon: Icon }) => {
-              const active = router.pathname.startsWith("/dashboard/storefront");
+              const active = router.pathname.startsWith(
+                "/dashboard/storefront",
+              );
               return (
                 <Link
                   key={href}
@@ -279,7 +283,11 @@ export default function Layout({
                   aria-current={active ? "page" : undefined}
                   className={ledgerLink(active)}
                 >
-                  <Icon size={15} strokeWidth={active ? 2 : 1.75} className={ledgerIcon(active)} />
+                  <Icon
+                    size={15}
+                    strokeWidth={active ? 2 : 1.75}
+                    className={ledgerIcon(active)}
+                  />
                   <span className="truncate">{label}</span>
                 </Link>
               );
@@ -299,7 +307,11 @@ export default function Layout({
                   aria-current={active ? "page" : undefined}
                   className={ledgerLink(active)}
                 >
-                  <Icon size={15} strokeWidth={active ? 2 : 1.75} className={ledgerIcon(active)} />
+                  <Icon
+                    size={15}
+                    strokeWidth={active ? 2 : 1.75}
+                    className={ledgerIcon(active)}
+                  />
                   <span className="truncate">{label}</span>
                 </Link>
               );
@@ -315,7 +327,11 @@ export default function Layout({
             onClick={() => mobile && setSidebarOpen(false)}
             className="flex items-center gap-3 px-3 py-2 rounded-xs text-[13.5px] text-ink-3 hover:text-ink hover:bg-surface transition-colors duration-200"
           >
-            <FileText size={15} strokeWidth={1.75} className="flex-shrink-0 text-ink-3" />
+            <FileText
+              size={15}
+              strokeWidth={1.75}
+              className="flex-shrink-0 text-ink-3"
+            />
             <span className="truncate">{t("nav.docs")}</span>
           </Link>
           <Link
@@ -323,7 +339,11 @@ export default function Layout({
             onClick={() => mobile && setSidebarOpen(false)}
             className="flex items-center gap-3 px-3 py-2 rounded-xs text-[13.5px] text-ink-3 hover:text-ink hover:bg-surface transition-colors duration-200"
           >
-            <MessageSquare size={15} strokeWidth={1.75} className="flex-shrink-0 text-ink-3" />
+            <MessageSquare
+              size={15}
+              strokeWidth={1.75}
+              className="flex-shrink-0 text-ink-3"
+            />
             <span className="truncate">{t("nav.contact")}</span>
           </Link>
         </div>
@@ -389,11 +409,16 @@ export default function Layout({
                 <span className="font-mono text-micro uppercase text-ember-500 tabular-nums">
                   {routeIndex}
                 </span>
-                <span aria-hidden="true" className="h-px w-6 bg-line shrink-0" />
+                <span
+                  aria-hidden="true"
+                  className="h-px w-6 bg-line shrink-0"
+                />
                 <span className="micro truncate">{pageLabel}</span>
               </div>
               <div className="sm:hidden min-w-0">
-                <p className="text-[13px] font-medium text-ink truncate leading-tight">{pageLabel}</p>
+                <p className="text-[13px] font-medium text-ink truncate leading-tight">
+                  {pageLabel}
+                </p>
               </div>
             </div>
             <div className="flex-1" />
@@ -459,9 +484,14 @@ export default function Layout({
                             : "text-ink-3 hover:text-ink hover:bg-canvas"
                         }`}
                       >
-                        <span className="font-mono text-[11px] tracking-label">{lang.label}</span>
+                        <span className="font-mono text-[11px] tracking-label">
+                          {lang.label}
+                        </span>
                         {language === lang.code && (
-                          <span aria-hidden="true" className="w-1 h-1 shrink-0 bg-ember-500" />
+                          <span
+                            aria-hidden="true"
+                            className="w-1 h-1 shrink-0 bg-ember-500"
+                          />
                         )}
                       </button>
                     ))}
@@ -480,7 +510,10 @@ export default function Layout({
                 >
                   <Bell size={16} strokeWidth={1.75} />
                   {unreadCount > 0 && (
-                    <span aria-hidden="true" className="absolute top-1.5 end-1.5 w-[5px] h-[5px] bg-clay" />
+                    <span
+                      aria-hidden="true"
+                      className="absolute top-1.5 end-1.5 w-[5px] h-[5px] bg-clay"
+                    />
                   )}
                 </button>
 
@@ -504,9 +537,7 @@ export default function Layout({
                     </div>
                     {notifications.length === 0 ? (
                       <div className="px-4 py-8 text-center">
-                        <p className="micro">
-                          No notifications
-                        </p>
+                        <p className="micro">No notifications</p>
                       </div>
                     ) : (
                       <div className="divide-y divide-line">
@@ -599,18 +630,15 @@ export default function Layout({
         </header>
 
         {/* Page Content — 1440px cap, asymmetric gutters */}
-        <main className="flex-1 px-4 sm:px-8 py-6 sm:py-8 max-w-[1440px] w-full mx-auto animate-fade-in">{children}</main>
+        <main className="flex-1 px-4 sm:px-8 py-6 sm:py-8 max-w-[1440px] w-full mx-auto animate-fade-in">
+          {children}
+        </main>
 
         {/* Footer — hairline + mono annotations */}
         <footer className="px-4 sm:px-8 pb-6">
           <div aria-hidden="true" className="rule mb-4" />
           <div className="max-w-[1440px] mx-auto flex flex-wrap items-center justify-between gap-2">
-            <p className="micro">
-              Smart Business Assistant — © 2026
-            </p>
-            <p className="micro">
-              {language === "ar" ? "Algiers — DZ" : language === "fr" ? "Alger — DZ" : "Algiers — DZ"} · {new Date().getFullYear()}
-            </p>
+            <p className="micro">Smart Business Assistant — © 2026</p>
           </div>
         </footer>
       </div>

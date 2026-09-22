@@ -14,7 +14,7 @@ export default function TermsPage() {
         <meta name="description" content="Terms of Service for Smart Business Assistant" />
       </Head>
 
-      <div className="min-h-screen bg-[#080808]">
+      <div className="min-h-screen bg-[var(--canvas)]">
         {/* Navigation */}
         <nav className="portal-nav">
           <div className="max-w-7xl mx-auto px-5 h-full flex items-center justify-between">
@@ -33,26 +33,26 @@ export default function TermsPage() {
                 </button>
                 
                 {showLanguageMenu && (
-                  <div className="absolute right-0 top-full mt-2 bg-ground-secondary border hairline rounded-lg shadow-xl py-2 min-w-[140px] z-50">
+                  <div className="absolute right-0 top-full mt-2 bg-ground-secondary border hairline  py-2 min-w-[140px] z-50">
                     <button
                       onClick={() => { setLanguage('en'); setShowLanguageMenu(false); }}
-                      className={`w-full px-4 py-2 text-left text-sm hover:bg-ground transition-colors flex items-center gap-2 ${language === 'en' ? 'text-amber' : 'text-[#8A8A8A]'}`}
+                      className={`w-full px-4 py-2 text-left text-sm hover:bg-ground transition-colors flex items-center gap-2 ${language === 'en' ? 'text-amber' : 'text-[var(--ink-3)]'}`}
                     >
-                      <span>🇬🇧</span>
+                      <span className="font-mono text-micro uppercase">EN</span>
                       <span>English</span>
                     </button>
                     <button
                       onClick={() => { setLanguage('fr'); setShowLanguageMenu(false); }}
-                      className={`w-full px-4 py-2 text-left text-sm hover:bg-ground transition-colors flex items-center gap-2 ${language === 'fr' ? 'text-amber' : 'text-[#8A8A8A]'}`}
+                      className={`w-full px-4 py-2 text-left text-sm hover:bg-ground transition-colors flex items-center gap-2 ${language === 'fr' ? 'text-amber' : 'text-[var(--ink-3)]'}`}
                     >
-                      <span>🇫🇷</span>
+                      <span className="font-mono text-micro uppercase">FR</span>
                       <span>Français</span>
                     </button>
                     <button
                       onClick={() => { setLanguage('ar'); setShowLanguageMenu(false); }}
-                      className={`w-full px-4 py-2 text-left text-sm hover:bg-ground transition-colors flex items-center gap-2 ${language === 'ar' ? 'text-amber' : 'text-[#8A8A8A]'}`}
+                      className={`w-full px-4 py-2 text-left text-sm hover:bg-ground transition-colors flex items-center gap-2 ${language === 'ar' ? 'text-amber' : 'text-[var(--ink-3)]'}`}
                     >
-                      <span>🇸🇦</span>
+                      <span className="font-mono text-micro uppercase">AR</span>
                       <span>العربية</span>
                     </button>
                   </div>
@@ -84,7 +84,7 @@ export default function TermsPage() {
         {/* Terms Content */}
         <section className="py-16 px-5">
           <div className="max-w-4xl mx-auto">
-            <div className="bg-[#111111] border border-white/10 rounded-lg p-8 space-y-8">
+            <div className="bg-canvas border border-line rounded-lg p-8 space-y-8">
               <div>
                 <h2 className="portal-heading text-xl mb-4">1. Acceptance of Terms</h2>
                 <p className="portal-text">
@@ -101,23 +101,23 @@ export default function TermsPage() {
                 </p>
                 <ul className="space-y-2 portal-text">
                   <li className="flex items-start gap-2">
-                    <span className="text-[#F5A623]">•</span>
+                    <span className="text-[var(--ember-500)]">•</span>
                     <span>Sales analytics and reporting</span>
                   </li>
                   <li className="flex items-start gap-2">
-                    <span className="text-[#F5A623]">•</span>
+                    <span className="text-[var(--ember-500)]">•</span>
                     <span>Inventory management</span>
                   </li>
                   <li className="flex items-start gap-2">
-                    <span className="text-[#F5A623]">•</span>
+                    <span className="text-[var(--ember-500)]">•</span>
                     <span>AI-powered insights and predictions</span>
                   </li>
                   <li className="flex items-start gap-2">
-                    <span className="text-[#F5A623]">•</span>
+                    <span className="text-[var(--ember-500)]">•</span>
                     <span>CSV data import and analysis</span>
                   </li>
                   <li className="flex items-start gap-2">
-                    <span className="text-[#F5A623]">•</span>
+                    <span className="text-[var(--ember-500)]">•</span>
                     <span>Chatbot assistance</span>
                   </li>
                 </ul>
@@ -130,19 +130,19 @@ export default function TermsPage() {
                 </p>
                 <ul className="space-y-2 portal-text">
                   <li className="flex items-start gap-2">
-                    <span className="text-[#F5A623]">•</span>
+                    <span className="text-[var(--ember-500)]">•</span>
                     <span>Provide accurate and complete information</span>
                   </li>
                   <li className="flex items-start gap-2">
-                    <span className="text-[#F5A623]">•</span>
+                    <span className="text-[var(--ember-500)]">•</span>
                     <span>Maintain the security of your password</span>
                   </li>
                   <li className="flex items-start gap-2">
-                    <span className="text-[#F5A623]">•</span>
+                    <span className="text-[var(--ember-500)]">•</span>
                     <span>Notify us of unauthorized access</span>
                   </li>
                   <li className="flex items-start gap-2">
-                    <span className="text-[#F5A623]">•</span>
+                    <span className="text-[var(--ember-500)]">•</span>
                     <span>Be responsible for all activities under your account</span>
                   </li>
                 </ul>
@@ -155,23 +155,23 @@ export default function TermsPage() {
                 </p>
                 <ul className="space-y-2 portal-text">
                   <li className="flex items-start gap-2">
-                    <span className="text-[#F5A623]">•</span>
+                    <span className="text-[var(--ember-500)]">•</span>
                     <span>Use the service for illegal purposes</span>
                   </li>
                   <li className="flex items-start gap-2">
-                    <span className="text-[#F5A623]">•</span>
+                    <span className="text-[var(--ember-500)]">•</span>
                     <span>Violate any applicable laws or regulations</span>
                   </li>
                   <li className="flex items-start gap-2">
-                    <span className="text-[#F5A623]">•</span>
+                    <span className="text-[var(--ember-500)]">•</span>
                     <span>Upload malicious or harmful content</span>
                   </li>
                   <li className="flex items-start gap-2">
-                    <span className="text-[#F5A623]">•</span>
+                    <span className="text-[var(--ember-500)]">•</span>
                     <span>Attempt to gain unauthorized access</span>
                   </li>
                   <li className="flex items-start gap-2">
-                    <span className="text-[#F5A623]">•</span>
+                    <span className="text-[var(--ember-500)]">•</span>
                     <span>Interfere with the service's operation</span>
                   </li>
                 </ul>
@@ -184,19 +184,19 @@ export default function TermsPage() {
                 </p>
                 <ul className="space-y-2 portal-text">
                   <li className="flex items-start gap-2">
-                    <span className="text-[#F5A623]">•</span>
+                    <span className="text-[var(--ember-500)]">•</span>
                     <span>You retain ownership of all data you provide</span>
                   </li>
                   <li className="flex items-start gap-2">
-                    <span className="text-[#F5A623]">•</span>
+                    <span className="text-[var(--ember-500)]">•</span>
                     <span>Your data is isolated and not shared with other users</span>
                   </li>
                   <li className="flex items-start gap-2">
-                    <span className="text-[#F5A623]">•</span>
+                    <span className="text-[var(--ember-500)]">•</span>
                     <span>You can request deletion of your data at any time</span>
                   </li>
                   <li className="flex items-start gap-2">
-                    <span className="text-[#F5A623]">•</span>
+                    <span className="text-[var(--ember-500)]">•</span>
                     <span>We use data only to provide and improve our services</span>
                   </li>
                 </ul>
@@ -241,7 +241,7 @@ export default function TermsPage() {
               <div>
                 <h2 className="portal-heading text-xl mb-4">10. Contact</h2>
                 <p className="portal-text">
-                  For questions about these terms, please contact us at <Link href="/contact" className="text-[#F5A623] hover:underline">contact@smartbusiness.ai</Link>
+                  For questions about these terms, please contact us at <Link href="/contact" className="text-[var(--ember-500)] hover:underline">contact@smartbusiness.ai</Link>
                 </p>
               </div>
             </div>

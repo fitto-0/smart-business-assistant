@@ -44,7 +44,7 @@ export default function ContactPage() {
         <meta name="description" content={t('contact.description')} />
       </Head>
 
-      <div className="min-h-screen bg-[#080808]">
+      <div className="min-h-screen bg-[var(--canvas)]">
         {/* Navigation */}
         <nav className="portal-nav">
           <div className="max-w-7xl mx-auto px-5 h-full flex items-center justify-between">
@@ -63,26 +63,26 @@ export default function ContactPage() {
                 </button>
                 
                 {showLanguageMenu && (
-                  <div className="absolute right-0 top-full mt-2 bg-ground-secondary border hairline rounded-lg shadow-xl py-2 min-w-[140px] z-50">
+                  <div className="absolute right-0 top-full mt-2 bg-ground-secondary border hairline  py-2 min-w-[140px] z-50">
                     <button
                       onClick={() => { setLanguage('en'); setShowLanguageMenu(false); }}
-                      className={`w-full px-4 py-2 text-left text-sm hover:bg-ground transition-colors flex items-center gap-2 ${language === 'en' ? 'text-amber' : 'text-[#8A8A8A]'}`}
+                      className={`w-full px-4 py-2 text-left text-sm hover:bg-ground transition-colors flex items-center gap-2 ${language === 'en' ? 'text-amber' : 'text-[var(--ink-3)]'}`}
                     >
-                      <span>🇬🇧</span>
+                      <span className="font-mono text-micro uppercase">EN</span>
                       <span>English</span>
                     </button>
                     <button
                       onClick={() => { setLanguage('fr'); setShowLanguageMenu(false); }}
-                      className={`w-full px-4 py-2 text-left text-sm hover:bg-ground transition-colors flex items-center gap-2 ${language === 'fr' ? 'text-amber' : 'text-[#8A8A8A]'}`}
+                      className={`w-full px-4 py-2 text-left text-sm hover:bg-ground transition-colors flex items-center gap-2 ${language === 'fr' ? 'text-amber' : 'text-[var(--ink-3)]'}`}
                     >
-                      <span>🇫🇷</span>
+                      <span className="font-mono text-micro uppercase">FR</span>
                       <span>Français</span>
                     </button>
                     <button
                       onClick={() => { setLanguage('ar'); setShowLanguageMenu(false); }}
-                      className={`w-full px-4 py-2 text-left text-sm hover:bg-ground transition-colors flex items-center gap-2 ${language === 'ar' ? 'text-amber' : 'text-[#8A8A8A]'}`}
+                      className={`w-full px-4 py-2 text-left text-sm hover:bg-ground transition-colors flex items-center gap-2 ${language === 'ar' ? 'text-amber' : 'text-[var(--ink-3)]'}`}
                     >
-                      <span>🇸🇦</span>
+                      <span className="font-mono text-micro uppercase">AR</span>
                       <span>العربية</span>
                     </button>
                   </div>
@@ -116,7 +116,7 @@ export default function ContactPage() {
           <div className="max-w-7xl mx-auto grid lg:grid-cols-2 gap-12">
             {/* Contact Form */}
             <div>
-              <div className="bg-[#111111] border border-white/10 rounded-lg p-8">
+              <div className="bg-canvas border border-line rounded-lg p-8">
                 <h2 className="portal-heading text-2xl mb-6">{t('contact.sendMessage')}</h2>
 
                 {submitSuccess && (
@@ -134,7 +134,7 @@ export default function ContactPage() {
                       value={formData.name}
                       onChange={handleChange}
                       required
-                      className="w-full bg-[#080808] border border-white/10 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-[#F5A623] transition-colors"
+                      className="w-full bg-[var(--canvas)] border border-line rounded-lg px-4 py-3 text-white focus:outline-none focus:border-[var(--ember-500)] transition-colors"
                       placeholder={t('contact.yourName')}
                     />
                   </div>
@@ -147,7 +147,7 @@ export default function ContactPage() {
                       value={formData.email}
                       onChange={handleChange}
                       required
-                      className="w-full bg-[#080808] border border-white/10 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-[#F5A623] transition-colors"
+                      className="w-full bg-[var(--canvas)] border border-line rounded-lg px-4 py-3 text-white focus:outline-none focus:border-[var(--ember-500)] transition-colors"
                       placeholder={t('contact.yourEmail')}
                     />
                   </div>
@@ -160,7 +160,7 @@ export default function ContactPage() {
                       value={formData.subject}
                       onChange={handleChange}
                       required
-                      className="w-full bg-[#080808] border border-white/10 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-[#F5A623] transition-colors"
+                      className="w-full bg-[var(--canvas)] border border-line rounded-lg px-4 py-3 text-white focus:outline-none focus:border-[var(--ember-500)] transition-colors"
                       placeholder={t('contact.howCanHelp')}
                     />
                   </div>
@@ -173,7 +173,7 @@ export default function ContactPage() {
                       onChange={handleChange}
                       required
                       rows={5}
-                      className="w-full bg-[#080808] border border-white/10 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-[#F5A623] transition-colors resize-none"
+                      className="w-full bg-[var(--canvas)] border border-line rounded-lg px-4 py-3 text-white focus:outline-none focus:border-[var(--ember-500)] transition-colors resize-none"
                       placeholder={t('contact.tellUsMore')}
                     />
                   </div>
@@ -181,7 +181,7 @@ export default function ContactPage() {
                   <button
                     type="submit"
                     disabled={isSubmitting}
-                    className="w-full bg-[#F5A623] hover:bg-[#E8913C] text-[#080808] font-semibold py-3 px-6 rounded-lg transition-colors flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="w-full bg-[var(--ember-500)] hover:bg-ember-300 text-[var(--canvas)] font-semibold py-3 px-6 rounded-lg transition-colors flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     {isSubmitting ? (
                       t('contact.sending')
@@ -197,13 +197,13 @@ export default function ContactPage() {
 
             {/* Contact Information */}
             <div className="space-y-8">
-              <div className="bg-[#111111] border border-white/10 rounded-lg p-8">
+              <div className="bg-canvas border border-line rounded-lg p-8">
                 <h2 className="portal-heading text-2xl mb-6">{t('contact.contactInfo')}</h2>
 
                 <div className="space-y-6">
                   <div className="flex items-start gap-4">
-                    <div className="w-10 h-10 rounded-full bg-[#F5A623]/10 flex items-center justify-center flex-shrink-0">
-                      <Mail size={18} className="text-[#F5A623]" />
+                    <div className="w-10 h-10 rounded-full bg-[var(--ember-500)]/10 flex items-center justify-center flex-shrink-0">
+                      <Mail size={18} className="text-[var(--ember-500)]" />
                     </div>
                     <div>
                       <h3 className="font-semibold text-white mb-1">{t('contact.emailLabel')}</h3>
@@ -213,8 +213,8 @@ export default function ContactPage() {
                   </div>
 
                   <div className="flex items-start gap-4">
-                    <div className="w-10 h-10 rounded-full bg-[#F5A623]/10 flex items-center justify-center flex-shrink-0">
-                      <Phone size={18} className="text-[#F5A623]" />
+                    <div className="w-10 h-10 rounded-full bg-[var(--ember-500)]/10 flex items-center justify-center flex-shrink-0">
+                      <Phone size={18} className="text-[var(--ember-500)]" />
                     </div>
                     <div>
                       <h3 className="font-semibold text-white mb-1">{t('contact.phoneLabel')}</h3>
@@ -224,8 +224,8 @@ export default function ContactPage() {
                   </div>
 
                   <div className="flex items-start gap-4">
-                    <div className="w-10 h-10 rounded-full bg-[#F5A623]/10 flex items-center justify-center flex-shrink-0">
-                      <MapPin size={18} className="text-[#F5A623]" />
+                    <div className="w-10 h-10 rounded-full bg-[var(--ember-500)]/10 flex items-center justify-center flex-shrink-0">
+                      <MapPin size={18} className="text-[var(--ember-500)]" />
                     </div>
                     <div>
                       <h3 className="font-semibold text-white mb-1">{t('contact.officeLabel')}</h3>
@@ -236,7 +236,7 @@ export default function ContactPage() {
                 </div>
               </div>
 
-              <div className="bg-[#111111] border border-white/10 rounded-lg p-8">
+              <div className="bg-canvas border border-line rounded-lg p-8">
                 <h2 className="portal-heading text-2xl mb-4">{t('contact.quickLinks')}</h2>
                 <div className="space-y-3">
                   <Link href="/register" className="flex items-center justify-between text-gray-400 hover:text-white transition-colors group">

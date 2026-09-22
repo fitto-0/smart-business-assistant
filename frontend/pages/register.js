@@ -49,9 +49,9 @@ export default function RegisterPage() {
     <div className="min-h-screen bg-ground flex items-center justify-center p-4 sm:p-8 relative overflow-hidden">
       <div className="w-full max-w-5xl grid lg:grid-cols-2 gap-0 relative animate-slide-up">
         {/* Left brand panel (desktop) */}
-        <div className="hidden lg:flex flex-col justify-between p-12 rounded-l-3xl border hairline bg-ground-secondary">
+        <div className="hidden lg:flex flex-col justify-between p-12 border-l-2 border-line bg-surface">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-amber flex items-center justify-center shadow-lg">
+            <div className="w-10 h-10 rounded-xs bg-ember-500 flex items-center justify-center">
               <Zap size={20} className="text-ground" />
             </div>
             <div>
@@ -70,7 +70,7 @@ export default function RegisterPage() {
             <div className="space-y-3">
               {highlights.map(({ icon: Icon, text }) => (
                 <div key={text} className="flex items-center gap-3 portal-text">
-                  <div className="w-8 h-8 rounded-lg bg-amber/10 border hairline flex items-center justify-center">
+                  <div className="w-8 h-8 rounded-xs bg-surface border border-line flex items-center justify-center">
                     <Icon size={15} className="text-amber" />
                   </div>
                   {text}
@@ -86,7 +86,7 @@ export default function RegisterPage() {
         <div className="p-8 sm:p-10 lg:rounded-l-none bg-ground border hairline lg:border-l-0 lg:rounded-r-3xl">
           {/* Mobile logo */}
           <div className="lg:hidden flex items-center gap-3 mb-8">
-            <div className="w-10 h-10 rounded-xl bg-amber flex items-center justify-center shadow-lg">
+            <div className="w-10 h-10 rounded-xs bg-ember-500 flex items-center justify-center">
               <Zap size={20} className="text-ground" />
             </div>
             <div>
@@ -106,7 +106,7 @@ export default function RegisterPage() {
                   type="text"
                   value={form.name}
                   onChange={(e) => setForm({ ...form, name: e.target.value })}
-                  className="w-full bg-ground-secondary border hairline rounded-xl px-4 py-3 text-ink placeholder-muted focus:outline-none focus:border-amber transition-colors"
+                  className="w-full bg-ground-secondary border hairline rounded-xs px-4 py-3 text-ink placeholder-muted focus:outline-none focus:border-amber transition-colors"
                   placeholder="John Doe"
                   required
                 />
@@ -117,7 +117,7 @@ export default function RegisterPage() {
                   type="text"
                   value={form.company}
                   onChange={(e) => setForm({ ...form, company: e.target.value })}
-                  className="w-full bg-ground-secondary border hairline rounded-xl px-4 py-3 text-ink placeholder-muted focus:outline-none focus:border-amber transition-colors"
+                  className="w-full bg-ground-secondary border hairline rounded-xs px-4 py-3 text-ink placeholder-muted focus:outline-none focus:border-amber transition-colors"
                   placeholder="My Store"
                 />
               </div>
@@ -128,7 +128,7 @@ export default function RegisterPage() {
                 type="email"
                 value={form.email}
                 onChange={(e) => setForm({ ...form, email: e.target.value })}
-                className="w-full bg-ground-secondary border hairline rounded-xl px-4 py-3 text-ink placeholder-muted focus:outline-none focus:border-amber transition-colors"
+                className="w-full bg-ground-secondary border hairline rounded-xs px-4 py-3 text-ink placeholder-muted focus:outline-none focus:border-amber transition-colors"
                 placeholder="your@email.com"
                 required
               />
@@ -140,7 +140,7 @@ export default function RegisterPage() {
                   type={showPwd ? 'text' : 'password'}
                   value={form.password}
                   onChange={(e) => setForm({ ...form, password: e.target.value })}
-                  className="w-full bg-ground-secondary border hairline rounded-xl px-4 py-3 text-ink placeholder-muted focus:outline-none focus:border-amber transition-colors pr-12"
+                  className="w-full bg-ground-secondary border hairline rounded-xs px-4 py-3 text-ink placeholder-muted focus:outline-none focus:border-amber transition-colors pr-12"
                   placeholder="Min. 6 characters"
                   required
                 />
@@ -160,12 +160,12 @@ export default function RegisterPage() {
                 type="password"
                 value={form.confirm}
                 onChange={(e) => setForm({ ...form, confirm: e.target.value })}
-                className="w-full bg-ground-secondary border hairline rounded-xl px-4 py-3 text-ink placeholder-muted focus:outline-none focus:border-amber transition-colors"
+                className="w-full bg-ground-secondary border hairline rounded-xs px-4 py-3 text-ink placeholder-muted focus:outline-none focus:border-amber transition-colors"
                 placeholder="••••••••"
                 required
               />
             </div>
-            <button type="submit" disabled={loading} className="portal-pill-btn w-full justify-center !py-3 text-base mt-2">
+            <button type="submit" disabled={loading} className="btn-ember w-full justify-center !py-3 text-base mt-2">
               {loading ? (
                 <>
                   <span className="animate-spin rounded-full h-4 w-4 border-2 border-amber border-t-transparent"></span>

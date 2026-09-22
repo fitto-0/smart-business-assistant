@@ -1,6 +1,6 @@
 import Head from "next/head";
 import Link from "next/link";
-import { ArrowLeft, Home, Menu, MoveUpRight } from "lucide-react";
+import { Home, ArrowLeft } from "lucide-react";
 
 export default function NotFoundPage() {
   return (
@@ -13,62 +13,42 @@ export default function NotFoundPage() {
         />
       </Head>
 
-      <main className="not-found-page">
-        <div className="not-found-frame">
-          <header className="not-found-header">
-            <button
-              className="not-found-menu"
-              type="button"
-              aria-label="Open menu"
-            >
-              <Menu size={12} />
-              <span>Menu</span>
-            </button>
-            <Link href="/" className="not-found-brand">
-              Smart Business<span>.</span>
+      <main className="min-h-screen bg-canvas flex items-center justify-center p-8">
+        <div className="max-w-2xl w-full text-center">
+          {/* Index number */}
+          <p className="font-mono text-micro uppercase text-ink-3 mb-8">
+            Error <span className="text-ember-500">404</span>
+          </p>
+
+          {/* Statement */}
+          <h1 className="font-display font-medium text-section text-ink mb-6 leading-tight">
+            This page took a wrong turn.
+          </h1>
+
+          <p className="text-ink-2 leading-relaxed max-w-md mx-auto mb-10">
+            We searched everywhere, but this address is not connected to the
+            dashboard.
+          </p>
+
+          {/* Action */}
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <Link href="/" className="btn-paper px-8 py-3">
+              <Home size={15} />
+              Go back home
             </Link>
-          </header>
+            <Link href="/contact" className="btn-outline px-8 py-3">
+              <ArrowLeft size={15} />
+              Need help?
+            </Link>
+          </div>
 
-          <section
-            className="not-found-content"
-            aria-labelledby="not-found-title"
-          >
-            <div className="not-found-orbit orbit-one" />
-            <div className="not-found-orbit orbit-two" />
-            <div className="not-found-code" aria-hidden="true">
-              <span>4</span>
-              <i>0</i>
-              <span>4</span>
-            </div>
-            <div className="not-found-sticker sticker-top">PAGE LOST</div>
-            <div className="not-found-sticker sticker-bottom">NO SIGNAL</div>
-
-            <div className="not-found-copy">
-              <p className="not-found-kicker">Navigation interrupted</p>
-              <h1 id="not-found-title">This page took a wrong turn.</h1>
-              <p>
-                We searched everywhere, but this address is not connected to the
-                dashboard.
-              </p>
-              <Link href="/" className="not-found-home-link">
-                <Home size={14} />
-                Go back home
-                <MoveUpRight size={13} />
-              </Link>
-            </div>
-          </section>
-
-          <footer className="not-found-footer">
-            <span>Smart Business Assistant</span>
-            <span className="not-found-footer-line" />
-            <span>404 / 2026</span>
-          </footer>
+          {/* Footer line */}
+          <div className="mt-16 flex items-center justify-center gap-6">
+            <span className="micro text-ink-3">Smart Business Assistant</span>
+            <div className="flex-1 h-px bg-line" />
+            <span className="micro text-ink-3">404 / 2026</span>
+          </div>
         </div>
-
-        <Link href="/contact" className="not-found-contact">
-          <span>Need help?</span>
-          <ArrowLeft size={13} />
-        </Link>
       </main>
     </>
   );

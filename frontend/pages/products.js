@@ -44,7 +44,7 @@ export default function ProductsPage() {
  const [products, setProducts] = useState([]);
  const [categories, setCategories] = useState([]);
  const [newCategory, setNewCategory] = useState("");
- const [newCategoryColor, setNewCategoryColor] = useState("#E2703A");
+ const [newCategoryColor, setNewCategoryColor] = useState("var(--ember-500)");
  const [search, setSearch] = useState("");
  const [catFilter, setCatFilter] = useState("All");
  const [showModal, setShowModal] = useState(false);

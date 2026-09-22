@@ -1,11 +1,10 @@
 import { useEffect, useState } from 'react';
 import Layout from '../components/Layout';
 import { apiGet } from '../lib/api';
-import {
- ComposedChart, Line, Area, XAxis, YAxis, CartesianGrid,
- Tooltip, Legend, ResponsiveContainer, ReferenceLine
+import { ComposedChart, Area, XAxis, YAxis, CartesianGrid,
+ Tooltip, ResponsiveContainer, ReferenceLine
 } from 'recharts';
-import { Brain, TrendingUp, Target, Zap, Info } from 'lucide-react';
+import { Info } from 'lucide-react';
 
 const fmt = (n) => new Intl.NumberFormat('fr-FR').format(n);
 
@@ -48,9 +47,13 @@ export default function PredictionsPage() {
  loadPredictions();
  }, []);
 
- const totalPredicted = (predictions || []).slice(0, 6).reduce((s, p) => s + Number(p.value || 0), 0);
+ const totalPredicted = (predictions || []).slice(0, horizon).reduce((s, p) => s + Number(p.value || 0), 0);
  const lastYearTotal = (monthlySales || []).reduce((s, m) => s + Number(m.actual || 0), 0);
  const growth = lastYearTotal ? (((totalPredicted - lastYearTotal) / lastYearTotal) * 100).toFixed(1) : '0.0';
+ const bestMonth = (predictions || []).slice(0, horizon).reduce(
+  (best, p) => (Number(p.value || 0) > Number(best?.value || 0) ? p : best),
+  null,
+ )?.month || '—';
 
  // Fusionner historique réel + prédictions pour le graphique
  const displayData = [
@@ -72,64 +75,41 @@ export default function PredictionsPage() {
 
  return (
  <Layout title="AI Predictions">
- {/* Header Banner */}
- <div className="bg-surface border hairline rounded-xs p-5 mb-6">
- <div className="flex items-start gap-4">
- <div className="w-12 h-12 rounded-xs bg-ember-500 flex items-center justify-center flex-shrink-0">
- <Brain size={24} className="text-ground" />
- </div>
- <div>
- <h3 className="portal-heading text-base mb-1">AI Prediction Engine — Regression Model</h3>
- <p className="portal-text leading-relaxed">
- Our model uses historical data from the last 12 months to predict future sales.
- The algorithm integrates seasonality, trends, and external factors for optimal accuracy.
- </p>
- <div className="flex flex-wrap gap-2 mt-3">
- <span className="portal-label bg-olive/10 text-olive px-2 py-1 rounded">Scikit-learn LinearRegression</span>
- <span className="portal-label bg-olive/10 text-olive px-2 py-1 rounded">Seasonality Analysis</span>
- <span className="portal-label bg-olive/10 text-olive px-2 py-1 rounded">Historical data + regression</span>
- </div>
- </div>
- </div>
+ {/* Header */}
+ <div className="border-b border-line pb-4 mb-6">
+  <p className="micro">Prediction engine</p>
+  <h3 className="text-[17px] font-medium text-ink mt-1">Forecast model</h3>
+  <p className="text-[13px] leading-[1.65] text-ink-2 mt-1.5 max-w-prose">
+  Built on the last 12 months of your sales. The model accounts for
+  seasonality and trend, and predicts each upcoming month from that
+  history.
+  </p>
+  <ul className="mt-3 flex flex-wrap gap-x-5 gap-y-1">
+  {["Linear regression", "Seasonality analysis", "12-month history"].map((chip) => (
+  <li key={chip} className="micro-2 normal-case tracking-normal">✓ {chip}</li>
+  ))}
+  </ul>
  </div>
 
  {/* KPIs */}
- <div className="grid grid-cols-2 xl:grid-cols-4 gap-4 mb-6">
- <div className="bg-surface border hairline rounded-xs p-4 flex items-center gap-4">
- <div className="w-11 h-11 rounded-xs bg-ember-500 flex items-center justify-center">
- <Target size={20} className="text-ground" />
+ <div className="grid grid-cols-2 xl:grid-cols-4 gap-px bg-line border border-line mb-6">
+ <div className="bg-surface p-4">
+ <p className="micro">Predicted revenue — {horizon} months</p>
+ <p className="stat-value mt-1">{fmt(totalPredicted)} <span className="text-[0.5em] text-ink-3">DA</span></p>
  </div>
- <div>
- <p className="portal-label">6-Month Predicted Revenue</p>
- <p className="portal-heading text-xl">{fmt(totalPredicted)} DA</p>
+ <div className="bg-surface p-4">
+ <p className="micro">Predicted growth</p>
+ <p className={`stat-value mt-1 ${parseFloat(growth) >= 0 ? 'text-olive' : 'text-clay'}`}>
+ {parseFloat(growth) >= 0 ? '+' : ''}{growth}%
+ </p>
  </div>
+ <div className="bg-surface p-4">
+ <p className="micro">Forecast horizon</p>
+ <p className="stat-value mt-1">{horizon} <span className="text-[0.5em] text-ink-3">months</span></p>
  </div>
- <div className="bg-surface border hairline rounded-xs p-4 flex items-center gap-4">
- <div className="w-11 h-11 rounded-xs bg-olive flex items-center justify-center">
- <TrendingUp size={20} className="text-ground" />
- </div>
- <div>
- <p className="portal-label">Predicted Growth</p>
- <p className="portal-heading text-xl text-olive">+{growth}%</p>
- </div>
- </div>
- <div className="bg-surface border hairline rounded-xs p-4 flex items-center gap-4">
- <div className="w-11 h-11 rounded-xs bg-ember-500 flex items-center justify-center">
- <Zap size={20} className="text-ground" />
- </div>
- <div>
- <p className="portal-label">Forecast Horizon</p>
- <p className="portal-heading text-xl">{horizon} months</p>
- </div>
- </div>
- <div className="bg-surface border hairline rounded-xs p-4 flex items-center gap-4">
- <div className="w-11 h-11 rounded-xs bg-ember-500 flex items-center justify-center">
- <Brain size={20} className="text-ground" />
- </div>
- <div>
- <p className="portal-label">Best Predicted Month</p>
- <p className="portal-heading text-xl">June 2025</p>
- </div>
+ <div className="bg-surface p-4">
+ <p className="micro">Best predicted month</p>
+ <p className="stat-value mt-1">{bestMonth}</p>
  </div>
  </div>
 
@@ -138,7 +118,7 @@ export default function PredictionsPage() {
  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-5">
  <div>
  <h3 className="portal-heading text-base">Sales Prediction</h3>
- <p className="portal-label mt-0.5">2026 History + AI Predictions</p>
+ <p className="portal-label mt-0.5">History + forecast</p>
  </div>
  <div className="flex items-center gap-2">
  <span className="portal-label">Horizon:</span>
