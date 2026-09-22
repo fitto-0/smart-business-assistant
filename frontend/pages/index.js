@@ -482,7 +482,7 @@ export default function LandingPage() {
       </nav>
 
       {/* ===================== HERO SECTION ===================== */}
-      <section ref={heroRef} className="relative min-h-screen overflow-hidden">
+      <section ref={heroRef} className="relative min-h-screen overflow-visible">
         <div className="absolute inset-0 -z-10">
           <GradientWaves
             horizonColor="#0A0807"
@@ -511,7 +511,7 @@ export default function LandingPage() {
         <div className="grain" />
 
         <div
-          className="relative z-10 max-w-[1200px] mx-auto px-5 pt-[78px] min-h-screen flex flex-col justify-center"
+          className="relative z-10 max-w-[1200px] mx-auto px-5 pt-[78px] min-h-screen flex flex-col justify-center pb-20"
           style={{
             transform: `translateY(${heroY}px)`,
             transition: "transform 120ms cubic-bezier(0.22, 0.61, 0.36, 1)",
@@ -561,13 +561,13 @@ export default function LandingPage() {
             </div>
 
             <Stagger
-              className="flex flex-wrap gap-x-16 gap-y-10 pt-12 border-t border-line"
+              className="flex flex-wrap gap-x-16 gap-y-10 pt-12 pb-8 border-t border-line"
               stagger={120}
             >
               <div className="flex flex-col">
                 <p
                   ref={teams.ref}
-                  className="font-display text-6xl text-ember-500 tabular-nums leading-none tracking-tight"
+                  className="font-display text-6xl text-ember-500 tabular-nums leading-tight tracking-tight"
                 >
                   {teams.value.toLocaleString()}
                 </p>
@@ -579,7 +579,7 @@ export default function LandingPage() {
               <div className="flex flex-col">
                 <p
                   ref={satisfaction.ref}
-                  className="font-display text-6xl text-ink tabular-nums leading-none tracking-tight"
+                  className="font-display text-6xl text-ink tabular-nums leading-tight tracking-tight"
                 >
                   {satisfaction.value}%
                 </p>
@@ -591,7 +591,7 @@ export default function LandingPage() {
               <div className="flex flex-col">
                 <p
                   ref={uptime.ref}
-                  className="font-display text-6xl text-ink tabular-nums leading-none tracking-tight"
+                  className="font-display text-6xl text-ink tabular-nums leading-tight tracking-tight"
                 >
                   {(uptime.value / 10).toFixed(1)}h
                 </p>
@@ -615,11 +615,11 @@ export default function LandingPage() {
       {/* ===================== FEATURES SECTION ===================== */}
       <section
         id="statement"
-        className="relative py-28 px-5 border-t border-line"
+        className="relative py-32 px-5 border-t border-line"
       >
         <div className="max-w-[1100px] mx-auto">
           <Stagger className="max-w-[800px]">
-            <p className="font-mono text-micro uppercase text-ember-500 mb-6">
+            <p className="font-mono text-micro uppercase text-ember-500 mb-8 pt-4">
               {t("landing.features.intro") || "What we built"}
             </p>
             <h2
@@ -670,7 +670,7 @@ export default function LandingPage() {
       {/* ===================== ABOUT SECTION ===================== */}
       <section
         id="about"
-        className="relative py-28 px-5 border-t border-line bg-surface"
+        className="relative py-32 px-5 border-t border-line bg-surface"
       >
         <div className="max-w-[1000px] mx-auto">
           <Stagger>
@@ -771,7 +771,7 @@ export default function LandingPage() {
       {/* ===================== INTELLIGENCE SECTION ===================== */}
       <section
         id="intelligence"
-        className="relative py-28 px-5 border-t border-line"
+        className="relative py-32 px-5 border-t border-line"
       >
         <div className="max-w-[1000px] mx-auto">
           <Stagger>
@@ -880,11 +880,11 @@ export default function LandingPage() {
       {/* ===================== HOW IT WORKS SECTION ===================== */}
       <section
         id="how-it-works"
-        className="relative py-28 px-5 border-t border-line"
+        className="relative py-32 px-5 border-t border-line"
       >
         <div className="max-w-[960px] mx-auto">
           <Stagger>
-            <p className="font-mono text-micro uppercase text-ember-500 mb-10">
+            <p className="font-mono text-micro uppercase text-ember-500 mb-10 pt-4">
               04 — Process
             </p>
 
@@ -919,11 +919,11 @@ export default function LandingPage() {
       {/* ===================== BENEFITS SECTION ===================== */}
       <section
         id="benefits"
-        className="relative py-28 px-5 border-t border-line"
+        className="relative py-32 px-5 border-t border-line"
       >
         <div className="max-w-[1000px] mx-auto">
           <Stagger>
-            <div className="text-center mb-16">
+            <div className="text-center mb-16 pt-4">
               <p className="font-mono text-micro uppercase text-ember-500 mb-6">
                 {t("landing.testimonials.heading") || "Why choose us"}
               </p>
@@ -964,11 +964,11 @@ export default function LandingPage() {
       {/* ===================== TESTIMONIALS SECTION ===================== */}
       <section
         id="testimonials"
-        className="relative py-28 px-5 border-t border-line bg-surface"
+        className="relative py-32 px-5 border-t border-line bg-surface"
       >
         <div className="max-w-[1000px] mx-auto">
           <Stagger>
-            <div className="text-center mb-16">
+            <div className="text-center mb-16 pt-4">
               <p className="font-mono text-micro uppercase text-ember-500 mb-6">
                 {t("landing.testimonials.heading") || "Testimonials"}
               </p>
@@ -1021,10 +1021,10 @@ export default function LandingPage() {
       </section>
 
       {/* ===================== CTA SECTION ===================== */}
-      <section className="relative py-28 px-5 border-t border-line bg-surface">
+      <section className="relative py-32 px-5 border-t border-line bg-surface">
         <div className="max-w-[640px] mx-auto">
           <Stagger className="text-center">
-            <p className="font-mono text-micro uppercase text-ember-500 mb-6">
+            <p className="font-mono text-micro uppercase text-ember-500 mb-6 pt-4">
               05 — Get started
             </p>
             <h2
@@ -1064,7 +1064,7 @@ export default function LandingPage() {
       </section>
 
       {/* ===================== FOOTER ===================== */}
-      <footer className="border-t border-line px-5 bg-surface">
+      <footer className="border-t border-line px-5 bg-surface pb-8">
         <div className="max-w-[1200px] mx-auto py-12 flex flex-col sm:flex-row items-center justify-between gap-6">
           <div className="flex flex-col items-center sm:items-start gap-2">
             <Link href="/" className="flex items-baseline gap-0.5 group">
