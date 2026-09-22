@@ -13,6 +13,8 @@ export default function App({ Component, pageProps }) {
       <Head>
         <link rel="icon" type="image/png" sizes="192x192" href="/favicon.png" />
         <link rel="apple-touch-icon" sizes="192x192" href="/favicon.png" />
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.1.9/p5.min.js" />
+        <script src="https://cdn.jsdelivr.net/npm/vanta@latest/dist/vanta.trunk.min.js" />
       </Head>
       <LanguageProvider userLanguage={userLanguage}>
         <Component {...pageProps} />

@@ -28,7 +28,7 @@ import {
   Clock,
   CheckCircle,
 } from "lucide-react";
-import GradientWaves from "../components/GradientWaves";
+import VantaTrunk from "../components/VantaTrunk";
 
 const NAV_LINKS = [
   { href: "#statement", key: "landing.nav.about" },
@@ -483,29 +483,9 @@ export default function LandingPage() {
 
       {/* ===================== HERO SECTION ===================== */}
       <section ref={heroRef} className="relative min-h-screen overflow-visible">
-        <div className="absolute inset-0 -z-10">
-          <GradientWaves
-            horizonColor="#0A0807"
-            waveColor="#C2452A"
-            crestColor="#F0A85C"
-            speed={0.18}
-            amplitude={1.7}
-            waveScale={0.48}
-            waveRatio={0.9}
-            swell={30}
-            turbulence={17}
-            tilt={1.1}
-            zoom={1.0}
-            height={5.2}
-            fogDepth={15}
-            detail="low"
-            brightness={0.82}
-            opacity={1.0}
-            mouseInteraction={false}
-            parallaxStrength={0}
-            grain={true}
-            grainIntensity={0.04}
-          />
+        {/* Vanta animation at the top */}
+        <div className="absolute top-0 left-0 right-0 h-[400px] -z-10">
+          <VantaTrunk />
         </div>
 
         <div className="grain" />
