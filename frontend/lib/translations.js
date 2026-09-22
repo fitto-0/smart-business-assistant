@@ -155,10 +155,22 @@ const translations = {
         getStarted: "Get Started",
       },
       hero: {
-        subtitle: "AI-POWERED BUSINESS INTELLIGENCE",
-        tagline: "Turn your business data into your next decision.",
+        eyebrow: "AI-POWERED BUSINESS INTELLIGENCE",
+        title: "We plant flags for brands",
+        highlight: "that last",
+        tagline:
+          "Smart Business Assistant turns sales, inventory and customer data into decisions you can act on — in real time, with AI that explains itself.",
+        cta: "Start free",
+        demo: "See how it works",
+        scroll: "Scroll",
+        stats: {
+          teams: "active teams",
+          satisfaction: "customer satisfaction rate",
+          time: "hours saved per week",
+        },
       },
       features: {
+        intro: "What we built",
         salesAnalytics: "Sales Analytics",
         salesAnalyticsSubtitle: "Revenue & KPIs",
         salesAnalyticsDesc:
@@ -185,6 +197,9 @@ const translations = {
           "Actionable AI suggestions to boost sales and optimize your inventory.",
       },
       intelligence: {
+        title: "One lens, not seven tabs.",
+        description:
+          "Ask a question in plain language and the assistant pulls revenue, inventory and sentiment into a single answer.",
         salesIntelligence: "Sales Intelligence",
         salesIntelligenceDesc: "Understand your revenue",
         predictiveAnalytics: "Predictive Analytics",
@@ -193,6 +208,19 @@ const translations = {
         customerSentimentDesc: "Understand your customers",
         businessAlerts: "Business Alerts",
         businessAlertsDesc: "Detect problems instantly",
+      },
+      statement: {
+        heading: "Built for teams that read their numbers.",
+        intro:
+          "Most tools drown you in charts. This one reads the room — your revenue, your stock, your customers — and tells you what deserves attention next.",
+      },
+      testimonial: {
+        quote:
+          "We used to run reports on Friday and argue about them on Monday. Now the numbers arrive with their context attached.",
+        author: {
+          name: "Sara N.",
+          role: "Operations · Mena Logistics",
+        },
       },
       howItWorks: {
         uploadData: "Upload your data",
@@ -226,6 +254,20 @@ const translations = {
         privacy: "Privacy",
         terms: "Terms",
         contact: "Contact",
+      },
+      benefits: {
+        revenueGrowth: "Revenue Growth",
+        revenueGrowthDesc: "Increase sales with AI-powered insights and smart recommendations.",
+        timeSavings: "Time Savings",
+        timeSavingsDesc: "Save hours weekly with automated reporting and real-time alerts",
+        dataSecurity: "Data Security",
+        dataSecurityDesc: "Enterprise-grade security with encrypted data storage and access controls.",
+        teamCollaboration: "Team Collaboration",
+        teamCollaborationDesc: "Share insights and work together with role-based permissions.",
+      },
+      testimonials: {
+        heading: "Trusted by teams worldwide",
+        subtitle: "See what our customers have to say about their experience.",
       },
     },
     // Dashboard
@@ -990,11 +1032,22 @@ const translations = {
         getStarted: "Commencer",
       },
       hero: {
-        subtitle: "INTELLIGENCE COMMERCIALE ALIMENTÉE PAR L'IA",
+        eyebrow: "INTELLIGENCE COMMERCIALE ALIMENTÉE PAR L'IA",
+        title: "Nous plantons des repères pour les marques",
+        highlight: "qui durent",
         tagline:
-          "Transformez vos données commerciales en votre prochaine décision.",
+          "Smart Business Assistant transforme vos ventes, votre stock et vos clients en décisions actionnables — en temps réel, avec une IA qui explique son raisonnement.",
+        cta: "Essayer gratuitement",
+        demo: "Voir comment ça marche",
+        scroll: "Défiler",
+        stats: {
+          teams: "équipes actives",
+          satisfaction: "satisfaction clients",
+          time: "heures économisées par semaine",
+        },
       },
       features: {
+        intro: "Ce que nous avons construit",
         salesAnalytics: "Analyse des ventes",
         salesAnalyticsSubtitle: "Revenus & KPIs",
         salesAnalyticsDesc:
@@ -1021,6 +1074,9 @@ const translations = {
           "Suggestions d'IA exploitables pour stimuler les ventes et optimiser votre inventaire.",
       },
       intelligence: {
+        title: "Une seule lentille, pas sept onglets.",
+        description:
+          "Posez une question en langage naturel : l'assistant réunit revenus, stock et sentiment en une seule réponse.",
         salesIntelligence: "Intelligence des ventes",
         salesIntelligenceDesc: "Comprendre vos revenus",
         predictiveAnalytics: "Analyse prédictive",
@@ -1029,6 +1085,19 @@ const translations = {
         customerSentimentDesc: "Comprendre vos clients",
         businessAlerts: "Alertes commerciales",
         businessAlertsDesc: "Détecter les problèmes instantanément",
+      },
+      statement: {
+        heading: "Conçu pour les équipes qui lisent leurs chiffres.",
+        intro:
+          "La plupart des outils vous noient dans des graphiques. Celui-ci lit la situation — vos revenus, votre stock, vos clients — et vous dit ce qui mérite votre attention.",
+      },
+      testimonial: {
+        quote:
+          "Avant, on sortait les rapports le vendredi et on en débattait le lundi. Maintenant, les chiffres arrivent avec leur contexte.",
+        author: {
+          name: "Sara N.",
+          role: "Opérations · Mena Logistics",
+        },
       },
       howItWorks: {
         uploadData: "Téléchargez vos données",
@@ -1063,6 +1132,20 @@ const translations = {
         privacy: "Confidentialité",
         terms: "Conditions",
         contact: "Contact",
+      },
+      benefits: {
+        revenueGrowth: "Croissance des revenus",
+        revenueGrowthDesc: "Augmentez les ventes avec des insights alimentés par l'IA et des recommandations intelligentes.",
+        timeSavings: "Gain de temps",
+        timeSavingsDesc: "Économisez des heures chaque semaine avec des rapports automatisés et des alertes en temps réel",
+        dataSecurity: "Sécurité des données",
+        dataSecurityDesc: "Sécurité de niveau entreprise avec stockage de données chiffré et contrôles d'accès.",
+        teamCollaboration: "Collaboration d'équipe",
+        teamCollaborationDesc: "Partagez des insights et travaillez ensemble avec des autorisations basées sur les rôles.",
+      },
+      testimonials: {
+        heading: "Approuvé par des équipes dans le monde entier",
+        subtitle: "Découvrez ce que nos clients disent de leur expérience.",
       },
     },
     // Dashboard
@@ -1837,10 +1920,22 @@ const translations = {
         getStarted: "ابدأ الآن",
       },
       hero: {
-        subtitle: "الذكاء التجاري المدعوم بالذكاء الاصطناعي",
-        tagline: "حول بيانات عملك إلى قرارك التالي.",
+        eyebrow: "الذكاء التجاري المدعوم بالذكاء الاصطناعي",
+        title: "نزرع معالم لعلامات تجارية",
+        highlight: "تبقى",
+        tagline:
+          "يحوّل Smart Business Assistant بيانات المبيعات والمخزون والعملاء إلى قرارات قابلة للتنفيذ — في الوقت الفعلي، مع ذكاء اصطناعي يشرح منطقه.",
+        cta: "ابدأ مجاناً",
+        demo: "شاهد كيف يعمل",
+        scroll: "مرّر",
+        stats: {
+          teams: "فِرق نشطة",
+          satisfaction: "معدل رضا العملاء",
+          time: "ساعات موفرة في الأسبوع",
+        },
       },
       features: {
+        intro: "ما الذي بنيناه",
         salesAnalytics: "تحليل المبيعات",
         salesAnalyticsSubtitle: "الإيرادات ومؤشرات الأداء",
         salesAnalyticsDesc:
@@ -1867,6 +1962,9 @@ const translations = {
           "اقتراحات الذكاء الاصطناعي القابلة للتنفيذ لزيادة المبيعات وتحسين المخزون.",
       },
       intelligence: {
+        title: "عدسة واحدة، لا سبع تبويبات.",
+        description:
+          "اطرح سؤالاً بلغة طبيعية، فيجمع المساعد الإيرادات والمخزون والمشاعر في إجابة واحدة.",
         salesIntelligence: "ذكاء المبيعات",
         salesIntelligenceDesc: "فهم إيراداتك",
         predictiveAnalytics: "التحليل التنبؤي",
@@ -1875,6 +1973,19 @@ const translations = {
         customerSentimentDesc: "فهم عملائك",
         businessAlerts: "تنبيهات الأعمال",
         businessAlertsDesc: "كشف المشاكل فوراً",
+      },
+      statement: {
+        heading: "مصمّم للفرق التي تقرأ أرقامها.",
+        intro:
+          "معظم الأدوات تُغرقك في الرسوم البيانية. هذه تقرأ الوضع — إيراداتك، مخزونك، عملاؤك — وتخبرك بما يستحق انتباهك.",
+      },
+      testimonial: {
+        quote:
+          "كنا نُعدّ التقارير يوم الجمعة ونتناقشها يوم الاثنين. الآن تصل الأرقام مع سياقها.",
+        author: {
+          name: "سارة ن.",
+          role: "العمليات · Mena Logistics",
+        },
       },
       howItWorks: {
         uploadData: "قم بتحميل بياناتك",
@@ -1908,6 +2019,20 @@ const translations = {
         privacy: "الخصوصية",
         terms: "الشروط",
         contact: "اتصل بنا",
+      },
+      benefits: {
+        revenueGrowth: "نمو الإيرادات",
+        revenueGrowthDesc: "زيادة المبيعات مع الرؤى المدعومة بالذكاء الاصطناعي والتوصيات الذكية.",
+        timeSavings: "توفير الوقت",
+        timeSavingsDesc: "وفر ساعات أسبوعياً مع التقارير الآلية والتنبيهات في الوقت الفعلي",
+        dataSecurity: "أمان البيانات",
+        dataSecurityDesc: "أمان على مستوى المؤسسات مع تخزين بيانات مشفر وضوابط الوصول.",
+        teamCollaboration: "التعاون الجماعي",
+        teamCollaborationDesc: "شارك الرؤى واعمل معاً مع الصلاحيات القائمة على الأدوار.",
+      },
+      testimonials: {
+        heading: "موثوق من قبل فرق حول العالم",
+        subtitle: "اكتشف ما يقوله عملاؤنا عن تجربتهم.",
       },
     },
     // Dashboard
