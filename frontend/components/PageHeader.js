@@ -36,15 +36,15 @@ export function Ledger({ items }) {
           className="ledger-row flex flex-wrap items-baseline justify-between gap-x-6 gap-y-1"
         >
           <div className="flex items-center gap-3 min-w-0">
-            <span className="font-mono text-micro uppercase text-ink-3 tabular-nums">
+            <span className="font-mono text-[12.5px] font-semibold uppercase tracking-[0.12em] text-ink-2 tabular-nums antialiased">
               {String(i + 1).padStart(2, "0")}
             </span>
-            <span className="micro truncate">{item.label}</span>
+            <span className="font-mono text-[12.5px] font-medium uppercase tracking-[0.12em] text-ink truncate antialiased">{item.label}</span>
           </div>
           <div className="flex items-baseline gap-3">
             {item.delta != null && item.delta !== "" && (
               <span
-                className={`font-mono text-[11px] tabular-nums ${
+                className={`font-mono text-[13px] font-medium tabular-nums antialiased ${
                   Number(item.delta) >= 0 ? "text-olive" : "text-clay"
                 }`}
               >
@@ -66,9 +66,9 @@ export function Section({ eyebrow, title, action = null, children, className = "
       {(eyebrow || title || action) && (
         <div className="flex flex-wrap items-end justify-between gap-3 mb-4">
           <div className="min-w-0">
-            {eyebrow && <p className="micro mb-1.5">{eyebrow}</p>}
+            {eyebrow && <p className="font-mono text-[12.5px] font-medium uppercase tracking-[0.14em] text-ink-2 antialiased mb-1.5">{eyebrow}</p>}
             {title && (
-              <h2 className="font-display text-xl font-medium tracking-[-0.02em] text-ink">
+              <h2 className="font-display text-[22px] font-semibold tracking-[-0.02em] text-ink antialiased">
                 {title}
               </h2>
             )}
@@ -92,7 +92,7 @@ export function NoirTable({ columns, rows, emptyLabel = "No rows", rowKey = null
               <th
                 key={col.key}
                 scope="col"
-                className={`px-4 py-2.5 font-mono text-micro uppercase text-ink-3 font-normal whitespace-nowrap ${
+                className={`px-4 py-2.5 font-mono text-[12px] font-medium uppercase tracking-[0.12em] text-ink-2 antialiased whitespace-nowrap ${
                   col.numeric ? "text-end" : "text-start"
                 }`}
               >
@@ -110,10 +110,10 @@ export function NoirTable({ columns, rows, emptyLabel = "No rows", rowKey = null
               {columns.map((col) => (
                 <td
                   key={col.key}
-                  className={`px-4 py-3 text-[13px] ${
+                  className={`px-4 py-3 text-[14.5px] font-medium antialiased ${
                     col.numeric
                       ? "text-end font-mono tabular-nums text-ink"
-                      : "text-start text-ink-2"
+                      : "text-start text-ink"
                   }`}
                 >
                   {col.render ? col.render(row, i) : row[col.key]}
@@ -146,8 +146,8 @@ export function Segmented({ options, value, onChange, ariaLabel = "View" }) {
             role="tab"
             aria-selected={active}
             onClick={() => onChange(opt.value)}
-            className={`px-3 py-1.5 font-mono text-[11px] uppercase tracking-label transition-colors duration-200 border-s border-line first:border-s-0 ${
-              active ? "bg-surface-2 text-ink" : "text-ink-3 hover:text-ink"
+            className={`px-3 py-1.5 font-mono text-[12.5px] font-medium uppercase tracking-label antialiased transition-colors duration-200 border-s border-line first:border-s-0 ${
+              active ? "bg-surface-2 text-ink" : "text-ink-2 hover:text-ink"
             } ${i === 0 ? "border-s-0" : ""}`}
             style={active ? { boxShadow: "inset 0 -1px 0 #E2703A" } : undefined}
           >
@@ -164,8 +164,8 @@ export function Empty({ title = "Nothing here", hint = null }) {
   return (
     <div className="px-4 py-10 text-center">
       <div aria-hidden="true" className="rule mx-auto max-w-[120px] mb-4" />
-      <p className="micro-2">{title}</p>
-      {hint && <p className="mt-2 text-[13px] text-ink-3">{hint}</p>}
+      <p className="font-mono text-[12.5px] font-medium uppercase tracking-[0.14em] text-ink antialiased">{title}</p>
+      {hint && <p className="mt-2 text-[14px] text-ink-2 antialiased">{hint}</p>}
     </div>
   );
 }
@@ -186,18 +186,18 @@ export default function PageHeader({
       {(eyebrow || index) && (
         <div className="flex items-center gap-3 mb-3">
           {index && (
-            <span className="font-mono text-micro uppercase text-ember-500 tabular-nums">
+            <span className="font-mono text-[12.5px] font-semibold uppercase tracking-[0.12em] text-ember-500 tabular-nums antialiased">
               {index}
             </span>
           )}
           {index && eyebrow && (
             <span aria-hidden="true" className="h-px w-6 bg-line" />
           )}
-          {eyebrow && <span className="breadcrumb">{eyebrow}</span>}
+          {eyebrow && <span className="breadcrumb !text-[12.5px]">{eyebrow}</span>}
           {meta && (
             <>
               <span aria-hidden="true" className="h-px w-6 bg-line" />
-              <span className="font-mono text-micro uppercase text-ink-2">
+              <span className="font-mono text-[12.5px] font-medium uppercase tracking-[0.12em] text-ink-2 antialiased">
                 {meta}
               </span>
             </>
@@ -208,7 +208,7 @@ export default function PageHeader({
         <div className="min-w-0 max-w-[42rem]">
           {title && <h1 className="page-title">{title}</h1>}
           {description && (
-            <p className="mt-3 text-[15px] leading-[1.65] text-ink-2 max-w-[38rem]">
+            <p className="mt-3 text-[16px] font-medium leading-[1.65] text-ink antialiased max-w-[38rem]">
               {description}
             </p>
           )}

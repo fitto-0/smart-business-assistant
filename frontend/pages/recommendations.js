@@ -107,7 +107,7 @@ export default function RecommendationsPage() {
   <div className="mt-3 max-w-xs">
   <div className="flex items-baseline justify-between gap-3">
   <span className="micro">{done} of {recs.length} actions completed</span>
-  <span className="font-mono text-[11px] tabular-nums text-ink-2">
+  <span className="font-mono text-[12.5px] font-medium tabular-nums text-ink antialiased">
   {recs.length ? Math.round((done / recs.length) * 100) : 0}%
   </span>
   </div>
@@ -161,7 +161,7 @@ export default function RecommendationsPage() {
  <button
  key={f.key}
  onClick={() => setFilter(f.key)}
- className={`font-mono text-[11px] uppercase tracking-label px-3 py-1.5 rounded-xs transition-colors ${filter === f.key ? "bg-surface-2 text-ink" : "bg-canvas text-ink-3 hover:text-ink"}`}
+  className={`font-mono text-[12.5px] font-medium uppercase tracking-label antialiased px-3 py-1.5 rounded-xs transition-colors ${filter === f.key ? "bg-surface-2 text-ink" : "bg-canvas text-ink-2 hover:text-ink"}`}
  >
  {f.label}
  </button>
@@ -193,27 +193,27 @@ export default function RecommendationsPage() {
  </div>
  <div className="flex-1 min-w-0">
  <div className="flex flex-wrap items-center gap-2.5 mb-2">
- <h3
- className={`text-[13px] font-medium ${rec.done ? "line-through text-ink-3" : "text-ink"}`}
- >
- {rec.title}
- </h3>
+  <h3
+  className={`text-[15px] font-semibold antialiased ${rec.done ? "line-through text-ink-3" : "text-ink"}`}
+  >
+  {rec.title}
+  </h3>
  <Status tone={prio.tone}>{prio.label}</Status>
  {cat && <Status tone={cat.tone}>{cat.label}</Status>}
  </div>
- <p className="text-[14px] leading-[1.65] text-ink-2 mb-3">
- {rec.description}
- </p>
+  <p className="text-[15px] font-medium leading-[1.65] text-ink antialiased mb-3">
+  {rec.description}
+  </p>
  <div className="flex flex-col sm:flex-row flex-wrap gap-2.5">
  <div className="flex items-baseline gap-2 px-3 py-2 rounded-xs bg-canvas/60 border hairline">
  <span className="micro shrink-0">Action</span>
- <span className="text-[13px] font-medium text-ink">
- {rec.action}
- </span>
+  <span className="text-[14.5px] font-medium text-ink antialiased">
+  {rec.action}
+  </span>
  </div>
  <div className="flex items-baseline gap-2 px-3 py-2 rounded-xs bg-canvas/60 border hairline">
  <span className="micro shrink-0">Impact</span>
- <span className={`text-[13px] font-medium ${rec.done ? "text-ink-3" : "text-olive"}`}>
+  <span className={`text-[14.5px] font-medium antialiased ${rec.done ? "text-ink-3" : "text-olive"}`}>
  {rec.impact}
  </span>
  </div>
@@ -223,7 +223,7 @@ export default function RecommendationsPage() {
  <div className="flex-shrink-0">
  <button
  onClick={() => markDone(rec.id)}
- className={`flex items-center gap-2 font-mono text-[11px] uppercase tracking-label px-3 py-1.5 rounded-xs border transition-colors ${
+  className={`flex items-center gap-2 font-mono text-[12.5px] font-medium uppercase tracking-label antialiased px-3 py-1.5 rounded-xs border transition-colors ${
  rec.done
  ? "border-olive/40 text-olive hover:bg-olive/10"
  : "border-line text-ink-2 hover:text-ink hover:border-ink-3/50"

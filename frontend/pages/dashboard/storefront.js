@@ -1012,19 +1012,19 @@ export default function StorefrontCustomize() {
             {
               field: "facebook_url",
               label: "Facebook",
-              icon: "📘",
+              //icon: "📘",
               placeholder: "https://facebook.com/yourstore",
             },
             {
               field: "instagram_url",
               label: "Instagram",
-              icon: "📷",
+              //icon: "📷",
               placeholder: "https://instagram.com/yourstore",
             },
             {
               field: "twitter_url",
               label: "Twitter/X",
-              icon: "🐦",
+              //icon: "🐦",
               placeholder: "https://twitter.com/yourstore",
             },
             {

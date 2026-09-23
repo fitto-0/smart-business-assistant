@@ -18,8 +18,8 @@ const CustomTooltip = ({ active, payload, label }) => {
  <div className="panel px-3 py-2.5 min-w-[160px]">
  <p className="micro-2 mb-2">{label}</p>
  {payload.map((p, i) => (
- <p key={i} className="flex items-baseline justify-between gap-4 font-mono text-[11px] tabular-nums">
- <span className="text-ink-3">{p.name}</span>
+  <p key={i} className="flex items-baseline justify-between gap-4 font-mono text-[12.5px] font-medium tabular-nums antialiased">
+  <span className="text-ink-2">{p.name}</span>
  <strong className="font-medium" style={{ color: p.color || CHART.ink }}>{fmt(p.value)}</strong>
  </p>
  ))}
@@ -215,20 +215,20 @@ export default function SalesPage() {
  <div className="divide-y divide-line">
  {topProducts.map((p, i) => (
  <div key={p.id} className="ledger-row flex items-center gap-4 !py-3">
- <span className="font-mono text-micro uppercase text-ink-3 tabular-nums w-6 shrink-0">
- {String(i + 1).padStart(2, "0")}
- </span>
- <div className="flex-1 min-w-0">
- <div className="flex items-baseline justify-between gap-3">
- <span className="text-[13px] text-ink truncate">{p.name}</span>
- <span className="font-mono text-[11px] tabular-nums text-ink shrink-0">{fmt(p.revenue)} DA</span>
- </div>
+  <span className="font-mono text-[12.5px] font-semibold uppercase tracking-[0.12em] text-ink-2 tabular-nums w-6 shrink-0 antialiased">
+  {String(i + 1).padStart(2, "0")}
+  </span>
+  <div className="flex-1 min-w-0">
+  <div className="flex items-baseline justify-between gap-3">
+  <span className="text-[15px] font-semibold text-ink truncate antialiased">{p.name}</span>
+  <span className="font-mono text-[13px] font-semibold tabular-nums text-ink shrink-0 antialiased">{fmt(p.revenue)} DA</span>
+  </div>
  <div className="mt-1.5 h-[3px] w-full bg-canvas">
  <div className="h-[3px] bg-ember-500/80"
  style={{ width: `${topProducts[0]?.revenue ? (p.revenue / topProducts[0].revenue) * 100 : 0}%` }} />
  </div>
  </div>
- <span className={`font-mono text-[11px] tabular-nums shrink-0 ${p.trend >= 0 ? 'text-olive' : 'text-clay'}`}>
+  <span className={`font-mono text-[12.5px] font-medium tabular-nums shrink-0 antialiased ${p.trend >= 0 ? 'text-olive' : 'text-clay'}`}>
  {p.trend >= 0 ? '+' : ''}{p.trend}%
  </span>
  </div>

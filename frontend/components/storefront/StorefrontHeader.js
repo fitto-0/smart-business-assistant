@@ -65,10 +65,10 @@ export default function StorefrontHeader({ userId }) {
               </div>
             )}
             <div>
-              <h1 className="text-xl font-bold text-ink" style={{ color: storeInfo?.primary_color || '#EDE7DC' }}>
+              <h1 className="text-[22px] font-extrabold antialiased tracking-[-0.01em] text-ink" style={{ color: storeInfo?.primary_color || '#EDE7DC' }}>
                 {storeInfo?.store_name || 'Store'}
               </h1>
-              <p className="text-sm text-ink-secondary">
+              <p className="text-[15px] font-medium antialiased text-ink-secondary">
                 {storeInfo?.tagline || storeInfo?.description || 'Welcome to our store'}
               </p>
             </div>
@@ -77,19 +77,19 @@ export default function StorefrontHeader({ userId }) {
           <div className="flex items-center gap-4">
             <div className="hidden md:flex items-center gap-6">
               {storeInfo?.contact_phone && (
-                <a href={`tel:${storeInfo.contact_phone}`} className="flex items-center gap-1 text-sm text-ink-secondary hover:text-amber transition-colors">
+                <a href={`tel:${storeInfo.contact_phone}`} className="flex items-center gap-1 text-[15px] font-medium antialiased text-ink-secondary hover:text-amber transition-colors">
                   <Phone size={16} />
                   <span>{storeInfo.contact_phone}</span>
                 </a>
               )}
               {storeInfo?.contact_email && (
-                <a href={`mailto:${storeInfo.contact_email}`} className="flex items-center gap-1 text-sm text-ink-secondary hover:text-amber transition-colors">
+                <a href={`mailto:${storeInfo.contact_email}`} className="flex items-center gap-1 text-[15px] font-medium antialiased text-ink-secondary hover:text-amber transition-colors">
                   <Mail size={16} />
                   <span>{storeInfo.contact_email}</span>
                 </a>
               )}
               {storeInfo?.address && (
-                <span className="flex items-center gap-1 text-sm text-ink-secondary">
+                <span className="flex items-center gap-1 text-[15px] font-medium antialiased text-ink-secondary">
                   <MapPin size={16} />
                   <span>{storeInfo.address}, {storeInfo.city}, {storeInfo.country}</span>
                 </span>

@@ -41,9 +41,9 @@ const ChartTooltip = ({ active, payload, label, unit = "" }) => {
   if (!active || !payload || !payload.length) return null;
   return (
     <div className="bg-surface border border-line rounded-xs px-3 py-2">
-      <p className="font-mono text-micro uppercase text-ink-3 mb-1">{label}</p>
+      <p className="font-mono text-[12px] font-medium uppercase tracking-[0.12em] text-ink-2 antialiased mb-1">{label}</p>
       {payload.map((p, i) => (
-        <p key={i} className="font-mono text-[11px] tabular-nums text-ink">
+        <p key={i} className="font-mono text-[12.5px] font-medium tabular-nums text-ink antialiased">
           <span
             aria-hidden="true"
             className="inline-block w-[5px] h-[5px] me-1.5 align-middle"
@@ -258,9 +258,9 @@ export default function Dashboard() {
                       className="w-[5px] h-[5px] shrink-0"
                       style={{ background: SERIES[i % SERIES.length] }}
                     />
-                    <span className="text-[13px] text-ink-2 truncate">{cat.name}</span>
+                    <span className="text-[15px] font-medium text-ink truncate antialiased">{cat.name}</span>
                   </div>
-                  <span className="font-mono text-[11px] tabular-nums text-ink shrink-0">
+                  <span className="font-mono text-[13px] font-medium tabular-nums text-ink shrink-0 antialiased">
                     {cat.value}%
                   </span>
                 </div>
@@ -288,23 +288,23 @@ export default function Dashboard() {
               <div className="divide-y divide-line">
                 {topProducts.map((product, index) => (
                   <div key={product.id} className="flex items-center gap-3 px-4 py-3 transition-colors duration-200 hover:bg-surface">
-                    <span className="font-mono text-micro uppercase text-ink-3 tabular-nums w-6 shrink-0">
+                    <span className="font-mono text-[12.5px] font-semibold uppercase tracking-[0.12em] text-ink-2 tabular-nums w-6 shrink-0 antialiased">
                       {String(index + 1).padStart(2, "0")}
                     </span>
                     <div className="min-w-0 flex-1">
-                      <p className="text-[13px] font-medium text-ink truncate">
+                      <p className="text-[15px] font-semibold text-ink truncate antialiased">
                         {product.name}
                       </p>
-                      <p className="micro mt-1">
+                      <p className="font-mono text-[12px] font-medium uppercase tracking-[0.12em] text-ink-2 antialiased mt-1">
                         {product.orders} orders
                       </p>
                     </div>
                     <div className="text-end shrink-0">
-                      <p className="font-mono text-[13px] tabular-nums text-ink">
+                      <p className="font-mono text-[14px] font-semibold tabular-nums text-ink antialiased">
                         {fmt(product.revenue)} DA
                       </p>
                       <p
-                        className={`font-mono text-[11px] tabular-nums mt-0.5 ${product.trend >= 0 ? "text-olive" : "text-clay"}`}
+                        className={`font-mono text-[12.5px] font-medium tabular-nums mt-0.5 antialiased ${product.trend >= 0 ? "text-olive" : "text-clay"}`}
                       >
                         {deltaGlyph(product.trend)} {Math.abs(Number(product.trend))}%
                       </p>
@@ -334,10 +334,10 @@ export default function Dashboard() {
                   className={`w-[5px] h-[5px] mt-1.5 shrink-0 ${a.severity === "critique" ? "bg-clay" : "bg-sand"}`}
                 />
                 <div className="min-w-0 flex-1">
-                  <p className="text-[13px] font-medium text-ink truncate">
+                  <p className="text-[15px] font-semibold text-ink truncate antialiased">
                     {a.product_name || a.product || "Anomaly"}
                   </p>
-                  <p className="text-xs text-ink-3 mt-0.5 line-clamp-2 leading-relaxed">
+                  <p className="text-[13.5px] font-medium text-ink-2 mt-0.5 line-clamp-2 leading-relaxed antialiased">
                     {a.description}
                   </p>
                 </div>
@@ -365,14 +365,14 @@ export default function Dashboard() {
           <div className="divide-y divide-line">
             {topRecs.map((r, i) => (
               <div key={r.id} className="flex items-start gap-3 px-4 py-3 transition-colors duration-200 hover:bg-surface">
-                <span className="font-mono text-micro uppercase text-ink-3 tabular-nums w-6 shrink-0 mt-0.5">
+                <span className="font-mono text-[12.5px] font-semibold uppercase tracking-[0.12em] text-ink-2 tabular-nums w-6 shrink-0 mt-0.5 antialiased">
                   {String(i + 1).padStart(2, "0")}
                 </span>
                 <div className="min-w-0">
-                  <p className="text-[13px] font-medium text-ink leading-snug">
+                  <p className="text-[15px] font-semibold text-ink leading-snug antialiased">
                     {r.title}
                   </p>
-                  <p className="font-mono text-[11px] tabular-nums text-olive mt-1">
+                  <p className="font-mono text-[12.5px] font-medium tabular-nums text-olive mt-1 antialiased">
                     {r.impact}
                   </p>
                 </div>

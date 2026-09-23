@@ -192,10 +192,10 @@ export default function AnomaliesPage() {
             <button
               key={f.key}
               onClick={() => setFilter(f.key)}
-              className={`font-mono text-[11px] uppercase tracking-label px-3 py-1.5 rounded-xs transition-colors ${
+              className={`font-mono text-[12.5px] font-medium uppercase tracking-label antialiased px-3 py-1.5 rounded-xs transition-colors ${
                 filter === f.key
                   ? "bg-surface-2 text-ink"
-                  : "bg-canvas text-ink-3 hover:text-ink"
+                  : "bg-canvas text-ink-2 hover:text-ink"
               }`}
             >
               {f.label}
@@ -272,14 +272,14 @@ export default function AnomaliesPage() {
                       {a.status === "non_resolu" && (
                         <button
                           onClick={() => markInProgress(a.id)}
-                          className="font-mono text-[11px] uppercase tracking-label px-3 py-1.5 rounded-xs border border-line text-ink-2 hover:text-ember-500 hover:border-ember-500/50 transition-colors flex items-center gap-1.5"
+                          className="font-mono text-[12.5px] font-medium uppercase tracking-label antialiased px-3 py-1.5 rounded-xs border border-line text-ink-2 hover:text-ember-500 hover:border-ember-500/50 transition-colors flex items-center gap-1.5"
                         >
                           <Clock size={12} /> In progress
                         </button>
                       )}
                       <button
                         onClick={() => markResolved(a.id)}
-                        className="font-mono text-[11px] uppercase tracking-label px-3 py-1.5 rounded-xs border border-line text-ink-2 hover:text-olive hover:border-olive/50 transition-colors flex items-center gap-1.5"
+                        className="font-mono text-[12.5px] font-medium uppercase tracking-label antialiased px-3 py-1.5 rounded-xs border border-line text-ink-2 hover:text-olive hover:border-olive/50 transition-colors flex items-center gap-1.5"
                       >
                         <CheckCircle size={12} /> Resolve
                       </button>

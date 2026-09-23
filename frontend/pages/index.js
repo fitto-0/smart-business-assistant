@@ -360,10 +360,10 @@ export default function LandingPage() {
             </button>
 
             <Link href="/" className="flex items-baseline gap-0.5 group">
-              <span className="font-display font-medium text-[14px] tracking-[-0.02em] text-ink leading-none">
+              <span className="font-display font-semibold text-[17px] tracking-[-0.02em] text-ink leading-none antialiased">
                 Smart Business
               </span>
-              <span className="font-display text-[14px] leading-none text-ember-500">
+              <span className="font-display text-[17px] leading-none text-ember-500">
                 .
               </span>
             </Link>
@@ -376,10 +376,10 @@ export default function LandingPage() {
                 key={link.href}
                 href={link.href}
                 onClick={(e) => handleSmoothScroll(e, link.href)}
-                className={`font-mono text-micro uppercase transition-colors ${
+                className={`font-mono text-[12px] font-medium uppercase tracking-[0.14em] antialiased transition-colors ${
                   activeSection === link.href.replace("#", "")
                     ? "text-ember-500"
-                    : "text-ink-3 hover:text-ink"
+                    : "text-ink-2 hover:text-ink"
                 }`}
               >
                 {t(link.key)}
@@ -398,7 +398,7 @@ export default function LandingPage() {
                 aria-expanded={showLangMenu}
               >
                 <Globe size={13} />
-                <span className="hidden sm:inline font-mono text-micro uppercase">
+                <span className="hidden sm:inline font-mono text-[12px] font-medium uppercase tracking-[0.14em] antialiased">
                   {language}
                 </span>
               </button>
@@ -434,14 +434,14 @@ export default function LandingPage() {
 
             <Link
               href="/login"
-              className="hidden sm:inline font-mono text-micro uppercase text-ink-3 hover:text-ink transition-colors"
+              className="hidden sm:inline font-mono text-[12px] font-medium uppercase tracking-[0.14em] antialiased text-ink-2 hover:text-ink transition-colors"
             >
               {t("landing.nav.login")}
             </Link>
 
             <Link
               href="/register"
-              className="group inline-flex items-center gap-1.5 bg-ink text-canvas ps-3.5 pe-3 py-2 rounded-xs text-[11px] font-medium uppercase tracking-[0.12em] transition-colors hover:bg-ember-100"
+              className="group inline-flex items-center gap-1.5 bg-ink text-canvas ps-3.5 pe-3 py-2 rounded-xs text-[12.5px] font-semibold uppercase tracking-[0.12em] antialiased transition-colors hover:bg-ember-100"
             >
               <span>{t("landing.nav.getStarted")}</span>
               <ArrowRight
@@ -471,7 +471,7 @@ export default function LandingPage() {
                       setMenuOpen(false);
                     }
                   }}
-                  className="py-3 border-b border-line last:border-b-0 font-mono text-micro uppercase text-ink-2 hover:text-ink transition-colors"
+                  className="py-3 border-b border-line last:border-b-0 font-mono text-[13px] font-medium uppercase tracking-[0.12em] antialiased text-ink hover:text-ink transition-colors"
                 >
                   {t(link.key)}
                 </a>

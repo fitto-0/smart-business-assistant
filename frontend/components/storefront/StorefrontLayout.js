@@ -302,7 +302,7 @@ export default function StorefrontLayout({
           {/* Top Bar */}
           {(storeSettings?.contact_email || storeSettings?.contact_phone) && (
             <div
-              className="py-2 text-xs"
+              className="py-2 text-[13.5px] font-medium antialiased tracking-[0.01em]"
               style={{ backgroundColor: secondaryColor, color: "white" }}
             >
               <div className="store-container flex flex-wrap items-center justify-between gap-2">
@@ -383,7 +383,7 @@ export default function StorefrontLayout({
                   </div>
                 )}
                 <span
-                  className="hidden sm:block font-bold text-xl"
+                  className="hidden sm:block font-extrabold text-[22px] antialiased tracking-[-0.01em]"
                   style={{ color: textColor, fontFamily: headingFontFamily }}
                 >
                   {storeSettings?.store_name || "Store"}
@@ -396,7 +396,7 @@ export default function StorefrontLayout({
                   <Link
                     key={link.href}
                     href={link.href}
-                    className={`text-sm font-medium transition-colors relative py-2 ${
+                    className={`text-[16px] font-semibold antialiased tracking-[0.01em] transition-colors relative py-2 ${
                       router.pathname === link.href ||
                       router.pathname.startsWith(link.href + "/")
                         ? `text-[${primaryColor}]`
@@ -507,7 +507,7 @@ export default function StorefrontLayout({
                   key={link.href}
                   href={link.href}
                   onClick={() => setMobileMenuOpen(false)}
-                  className={`block py-3 px-4 rounded-lg font-medium transition-colors ${
+                  className={`block py-3 px-4 rounded-lg text-[16px] font-semibold antialiased transition-colors ${
                     router.pathname === link.href ||
                     router.pathname.startsWith(link.href + "/")
                       ? `bg-[${primaryColor}] text-white`
@@ -524,7 +524,7 @@ export default function StorefrontLayout({
               {/* Categories in Mobile Menu */}
               {storeSettings?.show_categories_page !== false && (
                 <div className="pt-4 border-t" style={{ borderColor: borderColor }}>
-                  <h3 className="px-4 pb-2 font-semibold text-sm uppercase tracking-wide" style={{ color: textSecondaryColor }}>
+                  <h3 className="px-4 pb-2 font-semibold text-[14px] uppercase tracking-wide antialiased" style={{ color: textSecondaryColor }}>
                     Categories
                   </h3>
                   <div className="space-y-1">
@@ -538,7 +538,7 @@ export default function StorefrontLayout({
                         key={cat.href}
                         href={cat.href}
                         onClick={() => setMobileMenuOpen(false)}
-                        className="block py-2 px-4 rounded-lg text-sm transition-colors hover:bg-gray-100"
+                        className="block py-2 px-4 rounded-lg text-[15px] font-medium antialiased transition-colors hover:bg-gray-100"
                         style={{ color: textColor }}
                       >
                         {cat.label}

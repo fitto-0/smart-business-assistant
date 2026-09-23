@@ -178,8 +178,8 @@ module.exports = {
         sora: ['"Inter Tight"', 'Inter', 'sans-serif'],
       },
       fontSize: {
-        micro: ['10px', { lineHeight: '1.4', letterSpacing: '0.16em' }],
-        label: ['11px', { lineHeight: '1.4', letterSpacing: '0.12em' }],
+        micro: ['12px', { lineHeight: '1.45', letterSpacing: '0.14em' }],
+        label: ['12.5px', { lineHeight: '1.4', letterSpacing: '0.12em' }],
         statement: ['clamp(3rem, 9vw, 9rem)', { lineHeight: '0.92', letterSpacing: '-0.035em' }],
         section: ['clamp(2rem, 5vw, 4.5rem)', { lineHeight: '0.95', letterSpacing: '-0.03em' }],
       },

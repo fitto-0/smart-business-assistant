@@ -180,10 +180,10 @@ export default function Layout({
     );
 
   const ledgerLink = (active) =>
-    `relative flex items-center gap-3 px-3 py-2 rounded-xs text-[13.5px] transition-colors duration-200 border-s-2 ${
+    `relative flex items-center gap-3 px-3 py-2 rounded-xs text-[15px] font-medium antialiased tracking-[0.01em] transition-colors duration-200 border-s-2 ${
       active
-        ? "border-s-ember-500 bg-surface text-ink font-medium"
-        : "border-s-transparent text-ink-3 hover:text-ink hover:bg-surface"
+        ? "border-s-ember-500 bg-surface text-ink"
+        : "border-s-transparent text-ink-2 hover:text-ink hover:bg-surface"
     }`;
   const ledgerIcon = (active) =>
     `flex-shrink-0 ${active ? "text-ember-500" : "text-ink-3"}`;
@@ -201,7 +201,7 @@ export default function Layout({
             aria-hidden="true"
             className="w-2 h-2 shrink-0 bg-ember-500 group-hover:bg-ember-300 transition-colors"
           />
-          <span className="font-display font-medium text-[15px] tracking-[-0.02em] text-ink leading-none">
+          <span className="font-display font-semibold text-[17px] tracking-[-0.02em] text-ink leading-none antialiased">
             Smart Business
           </span>
         </Link>
@@ -221,16 +221,16 @@ export default function Layout({
                 }}
               />
             ) : (
-              <span className="font-mono text-[11px] text-ink-2">
+              <span className="font-mono text-[12.5px] font-semibold text-ink antialiased">
                 {user.name?.[0]?.toUpperCase() || "—"}
               </span>
             )}
           </div>
           <div className="flex-1 min-w-0">
-            <p className="text-[13px] font-medium text-ink truncate leading-tight">
+            <p className="text-[14.5px] font-semibold text-ink truncate leading-tight antialiased">
               {user.name || "—"}
             </p>
-            <p className="micro truncate mt-1 normal-case tracking-normal">
+            <p className="micro truncate mt-1 normal-case tracking-normal !text-[12px] !text-ink">
               {user.company || user.email}
             </p>
           </div>
@@ -241,7 +241,7 @@ export default function Layout({
       <nav className="flex-1 px-3 py-4 space-y-0.5 overflow-y-auto">
         {user.role !== "admin" && (
           <>
-            <p className="micro px-3 mb-2">Workspace</p>
+            <p className="px-3 mb-2 font-mono text-[11.5px] font-medium uppercase tracking-[0.14em] text-ink-2 antialiased">Workspace</p>
             {userNavItems.map(({ href, label, icon: Icon }) => {
               const active = router.pathname === href;
               return (
@@ -253,13 +253,13 @@ export default function Layout({
                   className={ledgerLink(active)}
                 >
                   <Icon
-                    size={15}
+                    size={17}
                     strokeWidth={active ? 2 : 1.75}
                     className={ledgerIcon(active)}
                   />
                   <span className="truncate">{label}</span>
                   {href === "/anomalies" && unreadCount > 0 && (
-                    <span className="ms-auto font-mono text-[10px] tabular-nums text-clay border border-clay/40 rounded-xs px-1.5 py-0.5 leading-none">
+                    <span className="ms-auto font-mono text-[11.5px] font-medium tabular-nums text-clay border border-clay/40 rounded-xs px-1.5 py-0.5 leading-none antialiased">
                       {unreadCount > 99 ? "99+" : unreadCount}
                     </span>
                   )}
@@ -270,7 +270,7 @@ export default function Layout({
         )}
         {user.role !== "admin" && (
           <>
-            <p className="micro px-3 mt-5 mb-2">Store</p>
+            <p className="px-3 mt-5 mb-2 font-mono text-[11.5px] font-medium uppercase tracking-[0.14em] text-ink-2 antialiased">Store</p>
             {storefrontNavItems.map(({ href, label, icon: Icon }) => {
               const active = router.pathname.startsWith(
                 "/dashboard/storefront",
@@ -284,7 +284,7 @@ export default function Layout({
                   className={ledgerLink(active)}
                 >
                   <Icon
-                    size={15}
+                    size={17}
                     strokeWidth={active ? 2 : 1.75}
                     className={ledgerIcon(active)}
                   />
@@ -296,7 +296,7 @@ export default function Layout({
         )}
         {user.role === "admin" && (
           <>
-            <p className="micro px-3 mb-2">Administration</p>
+            <p className="px-3 mb-2 font-mono text-[11.5px] font-medium uppercase tracking-[0.14em] text-ink-2 antialiased">Administration</p>
             {adminNavItems.map(({ href, label, icon: Icon }) => {
               const active = router.pathname === href;
               return (
@@ -308,7 +308,7 @@ export default function Layout({
                   className={ledgerLink(active)}
                 >
                   <Icon
-                    size={15}
+                    size={17}
                     strokeWidth={active ? 2 : 1.75}
                     className={ledgerIcon(active)}
                   />
@@ -321,28 +321,28 @@ export default function Layout({
 
         {/* system group */}
         <div className="pt-4 mt-4 border-t border-line">
-          <p className="micro px-3 mb-2">{t("nav.system") || "System"}</p>
+          <p className="px-3 mb-2 font-mono text-[11.5px] font-medium uppercase tracking-[0.14em] text-ink-2 antialiased">{t("nav.system") || "System"}</p>
           <Link
             href="/docs"
             onClick={() => mobile && setSidebarOpen(false)}
-            className="flex items-center gap-3 px-3 py-2 rounded-xs text-[13.5px] text-ink-3 hover:text-ink hover:bg-surface transition-colors duration-200"
+            className="flex items-center gap-3 px-3 py-2 rounded-xs text-[15px] font-medium antialiased tracking-[0.01em] text-ink-2 hover:text-ink hover:bg-surface transition-colors duration-200"
           >
             <FileText
-              size={15}
+              size={16}
               strokeWidth={1.75}
-              className="flex-shrink-0 text-ink-3"
+              className="flex-shrink-0 text-ink-2"
             />
             <span className="truncate">{t("nav.docs")}</span>
           </Link>
           <Link
             href="/contact"
             onClick={() => mobile && setSidebarOpen(false)}
-            className="flex items-center gap-3 px-3 py-2 rounded-xs text-[13.5px] text-ink-3 hover:text-ink hover:bg-surface transition-colors duration-200"
+            className="flex items-center gap-3 px-3 py-2 rounded-xs text-[15px] font-medium antialiased tracking-[0.01em] text-ink-2 hover:text-ink hover:bg-surface transition-colors duration-200"
           >
             <MessageSquare
-              size={15}
+              size={16}
               strokeWidth={1.75}
-              className="flex-shrink-0 text-ink-3"
+              className="flex-shrink-0 text-ink-2"
             />
             <span className="truncate">{t("nav.contact")}</span>
           </Link>
@@ -353,9 +353,9 @@ export default function Layout({
       <div className="px-3 py-3 border-t border-line">
         <button
           onClick={handleLogout}
-          className="w-full flex items-center gap-3 px-3 py-2 rounded-xs text-[13.5px] text-ink-3 hover:text-clay hover:bg-surface transition-colors duration-200"
+          className="w-full flex items-center gap-3 px-3 py-2 rounded-xs text-[15px] font-medium antialiased tracking-[0.01em] text-ink-2 hover:text-clay hover:bg-surface transition-colors duration-200"
         >
-          <LogOut size={15} strokeWidth={1.75} />
+          <LogOut size={17} strokeWidth={1.75} />
           <span className="truncate">{t("nav.logout")}</span>
         </button>
       </div>
@@ -413,10 +413,10 @@ export default function Layout({
                   aria-hidden="true"
                   className="h-px w-6 bg-line shrink-0"
                 />
-                <span className="micro truncate">{pageLabel}</span>
+                <span className="font-mono text-[12px] font-medium uppercase tracking-[0.14em] text-ink-2 truncate antialiased">{pageLabel}</span>
               </div>
               <div className="sm:hidden min-w-0">
-                <p className="text-[13px] font-medium text-ink truncate leading-tight">
+                <p className="text-[15px] font-semibold text-ink truncate leading-tight antialiased">
                   {pageLabel}
                 </p>
               </div>
@@ -446,7 +446,7 @@ export default function Layout({
                     onChange={(e) => setSearchQuery(e.target.value)}
                     placeholder={`${t("common.search") || "Search"}…`}
                     aria-label={t("common.search") || "Search"}
-                    className="w-40 focus:w-60 bg-transparent border border-transparent hover:border-line focus:border-ember-500/70 rounded-xs ps-8 pe-3 py-1.5 text-[13px] text-ink placeholder:text-ink-3 focus:outline-none transition-[width,border-color] duration-200"
+                    className="w-40 focus:w-60 bg-transparent border border-transparent hover:border-line focus:border-ember-500/70 rounded-xs ps-8 pe-3 py-1.5 text-[14.5px] text-ink placeholder:text-ink-2 focus:outline-none transition-[width,border-color] duration-200 antialiased"
                   />
                 </div>
               </form>
@@ -459,8 +459,8 @@ export default function Layout({
                   aria-expanded={showLanguageMenu}
                   className="h-8 px-2 rounded-xs flex items-center gap-1.5 text-ink-3 hover:text-ink hover:bg-surface transition-colors"
                 >
-                  <Globe size={15} strokeWidth={1.75} />
-                  <span className="font-mono text-[10px] uppercase tracking-micro hidden sm:block">
+                  <Globe size={17} strokeWidth={1.75} />
+                  <span className="font-mono text-[12px] font-medium uppercase tracking-micro hidden sm:block antialiased">
                     {language}
                   </span>
                 </button>
@@ -484,7 +484,7 @@ export default function Layout({
                             : "text-ink-3 hover:text-ink hover:bg-canvas"
                         }`}
                       >
-                        <span className="font-mono text-[11px] tracking-label">
+                        <span className="font-mono text-[12.5px] font-medium tracking-label antialiased">
                           {lang.label}
                         </span>
                         {language === lang.code && (
@@ -591,7 +591,7 @@ export default function Layout({
                       }}
                     />
                   ) : (
-                    <span className="font-mono text-[11px] text-ink-2">
+                    <span className="font-mono text-[12.5px] font-semibold text-ink antialiased">
                       {user.name?.[0]?.toUpperCase() || "—"}
                     </span>
                   )}
@@ -612,14 +612,14 @@ export default function Layout({
                       onClick={() => setShowProfileMenu(false)}
                       className="flex items-center gap-3 px-4 py-2.5 text-[13px] text-ink-2 hover:text-ink hover:bg-canvas transition-colors"
                     >
-                      <User size={15} strokeWidth={1.75} />
+                      <User size={17} strokeWidth={1.75} />
                       <span>{t("nav.profile")}</span>
                     </Link>
                     <button
                       onClick={handleLogout}
                       className="w-full flex items-center gap-3 px-4 py-2.5 text-[13px] text-ink-3 hover:text-clay hover:bg-canvas transition-colors"
                     >
-                      <LogOut size={15} strokeWidth={1.75} />
+                      <LogOut size={17} strokeWidth={1.75} />
                       <span>{t("nav.logout")}</span>
                     </button>
                   </div>

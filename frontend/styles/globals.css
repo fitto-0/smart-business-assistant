@@ -49,7 +49,12 @@
   }
 
   .portal-nav-link {
-  @apply font-mono text-micro uppercase text-ink-3 hover:text-ink transition-colors;
+  @apply font-mono uppercase text-ink-2 hover:text-ink transition-colors;
+  font-size: 12.5px;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
   .portal-pill-btn {
@@ -176,12 +181,12 @@ html {
    EMBER NOIR — component layer (use these in new/refactored markup)
    ================================================================ */
 @layer components {
-  /* ---- micro typography: mono, 10px, wide tracking, dimmed ---- */
+  /* ---- micro typography: mono labels, slightly bigger + clearer ---- */
   .micro {
-    @apply font-mono text-micro uppercase text-ink-3;
+    @apply font-mono text-micro uppercase text-ink-2 font-medium antialiased;
   }
   .micro-2 {
-    @apply font-mono text-micro uppercase text-ink-2;
+    @apply font-mono text-micro uppercase text-ink font-medium antialiased;
   }
   .mono-num {
     @apply font-mono tabular-nums;
@@ -224,12 +229,12 @@ html {
     @apply font-display text-[2.5rem] leading-none tracking-[-0.02em] tabular-nums;
   }
   .stat-delta {
-    @apply font-mono text-micro tabular-nums;
+    @apply font-mono text-micro tabular-nums font-medium;
   }
 
   /* ---- status: a 5px LED + mono label, never a pastel pill ---- */
   .status {
-    @apply font-mono text-micro uppercase inline-flex items-center gap-2;
+    @apply font-mono text-micro uppercase inline-flex items-center gap-2 font-medium antialiased text-ink-2;
   }
   .status::before {
     content: "";
@@ -263,13 +268,13 @@ html {
 
   /* ---- editorial page furniture ---- */
   .kicker {
-    @apply font-mono text-micro uppercase text-ember-500;
+    @apply font-mono text-micro uppercase text-ember-500 font-medium antialiased;
   }
   .page-title {
-    @apply font-display text-section font-medium text-ink;
+    @apply font-display text-section font-medium text-ink antialiased;
   }
   .breadcrumb {
-    @apply font-mono text-micro uppercase text-ink-3;
+    @apply font-mono text-micro uppercase text-ink-2 font-medium antialiased;
   }
 }
 

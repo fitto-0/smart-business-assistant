@@ -25,9 +25,10 @@ export const axisProps = {
   axisLine: false,
   tickMargin: 12,
   tick: {
-    fontSize: 10,
+    fontSize: 12,
+    fontWeight: 500,
     fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-    fill: CHART.tick,
+    fill: "#A79F95",
   },
 };
 
@@ -36,17 +37,19 @@ export const tooltipStyle = {
   border: "1px solid rgb(242 236 228 / 0.10)",
   borderRadius: "2px",
   fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-  fontSize: 11,
+  fontSize: 12.5,
+  fontWeight: 500,
   color: "#EDE7DC",
   padding: "8px 12px",
 };
 
 export const tooltipLabelStyle = {
   fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-  fontSize: 10,
+  fontSize: 12,
+  fontWeight: 500,
   textTransform: "uppercase",
   letterSpacing: "0.12em",
-  color: "#847B74",
+  color: "#A79F95",
   marginBottom: 4,
 };
 
