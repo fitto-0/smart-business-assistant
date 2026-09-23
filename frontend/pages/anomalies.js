@@ -124,9 +124,9 @@ export default function AnomaliesPage() {
             <h3 className="portal-heading text-base mb-1">What we&apos;re watching for</h3>
             <p className="portal-text leading-relaxed">
               We keep an eye on your sales, stock, and reviews. When something
-              looks unusual — revenue suddenly dropping, a product about to run
-              out, a wave of bad reviews — it shows up here with a suggested
-              fix.
+              looks unusual, like revenue suddenly dropping, a product about
+              to run out, or a wave of bad reviews, it shows up here with a
+              suggested fix.
             </p>
           </div>
         </div>
@@ -263,7 +263,7 @@ export default function AnomaliesPage() {
                     {a.description}
                   </p>
                   <p className="micro">
-                    Detected — {formatDetectedDate(a.detected_at || a.detected)}
+                    Detected · {formatDetectedDate(a.detected_at || a.detected)}
                   </p>
                 </div>
                 <div className="flex sm:flex-col gap-2 flex-shrink-0">

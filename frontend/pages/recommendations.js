@@ -128,8 +128,8 @@ export default function RecommendationsPage() {
  value: recs.length - done,
  color: "text-ink",
  },
- { label: "Critical — open", value: critiques, color: "text-clay" },
- { label: "High — open", value: hautes, color: "text-ember-500" },
+  { label: "Critical · open", value: critiques, color: "text-clay" },
+  { label: "High · open", value: hautes, color: "text-ember-500" },
  { label: "Completed", value: done, color: "text-olive" },
  ].map((s, i) => (
  <div

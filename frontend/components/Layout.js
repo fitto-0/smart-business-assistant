@@ -468,9 +468,9 @@ export default function Layout({
                 {showLanguageMenu && (
                   <div className="absolute end-0 top-full mt-2 bg-surface border border-line rounded-xs py-1 min-w-[148px] z-50">
                     {[
-                      { code: "en", label: "EN — English" },
-                      { code: "fr", label: "FR — Français" },
-                      { code: "ar", label: "AR — العربية" },
+                      { code: "en", label: "EN · English" },
+                      { code: "fr", label: "FR · Français" },
+                      { code: "ar", label: "AR · العربية" },
                     ].map((lang) => (
                       <button
                         key={lang.code}
@@ -523,7 +523,7 @@ export default function Layout({
                       <h3 className="micro-2">
                         Notifications
                         {unreadCount > 0 && (
-                          <span className="text-clay"> — {unreadCount}</span>
+                          <span className="text-clay"> · {unreadCount}</span>
                         )}
                       </h3>
                       {unreadCount > 0 && (
@@ -638,7 +638,7 @@ export default function Layout({
         <footer className="px-4 sm:px-8 pb-6">
           <div aria-hidden="true" className="rule mb-4" />
           <div className="max-w-[1440px] mx-auto flex flex-wrap items-center justify-between gap-2">
-            <p className="micro">Smart Business Assistant — © 2026</p>
+            <p className="micro">Smart Business Assistant · © 2026</p>
           </div>
         </footer>
       </div>

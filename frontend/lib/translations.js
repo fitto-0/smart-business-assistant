@@ -159,7 +159,7 @@ const translations = {
         title: "We plant flags for brands",
         highlight: "that last",
         tagline:
-          "Smart Business Assistant turns sales, inventory and customer data into decisions you can act on — in real time, with AI that explains itself.",
+          "Smart Business Assistant turns sales, inventory and customer data into decisions you can act on, in real time, with AI that explains itself.",
         cta: "Start free",
         demo: "See how it works",
         scroll: "Scroll",
@@ -212,7 +212,7 @@ const translations = {
       statement: {
         heading: "Built for teams that read their numbers.",
         intro:
-          "Most tools drown you in charts. This one reads the room — your revenue, your stock, your customers — and tells you what deserves attention next.",
+          "Most tools drown you in charts. This one reads the room: your revenue, your stock, your customers. Then it tells you what deserves attention next.",
       },
       testimonial: {
         quote:
@@ -524,7 +524,7 @@ const translations = {
       totalOrders: "Total Orders",
       monthlyAverage: "Monthly Average",
       bestMonth: "Best Month",
-      salesVsTargets: "Sales vs Targets — 2026",
+      salesVsTargets: "Sales vs Targets · 2026",
       monthlyComparison: "Monthly comparison of actual sales against targets",
       sales: "Sales (DA)",
       target: "Target (DA)",
@@ -633,7 +633,7 @@ const translations = {
       anomalyDetection: "Automatic anomaly detection",
       intelligentDashboard: "Welcome back to your intelligent dashboard",
       salesDescription:
-        "Sales analytics, AI predictions and anomaly detection — all in one secure place.",
+        "Sales analytics, AI predictions and anomaly detection, all in one secure place.",
     },
     // Register
     register: {
@@ -655,7 +655,7 @@ const translations = {
       accountCreateError: "Error creating account",
       startGrowing: "Start growing with AI-powered insights",
       dataPrivate:
-        "Create your free account. Your data stays private and isolated — only you can see it.",
+        "Create your free account. Your data stays private and isolated. Only you can see it.",
     },
     // Contact
     contact: {
@@ -1036,7 +1036,7 @@ const translations = {
         title: "Nous plantons des repères pour les marques",
         highlight: "qui durent",
         tagline:
-          "Smart Business Assistant transforme vos ventes, votre stock et vos clients en décisions actionnables — en temps réel, avec une IA qui explique son raisonnement.",
+          "Smart Business Assistant transforme vos ventes, votre stock et vos clients en décisions actionnables, en temps réel, avec une IA qui explique son raisonnement.",
         cta: "Essayer gratuitement",
         demo: "Voir comment ça marche",
         scroll: "Défiler",
@@ -1089,7 +1089,7 @@ const translations = {
       statement: {
         heading: "Conçu pour les équipes qui lisent leurs chiffres.",
         intro:
-          "La plupart des outils vous noient dans des graphiques. Celui-ci lit la situation — vos revenus, votre stock, vos clients — et vous dit ce qui mérite votre attention.",
+          "La plupart des outils vous noient dans des graphiques. Celui-ci lit la situation : vos revenus, votre stock, vos clients. Puis il vous dit ce qui mérite votre attention.",
       },
       testimonial: {
         quote:
@@ -1403,7 +1403,7 @@ const translations = {
       totalOrders: "Total des commandes",
       monthlyAverage: "Moyenne mensuelle",
       bestMonth: "Meilleur mois",
-      salesVsTargets: "Ventes vs Objectifs — 2026",
+      salesVsTargets: "Ventes vs Objectifs · 2026",
       monthlyComparison:
         "Comparaison mensuelle des ventes réelles par rapport aux objectifs",
       sales: "Ventes (DA)",
@@ -1513,7 +1513,7 @@ const translations = {
       anomalyDetection: "Détection automatique d'anomalies",
       intelligentDashboard: "Bon retour sur votre tableau de bord intelligent",
       salesDescription:
-        "Analyse des ventes, prédictions IA et détection d'anomalies — tout en un seul endroit sécurisé.",
+        "Analyse des ventes, prédictions IA et détection d'anomalies, tout en un seul endroit sécurisé.",
     },
     // Register
     register: {
@@ -1536,7 +1536,7 @@ const translations = {
       accountCreateError: "Erreur lors de la création du compte",
       startGrowing: "Commencez à grandir avec des insights alimentés par l'IA",
       dataPrivate:
-        "Créez votre compte gratuit. Vos données restent privées et isolées — seul vous pouvez les voir.",
+        "Créez votre compte gratuit. Vos données restent privées et isolées. Seul vous pouvez les voir.",
     },
     // Contact
     contact: {
@@ -1924,7 +1924,7 @@ const translations = {
         title: "نزرع معالم لعلامات تجارية",
         highlight: "تبقى",
         tagline:
-          "يحوّل Smart Business Assistant بيانات المبيعات والمخزون والعملاء إلى قرارات قابلة للتنفيذ — في الوقت الفعلي، مع ذكاء اصطناعي يشرح منطقه.",
+          "يحوّل Smart Business Assistant بيانات المبيعات والمخزون والعملاء إلى قرارات قابلة للتنفيذ، في الوقت الفعلي، مع ذكاء اصطناعي يشرح منطقه.",
         cta: "ابدأ مجاناً",
         demo: "شاهد كيف يعمل",
         scroll: "مرّر",
@@ -1977,7 +1977,7 @@ const translations = {
       statement: {
         heading: "مصمّم للفرق التي تقرأ أرقامها.",
         intro:
-          "معظم الأدوات تُغرقك في الرسوم البيانية. هذه تقرأ الوضع — إيراداتك، مخزونك، عملاؤك — وتخبرك بما يستحق انتباهك.",
+          "معظم الأدوات تُغرقك في الرسوم البيانية. هذه تقرأ الوضع: إيراداتك، مخزونك، عملاؤك. وتخبرك بما يستحق انتباهك.",
       },
       testimonial: {
         quote:
@@ -2179,7 +2179,7 @@ const translations = {
       totalOrders: "إجمالي الطلبات",
       monthlyAverage: "المتوسط الشهري",
       bestMonth: "أفضل شهر",
-      salesVsTargets: "المبيعات مقابل الأهداف — 2026",
+      salesVsTargets: "المبيعات مقابل الأهداف · 2026",
       monthlyComparison: "مقارنة شهرية للمبيعات الفعلية مقابل الأهداف",
       sales: "المبيعات (DA)",
       target: "الهدف (DA)",
@@ -2288,7 +2288,7 @@ const translations = {
       anomalyDetection: "الكشف التلقائي عن الشذوذ",
       intelligentDashboard: "أهلاً بك مجدداً في لوحة التحكم الذكية",
       salesDescription:
-        "تحليلات المبيعات، التنبؤات بالذكاء الاصطناعي والكشف عن الشذوذ — كل ذلك في مكان آمن واحد.",
+        "تحليلات المبيعات، التنبؤات بالذكاء الاصطناعي والكشف عن الشذوذ، كل ذلك في مكان آمن واحد.",
     },
     // Register
     register: {
@@ -2310,7 +2310,7 @@ const translations = {
       accountCreateError: "خطأ في إنشاء الحساب",
       startGrowing: "ابدأ النمو مع رؤى مدعومة بالذكاء الاصطناعي",
       dataPrivate:
-        "أنشئ حسابك المجاني. بياناتك تبقى خاصة ومعزولة — أنت فقط يمكنه رؤيتها.",
+        "أنشئ حسابك المجاني. بياناتك تبقى خاصة ومعزولة. أنت فقط يمكنه رؤيتها.",
     },
     // Contact
     contact: {

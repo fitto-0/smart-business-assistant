@@ -537,13 +537,13 @@ export default function LandingPage() {
             </div>
 
             <Stagger
-              className="flex flex-wrap gap-x-16 gap-y-10 pt-12 pb-8 border-t border-line"
+              className="grid grid-cols-3 gap-x-6 sm:gap-x-10 lg:gap-x-16 pt-12 pb-8 border-t border-line"
               stagger={120}
             >
-              <div className="flex flex-col">
+              <div className="flex flex-col min-w-0">
                 <p
                   ref={teams.ref}
-                  className="font-display text-6xl text-ember-500 tabular-nums leading-tight tracking-tight"
+                  className="font-display text-4xl sm:text-5xl lg:text-6xl text-ember-500 tabular-nums leading-tight tracking-tight whitespace-nowrap"
                 >
                   {teams.value.toLocaleString()}
                 </p>
@@ -552,10 +552,10 @@ export default function LandingPage() {
                 </p>
               </div>
 
-              <div className="flex flex-col">
+              <div className="flex flex-col min-w-0">
                 <p
                   ref={satisfaction.ref}
-                  className="font-display text-6xl text-ink tabular-nums leading-tight tracking-tight"
+                  className="font-display text-4xl sm:text-5xl lg:text-6xl text-ink tabular-nums leading-tight tracking-tight whitespace-nowrap"
                 >
                   {satisfaction.value}%
                 </p>
@@ -564,10 +564,10 @@ export default function LandingPage() {
                 </p>
               </div>
 
-              <div className="flex flex-col">
+              <div className="flex flex-col min-w-0">
                 <p
                   ref={uptime.ref}
-                  className="font-display text-6xl text-ink tabular-nums leading-tight tracking-tight"
+                  className="font-display text-4xl sm:text-5xl lg:text-6xl text-ink tabular-nums leading-tight tracking-tight whitespace-nowrap"
                 >
                   {(uptime.value / 10).toFixed(1)}h
                 </p>
@@ -589,45 +589,47 @@ export default function LandingPage() {
         id="statement"
         className="relative py-32 px-5 border-t border-line"
       >
-        <div className="max-w-[1100px] mx-auto">
-          <Stagger className="max-w-[800px]">
-            <p className="font-mono text-micro uppercase text-ember-500 mb-8 pt-4">
-              {t("landing.features.intro") || "What we built"}
-            </p>
-            <h2
-              className="font-display font-medium text-section text-ink leading-[0.95] tracking-[-0.03em] mb-10"
-              style={{ letterSpacing: "-0.03em" }}
-            >
-              {t("landing.statement.heading") ||
-                "Built for teams that read their numbers."}
-            </h2>
-            <p className="text-xl text-ink-2 leading-[1.7] mb-12 max-w-[620px]">
-              {t("landing.statement.intro") ||
-                "Smart Business Assistant transforms sales, inventory and customer data into decisions you can act on."}
-            </p>
+        <div className="max-w-[1200px] mx-auto">
+          <Stagger>
+            <div className="max-w-[800px]">
+              <p className="font-mono text-micro uppercase text-ember-500 mb-8 pt-4">
+                {t("landing.features.intro") || "What we built"}
+              </p>
+              <h2
+                className="font-display font-medium text-section text-ink leading-[0.95] tracking-[-0.03em] mb-10"
+                style={{ letterSpacing: "-0.03em" }}
+              >
+                {t("landing.statement.heading") ||
+                  "Built for teams that read their numbers."}
+              </h2>
+              <p className="text-xl text-ink-2 leading-[1.7] mb-12 max-w-[620px]">
+                {t("landing.statement.intro") ||
+                  "Smart Business Assistant transforms sales, inventory and customer data into decisions you can act on."}
+              </p>
+            </div>
 
-            {/* Feature ledger — hairline rows, no cards */}
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-0">
+            {/* Feature grid — hairline cells, even rows, no cards */}
+            <div className="grid sm:grid-cols-2 lg:grid-cols-3 border-t border-s border-line">
               {FEATURES.map((f, i) => (
                 <div
                   key={f.titleKey}
-                  className="py-8 border-t border-line first:pt-0 last:pb-0 group hover:bg-surface-2 transition-colors duration-300"
+                  className="border-b border-e border-line p-7 sm:p-8 group hover:bg-surface transition-colors duration-300"
                 >
-                  <div className="flex items-start gap-3">
-                    <div className="shrink-0 w-7 h-7 rounded-xs bg-surface border border-line flex items-center justify-center mt-0.5 group-hover:border-ember-500/50 transition-colors">
-                      <f.icon size={13} className="text-ember-500" />
+                  <div className="flex items-start gap-4">
+                    <div className="shrink-0 w-9 h-9 rounded-xs bg-surface-2 border border-line flex items-center justify-center mt-0.5 group-hover:border-ember-500/60 transition-colors">
+                      <f.icon size={16} className="text-ember-500" />
                     </div>
                     <div className="min-w-0">
-                      <p className="font-mono text-micro uppercase text-ember-500/80 mb-2 mt-1">
+                      <p className="font-mono text-[12px] font-medium uppercase tracking-[0.14em] text-ember-500 antialiased mb-2">
                         {String(i + 1).padStart(2, "0")}
                       </p>
-                      <h3 className="font-display font-medium text-[14px] text-ink mb-2 group-hover:text-ember-500 transition-colors">
+                      <h3 className="font-display font-semibold text-[17px] tracking-[-0.01em] text-ink mb-1.5 group-hover:text-ember-500 transition-colors antialiased">
                         {t(f.titleKey)}
                       </h3>
-                      <p className="font-mono text-micro uppercase text-ink-3 mb-1">
+                      <p className="font-mono text-[12px] font-medium uppercase tracking-[0.12em] text-ink-2 antialiased mb-2">
                         {t(f.subtitleKey)}
                       </p>
-                      <p className="text-[12.5px] text-ink-2 leading-[1.65]">
+                      <p className="text-[14px] font-medium text-ink-2 leading-[1.65] antialiased">
                         {t(f.descKey)}
                       </p>
                     </div>
@@ -650,7 +652,7 @@ export default function LandingPage() {
               {/* Left — editorial statement */}
               <div>
                 <p className="font-mono text-micro uppercase text-ember-500 mb-6">
-                  02 — About
+                  02 · About
                 </p>
                 <h2
                   className="font-display font-medium text-section text-ink leading-[0.95] tracking-[-0.03em] mb-6"
@@ -698,42 +700,50 @@ export default function LandingPage() {
                 </ul>
               </div>
 
-              {/* Right — quiet numeric composition */}
-              <div className="hidden md:flex items-center justify-center">
-                <div className="relative w-56 h-56 border border-line">
+              {/* Right — pipeline composition (screenshot-ready frame) */}
+              <div className="hidden md:flex flex-col items-center justify-center gap-4">
+                <div className="relative w-full max-w-[340px] aspect-square border border-line bg-canvas">
                   <span
                     aria-hidden="true"
-                    className="absolute -top-px -start-px w-2 h-2 border-t border-s-2 border-ember-500/60"
+                    className="absolute -top-px -start-px w-2 h-2 border-t border-s-2 border-ember-500/60 z-10"
                   />
                   <span
                     aria-hidden="true"
-                    className="absolute -bottom-px -end-px w-2 h-2 border-b border-e-2 border-ember-500/60"
+                    className="absolute -bottom-px -end-px w-2 h-2 border-b border-e-2 border-ember-500/60 z-10"
                   />
                   <div className="absolute inset-0 grid grid-cols-2 grid-rows-2">
                     {[
-                      { v: "01", l: "ingest" },
-                      { v: "02", l: "model" },
-                      { v: "03", l: "detect" },
-                      { v: "04", l: "act" },
+                      { v: "01", l: "ingest", d: "Connect sales, stock & reviews" },
+                      { v: "02", l: "model", d: "Learn from your history" },
+                      { v: "03", l: "detect", d: "Flag outliers early" },
+                      { v: "04", l: "act", d: "Recommend the next move" },
                     ].map((cell, i) => (
                       <div
                         key={cell.v}
                         className={
-                          "flex flex-col justify-between p-5 " +
+                          "group flex flex-col justify-between p-6 transition-colors duration-300 hover:bg-surface-2 " +
                           (i < 2 ? "border-b border-line " : "") +
                           (i % 2 === 0 ? "border-e border-line" : "")
                         }
                       >
-                        <span className="font-mono text-micro text-ink-3">
+                        <span className="font-mono text-[12px] font-medium tracking-[0.14em] text-ember-500 antialiased">
                           {cell.v}
                         </span>
-                        <span className="font-display font-medium text-[15px] text-ink">
-                          {cell.l}
+                        <span>
+                          <span className="block font-display font-semibold text-[19px] tracking-[-0.01em] text-ink antialiased group-hover:text-ember-500 transition-colors">
+                            {cell.l}
+                          </span>
+                          <span className="block mt-1.5 text-[13px] font-medium text-ink-2 leading-snug antialiased">
+                            {cell.d}
+                          </span>
                         </span>
                       </div>
                     ))}
                   </div>
                 </div>
+                <p className="font-mono text-[12px] uppercase tracking-[0.14em] text-ink-3 antialiased">
+                  From raw data to decision, in four steps
+                </p>
               </div>
             </div>
           </Stagger>
@@ -751,7 +761,7 @@ export default function LandingPage() {
               {/* Left — prose + stat tiles */}
               <div>
                 <p className="font-mono text-micro uppercase text-ember-500 mb-6">
-                  03 — Intelligence
+                  03 · Intelligence
                 </p>
                 <h2
                   className="font-display font-medium text-section text-ink leading-[0.95] tracking-[-0.03em] mb-6"
@@ -786,18 +796,19 @@ export default function LandingPage() {
                     <div
                       key={tile.l}
                       className={
-                        "px-5 py-6 " + (i < 2 ? "border-e border-line" : "")
+                        "px-5 py-6 transition-colors duration-300 hover:bg-surface " +
+                        (i < 2 ? "border-e border-line" : "")
                       }
                     >
                       <p
                         className={
-                          "font-display text-[1.75rem] leading-none tabular-nums " +
+                          "font-display font-medium text-[2rem] leading-none tabular-nums antialiased " +
                           tile.tone
                         }
                       >
                         {tile.v}
                       </p>
-                      <p className="font-mono text-micro uppercase text-ink-3 mt-3">
+                      <p className="font-mono text-[12px] font-medium uppercase tracking-[0.12em] text-ink-2 antialiased mt-3">
                         {tile.l}
                       </p>
                     </div>
@@ -805,44 +816,57 @@ export default function LandingPage() {
                 </div>
               </div>
 
-              {/* Right — sparkline (deterministic, no Math.random: SSR-safe) */}
-              <div className="border border-line p-5">
-                <div className="flex items-center justify-between mb-5">
-                  <p className="font-mono text-micro uppercase text-ink-3">
-                    Live activity · 24h
+              {/* Right — activity panel (deterministic, no Math.random: SSR-safe) */}
+              <div className="flex flex-col gap-4">
+                <div className="border border-line bg-surface p-5 sm:p-6">
+                  <div className="flex items-center justify-between mb-2">
+                    <p className="font-mono text-[12px] font-medium uppercase tracking-[0.14em] text-ink-2 antialiased">
+                      Sales activity · 24h
+                    </p>
+                    <span className="inline-flex items-center gap-2">
+                      <span
+                        aria-hidden="true"
+                        className="w-[5px] h-[5px] bg-ember-500 animate-pulse"
+                      />
+                      <span className="font-mono text-[12px] font-medium uppercase tracking-[0.14em] text-ember-500 antialiased">
+                        live
+                      </span>
+                    </span>
+                  </div>
+                  <p className="font-display font-medium text-[2rem] leading-none tabular-nums text-ink antialiased mb-5">
+                    2,847 <span className="text-[1rem] text-ink-3">orders</span>
                   </p>
-                  <span className="inline-flex items-center gap-2">
-                    <span
-                      aria-hidden="true"
-                      className="w-[5px] h-[5px] bg-ember-500 animate-pulse"
-                    />
-                    <span className="font-mono text-micro uppercase text-ember-500">
-                      live
-                    </span>
-                  </span>
-                </div>
 
-                <div className="h-32 flex items-end gap-[2px]">
-                  {SPARK.map((h, i) => (
-                    <div
-                      key={i}
-                      className={
-                        "flex-1 " +
-                        (h > 0.82 ? "bg-ember-500" : "bg-ember-500/35")
-                      }
-                      style={{ height: Math.round(h * 100) + "%" }}
-                      aria-hidden="true"
-                    />
-                  ))}
-                </div>
+                  <div className="h-40 flex items-end gap-[3px]">
+                    {SPARK.map((h, i) => (
+                      <div
+                        key={i}
+                        className={
+                          "flex-1 transition-colors " +
+                          (h > 0.82
+                            ? "bg-ember-500"
+                            : "bg-ember-500/30 hover:bg-ember-500/60")
+                        }
+                        style={{ height: Math.round(h * 100) + "%" }}
+                        aria-hidden="true"
+                      />
+                    ))}
+                  </div>
 
-                <div className="flex justify-between mt-3">
-                  {["00:00", "06:00", "12:00", "18:00", "24:00"].map((l) => (
-                    <span key={l} className="font-mono text-micro text-ink-3">
-                      {l}
-                    </span>
-                  ))}
+                  <div className="flex justify-between mt-3">
+                    {["00:00", "06:00", "12:00", "18:00", "24:00"].map((l) => (
+                      <span
+                        key={l}
+                        className="font-mono text-[12px] text-ink-2 antialiased"
+                      >
+                        {l}
+                      </span>
+                    ))}
+                  </div>
                 </div>
+                <p className="font-mono text-[12px] uppercase tracking-[0.14em] text-ink-3 antialiased">
+                  Illustrative preview. Live figures once you connect your data.
+                </p>
               </div>
             </div>
           </Stagger>
@@ -857,7 +881,7 @@ export default function LandingPage() {
         <div className="max-w-[960px] mx-auto">
           <Stagger>
             <p className="font-mono text-micro uppercase text-ember-500 mb-10 pt-4">
-              04 — Process
+              04 · Process
             </p>
 
             <div className="flex flex-col">
@@ -997,7 +1021,7 @@ export default function LandingPage() {
         <div className="max-w-[640px] mx-auto">
           <Stagger className="text-center">
             <p className="font-mono text-micro uppercase text-ember-500 mb-6 pt-4">
-              05 — Get started
+              05 · Get started
             </p>
             <h2
               className="font-display font-medium text-section text-ink leading-[0.95] tracking-[-0.03em] mb-6"

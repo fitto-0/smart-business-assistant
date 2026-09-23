@@ -94,7 +94,7 @@ export default function PredictionsPage() {
  {/* KPIs */}
  <div className="grid grid-cols-2 xl:grid-cols-4 gap-px bg-line border border-line mb-6">
  <div className="bg-surface p-4">
- <p className="micro">Predicted revenue — {horizon} months</p>
+  <p className="micro">Predicted revenue ({horizon} months)</p>
  <p className="stat-value mt-1">{fmt(totalPredicted)} <span className="text-[0.5em] text-ink-3">DA</span></p>
  </div>
  <div className="bg-surface p-4">

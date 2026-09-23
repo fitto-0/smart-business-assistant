@@ -160,7 +160,7 @@ export default function SalesPage() {
  { label: t('sales.totalAnnualRevenue'), value: `${fmt(totalSales)} DA` },
  { label: t('sales.totalOrders'), value: fmt(totalOrders) },
  { label: t('sales.monthlyAverage'), value: `${fmt(avgMonthly)} DA` },
- { label: `${t('sales.bestMonth')} — ${bestMonth.month}`, value: `${fmt(bestMonthVentes)} DA` },
+  { label: `${t('sales.bestMonth')} · ${bestMonth.month}`, value: `${fmt(bestMonthVentes)} DA` },
  ]}
  />
 

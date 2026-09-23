@@ -109,7 +109,7 @@ export default function Chatbot() {
         <div className="flex items-center gap-3 min-w-0">
           <span aria-hidden="true" className="w-1.5 h-1.5 shrink-0 bg-ember-500" />
           <div className="min-w-0">
-            <p className="micro">Assist — 00</p>
+            <p className="micro">Assist · 00</p>
             <h3 className="text-[14px] font-medium text-ink leading-tight mt-0.5">Assistant</h3>
           </div>
         </div>

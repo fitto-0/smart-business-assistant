@@ -332,7 +332,7 @@ export default function ProductsPage() {
  <button
  key={c}
  onClick={() => setCatFilter(c)}
- className={`portal-label px-3 py-1.5 rounded-xs font-medium transition-colors ${catFilter === c ? "bg-ember-500 text-ground" : "bg-canvas text-ink-2 hover:bg-canvas/50"}`}
+  className={`px-3 py-1.5 rounded-xs font-mono text-[12.5px] font-semibold uppercase tracking-[0.12em] antialiased transition-colors ${catFilter === c ? "bg-ember-500 text-white" : "bg-canvas text-ink hover:bg-surface-2"}`}
  >
  {c}
  </button>
