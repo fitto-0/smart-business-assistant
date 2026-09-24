@@ -10,6 +10,7 @@ import {
  Settings,
  ChevronDown,
  Check,
+ Download,
 } from "lucide-react";
 import toast from "react-hot-toast";
 
@@ -352,18 +353,47 @@ export default function Reports() {
  {showRunModal && reportData && (
  <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
  <div className="bg-surface border hairline rounded-xs p-6 w-full max-w-4xl max-h-[90vh] overflow-y-auto">
- <div className="flex items-center justify-between mb-6">
- <div>
- <h3 className="portal-heading text-lg">{reportData.reportName}</h3>
- <p className="portal-label text-ink-3">{reportData.rowCount} rows</p>
- </div>
- <button
- onClick={() => setShowRunModal(false)}
- className="p-2 hover:bg-canvas rounded-xs"
- >
- ×
- </button>
- </div>
+  <div className="flex items-center justify-between mb-6">
+  <div>
+  <h3 className="portal-heading text-lg">{reportData.reportName}</h3>
+  <p className="portal-label text-ink-3">{reportData.rowCount} rows</p>
+  </div>
+  <div className="flex items-center gap-2">
+  <button
+  onClick={async () => {
+  try {
+  const base = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
+  const token = (await import('js-cookie')).default.get('sba_token');
+  const res = await fetch(`${base}/reports/${reportData.reportId}/export/pdf`, { headers: token ? { Authorization: `Bearer ${token}` } : {} });
+  if (!res.ok) {
+    let msg = 'Export failed';
+    try { const j = await res.json(); msg = j.detail || j.error || msg; } catch (_) {}
+    throw new Error(msg);
+  }
+  const blob = await res.blob();
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `${reportData.reportName.replace(/[^a-z0-9_-]/gi,'_')}.pdf`;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
+  toast.success('PDF downloaded');
+  } catch (e) { toast.error(e.message || 'Failed to export PDF'); }
+  }}
+  className="flex items-center gap-2 px-3 py-2 bg-ember-500 text-white rounded-xs font-mono text-[12.5px] font-bold uppercase tracking-[0.12em] antialiased hover:bg-ember-600"
+  >
+  <Download size={14} className="text-white" /> Export PDF
+  </button>
+  <button
+  onClick={() => setShowRunModal(false)}
+  className="p-2 hover:bg-canvas rounded-xs text-ink-2 hover:text-ink"
+  >
+  ×
+  </button>
+  </div>
+  </div>
 
  <div className="overflow-x-auto">
  <table className="w-full">

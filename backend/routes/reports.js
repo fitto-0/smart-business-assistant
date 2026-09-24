@@ -432,6 +432,268 @@ router.delete(
   }
 );
 
+function fixColumnName(col) {
+  if (col === 'sale_date') return 'date';
+  if (col === 'customer_email') return 'customer_name';
+  if (col === 'cost') return 'cost_price';
+  return col;
+}
+const SAFE_COL_RE = /^[a-zA-Z_][a-zA-Z0-9_]*$/;
+const isSafeCol = (c) => SAFE_COL_RE.test(c);
+const q = (id) => `"${id.replace(/"/g, '""')}"`;
+
+/**
+ * Helper — build the report SQL + params from a stored config.
+ * Shared by run and export so both always reflect real DB data.
+ */
+async function buildReportQuery(organizationId, config) {
+  const fixedColumns = (config.columns || []).map(fixColumnName);
+  const fixedGroupBy = config.group_by ? fixColumnName(config.group_by) : null;
+  const fixedSortBy = config.sort_by ? fixColumnName(config.sort_by) : null;
+
+  const validFixedColumns = fixedColumns.filter(isSafeCol);
+  const validGroupBy = fixedGroupBy && isSafeCol(fixedGroupBy) ? fixedGroupBy : null;
+  if (validFixedColumns.length === 0) throw Object.assign(new Error('No valid columns selected.'), { statusCode: 400 });
+
+  const buildGrouped = (table, cols, groupBy) => {
+    const aggs = cols.filter((c) => c !== groupBy);
+    const selectCols = [q(groupBy), ...aggs.map((c) => `MAX(${q(c)}) AS ${q(c)}`)];
+    return `SELECT ${selectCols.join(', ')} FROM ${table} WHERE organization_id = $1 GROUP BY ${q(groupBy)}`;
+  };
+
+  let sql = '';
+  let params = [organizationId];
+  let paramIndex = 2;
+
+  switch (config.type) {
+    case 'sales':
+      sql = validGroupBy ? buildGrouped('sales', validFixedColumns, validGroupBy) : `SELECT ${validFixedColumns.map(q).join(', ')} FROM sales WHERE organization_id = $1`;
+      break;
+    case 'products':
+      sql = validGroupBy ? buildGrouped('products', validFixedColumns, validGroupBy) : `SELECT ${validFixedColumns.map(q).join(', ')} FROM products WHERE organization_id = $1`;
+      break;
+    case 'customers':
+      sql = `SELECT ${q('customer_name')}, COUNT(*)::int as orders, SUM(total_amount) as total_spent, AVG(total_amount) as avg_order_value FROM sales WHERE organization_id = $1 AND customer_name IS NOT NULL GROUP BY ${q('customer_name')}`;
+      break;
+    case 'inventory':
+      sql = validGroupBy ? buildGrouped('products', validFixedColumns, validGroupBy) : `SELECT ${validFixedColumns.map(q).join(', ')} FROM products WHERE organization_id = $1`;
+      break;
+    default:
+      sql = validGroupBy ? buildGrouped('sales', validFixedColumns, validGroupBy) : `SELECT ${validFixedColumns.map(q).join(', ')} FROM sales WHERE organization_id = $1`;
+  }
+
+  if (config.filters) {
+    if (config.filters.startDate) { sql += ` AND ${q('date')} >= $${paramIndex}`; params.push(config.filters.startDate); paramIndex++; }
+    if (config.filters.endDate) { sql += ` AND ${q('date')} <= $${paramIndex}`; params.push(config.filters.endDate); paramIndex++; }
+    if (config.filters.category) { sql += ` AND ${q('category')} = $${paramIndex}`; params.push(config.filters.category); paramIndex++; }
+  }
+
+  const validSortBy = fixedSortBy && isSafeCol(fixedSortBy) ? fixedSortBy : null;
+  if (validSortBy && validFixedColumns.includes(validSortBy)) {
+    sql += ` ORDER BY ${q(validSortBy)} ${config.sort_order || 'ASC'}`;
+  }
+
+  return { sql, params, columns: validFixedColumns };
+}
+
+/**
+ * GET /api/reports/:id/export/pdf
+ * Export a report as PDF (real DB data, streamed)
+ */
+router.get(
+  '/:id/export/pdf',
+  auth,
+  requirePermission('analytics', 'view'),
+  async (req, res) => {
+    try {
+      const reportId = req.params.id;
+      const organizationId = req.organizationId;
+
+      const report = await query(`SELECT * FROM custom_reports WHERE id = $1 AND organization_id = $2`, [reportId, organizationId]);
+      if (report.rowCount === 0) return res.status(404).json({ error: 'Report not found' });
+
+      const config = report.rows[0];
+      const { sql, params, columns } = await buildReportQuery(organizationId, config);
+      const data = await query(sql, params);
+
+      const PDFDocument = require('pdfkit');
+      const doc = new PDFDocument({ size: 'A4', margin: 32, layout: 'landscape' });
+
+      const filename = `${String(config.name || 'report').replace(/[^a-z0-9_-]/gi, '_')}.pdf`;
+      res.setHeader('Content-Type', 'application/pdf');
+      res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+      doc.pipe(res);
+
+      // ---- Helpers for a clean PDF ----
+      const fmtDate = (v) => {
+        if (v == null || v === '') return '-';
+        const d = new Date(v);
+        if (!isNaN(d.getTime())) return d.toISOString().slice(0, 10); // 2026-09-16
+        return String(v);
+      };
+      const fmtCell = (col, val) => {
+        if (val == null || val === '') return '-';
+        const lc = String(col).toLowerCase();
+        if (lc.includes('updated_at') || lc.includes('created_at') || lc === 'date') return fmtDate(val);
+        if (lc === 'description') {
+          const s = String(val).replace(/\s+/g, ' ').trim();
+          return s.length > 60 ? s.slice(0, 60) + '…' : s;
+        }
+        if (lc === 'cost_price' && Number(val) === 0) return '-';
+        if (typeof val === 'number') return Number.isInteger(val) ? String(val) : Number(val).toFixed(2);
+        const s = String(val);
+        return s.length > 40 ? s.slice(0, 40) + '…' : s;
+      };
+      const isNumericCol = (c) => ['id','stock','price','cost_price','quantity','total_amount','orders','total_spent','avg_order_value'].includes(c);
+      // Smart column widths: description a bit wider, Dates narrower, ID very narrow
+      const weightOf = (c) => {
+        if (c === 'id') return 0.6;
+        if (c === 'description') return 1.6;
+        if (c === 'name') return 1.2;
+        if (c === 'customer_name') return 1.1;
+        if (c === 'category') return 0.9;
+        if (['updated_at','created_at','date'].includes(c)) return 1.0;
+        return 0.85;
+      };
+      const totalWeight = columns.reduce((s,c)=> s + weightOf(c), 0);
+
+      // ---- Header ----
+      doc.font('Helvetica-Bold').fontSize(15).fillColor('#0A0807').text(config.name || 'Report', { align: 'left' });
+      doc.moveDown(0.25);
+      doc.font('Helvetica').fontSize(7.5).fillColor('#847B74').text(
+        `${(config.type || '').toUpperCase()}  ·  ${(config.description || 'No description').slice(0,120)}  ·  ${data.rowCount} rows  ·  ${new Date().toLocaleDateString('en-CA')} ${new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})}`,
+        { align: 'left' }
+      );
+      // Brand accent rule
+      doc.moveDown(0.5);
+      const ruleY = doc.y;
+      doc.moveTo(doc.page.margins.left, ruleY).lineTo(doc.page.width - doc.page.margins.right, ruleY).strokeColor('#E2703A').lineWidth(1.2).stroke();
+      doc.moveDown(0.6);
+
+      if (data.rows.length === 0) {
+        doc.moveDown(1).fontSize(10).fillColor('#847B74').font('Helvetica').text('No data for this report.', { align: 'center' });
+        doc.end();
+        return;
+      }
+
+      // ---- Table config ----
+      const pageWidth = doc.page.width - doc.page.margins.left - doc.page.margins.right;
+      const colWidths = columns.map(c => (weightOf(c) / totalWeight) * pageWidth);
+      const rowPadding = 4;
+      const fontSize = 7;
+      const headerH = 20;
+
+      // Precompute X positions
+      const colX = [];
+      let acc = doc.page.margins.left;
+      for (const w of colWidths) { colX.push(acc); acc += w; }
+
+      const drawHeader = (y) => {
+        doc.save();
+        doc.roundedRect(doc.page.margins.left, y, pageWidth, headerH, 2).fill('#0A0807');
+        doc.restore();
+        doc.fillColor('#EDE7DC').font('Helvetica-Bold').fontSize(6.5);
+        columns.forEach((col, i) => {
+          const align = isNumericCol(col) ? 'right' : 'left';
+          // use lineBreak:false to stop pdfkit auto-pagination
+          doc.text(col.toUpperCase(), colX[i] + rowPadding, y + 7, { width: colWidths[i] - rowPadding*2, align, ellipsis: true, lineBreak: false });
+        });
+        // keep doc.y in sync so pdfkit doesn't think we are at top
+        doc.y = y + headerH;
+        doc.x = doc.page.margins.left;
+      };
+
+      const rowHeightFor = (row) => {
+        let maxH = 16;
+        doc.font('Helvetica').fontSize(fontSize);
+        columns.forEach((col, i) => {
+          const txt = fmtCell(col, row[col]);
+          const h = doc.heightOfString(txt, { width: colWidths[i] - rowPadding*2 });
+          maxH = Math.max(maxH, h + rowPadding*2);
+        });
+        return Math.min(maxH, 28);
+      };
+
+      let y = doc.y + 6;
+      drawHeader(y);
+      y += headerH + 2;
+      doc.y = y; doc.x = doc.page.margins.left;
+
+      // Manual pagination — draw footer inside content area so it never creates a blank page
+      let pageNum = 1;
+      const drawFooter = (p, totalHint) => {
+        // inside bottom margin (563 is the content bottom), keep 12pt above edge
+        const footerY = doc.page.height - doc.page.margins.bottom + 10;
+        const savedY = doc.y; const savedX = doc.x;
+        doc.font('Helvetica').fontSize(6.5).fillColor('#847B74')
+          .text(`Smart Business Assistant  ·  ${config.name}`, doc.page.margins.left, footerY, { width: pageWidth/2, align: 'left', lineBreak: false });
+        doc.text(`Page ${p}${totalHint ? ' / ' + totalHint : ''}`, doc.page.margins.left + pageWidth/2, footerY, { width: pageWidth/2, align: 'right', lineBreak: false });
+        doc.y = savedY; doc.x = savedX;
+      };
+
+      for (let idx = 0; idx < data.rows.length; idx++) {
+        const row = data.rows[idx];
+        const rh = rowHeightFor(row);
+        if (y + rh > doc.page.height - doc.page.margins.bottom - 20) {
+          doc.addPage({ size: 'A4', layout: 'landscape', margin: 32 });
+          pageNum++;
+          y = doc.page.margins.top;
+          drawHeader(y);
+          y += headerH + 2;
+          doc.y = y; doc.x = doc.page.margins.left;
+        }
+        // zebra
+        doc.save();
+        if (idx % 2 === 1) {
+          doc.rect(doc.page.margins.left, y, pageWidth, rh).fillOpacity(0.07).fill('#E2703A').fillOpacity(1);
+        }
+        doc.restore();
+        // row rule
+        doc.save();
+        doc.moveTo(doc.page.margins.left, y).lineTo(doc.page.margins.left + pageWidth, y).strokeColor('#F2ECE4').opacity(0.35).lineWidth(0.5).stroke().opacity(1);
+        doc.restore();
+
+        doc.font('Helvetica').fontSize(fontSize);
+        columns.forEach((col, i) => {
+          const txt = fmtCell(col, row[col]);
+          const align = isNumericCol(col) ? 'right' : 'left';
+          if (isNumericCol(col)) doc.fillColor('#0A0807');
+          else doc.fillColor('#2B2B2B');
+          doc.text(txt, colX[i] + rowPadding, y + rowPadding, { width: colWidths[i] - rowPadding*2, align, lineBreak: false });
+        });
+        y += rh;
+        doc.y = y; doc.x = doc.page.margins.left;
+      }
+      // bottom rule — no footer that would spill into margin and spawn a blank page
+      doc.save();
+      doc.moveTo(doc.page.margins.left, y).lineTo(doc.page.margins.left + pageWidth, y).strokeColor('#E2703A').opacity(0.25).lineWidth(0.8).stroke().opacity(1);
+      doc.restore();
+      // single-line footer centered below table (only on last page, never creates a new page)
+      {
+        const footerY = y + 10;
+        if (footerY < doc.page.height - 16) {
+          const savedY = doc.y; const savedX = doc.x;
+          doc.font('Helvetica').fontSize(6.5).fillColor('#847B74')
+            .text(`Smart Business Assistant  ·  ${config.name}  ·  Page ${pageNum} / ${pageNum}`, doc.page.margins.left, footerY, { width: pageWidth, align: 'center', lineBreak: false });
+          doc.y = savedY; doc.x = savedX;
+        }
+      }
+
+      doc.end();
+      await query(`UPDATE custom_reports SET last_run_at = NOW() WHERE id = $1`, [reportId]);
+    } catch (err) {
+      console.error('Error exporting PDF:', err);
+      const status = err.statusCode || 500;
+      // If headers already sent (pdf stream started) we can only abort
+      if (res.headersSent) {
+        try { res.end(); } catch (_) {}
+        return;
+      }
+      return res.status(status).json({ error: err.message || 'Error exporting PDF', detail: err.detail || String(err) });
+    }
+  }
+);
+
 /**
  * GET /api/reports/columns/:type
  * Get available columns for a report type
