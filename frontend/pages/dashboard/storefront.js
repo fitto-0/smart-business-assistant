@@ -237,6 +237,19 @@ export default function StorefrontCustomize() {
     }
   };
 
+  const handleDomainRemove = async () => {
+    if (!storeSettings.custom_domain) return;
+    if (!confirm(t("storefront.domain.removeConfirm") || "Remove this custom domain? Your store will fall back to the default URL.")) return;
+    try {
+      const { apiDelete } = await import("../../lib/api");
+      await apiDelete("/store-settings/domain");
+      setStoreSettings((prev) => ({ ...prev, custom_domain: "", domain_verified: false }));
+      toast.success(t("storefront.domain.removed") || "Custom domain removed");
+    } catch (err) {
+      toast.error(err.message || "Failed to remove domain");
+    }
+  };
+
   const tabs = [
     {
       id: "branding",
@@ -905,19 +918,35 @@ export default function StorefrontCustomize() {
               </p>
             </div>
             {storeSettings.custom_domain && !storeSettings.domain_verified && (
-              <button
-                onClick={handleDomainVerify}
-                className="portal-pill-btn w-full sm:w-auto justify-center shrink-0"
-              >
-                <Shield size={16} />{" "}
-                {t("storefront.domain.verify") || "Verify Domain"}
-              </button>
+              <div className="flex gap-2 w-full sm:w-auto">
+                <button
+                  onClick={handleDomainVerify}
+                  className="portal-pill-btn flex-1 sm:flex-none justify-center shrink-0"
+                >
+                  <Shield size={16} />{" "}
+                  {t("storefront.domain.verify") || "Verify Domain"}
+                </button>
+                <button
+                  onClick={handleDomainRemove}
+                  className="px-4 py-2 rounded-xl border hairline bg-white text-ink-2 hover:text-clay hover:border-clay/30 flex items-center gap-2 font-medium"
+                >
+                  <Trash2 size={16} /> {t("storefront.domain.remove") || "Remove"}
+                </button>
+              </div>
             )}
             {storeSettings.domain_verified && (
-              <span className="flex items-center gap-2 text-teal font-medium">
-                <CheckCircle size={16} />{" "}
-                {t("storefront.domain.verifiedBadge") || "Verified"}
-              </span>
+              <div className="flex items-center gap-3">
+                <span className="flex items-center gap-2 text-teal font-medium">
+                  <CheckCircle size={16} />{" "}
+                  {t("storefront.domain.verifiedBadge") || "Verified"}
+                </span>
+                <button
+                  onClick={handleDomainRemove}
+                  className="px-4 py-2 rounded-xl border hairline bg-white text-ink-2 hover:text-clay hover:border-clay/30 flex items-center gap-2 font-medium"
+                >
+                  <Trash2 size={16} /> {t("storefront.domain.remove") || "Remove"}
+                </button>
+              </div>
             )}
           </div>
 

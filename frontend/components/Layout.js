@@ -363,7 +363,7 @@ export default function Layout({
   );
 
   return (
-    <div className="min-h-screen bg-canvas flex text-ink">
+    <div className="light min-h-screen bg-canvas flex text-ink">
       {/* Desktop Sidebar — hairline-divided ledger rail */}
       <aside className="hidden lg:flex flex-col w-60 bg-canvas border-e border-line fixed h-full z-30">
         <Sidebar />

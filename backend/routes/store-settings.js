@@ -417,4 +417,24 @@ router.put("/verify-domain", auth, async (req, res) => {
   }
 });
 
+router.delete("/domain", auth, async (req, res) => {
+  try {
+    const result = await query(
+      "UPDATE store_settings SET custom_domain = NULL, domain_verified = false, updated_at = NOW() WHERE user_id = $1 RETURNING *",
+      [req.user.id],
+    );
+    if (result.rowCount === 0) {
+      // No settings row yet — create one with null domain so subsequent GET works
+      await query(
+        "INSERT INTO store_settings (user_id, custom_domain, domain_verified) VALUES ($1, NULL, false) ON CONFLICT (user_id) DO NOTHING",
+        [req.user.id],
+      );
+    }
+    return res.json({ success: true });
+  } catch (err) {
+    console.error("Error DELETE /store-settings/domain:", err);
+    return res.status(500).json({ error: "Server error" });
+  }
+});
+
 module.exports = router;

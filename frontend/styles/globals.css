@@ -43,16 +43,17 @@
   /* Portal landing components */
   .portal-nav {
     @apply fixed top-0 left-0 right-0 h-[58px] z-50;
-    background: rgba(10, 8, 7, 0.85);
+    background: rgba(248, 247, 245, 0.85);
     backdrop-filter: blur(14px);
-    border-bottom: 1px solid rgba(237, 231, 220, 0.13);
+    border-bottom: 1px solid rgba(26, 26, 26, 0.08);
   }
 
   .portal-nav-link {
-  @apply font-mono uppercase text-ink-2 hover:text-ink transition-colors;
+  @apply font-mono uppercase hover:text-ink transition-colors;
   font-size: 12.5px;
-  font-weight: 500;
+  font-weight: 700;
   letter-spacing: 0.14em;
+  color: var(--light-ink);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
@@ -80,7 +81,7 @@
 }
 
 
-/* Scrollbar — warm, near-invisible until hover */
+/* Scrollbar — light, subtle */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
@@ -89,15 +90,16 @@
   background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background: #3a3330;
+  background: #d1c7b8;
   border-radius: 0;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #847b74;
+  background: #a79f95;
 }
 html {
   scrollbar-width: thin;
-  scrollbar-color: #3a3330 transparent;
+  scrollbar-color: #d1c7b8 transparent;
+  background: var(--light-canvas);
 }
 
 /* ================================================================
@@ -114,6 +116,17 @@ html {
   --ink: #ede7dc;
   --ink-2: #a79f95;
   --ink-3: #847b74;
+
+  /* Light tokens — now the default for all pages — all text dark & high-contrast */
+  --light-canvas: #f8f7f5;
+  --light-surface: #ffffff;
+  --light-surface-2: #fdfbf8;
+  --light-surface-3: #f2ece4;
+  --light-hairline: rgb(26 26 26 / 0.08);
+  --light-hairline-strong: rgb(26 26 26 / 0.14);
+  --light-ink: #0a0a0a;
+  --light-ink-2: #1f2937;
+  --light-ink-3: #374151;
   --ember-100: #f7e3c4;
   --ember-300: #f0a85c;
   --ember-500: #e2703a;
@@ -132,12 +145,13 @@ html {
   z-index: 0;
   pointer-events: none;
   background:
-    radial-gradient(58% 42% at 24% 76%, rgb(194 69 42 / 0.55), transparent 62%),
-    radial-gradient(44% 36% at 72% 26%, rgb(226 112 58 / 0.4), transparent 64%),
-    radial-gradient(26% 24% at 50% 10%, rgb(247 227 196 / 0.18), transparent 60%),
-    var(--canvas);
-  filter: blur(28px) saturate(115%);
+    radial-gradient(58% 42% at 24% 76%, rgb(226 112 58 / 0.12), transparent 62%),
+    radial-gradient(44% 36% at 72% 26%, rgb(226 112 58 / 0.08), transparent 64%),
+    radial-gradient(26% 24% at 50% 10%, rgb(194 69 42 / 0.06), transparent 60%),
+    var(--light-canvas);
+  filter: blur(28px) saturate(110%);
   animation: auroraDrift 42s ease-in-out infinite;
+  opacity: 0.6;
 }
 
 .aurora-soft {
@@ -276,6 +290,54 @@ html {
   .breadcrumb {
     @apply font-mono text-micro uppercase text-ink-2 font-medium antialiased;
   }
+}
+
+/* Light mode — now global (no more dark backgrounds) */
+:root {
+  --canvas: var(--light-canvas);
+  --surface: var(--light-surface);
+  --surface-2: var(--light-surface-2);
+  --surface-3: var(--light-surface-3);
+  --hairline: var(--light-hairline);
+  --hairline-strong: var(--light-hairline-strong);
+  --ink: var(--light-ink);
+  --ink-2: var(--light-ink-2);
+  --ink-3: var(--light-ink-3);
+}
+html, body {
+  background: var(--light-canvas) !important;
+  color: var(--light-ink) !important;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  font-weight: 500;
+}
+.bg-canvas, .bg-ground { background-color: var(--light-canvas) !important; }
+.bg-surface, .bg-ground-secondary { background-color: var(--light-surface) !important; }
+.bg-surface-2 { background-color: var(--light-surface-2) !important; }
+.text-ink, .portal-heading, .page-title, h1, h2, h3, h4 { color: var(--light-ink) !important; font-weight: 700 !important; }
+.text-ink-2, .portal-label { color: var(--light-ink-2) !important; font-weight: 600 !important; }
+.text-ink-3 { color: var(--light-ink-3) !important; font-weight: 600 !important; }
+.portal-text { color: var(--light-ink-2) !important; font-weight: 500 !important; }
+.micro, .micro-2, .breadcrumb, .kicker, .mono-num { color: var(--light-ink-2) !important; font-weight: 700 !important; letter-spacing: 0.12em !important; }
+.border-line, .hairline, .rule { border-color: var(--light-hairline) !important; background-color: var(--light-hairline) !important; }
+.rule::before, .rule::after { background: var(--light-hairline-strong) !important; }
+/* Hover stays clear — ember, not dark */
+.hover\:text-ink:hover { color: var(--ember-500) !important; }
+.hover\:bg-surface:hover { background-color: var(--light-surface-2) !important; }
+.hover\:bg-canvas:hover { background-color: var(--light-surface-2) !important; }
+
+/* Keep .light for backwards compat */
+.light {
+  --canvas: var(--light-canvas);
+  --surface: var(--light-surface);
+  --surface-2: var(--light-surface-2);
+  --surface-3: var(--light-surface-3);
+  --hairline: var(--light-hairline);
+  --hairline-strong: var(--light-hairline-strong);
+  --ink: var(--light-ink);
+  --ink-2: var(--light-ink-2);
+  --ink-3: var(--light-ink-3);
 }
 
 
