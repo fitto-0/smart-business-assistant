@@ -398,7 +398,7 @@ export default function ProductsPage() {
  <button
  onClick={() => deleteCategory(category)}
  title={t("products.deleteCategory")}
- className="text-ink-3 hover:text-clay transition-colors"
+  className="text-ink-2 hover:text-clay transition-colors"
  >
  <X size={13} />
  </button>
@@ -534,7 +534,7 @@ export default function ProductsPage() {
  </h3>
  <button
  onClick={() => setShowModal(false)}
- className="p-2 rounded-xs hover:bg-canvas text-ink-3"
+  className="p-2 rounded-xs hover:bg-canvas text-ink-2 hover:text-ink transition-colors"
  >
  <X size={18} />
  </button>
@@ -657,7 +657,7 @@ export default function ProductsPage() {
  </h3>
  <button
  onClick={() => setShowCsvModal(false)}
- className="p-2 rounded-xs hover:bg-canvas text-ink-3"
+  className="p-2 rounded-xs hover:bg-canvas text-ink-2 hover:text-ink transition-colors"
  >
  <X size={18} />
  </button>

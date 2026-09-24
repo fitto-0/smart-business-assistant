@@ -174,13 +174,13 @@ export default function ReviewsPage() {
  <Layout title={t('reviews.title')}>
  {/* Action Buttons */}
  <div className="flex gap-3 mb-6">
- <button
- onClick={() => setShowReviewForm(true)}
- className="flex items-center gap-2 px-4 py-2.5 bg-ember-500 text-ground rounded-xs portal-label font-semibold hover:bg-ember-500/90 transition-colors"
- >
- <Plus size={18} />
- {t('reviews.addReview')}
- </button>
+  <button
+  onClick={() => setShowReviewForm(true)}
+  className="flex items-center gap-2 px-4 py-2.5 bg-ember-500 text-white rounded-xs font-mono text-[12.5px] font-bold uppercase tracking-[0.12em] antialiased hover:bg-ember-600 transition-colors"
+  >
+  <Plus size={18} className="text-white" />
+  {t('reviews.addReview')}
+  </button>
  <div className="flex-1" />
  <div className="flex items-center gap-3">
  <input
@@ -190,21 +190,21 @@ export default function ReviewsPage() {
  className="hidden"
  id="csv-upload"
  />
- <label
- htmlFor="csv-upload"
- className="flex items-center gap-2 px-4 py-2.5 border hairline rounded-xs portal-label hover:border-ember-500/50 transition-colors cursor-pointer"
- >
- <Upload size={18} />
- {csvFile ? csvFile.name : t('reviews.importCSV')}
- </label>
+  <label
+  htmlFor="csv-upload"
+  className="flex items-center gap-2 px-4 py-2.5 border hairline rounded-xs font-mono text-[12.5px] font-semibold uppercase tracking-[0.12em] antialiased text-ink-2 hover:text-ink hover:border-ember-500/50 transition-colors cursor-pointer"
+  >
+  <Upload size={18} className="text-ink-2" />
+  {csvFile ? csvFile.name : t('reviews.importCSV')}
+  </label>
  {csvFile && (
- <button
- onClick={handleCSVImport}
- disabled={uploading}
- className="px-4 py-2.5 bg-olive text-ground rounded-xs portal-label font-semibold hover:bg-olive/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
- >
- {uploading ? t('reviews.importing') : t('reviews.import')}
- </button>
+  <button
+  onClick={handleCSVImport}
+  disabled={uploading}
+  className="px-4 py-2.5 bg-olive text-white rounded-xs font-mono text-[12.5px] font-bold uppercase tracking-[0.12em] antialiased hover:bg-olive/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+  >
+  {uploading ? t('reviews.importing') : t('reviews.import')}
+  </button>
  )}
  </div>
  </div>

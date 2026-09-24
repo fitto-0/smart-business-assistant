@@ -41,12 +41,12 @@ const ReviewForm = ({ products, onClose, onSuccess }) => {
           <h2 className="portal-heading text-lg">Add Customer Review</h2>
           <button
             onClick={onClose}
-            className="p-1 hover:bg-ground rounded-lg transition-colors"
+            className="p-1 hover:bg-ground rounded-lg transition-colors text-ink-2 hover:text-ink"
           >
-            <X size={20} className="text-muted" />
+            <X size={20} />
           </button>
         </div>
-
+ 
         <form onSubmit={handleSubmit} className="space-y-4">
           {/* Product Selection */}
           <div>
@@ -92,7 +92,7 @@ const ReviewForm = ({ products, onClose, onSuccess }) => {
                 >
                   <Star
                     size={28}
-                    className={star <= formData.rating ? "text-amber fill-amber" : "text-muted"}
+                    className={star <= formData.rating ? "text-amber fill-amber" : "text-ink-2 fill-transparent stroke-current"}
                   />
                 </button>
               ))}
@@ -127,14 +127,14 @@ const ReviewForm = ({ products, onClose, onSuccess }) => {
             <button
               type="button"
               onClick={onClose}
-              className="flex-1 px-4 py-2.5 border hairline rounded-lg portal-label hover:bg-ground transition-colors"
+              className="flex-1 px-4 py-2.5 border border-line rounded-xs font-mono text-[12.5px] font-semibold uppercase tracking-[0.12em] antialiased text-ink-2 hover:text-ink hover:bg-surface transition-colors"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={loading}
-              className="flex-1 px-4 py-2.5 bg-amber text-ground rounded-lg portal-label font-semibold hover:bg-amber/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              className="flex-1 px-4 py-2.5 bg-ember-500 text-white rounded-xs font-mono text-[12.5px] font-bold uppercase tracking-[0.12em] antialiased hover:bg-ember-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {loading ? "Adding..." : "Add Review"}
             </button>

@@ -393,7 +393,7 @@ export default function LandingPage() {
               <button
                 type="button"
                 onClick={() => setShowLangMenu((v) => !v)}
-                className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xs border border-line text-ink-3 hover:text-ink hover:bg-surface transition-colors"
+                className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xs border border-line text-ink-2 hover:text-ink hover:bg-surface transition-colors"
                 aria-label="Change language"
                 aria-expanded={showLangMenu}
               >

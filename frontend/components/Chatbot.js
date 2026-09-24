@@ -121,7 +121,7 @@ export default function Chatbot() {
           <button
             onClick={() => setIsOpen(false)}
             aria-label="Close assistant"
-            className="w-8 h-8 rounded-xs flex items-center justify-center text-ink-3 hover:text-ink hover:bg-canvas transition-colors"
+            className="w-8 h-8 rounded-xs flex items-center justify-center text-ink-2 hover:text-ink hover:bg-canvas transition-colors"
           >
             <X size={16} />
           </button>

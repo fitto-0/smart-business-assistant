@@ -17,28 +17,40 @@ router.use(auth.requireOrganization);
 // ---------------------------------------------------------
 router.get("/predictions", async (req, res) => {
   try {
+    const horizon = Math.max(
+      1,
+      Math.min(parseInt(req.query.horizon, 10) || 6, 12),
+    );
     const monthly = await agg.getMonthlySales(req.organizationId, 12);
 
     if (monthly.length < 6) {
       return res.status(422).json({
-        error:
-          "Données insuffisantes : au moins 6 mois d'historique sont requis.",
+        error: `Not enough sales history: at least 6 months are required (have ${monthly.length}).`,
         based_on_points: monthly.length,
       });
     }
 
     const sales = monthly.map((m) => Number(m.total));
-    const months = monthly.map((m) => m.month);
+    // Future labels computed from the last history month — the AI must
+    // never stamp forecasts with past months.
+    const futureLabels = futureMonthLabels(
+      monthly[monthly.length - 1].month,
+      horizon,
+    );
 
     const aiRes = await ai.predict({
       sales,
-      horizon: 6,
-      months_labels: months,
+      horizon,
+      months_labels: futureLabels,
     });
 
-    // On retourne au frontend un format simple { predictions: [...] }
+    // On retourne au frontend l'historique réel + les prédictions
     return res.json({
       predictions: aiRes.predictions,
+      history: monthly.map((m) => ({
+        month: m.month,
+        total: Number(m.total),
+      })),
       metrics: aiRes.metrics,
       based_on_points: aiRes.based_on_points,
       model: aiRes.model,
@@ -180,6 +192,7 @@ router.post("/reviews", async (req, res) => {
 // ---------------------------------------------------------
 router.post("/detect-anomalies", async (req, res) => {
   try {
+    const lang = normalizeLang(req.body?.lang);
     const [monthly, products] = await Promise.all([
       agg.getMonthlySales(req.organizationId, 12),
       agg.getProductsWithStock(req.organizationId),
@@ -195,6 +208,7 @@ router.post("/detect-anomalies", async (req, res) => {
       const aiRes = await ai.anomalies({
         sales: salesSeries,
         products,
+        lang,
       });
       salesAnomalies = aiRes.sales_anomalies || [];
       stockAnomalies = aiRes.stock_anomalies || [];
@@ -217,13 +231,14 @@ router.post("/detect-anomalies", async (req, res) => {
       await pool.query(
         `
   INSERT INTO anomalies
-    (user_id, organization_id, type, description, severity, status, detected_at)
-  VALUES ($1, $2, $3, $4, $5, 'non_résolu', NOW())
+    (user_id, organization_id, type, product_name, description, severity, status, detected_at)
+  VALUES ($1, $2, $3, $4, $5, $6, 'non_résolu', NOW())
   `,
         [
           req.user.id, // ← AJOUT
           req.organizationId,
           type,
+          a.product_name || null,
           a.explanation || a.description || "",
           a.severity || "moyenne",
         ],
@@ -308,10 +323,11 @@ router.put("/anomalies/:id/in-progress", async (req, res) => {
 // ---------------------------------------------------------
 router.get("/recommendations", async (req, res) => {
   try {
+    const lang = normalizeLang(req.query.lang);
     const [anomalies, products, salesStats, reviewsStats] = await Promise.all([
       pool
         .query(
-          `SELECT type, description, severity FROM anomalies
+          `SELECT type, product_name, description, severity FROM anomalies
          WHERE organization_id = $1 AND status = 'non_résolu'`,
           [req.organizationId],
         )
@@ -321,9 +337,10 @@ router.get("/recommendations", async (req, res) => {
       agg.getReviewsStats(req.organizationId),
     ]);
 
-    // Convertir les anomalies DB vers le format AI
+    // Convertir les anomalies DB vers le format AI (avec le produit concerné)
     const aiAnomalies = anomalies.map((a) => ({
       type: a.type,
+      product_name: a.product_name,
       explanation: a.description,
       severity: a.severity,
     }));
@@ -335,6 +352,7 @@ router.get("/recommendations", async (req, res) => {
         products,
         sales_stats: salesStats,
         reviews_stats: reviewsStats,
+        lang,
       });
       recommendations = aiRes.recommendations || [];
     } catch (e) {
@@ -354,7 +372,15 @@ router.get("/recommendations", async (req, res) => {
       done: Boolean(doneMap[r.title]),
     }));
 
-    return res.json({ recommendations: enriched });
+    return res.json({
+      recommendations: enriched,
+      meta: {
+        products: products.length,
+        open_anomalies: anomalies.length,
+        reviews: reviewsStats.total || 0,
+        lang,
+      },
+    });
   } catch (err) {
     console.error("[analysis/recommendations]", err);
     return res.status(500).json({ error: "Erreur." });
@@ -405,6 +431,30 @@ router.put("/recommendations/:id/toggle", async (req, res) => {
 // ---------------------------------------------------------
 // Helpers
 // ---------------------------------------------------------
+function normalizeLang(raw) {
+  const l = String(raw || "en").slice(0, 2).toLowerCase();
+  return l === "fr" ? "fr" : "en";
+}
+
+/**
+ * Calcule les étiquettes des mois futurs à partir du dernier mois
+ * d'historique ("YYYY-MM"), pour que les prédictions portent de vrais
+ * mois à venir et jamais des mois du passé.
+ */
+function futureMonthLabels(lastMonth, horizon) {
+  const [y, m] = String(lastMonth || "").split("-").map(Number);
+  if (!Number.isFinite(y) || !Number.isFinite(m)) return undefined;
+  const d = new Date(Date.UTC(y, m - 1, 1));
+  const labels = [];
+  for (let i = 0; i < horizon; i++) {
+    d.setUTCMonth(d.getUTCMonth() + 1);
+    labels.push(
+      `${d.getUTCFullYear()}-${String(d.getUTCMonth() + 1).padStart(2, "0")}`,
+    );
+  }
+  return labels;
+}
+
 function normalizeAnomalyType(rawType) {
   const map = {
     baisse_anormale: "baisse_ventes",

@@ -278,7 +278,7 @@ export default function SalesPage() {
  <div className="bg-canvas border hairline rounded-xs p-6 w-full max-w-md">
  <div className="flex items-center justify-between mb-4">
  <h3 className="portal-heading text-xl">{t('sales.recordSale')}</h3>
- <button onClick={closeSaleModal} className="text-ink-3 hover:text-ink">
+  <button onClick={closeSaleModal} className="text-ink-2 hover:text-ink">
  <X size={20} />
  </button>
  </div>

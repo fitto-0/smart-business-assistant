@@ -148,32 +148,32 @@ export default function Reports() {
  <p className="portal-label text-ink-3">{reports.length} report(s)</p>
  </div>
  </div>
- <button
- onClick={() => {
- setShowCreateModal(true);
- loadAvailableColumns('sales');
- }}
- className="px-4 py-2 bg-ember-500 text-ground rounded-xs portal-label font-semibold hover:bg-ember-500/90 flex items-center gap-2"
- >
- <Plus size={18} />
- Create Report
- </button>
- </div>
+  <button
+  onClick={() => {
+  setShowCreateModal(true);
+  loadAvailableColumns('sales');
+  }}
+  className="px-4 py-2 bg-ember-500 text-white rounded-xs font-mono text-[12.5px] font-bold uppercase tracking-[0.12em] antialiased hover:bg-ember-600 flex items-center gap-2"
+  >
+  <Plus size={18} className="text-white" />
+  Create Report
+  </button>
+  </div>
 
  {/* Reports List */}
  {reports.length === 0 ? (
  <div className="bg-surface border hairline rounded-xs p-8 text-center">
  <FileText className="w-12 h-12 text-ink-3 mx-auto mb-4" />
  <p className="portal-label text-ink-3 mb-4">No custom reports yet</p>
- <button
- onClick={() => {
- setShowCreateModal(true);
- loadAvailableColumns('sales');
- }}
- className="px-4 py-2 bg-ember-500 text-ground rounded-xs portal-label font-semibold hover:bg-ember-500/90"
- >
- Create Your First Report
- </button>
+  <button
+  onClick={() => {
+  setShowCreateModal(true);
+  loadAvailableColumns('sales');
+  }}
+  className="px-4 py-2 bg-ember-500 text-white rounded-xs font-mono text-[12.5px] font-bold uppercase tracking-[0.12em] antialiased hover:bg-ember-600"
+  >
+  Create Your First Report
+  </button>
  </div>
  ) : (
  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -310,39 +310,39 @@ export default function Reports() {
  <div>
  <label className="portal-label block mb-2">Sort Order</label>
  <div className="flex gap-3">
- <button
- onClick={() => setNewReport(prev => ({ ...prev, sortOrder: 'ASC' }))}
- className={`flex-1 px-4 py-2 rounded-xs portal-label font-semibold ${
- newReport.sortOrder === 'ASC' ? 'bg-ember-500 text-ground' : 'bg-canvas border hairline'
- }`}
- >
- Ascending
- </button>
- <button
- onClick={() => setNewReport(prev => ({ ...prev, sortOrder: 'DESC' }))}
- className={`flex-1 px-4 py-2 rounded-xs portal-label font-semibold ${
- newReport.sortOrder === 'DESC' ? 'bg-ember-500 text-ground' : 'bg-canvas border hairline'
- }`}
- >
- Descending
- </button>
+  <button
+  onClick={() => setNewReport(prev => ({ ...prev, sortOrder: 'ASC' }))}
+  className={`flex-1 px-4 py-2 rounded-xs font-mono text-[12.5px] font-bold uppercase tracking-[0.12em] antialiased ${
+  newReport.sortOrder === 'ASC' ? 'bg-ember-500 text-white' : 'bg-canvas border hairline text-ink-2'
+  }`}
+  >
+  Ascending
+  </button>
+  <button
+  onClick={() => setNewReport(prev => ({ ...prev, sortOrder: 'DESC' }))}
+  className={`flex-1 px-4 py-2 rounded-xs font-mono text-[12.5px] font-bold uppercase tracking-[0.12em] antialiased ${
+  newReport.sortOrder === 'DESC' ? 'bg-ember-500 text-white' : 'bg-canvas border hairline text-ink-2'
+  }`}
+  >
+  Descending
+  </button>
  </div>
  </div>
 
- <div className="flex gap-3 pt-4">
- <button
- onClick={createReport}
- className="flex-1 px-4 py-2 bg-ember-500 text-ground rounded-xs portal-label font-semibold hover:bg-ember-500/90"
- >
- Create Report
- </button>
- <button
- onClick={() => setShowCreateModal(false)}
- className="px-4 py-2 bg-canvas border hairline rounded-xs portal-label font-semibold hover:bg-canvas/50"
- >
- Cancel
- </button>
- </div>
+  <div className="flex gap-3 pt-4">
+  <button
+  onClick={createReport}
+  className="flex-1 px-4 py-2 bg-ember-500 text-white rounded-xs font-mono text-[12.5px] font-bold uppercase tracking-[0.12em] antialiased hover:bg-ember-600"
+  >
+  Create Report
+  </button>
+  <button
+  onClick={() => setShowCreateModal(false)}
+  className="px-4 py-2 bg-canvas border hairline rounded-xs font-mono text-[12.5px] font-semibold uppercase tracking-[0.12em] antialiased text-ink-2 hover:text-ink hover:bg-surface transition-colors"
+  >
+  Cancel
+  </button>
+  </div>
  </div>
  </div>
  </div>

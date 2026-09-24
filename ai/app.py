@@ -88,13 +88,14 @@ def anomalies():
 
     sales_anomalies = []
     stock_anomalies = []
+    lang = data.get("lang", "en") if isinstance(data.get("lang"), str) else "en"
 
     if "sales" in data and isinstance(data["sales"], list) and len(data["sales"]) >= Config.ANOMALY_MIN_DATA_POINTS:
         sales_series = prepare_sales_series(data["sales"])
-        sales_anomalies = anomaly_detector.detect_sales_anomalies(sales_series.tolist())
+        sales_anomalies = anomaly_detector.detect_sales_anomalies(sales_series.tolist(), lang=lang)
 
     if "products" in data and isinstance(data["products"], list):
-        stock_anomalies = anomaly_detector.detect_stock_anomalies(data["products"])
+        stock_anomalies = anomaly_detector.detect_stock_anomalies(data["products"], lang=lang)
 
     return jsonify({
         "sales_anomalies": sales_anomalies,
@@ -113,12 +114,14 @@ def recommendations():
     products = data.get("products", [])
     sales_stats = data.get("sales_stats")
     reviews_stats = data.get("reviews_stats")
+    lang = data.get("lang", "en") if isinstance(data.get("lang"), str) else "en"
 
     recs = recommendation_engine.generate(
         anomalies=anomalies,
         products=products,
         sales_stats=sales_stats,
         reviews_stats=reviews_stats,
+        lang=lang,
     )
     return jsonify({"recommendations": recs, "total": len(recs)}), 200
 

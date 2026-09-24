@@ -186,7 +186,7 @@ export default function Layout({
         : "border-s-transparent text-ink-2 hover:text-ink hover:bg-surface"
     }`;
   const ledgerIcon = (active) =>
-    `flex-shrink-0 ${active ? "text-ember-500" : "text-ink-3"}`;
+    `flex-shrink-0 ${active ? "text-ember-500" : "text-ink-2"}`;
 
   const Sidebar = ({ mobile = false }) => (
     <div className={`flex flex-col h-full ${mobile ? "w-full" : "w-60"}`}>
@@ -457,7 +457,7 @@ export default function Layout({
                   onClick={() => setShowLanguageMenu(!showLanguageMenu)}
                   aria-label="Language"
                   aria-expanded={showLanguageMenu}
-                  className="h-8 px-2 rounded-xs flex items-center gap-1.5 text-ink-3 hover:text-ink hover:bg-surface transition-colors"
+                  className="h-8 px-2 rounded-xs flex items-center gap-1.5 text-ink-2 hover:text-ink hover:bg-surface transition-colors"
                 >
                   <Globe size={17} strokeWidth={1.75} />
                   <span className="font-mono text-[12px] font-medium uppercase tracking-micro hidden sm:block antialiased">
@@ -481,7 +481,7 @@ export default function Layout({
                         className={`w-full flex items-center justify-between gap-2 px-3 py-2 text-start transition-colors ${
                           language === lang.code
                             ? "bg-canvas text-ink font-medium"
-                            : "text-ink-3 hover:text-ink hover:bg-canvas"
+                            : "text-ink-2 hover:text-ink hover:bg-canvas"
                         }`}
                       >
                         <span className="font-mono text-[12.5px] font-medium tracking-label antialiased">
@@ -506,7 +506,7 @@ export default function Layout({
                   }
                   aria-label="Notifications"
                   aria-expanded={showNotificationsMenu}
-                  className="relative w-8 h-8 rounded-xs flex items-center justify-center text-ink-3 hover:text-ink hover:bg-surface transition-colors"
+                  className="relative w-8 h-8 rounded-xs flex items-center justify-center text-ink-2 hover:text-ink hover:bg-surface transition-colors"
                 >
                   <Bell size={16} strokeWidth={1.75} />
                   {unreadCount > 0 && (
@@ -529,7 +529,7 @@ export default function Layout({
                       {unreadCount > 0 && (
                         <button
                           onClick={handleMarkAllAsRead}
-                          className="font-mono text-micro uppercase text-ink-3 hover:text-ink transition-colors"
+                          className="font-mono text-micro uppercase text-ink-2 hover:text-ink transition-colors"
                         >
                           Mark all read
                         </button>
@@ -617,7 +617,7 @@ export default function Layout({
                     </Link>
                     <button
                       onClick={handleLogout}
-                      className="w-full flex items-center gap-3 px-4 py-2.5 text-[13px] text-ink-3 hover:text-clay hover:bg-canvas transition-colors"
+                      className="w-full flex items-center gap-3 px-4 py-2.5 text-[14px] font-medium antialiased text-ink-2 hover:text-clay hover:bg-canvas transition-colors"
                     >
                       <LogOut size={17} strokeWidth={1.75} />
                       <span>{t("nav.logout")}</span>

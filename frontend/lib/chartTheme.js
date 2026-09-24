@@ -5,7 +5,7 @@
 export const CHART = {
   grid: "rgb(242 236 228 / 0.06)",
   cursor: "rgb(242 236 228 / 0.15)",
-  tick: "#847B74",
+  tick: "#A79F95",
   ink: "#EDE7DC",
   ember: "#E2703A",
   emberSoft: "#F0A85C",
