@@ -160,61 +160,68 @@ router.post(
       let params = [organizationId];
       let paramIndex = 2;
 
-      // Fix old column names in configuration
-      const fixColumnName = (col) => 
-        col === 'sale_date' ? 'date' : 
-        col === 'customer_email' ? 'customer_name' : 
-        col;
+      // Fix old / UI column names in configuration
+      const fixColumnName = (col) => {
+        if (col === 'sale_date') return 'date';
+        if (col === 'customer_email') return 'customer_name';
+        if (col === 'cost') return 'cost_price';
+        return col;
+      };
 
       const fixedColumns = config.columns.map(fixColumnName);
       const fixedGroupBy = config.group_by ? fixColumnName(config.group_by) : null;
       const fixedSortBy = config.sort_by ? fixColumnName(config.sort_by) : null;
 
+      // Safe identifier helper — reject anything that is not a simple column name
+      const SAFE_COL_RE = /^[a-zA-Z_][a-zA-Z0-9_]*$/;
+      const isSafeCol = (c) => SAFE_COL_RE.test(c);
+      const validFixedColumns = fixedColumns.filter(isSafeCol);
+      const validGroupBy = fixedGroupBy && isSafeCol(fixedGroupBy) ? fixedGroupBy : null;
+      if (validFixedColumns.length === 0) {
+        return res.status(400).json({ error: 'No valid columns selected for this report.' });
+      }
+
+      // Helper: build a GROUP BY query that is actually valid Postgres.
+      // Any non-group column without an aggregate would otherwise raise
+      // "must appear in GROUP BY clause" → wrap it so the report still runs.
+      const buildGrouped = (table, cols, groupBy) => {
+        const aggs = cols.filter((c) => c !== groupBy);
+        const selectCols = [groupBy, ...aggs.map((c) => `MAX(${c}) AS ${c}`)];
+        return `SELECT ${selectCols.join(', ')} FROM ${table} WHERE organization_id = $1 GROUP BY ${groupBy}`;
+      };
+
       // Build SQL based on report type
       switch (config.type) {
         case 'sales':
-          if (fixedGroupBy) {
-            // When grouping, only include grouped column and aggregates
-            const groupColumn = fixedGroupBy;
-            const aggregates = fixedColumns.filter(col => col !== groupColumn);
-            const selectCols = [groupColumn, ...aggregates];
-            sql = `SELECT ${selectCols.join(', ')} FROM sales WHERE organization_id = $1 GROUP BY ${groupColumn}`;
+          if (validGroupBy) {
+            sql = buildGrouped('sales', validFixedColumns, validGroupBy);
           } else {
-            sql = `SELECT ${fixedColumns.join(', ')} FROM sales WHERE organization_id = $1`;
+            sql = `SELECT ${validFixedColumns.join(', ')} FROM sales WHERE organization_id = $1`;
           }
           break;
         case 'products':
-          if (fixedGroupBy) {
-            const groupColumn = fixedGroupBy;
-            const aggregates = fixedColumns.filter(col => col !== groupColumn);
-            const selectCols = [groupColumn, ...aggregates];
-            sql = `SELECT ${selectCols.join(', ')} FROM products WHERE organization_id = $1 GROUP BY ${groupColumn}`;
+          if (validGroupBy) {
+            sql = buildGrouped('products', validFixedColumns, validGroupBy);
           } else {
-            sql = `SELECT ${fixedColumns.join(', ')} FROM products WHERE organization_id = $1`;
+            sql = `SELECT ${validFixedColumns.join(', ')} FROM products WHERE organization_id = $1`;
           }
           break;
         case 'customers':
-          sql = `SELECT DISTINCT customer_name, COUNT(*) as orders, SUM(total_amount) as total_spent 
+          sql = `SELECT customer_name, COUNT(*)::int as orders, SUM(total_amount) as total_spent, AVG(total_amount) as avg_order_value
                  FROM sales WHERE organization_id = $1 AND customer_name IS NOT NULL GROUP BY customer_name`;
           break;
         case 'inventory':
-          if (fixedGroupBy) {
-            const groupColumn = fixedGroupBy;
-            const aggregates = fixedColumns.filter(col => col !== groupColumn);
-            const selectCols = [groupColumn, ...aggregates];
-            sql = `SELECT ${selectCols.join(', ')} FROM products WHERE organization_id = $1 GROUP BY ${groupColumn}`;
+          if (validGroupBy) {
+            sql = buildGrouped('products', validFixedColumns, validGroupBy);
           } else {
-            sql = `SELECT ${fixedColumns.join(', ')} FROM products WHERE organization_id = $1`;
+            sql = `SELECT ${validFixedColumns.join(', ')} FROM products WHERE organization_id = $1`;
           }
           break;
         default:
-          if (fixedGroupBy) {
-            const groupColumn = fixedGroupBy;
-            const aggregates = fixedColumns.filter(col => col !== groupColumn);
-            const selectCols = [groupColumn, ...aggregates];
-            sql = `SELECT ${selectCols.join(', ')} FROM sales WHERE organization_id = $1 GROUP BY ${groupColumn}`;
+          if (validGroupBy) {
+            sql = buildGrouped('sales', validFixedColumns, validGroupBy);
           } else {
-            sql = `SELECT ${fixedColumns.join(', ')} FROM sales WHERE organization_id = $1`;
+            sql = `SELECT ${validFixedColumns.join(', ')} FROM sales WHERE organization_id = $1`;
           }
       }
 
@@ -238,9 +245,10 @@ router.post(
       }
 
       // Apply grouping (already handled above, but keep for HAVING clause if needed)
-      // Apply sorting
-      if (fixedSortBy) {
-        sql += ` ORDER BY ${fixedSortBy} ${config.sort_order || 'ASC'}`;
+      // Apply sorting — only on safe, selected columns
+      const validSortBy = fixedSortBy && isSafeCol(fixedSortBy) ? fixedSortBy : null;
+      if (validSortBy && validFixedColumns.includes(validSortBy)) {
+        sql += ` ORDER BY ${validSortBy} ${config.sort_order || 'ASC'}`;
       }
 
       // Execute query
@@ -261,7 +269,10 @@ router.post(
       });
     } catch (err) {
       console.error("Error running report:", err);
-      return res.status(500).json({ error: "Error running report" });
+      const msg = err.message || 'Error running report';
+      // Surface Postgres detail in non-production to help debug the report builder
+      const detail = process.env.NODE_ENV !== 'production' ? msg : undefined;
+      return res.status(500).json({ error: 'Error running report', ...(detail ? { detail } : {}) });
     }
   }
 );
@@ -435,9 +446,9 @@ router.get(
 
       const columns = {
         sales: ['id', 'quantity', 'total_amount', 'date', 'customer_name', 'product_id', 'created_at'],
-        products: ['id', 'name', 'description', 'price', 'stock', 'category', 'cost', 'created_at', 'updated_at'],
-        customers: ['customer_name', 'COUNT(*) as orders', 'SUM(total_amount) as total_spent', 'AVG(total_amount) as avg_order_value'],
-        inventory: ['id', 'name', 'category', 'stock', 'price', 'cost', 'created_at', 'updated_at'],
+        products: ['id', 'name', 'description', 'price', 'stock', 'category', 'cost_price', 'created_at', 'updated_at'],
+        customers: ['customer_name', 'orders', 'total_spent', 'avg_order_value'],
+        inventory: ['id', 'name', 'category', 'stock', 'price', 'cost_price', 'created_at', 'updated_at'],
       };
 
       if (!columns[type]) {
