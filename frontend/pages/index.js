@@ -455,7 +455,7 @@ export default function LandingPage() {
 
             <Link
               href="/register"
-              className="group inline-flex items-center gap-1.5 bg-ink text-canvas ps-3.5 pe-3 py-2 rounded-xs text-[12.5px] font-semibold uppercase tracking-[0.12em] antialiased transition-colors hover:bg-ember-100"
+              className="group inline-flex items-center gap-1.5 bg-ink text-canvas ps-3.5 pe-3 py-2 rounded-xs text-[12.5px] font-semibold uppercase tracking-[0.12em] antialiased transition-colors hover:bg-ember-300"
             >
               <span>{t("landing.nav.getStarted")}</span>
               <ArrowRight
@@ -534,7 +534,7 @@ export default function LandingPage() {
             <div className="flex flex-col sm:flex-row gap-3 mb-22">
               <Link
                 href="/register"
-                className="group inline-flex items-center justify-center gap-2 bg-ink text-canvas px-8 py-4 rounded-xs text-[12px] font-medium uppercase tracking-[0.14em] transition-all duration-300 hover:bg-ember-100 hover:shadow-lg hover:shadow-ember-500/20"
+                className="group inline-flex items-center justify-center gap-2 bg-ink text-canvas px-8 py-4 rounded-xs text-[12px] font-medium uppercase tracking-[0.14em] transition-all duration-300 hover:bg-ember-300 hover:shadow-lg hover:shadow-ember-500/20"
               >
                 {t("landing.hero.cta") || "Start free"}
                 <ArrowRight
@@ -1050,7 +1050,7 @@ export default function LandingPage() {
             <div className="flex flex-col sm:flex-row gap-3 justify-center">
               <Link
                 href="/register"
-                className="group inline-flex items-center justify-center gap-2 bg-ink text-canvas px-9 py-4 rounded-xs text-[12px] font-medium uppercase tracking-[0.14em] transition-all duration-300 hover:bg-ember-100 hover:shadow-lg hover:shadow-ember-500/20"
+                className="group inline-flex items-center justify-center gap-2 bg-ink text-canvas px-9 py-4 rounded-xs text-[12px] font-medium uppercase tracking-[0.14em] transition-all duration-300 hover:bg-ember-300 hover:shadow-lg hover:shadow-ember-500/20"
               >
                 {t("landing.cta.getStarted")}
                 <ArrowRight

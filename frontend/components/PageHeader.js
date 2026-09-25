@@ -149,7 +149,7 @@ export function Segmented({ options, value, onChange, ariaLabel = "View" }) {
             className={`px-3 py-1.5 font-mono text-[12.5px] font-medium uppercase tracking-label antialiased transition-colors duration-200 border-s border-line first:border-s-0 ${
               active ? "bg-surface-2 text-ink" : "text-ink-2 hover:text-ink"
             } ${i === 0 ? "border-s-0" : ""}`}
-            style={active ? { boxShadow: "inset 0 -1px 0 #E2703A" } : undefined}
+            style={active ? { boxShadow: "inset 0 -1px 0 #1C352D" } : undefined}
           >
             {opt.label}
           </button>

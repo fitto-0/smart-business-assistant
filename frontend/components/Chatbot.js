@@ -94,7 +94,7 @@ export default function Chatbot() {
           onClick={() => setIsOpen(true)}
           aria-label="Open assistant"
           title="Open assistant"
-          className="w-12 h-12 rounded-xs bg-ink text-canvas hover:bg-ember-100 flex items-center justify-center transition-colors"
+          className="w-12 h-12 rounded-xs bg-ink text-canvas hover:bg-ember-300 flex items-center justify-center transition-colors"
         >
           <MessageSquare size={18} strokeWidth={2} />
         </button>
@@ -186,7 +186,7 @@ export default function Chatbot() {
             onClick={handleSend}
             disabled={loading || !input.trim()}
             aria-label="Send message"
-            className="w-9 h-9 shrink-0 bg-ink text-canvas rounded-xs flex items-center justify-center hover:bg-ember-100 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+            className="w-9 h-9 shrink-0 bg-ink text-canvas rounded-xs flex items-center justify-center hover:bg-ember-300 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
           >
             <Send size={15} />
           </button>

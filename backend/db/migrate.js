@@ -156,8 +156,8 @@ const migrate = async () => {
     )
     UPDATE categories c
     SET color = (ARRAY[
-      '#E8913C', '#2E6B72', '#6366F1', '#EF4444',
-      '#10B981', '#D946EF', '#F59E0B', '#06B6D4'
+      '#1C352D', '#2E6B72', '#6366F1', '#EF4444',
+      '#10B981', '#D946EF', '#7E9C6B', '#06B6D4'
     ])[((ranked.position - 1) % 8) + 1]
     FROM ranked
     WHERE c.id = ranked.id
@@ -292,8 +292,8 @@ const migrate = async () => {
     )
     UPDATE categories c
     SET color = (ARRAY[
-      '#E8913C', '#2E6B72', '#6366F1', '#EF4444',
-      '#10B981', '#D946EF', '#F59E0B', '#06B6D4'
+      '#1C352D', '#2E6B72', '#6366F1', '#EF4444',
+      '#10B981', '#D946EF', '#7E9C6B', '#06B6D4'
     ])[((ranked.position - 1) % 8) + 1]
     FROM ranked
     WHERE c.id = ranked.id

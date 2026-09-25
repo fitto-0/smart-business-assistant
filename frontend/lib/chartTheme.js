@@ -1,23 +1,23 @@
 /**
- * Ember Noir — shared chart theme (recharts).
+ * Chart theme — palette: soft beige + forest green.
  * Single accent ramp + muted semantics. No rainbows, no grid noise.
  */
 export const CHART = {
-  grid: "rgb(242 236 228 / 0.06)",
-  cursor: "rgb(242 236 228 / 0.15)",
-  tick: "#A79F95",
-  ink: "#EDE7DC",
-  ember: "#E2703A",
-  emberSoft: "#F0A85C",
-  cream: "#F7E3C4",
-  dim: "#A79F95",
+  grid: "rgb(28 53 45 / 0.08)",
+  cursor: "rgb(28 53 45 / 0.15)",
+  tick: "#5A6A62",
+  ink: "#1C352D",
+  ember: "#1C352D",
+  emberSoft: "#4F7A66",
+  cream: "#E1EAE2",
+  dim: "#7F8A7A",
   olive: "#7E9C6B",
   clay: "#B3392B",
   sand: "#D9A05B",
-  steel: "#8A9AA8",
+  steel: "#8A968C",
 };
 
-/** Series order — ember first, max 4. */
+/** Series order — accent first, max 4. */
 export const SERIES = [CHART.ember, CHART.cream, CHART.dim, CHART.olive];
 
 export const axisProps = {
@@ -28,18 +28,18 @@ export const axisProps = {
     fontSize: 12,
     fontWeight: 500,
     fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-    fill: "#A79F95",
+    fill: "#5A6A62",
   },
 };
 
 export const tooltipStyle = {
-  backgroundColor: "#100C0B",
-  border: "1px solid rgb(242 236 228 / 0.10)",
+  backgroundColor: "rgba(248, 240, 229, 0.96)",
+  border: "1px solid rgb(28 53 45 / 0.14)",
   borderRadius: "2px",
   fontFamily: "'JetBrains Mono', ui-monospace, monospace",
   fontSize: 12.5,
   fontWeight: 500,
-  color: "#EDE7DC",
+  color: "#1C352D",
   padding: "8px 12px",
 };
 
@@ -49,7 +49,7 @@ export const tooltipLabelStyle = {
   fontWeight: 500,
   textTransform: "uppercase",
   letterSpacing: "0.12em",
-  color: "#A79F95",
+  color: "#5A6A62",
   marginBottom: 4,
 };
 

@@ -142,7 +142,7 @@ const ALL_FIELDS = [
 const DEFAULTS = {
   primary_color: "#3B82F6",
   secondary_color: "#1E40AF",
-  accent_color: "#F59E0B",
+  accent_color: "#1C352D",
   background_color: "#FFFFFF",
   background_type: "color",
   background_gradient: null,

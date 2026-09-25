@@ -512,7 +512,7 @@ export default function ProfilePage() {
                   <>
                     <div className="text-center">
                       <p className="portal-label mb-4">{t('profile.scanQR')}</p>
-                      <div className="inline-block p-4 bg-white rounded-xs">
+                      <div className="inline-block p-4 bg-surface-2 rounded-xs">
                         <img src={qrCode} alt="QR Code" className="w-48 h-48" />
                       </div>
                     </div>

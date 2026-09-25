@@ -18,7 +18,7 @@ module.exports = {
     { name: 'Électronique', value: 32, color: '#6366f1', amount: 28800 },
     { name: 'Vêtements', value: 25, color: '#06b6d4', amount: 22500 },
     { name: 'Alimentation', value: 20, color: '#10b981', amount: 18000 },
-    { name: 'Maison', value: 15, color: '#f59e0b', amount: 13500 },
+    { name: 'Maison', value: 15, color: '#7E9C6B', amount: 13500 },
     { name: 'Sport', value: 8, color: '#ec4899', amount: 7200 },
   ],
   kpis: {
@@ -52,7 +52,7 @@ module.exports = {
   ],
   sentimentStats: {
     positif: { count: 6, percentage: 60, color: '#10b981' },
-    neutre: { count: 2, percentage: 20, color: '#f59e0b' },
+    neutre: { count: 2, percentage: 20, color: '#7E9C6B' },
     négatif: { count: 2, percentage: 20, color: '#ef4444' },
   },
   anomalies: [

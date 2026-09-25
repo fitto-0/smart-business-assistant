@@ -4,13 +4,13 @@ const pool = require("../config/db");
 
 const query = (text, params) => pool.query(text, params);
 const fallbackColors = [
-  "#E8913C",
+  "#1C352D",
   "#2E6B72",
   "#6366F1",
   "#EF4444",
   "#10B981",
   "#D946EF",
-  "#F59E0B",
+  "#7E9C6B",
   "#06B6D4",
 ];
 

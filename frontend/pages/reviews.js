@@ -29,7 +29,7 @@ const Stars = ({ n }) => (
 
 const ScoreBar = ({ score }) => {
  const pct = Math.round(score * 100);
- const color = score >= 0.7 ? "#7E9C6B" : score >= 0.4 ? "#E2703A" : "#B3392B";
+ const color = score >= 0.7 ? "#7E9C6B" : score >= 0.4 ? "#7F8A7A" : "#B3392B";
  return (
  <div className="flex items-center gap-2">
  <div className="flex-1 bg-canvas rounded-full h-1.5">
@@ -303,8 +303,8 @@ export default function ReviewsPage() {
  <Tooltip
  formatter={(v, n) => [`${v}%`, n]}
  contentStyle={{
- background: "#100C0B",
- border: "1px solid rgb(242 236 228 / 0.10)",
+ background: "#F8F0E5",
+ border: "1px solid rgb(28 53 45 / 0.14)",
  borderRadius: "2px",
  fontFamily: "'JetBrains Mono', monospace",
  fontSize: 11,

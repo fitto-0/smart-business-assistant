@@ -180,22 +180,22 @@ export default function PredictionsPage() {
  <ComposedChart data={displayData}>
  <defs>
  <linearGradient id="histGrad" x1="0" y1="0" x2="0" y2="1">
- <stop offset="5%" stopColor="#E2703A" stopOpacity={0.22} />
- <stop offset="95%" stopColor="#E2703A" stopOpacity={0} />
+ <stop offset="5%" stopColor="#1C352D" stopOpacity={0.22} />
+ <stop offset="95%" stopColor="#1C352D" stopOpacity={0} />
  </linearGradient>
  <linearGradient id="predGrad" x1="0" y1="0" x2="0" y2="1">
  <stop offset="5%" stopColor="#7E9C6B" stopOpacity={0.18} />
  <stop offset="95%" stopColor="#7E9C6B" stopOpacity={0} />
  </linearGradient>
  </defs>
- <CartesianGrid vertical={false} strokeDasharray="3 3" stroke="rgb(242 236 228 / 0.06)" />
- <XAxis dataKey="month" tick={{ fill: '#A79F95', fontSize: 12, fontFamily: "'JetBrains Mono', monospace" }} axisLine={false} tickLine={false} tickMargin={12} />
- <YAxis tick={{ fill: '#A79F95', fontSize: 12, fontFamily: "'JetBrains Mono', monospace" }} axisLine={false} tickLine={false} tickFormatter={v => `${v / 1000}k`} width={44} />
- <Tooltip content={<CustomTooltip />} cursor={{ stroke: 'rgb(242 236 228 / 0.15)' }} />
+ <CartesianGrid vertical={false} strokeDasharray="3 3" stroke="rgb(28 53 45 / 0.10)" />
+ <XAxis dataKey="month" tick={{ fill: '#5A6A62', fontSize: 12, fontFamily: "'JetBrains Mono', monospace" }} axisLine={false} tickLine={false} tickMargin={12} />
+ <YAxis tick={{ fill: '#5A6A62', fontSize: 12, fontFamily: "'JetBrains Mono', monospace" }} axisLine={false} tickLine={false} tickFormatter={v => `${v / 1000}k`} width={44} />
+ <Tooltip content={<CustomTooltip />} cursor={{ stroke: 'rgb(28 53 45 / 0.18)' }} />
  {forecastStart && (
- <ReferenceLine x={forecastStart} stroke="rgb(242 236 228 / 0.15)" strokeDasharray="4 4" label={{ value: 'Forecast', fill: '#A79F95', fontSize: 10, fontFamily: "'JetBrains Mono', monospace" }} />
+ <ReferenceLine x={forecastStart} stroke="rgb(28 53 45 / 0.18)" strokeDasharray="4 4" label={{ value: 'Forecast', fill: '#5A6A62', fontSize: 10, fontFamily: "'JetBrains Mono', monospace" }} />
  )}
- <Area type="monotone" dataKey="historique" name="History (MAD)" stroke="#E2703A" strokeWidth={2.5} fill="url(#histGrad)" connectNulls={false} dot={false} />
+ <Area type="monotone" dataKey="historique" name="History (MAD)" stroke="#1C352D" strokeWidth={2.5} fill="url(#histGrad)" connectNulls={false} dot={false} />
  <Area type="monotone" dataKey="prediction" name="Prediction (MAD)" stroke="#7E9C6B" strokeWidth={2.5} strokeDasharray="6 3" fill="url(#predGrad)" connectNulls={false} dot={{ fill: '#7E9C6B', r: 4 }} />
  </ComposedChart>
  </ResponsiveContainer>

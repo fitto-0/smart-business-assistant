@@ -41,7 +41,7 @@ import Layout from "../../components/Layout";
 const DEFAULT_COLORS = {
   primary: "#3B82F6",
   secondary: "#1E40AF",
-  accent: "#F59E0B",
+  accent: "#1C352D",
 };
 
 const API_ORIGIN = (
@@ -1342,7 +1342,7 @@ export default function StorefrontCustomize() {
                 </button>
                 <button
                   onClick={handleDomainRemove}
-                  className="px-4 py-2 rounded-xl border hairline bg-white text-ink-2 hover:text-clay hover:border-clay/30 flex items-center gap-2 font-medium"
+                  className="px-4 py-2 rounded-xl border hairline bg-surface-2 text-ink-2 hover:text-clay hover:border-clay/30 flex items-center gap-2 font-medium"
                 >
                   <Trash2 size={16} /> {t("storefront.domain.remove") || "Remove"}
                 </button>
@@ -1356,7 +1356,7 @@ export default function StorefrontCustomize() {
                 </span>
                 <button
                   onClick={handleDomainRemove}
-                  className="px-4 py-2 rounded-xl border hairline bg-white text-ink-2 hover:text-clay hover:border-clay/30 flex items-center gap-2 font-medium"
+                  className="px-4 py-2 rounded-xl border hairline bg-surface-2 text-ink-2 hover:text-clay hover:border-clay/30 flex items-center gap-2 font-medium"
                 >
                   <Trash2 size={16} /> {t("storefront.domain.remove") || "Remove"}
                 </button>

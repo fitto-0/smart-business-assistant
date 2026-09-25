@@ -20,42 +20,42 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        /* ---------- Ember Noir core ---------- */
-        canvas: '#0A0807',
+        /* ---------- Palette: soft beige + forest green ---------- */
+        canvas: '#F1E9DC',
         surface: {
-          DEFAULT: '#100C0B',
-          2: '#16100E',
-          3: '#1C1513',
+          DEFAULT: '#F8F0E5',
+          2: '#FCF7EF',
+          3: '#E9E0D1',
         },
 
         /* ---------- Portal tokens (names kept on purpose) ---------- */
-        ground: '#0A0807',
-        'ground-secondary': '#100C0B',
+        ground: '#F1E9DC',
+        'ground-secondary': '#F8F0E5',
         ink: {
-          DEFAULT: '#EDE7DC',
-          2: '#A79F95',
-          3: '#847B74',
+          DEFAULT: '#1C352D',
+          2: '#3A4B44',
+          3: '#5A6A62',
         },
-        'ink-secondary': '#A79F95',
-        muted: '#847B74',
-        line: 'rgb(242 236 228 / 0.10)',
+        'ink-secondary': '#3A4B44',
+        muted: '#5A6A62',
+        line: 'rgb(28 53 45 / 0.14)',
 
-        /* ---------- ONE accent ramp ---------- */
+        /* ---------- ONE accent ramp (forest green) ---------- */
         ember: {
-          100: '#F7E3C4',
-          300: '#F0A85C',
-          500: '#E2703A',
-          600: '#C2452A',
-          700: '#8E2A20',
+          100: '#E1EAE2',
+          300: '#4F7A66',
+          500: '#1C352D',
+          600: '#152A23',
+          700: '#0E1F19',
         },
-        amber: '#E2703A', // was #E8913C — ~100 usages now get the terracotta accent
-        teal: '#7E9C6B',  // was cool #2E6B72 — 53 usages now muted olive
+        amber: '#1C352D', // was #E8913C — now the forest green accent
+        teal: '#7E9C6B',  // was cool #2E6B72 — muted olive
 
         /* ---------- Muted semantics ---------- */
         olive: '#7E9C6B',
         clay: '#B3392B',
         sand: '#D9A05B',
-        steel: '#8A9AA8',
+        steel: '#8A968C',
 
         /* ---------- Dark-theme inverted legacy ramps ----------
            Low keys (100) = dark tint backgrounds · high keys (800) = light readable text.
@@ -122,50 +122,50 @@ module.exports = {
           900: '#E2E9ED',
         },
         indigo: {
-          50: '#1A1109',
-          100: '#241708',
-          200: '#33200C',
-          300: '#F0A85C',
-          400: '#E88A4E',
-          500: '#E2703A',
-          600: '#C2452A',
-          700: '#8E2A20',
-          800: '#F7E3C4',
-          900: '#FBEFDC',
+          50: '#12241C',
+          100: '#1A2E25',
+          200: '#233A2F',
+          300: '#4F7A66',
+          400: '#3E6B57',
+          500: '#1C352D',
+          600: '#152A23',
+          700: '#0E1F19',
+          800: '#E1EAE2',
+          900: '#EFF4EE',
         },
         purple: {
-          400: '#F0A85C',
-          500: '#E2703A',
-          600: '#C2452A',
+          400: '#4F7A66',
+          500: '#1C352D',
+          600: '#152A23',
         },
 
-        /* ---------- Warm neutrals + legacy aliases ---------- */
+        /* ---------- Warm neutrals + legacy aliases (beige → green) ---------- */
         slate: {
-          50: '#F7F3EE',
-          100: '#EDE7DC',
-          200: '#D9D1C6',
-          300: '#C4BAB0',
-          400: '#A79F95',
-          500: '#8B8279',
-          600: '#847B74',
-          700: '#3A3330',
-          800: '#16100E',
-          900: '#100C0B',
-          950: '#0A0807',
+          50: '#F7F3EC',
+          100: '#EFE8DC',
+          200: '#E1DACB',
+          300: '#C7C1B2',
+          400: '#A6AC9E',
+          500: '#7F8A7A',
+          600: '#5F6E61',
+          700: '#3A4B44',
+          800: '#24382F',
+          900: '#1C352D',
+          950: '#12241C',
         },
         dark: {
-          800: '#16100E',
-          850: '#120E0D',
-          900: '#100C0B',
-          950: '#0A0807',
+          800: '#24382F',
+          850: '#1F3129',
+          900: '#1C352D',
+          950: '#12241C',
         },
         primary: {
-          50: '#241708',
-          100: '#33200C',
-          500: '#E2703A',
-          600: '#C2452A',
-          700: '#8E2A20',
-          900: '#1C1513',
+          50: '#EAF0E9',
+          100: '#D6E1D7',
+          500: '#1C352D',
+          600: '#152A23',
+          700: '#0E1F19',
+          900: '#0A1611',
         },
 
       },

@@ -363,9 +363,12 @@ export default function Layout({
   );
 
   return (
-    <div className="light min-h-screen bg-canvas flex text-ink">
+    <div className="light min-h-screen bg-canvas portal-bg flex text-ink">
+      {/* Film grain background over every portal page */}
+      <div className="grain-fixed" aria-hidden="true" />
+
       {/* Desktop Sidebar — hairline-divided ledger rail */}
-      <aside className="hidden lg:flex flex-col w-60 bg-canvas border-e border-line fixed h-full z-30">
+      <aside className="hidden lg:flex flex-col w-60 glass border-e border-line fixed h-full z-30">
         <Sidebar />
       </aside>
 
@@ -376,7 +379,7 @@ export default function Layout({
             className="fixed inset-0 bg-black/60 backdrop-blur-[8px]"
             onClick={() => setSidebarOpen(false)}
           />
-          <aside className="relative z-50 w-72 bg-canvas border-e border-line flex flex-col">
+          <aside className="relative z-50 w-72 glass border-e border-line flex flex-col">
             <div className="absolute top-4 end-4">
               <button
                 onClick={() => setSidebarOpen(false)}
@@ -394,7 +397,7 @@ export default function Layout({
       {/* Main Content */}
       <div className="flex-1 lg:ms-60 flex flex-col min-h-screen min-w-0">
         {/* Topbar — h-14 hairline rule, route index, square icon cluster */}
-        <header className="sticky top-0 z-20 bg-canvas/90 backdrop-blur-[14px] border-b border-line px-4 sm:px-6 h-14 flex items-center">
+        <header className="sticky top-0 z-20 glass bg-canvas/90 backdrop-blur-[14px] border-b border-line px-4 sm:px-6 h-14 flex items-center">
           <div className="flex items-center gap-2 w-full">
             <div className="flex items-center gap-2 min-w-0">
               <button

@@ -567,7 +567,7 @@ router.get(
       // Brand accent rule
       doc.moveDown(0.5);
       const ruleY = doc.y;
-      doc.moveTo(doc.page.margins.left, ruleY).lineTo(doc.page.width - doc.page.margins.right, ruleY).strokeColor('#E2703A').lineWidth(1.2).stroke();
+      doc.moveTo(doc.page.margins.left, ruleY).lineTo(doc.page.width - doc.page.margins.right, ruleY).strokeColor('#1C352D').lineWidth(1.2).stroke();
       doc.moveDown(0.6);
 
       if (data.rows.length === 0) {
@@ -645,7 +645,7 @@ router.get(
         // zebra
         doc.save();
         if (idx % 2 === 1) {
-          doc.rect(doc.page.margins.left, y, pageWidth, rh).fillOpacity(0.07).fill('#E2703A').fillOpacity(1);
+          doc.rect(doc.page.margins.left, y, pageWidth, rh).fillOpacity(0.07).fill('#1C352D').fillOpacity(1);
         }
         doc.restore();
         // row rule
@@ -666,7 +666,7 @@ router.get(
       }
       // bottom rule — no footer that would spill into margin and spawn a blank page
       doc.save();
-      doc.moveTo(doc.page.margins.left, y).lineTo(doc.page.margins.left + pageWidth, y).strokeColor('#E2703A').opacity(0.25).lineWidth(0.8).stroke().opacity(1);
+      doc.moveTo(doc.page.margins.left, y).lineTo(doc.page.margins.left + pageWidth, y).strokeColor('#1C352D').opacity(0.25).lineWidth(0.8).stroke().opacity(1);
       doc.restore();
       // single-line footer centered below table (only on last page, never creates a new page)
       {

@@ -29,7 +29,7 @@ import {
 
 const fmt = (value) =>
   new Intl.NumberFormat("fr-FR").format(Number(value || 0));
-const COLORS = ["#e8913c", "#2e6b72", "#7c8cf8"];
+const COLORS = ["#1C352D", "#2e6b72", "#7c8cf8"];
 
 function Metric({ icon: Icon, label, value, tone = "bg-teal" }) {
   return (
@@ -159,8 +159,8 @@ export default function AdminDashboard() {
                     stroke="#334155"
                     vertical={false}
                   />
-                  <XAxis dataKey="month" stroke="#94a3b8" fontSize={11} />
-                  <YAxis stroke="#94a3b8" fontSize={11} />
+                  <XAxis dataKey="month" stroke="#5A6A62" fontSize={11} />
+                  <YAxis stroke="#5A6A62" fontSize={11} />
                   <Tooltip
                     contentStyle={{
                       background: "#172126",
@@ -171,7 +171,7 @@ export default function AdminDashboard() {
                   <Bar
                     dataKey="revenue"
                     name="Revenue"
-                    fill="#e8913c"
+                    fill="#1C352D"
                     radius={[4, 4, 0, 0]}
                   />
                   <Bar
