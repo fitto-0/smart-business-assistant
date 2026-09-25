@@ -2,6 +2,7 @@ import Head from 'next/head';
 import Link from 'next/link';
 import { useState } from 'react';
 import { useLanguage } from '../lib/LanguageContext';
+import PortalAuthPill from '../components/PortalAuthPill';
 import { ArrowRight, Book, Zap, Shield, Database, Cpu, BarChart3, ChevronRight, Search, Globe } from 'lucide-react';
 
 export default function DocsPage() {
@@ -505,9 +506,7 @@ export default function DocsPage() {
               <Link href="/" className="portal-nav-link">
                 {t('contact.home')}
               </Link>
-              <Link href="/login" className="portal-pill-btn">
-                {t('contact.login')}
-              </Link>
+              <PortalAuthPill />
             </div>
           </div>
         </nav>
@@ -529,13 +528,13 @@ export default function DocsPage() {
         <section className="px-5 pb-8">
           <div className="max-w-7xl mx-auto">
             <div className="relative">
-              <Search size={20} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
+              <Search size={20} className="absolute left-4 top-1/2 -translate-y-1/2 text-ink-3" />
               <input
                 type="text"
                 placeholder={t('docs.searchDocs')}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full bg-canvas border border-line rounded-lg pl-12 pr-4 py-3 text-white placeholder-gray-400 focus:outline-none focus:border-[var(--ember-500)] transition-colors"
+                className="w-full bg-canvas border border-line rounded-lg pl-12 pr-4 py-3 text-ink placeholder:text-ink-3 focus:outline-none focus:border-[var(--ember-500)] transition-colors"
               />
             </div>
           </div>
@@ -557,8 +556,8 @@ export default function DocsPage() {
                         onClick={() => setActiveSection(section.id)}
                         className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-left transition-colors ${
                           activeSection === section.id
-                            ? 'bg-[var(--ember-500)]/10 text-ember-500'
-                            : 'text-gray-400 hover:text-white hover:bg-white/5'
+                            ? 'bg-[var(--ember-500)]/10 text-ember-600'
+                            : 'text-ink-2 hover:text-ink hover:bg-surface-2'
                         }`}
                       >
                         <Icon size={16} />

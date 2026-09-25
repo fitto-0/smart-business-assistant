@@ -100,14 +100,14 @@ INSERT INTO sales (user_id, product_id, date, quantity, unit_price, customer_nam
 (1, 5, '2026-04-15', 10, 79.00, 'Pierre Moreau', 'carte'),
 (1, 7, '2026-04-22', 8, 129.00, 'Sophie Martin', 'carte'),
 (1, 9, '2026-04-28', 60, 12.00, 'Karim Khali', 'virement'),
-(1, 1, '2026-12-05', 15, 1299.00, 'Marie Lambert', 'carte'),
-(1, 3, '2026-12-08', 10, 1599.00, 'Fatima Alaoui', 'carte'),
-(1, 6, '2026-12-12', 50, 59.00, 'Pierre Moreau', 'espèces'),
-(1, 4, '2026-12-15', 30, 279.00, 'Jean-Paul Lebrun', 'carte'),
-(1, 2, '2026-12-20', 12, 999.00, 'Nathalie Bernard', 'carte'),
-(1, 12, '2026-12-24', 40, 35.00, 'Léa Rousseau', 'carte'),
-(1, 10, '2026-12-28', 5, 899.00, 'Karim Khali', 'virement'),
-(1, 5, '2026-12-30', 20, 79.00, 'Thomas Petit', 'carte');
+(1, 1, '2026-05-05', 15, 1299.00, 'Marie Lambert', 'carte'),
+(1, 3, '2026-05-09', 10, 1599.00, 'Fatima Alaoui', 'carte'),
+(1, 6, '2026-05-14', 50, 59.00, 'Pierre Moreau', 'espèces'),
+(1, 4, '2026-05-19', 30, 279.00, 'Jean-Paul Lebrun', 'carte'),
+(1, 2, '2026-06-04', 12, 999.00, 'Nathalie Bernard', 'carte'),
+(1, 12, '2026-06-11', 40, 35.00, 'Léa Rousseau', 'carte'),
+(1, 10, '2026-06-17', 5, 899.00, 'Karim Khali', 'virement'),
+(1, 5, '2026-06-24', 20, 79.00, 'Thomas Petit', 'carte');
 
 -- ===================== VENTES — USER 2 (2026) =====================
 INSERT INTO sales (user_id, product_id, date, quantity, unit_price, customer_name, payment_method) VALUES

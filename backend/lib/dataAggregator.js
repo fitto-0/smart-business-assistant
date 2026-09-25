@@ -13,6 +13,7 @@ async function getMonthlySales(organizationId, monthsBack = 12) {
     FROM sales
     WHERE organization_id = $1
       AND date >= NOW() - ($2 || ' months')::interval
+      AND date <= NOW()
     GROUP BY DATE_TRUNC('month', date)
     ORDER BY DATE_TRUNC('month', date) ASC
     `,

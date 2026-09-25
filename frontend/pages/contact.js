@@ -2,10 +2,13 @@ import Head from 'next/head';
 import Link from 'next/link';
 import { useState } from 'react';
 import { useLanguage } from '../lib/LanguageContext';
+import PortalAuthPill from '../components/PortalAuthPill';
+import useAuth from '../lib/useAuth';
 import { ArrowRight, Mail, Phone, MapPin, Send, Globe } from 'lucide-react';
 
 export default function ContactPage() {
   const { t, language, setLanguage } = useLanguage();
+  const authed = useAuth();
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -91,9 +94,7 @@ export default function ContactPage() {
               <Link href="/" className="portal-nav-link">
                 {t('contact.home')}
               </Link>
-              <Link href="/login" className="portal-pill-btn">
-                {t('contact.login')}
-              </Link>
+              <PortalAuthPill />
             </div>
           </div>
         </nav>
@@ -121,59 +122,59 @@ export default function ContactPage() {
 
                 {submitSuccess && (
                   <div className="bg-green-500/10 border border-green-500/30 rounded-lg p-4 mb-6">
-                    <p className="text-green-400 text-sm">{t('contact.messageSent')}</p>
+                    <p className="text-green-700 text-sm">{t('contact.messageSent')}</p>
                   </div>
                 )}
 
                 <form onSubmit={handleSubmit} className="space-y-6">
                   <div>
-                    <label className="block text-sm font-medium text-gray-400 mb-2">{t('contact.name')}</label>
+                    <label className="block text-sm font-medium text-ink-2 mb-2">{t('contact.name')}</label>
                     <input
                       type="text"
                       name="name"
                       value={formData.name}
                       onChange={handleChange}
                       required
-                      className="w-full bg-[var(--canvas)] border border-line rounded-lg px-4 py-3 text-white focus:outline-none focus:border-[var(--ember-500)] transition-colors"
+                      className="w-full bg-[var(--canvas)] border border-line rounded-lg px-4 py-3 text-ink placeholder:text-ink-3 focus:outline-none focus:border-[var(--ember-500)] transition-colors"
                       placeholder={t('contact.yourName')}
                     />
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-400 mb-2">{t('contact.email')}</label>
+                    <label className="block text-sm font-medium text-ink-2 mb-2">{t('contact.email')}</label>
                     <input
                       type="email"
                       name="email"
                       value={formData.email}
                       onChange={handleChange}
                       required
-                      className="w-full bg-[var(--canvas)] border border-line rounded-lg px-4 py-3 text-white focus:outline-none focus:border-[var(--ember-500)] transition-colors"
+                      className="w-full bg-[var(--canvas)] border border-line rounded-lg px-4 py-3 text-ink placeholder:text-ink-3 focus:outline-none focus:border-[var(--ember-500)] transition-colors"
                       placeholder={t('contact.yourEmail')}
                     />
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-400 mb-2">{t('contact.subject')}</label>
+                    <label className="block text-sm font-medium text-ink-2 mb-2">{t('contact.subject')}</label>
                     <input
                       type="text"
                       name="subject"
                       value={formData.subject}
                       onChange={handleChange}
                       required
-                      className="w-full bg-[var(--canvas)] border border-line rounded-lg px-4 py-3 text-white focus:outline-none focus:border-[var(--ember-500)] transition-colors"
+                      className="w-full bg-[var(--canvas)] border border-line rounded-lg px-4 py-3 text-ink placeholder:text-ink-3 focus:outline-none focus:border-[var(--ember-500)] transition-colors"
                       placeholder={t('contact.howCanHelp')}
                     />
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-400 mb-2">{t('contact.message')}</label>
+                    <label className="block text-sm font-medium text-ink-2 mb-2">{t('contact.message')}</label>
                     <textarea
                       name="message"
                       value={formData.message}
                       onChange={handleChange}
                       required
                       rows={5}
-                      className="w-full bg-[var(--canvas)] border border-line rounded-lg px-4 py-3 text-white focus:outline-none focus:border-[var(--ember-500)] transition-colors resize-none"
+                      className="w-full bg-[var(--canvas)] border border-line rounded-lg px-4 py-3 text-ink placeholder:text-ink-3 focus:outline-none focus:border-[var(--ember-500)] transition-colors resize-none"
                       placeholder={t('contact.tellUsMore')}
                     />
                   </div>
@@ -181,7 +182,7 @@ export default function ContactPage() {
                   <button
                     type="submit"
                     disabled={isSubmitting}
-                    className="w-full bg-[var(--ember-500)] hover:bg-ember-300 text-[var(--canvas)] font-semibold py-3 px-6 rounded-lg transition-colors flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="w-full bg-[var(--ember-500)] hover:bg-ember-300 text-canvas font-semibold py-3 px-6 rounded-lg transition-colors flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     {isSubmitting ? (
                       t('contact.sending')
@@ -206,9 +207,9 @@ export default function ContactPage() {
                       <Mail size={18} className="text-[var(--ember-500)]" />
                     </div>
                     <div>
-                      <h3 className="font-semibold text-white mb-1">{t('contact.emailLabel')}</h3>
-                      <p className="text-gray-400 text-sm">contact@smartbusiness.ai</p>
-                      <p className="text-gray-400 text-sm">support@smartbusiness.ai</p>
+                      <h3 className="font-semibold text-ink mb-1">{t('contact.emailLabel')}</h3>
+                      <p className="text-ink-2 text-sm">contact@smartbusiness.ai</p>
+                      <p className="text-ink-2 text-sm">support@smartbusiness.ai</p>
                     </div>
                   </div>
 
@@ -217,9 +218,9 @@ export default function ContactPage() {
                       <Phone size={18} className="text-[var(--ember-500)]" />
                     </div>
                     <div>
-                      <h3 className="font-semibold text-white mb-1">{t('contact.phoneLabel')}</h3>
-                      <p className="text-gray-400 text-sm">+1 (555) 123-4567</p>
-                      <p className="text-gray-400 text-sm">Mon-Fri, 9am-6pm EST</p>
+                      <h3 className="font-semibold text-ink mb-1">{t('contact.phoneLabel')}</h3>
+                      <p className="text-ink-2 text-sm">+1 (555) 123-4567</p>
+                      <p className="text-ink-2 text-sm">Mon-Fri, 9am-6pm EST</p>
                     </div>
                   </div>
 
@@ -228,9 +229,9 @@ export default function ContactPage() {
                       <MapPin size={18} className="text-[var(--ember-500)]" />
                     </div>
                     <div>
-                      <h3 className="font-semibold text-white mb-1">{t('contact.officeLabel')}</h3>
-                      <p className="text-gray-400 text-sm">123 somewhere</p>
-                      <p className="text-gray-400 text-sm">Tangier, Morocco</p>
+                      <h3 className="font-semibold text-ink mb-1">{t('contact.officeLabel')}</h3>
+                      <p className="text-ink-2 text-sm">123 somewhere</p>
+                      <p className="text-ink-2 text-sm">Tangier, Morocco</p>
                     </div>
                   </div>
                 </div>
@@ -239,15 +240,15 @@ export default function ContactPage() {
               <div className="bg-canvas border border-line rounded-lg p-8">
                 <h2 className="portal-heading text-2xl mb-4">{t('contact.quickLinks')}</h2>
                 <div className="space-y-3">
-                  <Link href="/register" className="flex items-center justify-between text-gray-400 hover:text-white transition-colors group">
+                  <Link href="/register" className="flex items-center justify-between text-ink-2 hover:text-ink transition-colors group">
                     <span>{t('contact.createAccountLink')}</span>
                     <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />
                   </Link>
-                  <Link href="/login" className="flex items-center justify-between text-gray-400 hover:text-white transition-colors group">
-                    <span>{t('contact.loginDashboard')}</span>
+                  <Link href={authed ? '/dashboard' : '/login'} className="flex items-center justify-between text-ink-2 hover:text-ink transition-colors group">
+                    <span>{authed ? t('nav.dashboard') : t('contact.loginDashboard')}</span>
                     <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />
                   </Link>
-                  <Link href="/docs" className="flex items-center justify-between text-gray-400 hover:text-white transition-colors group">
+                  <Link href="/docs" className="flex items-center justify-between text-ink-2 hover:text-ink transition-colors group">
                     <span>{t('contact.viewDocs')}</span>
                     <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />
                   </Link>

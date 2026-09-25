@@ -331,8 +331,9 @@ export default function LandingPage() {
     return () => observer.disconnect();
   }, []);
 
-  // Smooth scroll handler
+  // Smooth scroll handler — only for in-page anchors, real routes navigate
   const handleSmoothScroll = (e, href) => {
+    if (!href.startsWith("#")) return;
     e.preventDefault();
     const targetId = href.replace("#", "");
     const element = document.getElementById(targetId);
@@ -371,20 +372,33 @@ export default function LandingPage() {
 
           {/* Centre — desktop links */}
           <div className="hidden lg:flex items-center gap-6">
-            {NAV_LINKS.map((link) => (
-              <a
-                key={link.href}
-                href={link.href}
-                onClick={(e) => handleSmoothScroll(e, link.href)}
-                className={`font-mono text-[12px] font-medium uppercase tracking-[0.14em] antialiased transition-colors ${
-                  activeSection === link.href.replace("#", "")
-                    ? "text-ember-500"
-                    : "text-ink-2 hover:text-ink"
-                }`}
-              >
-                {t(link.key)}
-              </a>
-            ))}
+            {NAV_LINKS.map((link) => {
+              const linkClass = `font-mono text-[12px] font-medium uppercase tracking-[0.14em] antialiased transition-colors ${
+                activeSection === link.href.replace("#", "")
+                  ? "text-ember-500"
+                  : "text-ink-2 hover:text-ink"
+              }`;
+
+              // In-page anchors scroll smoothly; real routes use Next navigation.
+              if (link.href.startsWith("#")) {
+                return (
+                  <a
+                    key={link.href}
+                    href={link.href}
+                    onClick={(e) => handleSmoothScroll(e, link.href)}
+                    className={linkClass}
+                  >
+                    {t(link.key)}
+                  </a>
+                );
+              }
+
+              return (
+                <Link key={link.href} href={link.href} className={linkClass}>
+                  {t(link.key)}
+                </Link>
+              );
+            })}
           </div>
 
           {/* Right — language + auth */}
@@ -495,7 +509,7 @@ export default function LandingPage() {
           {/* Left side - Content */}
           <div className="max-w-[920px] flex-1 pt-20">
             <div className="flex items-center gap-3 mb-8 group">
-              <span className="font-mono text-micro uppercase text-ember-500/70">
+              <span className="font-mono text-micro uppercase text-ember-600">
                 {t("landing.hero.eyebrow")} · Morocco
               </span>
               <div className="h-px flex-1 bg-line opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
@@ -892,7 +906,7 @@ export default function LandingPage() {
                 >
                   <div className="shrink-0">
                     <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-xs border border-line flex items-center justify-center group-hover:border-ember-500/50 transition-colors">
-                      <span className="font-mono text-base sm:text-lg text-ember-500/60 group-hover:text-ember-500 transition-colors">
+                      <span className="font-mono text-base sm:text-lg text-ember-600 group-hover:text-ember-600 transition-colors">
                         {item.number}
                       </span>
                     </div>

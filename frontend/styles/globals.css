@@ -1,4 +1,4 @@
-/* Ember Noir type: one neutral grotesk (display + UI) + one mono (micro labels, figures).
+﻿/* Ember Noir type: one neutral grotesk (display + UI) + one mono (micro labels, figures).
    Inter is kept for the storefront theme (merchant default font) and legacy weights. */
 @import url("https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap");
 @tailwind base;
@@ -81,7 +81,7 @@
 }
 
 
-/* Scrollbar — light, subtle */
+/* Scrollbar â€” light, subtle */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
@@ -103,7 +103,7 @@ html {
 }
 
 /* ================================================================
-   EMBER NOIR — Phase 0 system layer
+   EMBER NOIR â€” Phase 0 system layer
    ================================================================ */
 
 :root {
@@ -117,7 +117,7 @@ html {
   --ink-2: #a79f95;
   --ink-3: #847b74;
 
-  /* Light tokens — now the default for all pages — all text dark & high-contrast */
+  /* Light tokens â€” now the default for all pages â€” all text dark & high-contrast */
   --light-canvas: #f8f7f5;
   --light-surface: #ffffff;
   --light-surface-2: #fdfbf8;
@@ -192,7 +192,7 @@ html {
 }
 
 /* ================================================================
-   EMBER NOIR — component layer (use these in new/refactored markup)
+   EMBER NOIR â€” component layer (use these in new/refactored markup)
    ================================================================ */
 @layer components {
   /* ---- micro typography: mono labels, slightly bigger + clearer ---- */
@@ -210,7 +210,7 @@ html {
   .rule {
     @apply relative h-px w-full bg-line;
   }
-  /* crosshair ticks at both ends — the small detail that reads "art directed" */
+  /* crosshair ticks at both ends â€” the small detail that reads "art directed" */
   .rule::before,
   .rule::after {
     content: "";
@@ -292,7 +292,7 @@ html {
   }
 }
 
-/* Light mode — now global (no more dark backgrounds) */
+/* Light mode â€” now global (no more dark backgrounds) */
 :root {
   --canvas: var(--light-canvas);
   --surface: var(--light-surface);
@@ -322,7 +322,7 @@ html, body {
 .micro, .micro-2, .breadcrumb, .kicker, .mono-num { color: var(--light-ink-2) !important; font-weight: 700 !important; letter-spacing: 0.12em !important; }
 .border-line, .hairline, .rule { border-color: var(--light-hairline) !important; background-color: var(--light-hairline) !important; }
 .rule::before, .rule::after { background: var(--light-hairline-strong) !important; }
-/* Hover stays clear — ember, not dark */
+/* Hover stays clear â€” ember, not dark */
 .hover\:text-ink:hover { color: var(--ember-500) !important; }
 .hover\:bg-surface:hover { background-color: var(--light-surface-2) !important; }
 .hover\:bg-canvas:hover { background-color: var(--light-surface-2) !important; }
@@ -340,6 +340,26 @@ html, body {
   --ink-3: var(--light-ink-3);
 }
 
+
+/* ================================================================
+   LIGHT THEME — translucent canvas surfaces + their text
+   Tailwind opacity variants (bg-canvas/50 … /90) keep the raw dark
+   hex, so they need their own light equivalents here.
+   ================================================================ */
+.bg-canvas\/50,
+.bg-canvas\/60 {
+  background-color: rgb(242 236 228 / 0.9) !important;
+}
+
+.bg-canvas\/70,
+.bg-canvas\/90 {
+  background-color: rgb(248 247 245 / 0.92) !important;
+}
+
+.hover\:bg-canvas\/50:hover,
+.hover\:bg-canvas\/60:hover {
+  background-color: var(--light-surface-3) !important;
+}
 
 /* Animations */
 .animate-fade-in {
@@ -665,7 +685,7 @@ html, body {
 }
 
 /* ================================================================
-   LANDING / AUTH — dark abstract design
+   LANDING / AUTH â€” dark abstract design
    ================================================================ */
 html {
   scroll-behavior: smooth;
@@ -984,25 +1004,25 @@ html {
   font-size: 10.5px;
   letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: rgba(237, 231, 220, 0.5);
+  color: var(--ink);
   text-align: left;
   padding: 1rem 0;
-  border-bottom: 1px solid rgba(237, 231, 220, 0.13);
+  border-bottom: 1px solid var(--hairline);
 }
 
 .portal-dates-cell {
   font-family: "Sora", sans-serif;
   font-size: 0.875rem;
-  color: rgba(237, 231, 220, 0.7);
+  color: var(--ink-2);
   padding: 1rem 0;
-  border-bottom: 1px solid rgba(237, 231, 220, 0.08);
+  border-bottom: 1px solid var(--hairline);
 }
 
 .portal-dates-cell-primary {
   font-family: "Syne", sans-serif;
   font-weight: 600;
   font-size: 1rem;
-  color: #ede7dc;
+  color: var(--ink);
 }
 
 /* Close/footer section */
@@ -1255,7 +1275,7 @@ html {
   animation: floatY 7s ease-in-out 1.2s infinite;
 }
 
-/* Accent button — solid ember. No gradient, no glow, 2px radius. */
+/* Accent button â€” solid ember. No gradient, no glow, 2px radius. */
 .btn-accent {
   background: var(--ember-500);
   color: var(--canvas);
@@ -1293,7 +1313,7 @@ html {
   }
 }
 
-/* Auth pages shell — same bloom as the landing, quieter */
+/* Auth pages shell â€” same bloom as the landing, quieter */
 .auth-shell {
   min-height: 100vh;
   background:
@@ -1356,7 +1376,7 @@ html {
 }
 
 /* ================================================================
-   EMBER NOIR — reduced-motion hygiene
+   EMBER NOIR â€” reduced-motion hygiene
    ================================================================ */
 @media (prefers-reduced-motion: reduce) {
   html {

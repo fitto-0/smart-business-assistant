@@ -23,20 +23,22 @@ router.get("/predictions", async (req, res) => {
     );
     const monthly = await agg.getMonthlySales(req.organizationId, 12);
 
-    if (monthly.length < 6) {
+    // Aucun mois futur ne doit figurer dans l'historique (données
+    // potentiellement saisies avec une date postérieure à aujourd'hui).
+    const currentMonth = monthLabel(new Date());
+    const history = monthly.filter((m) => m.month <= currentMonth);
+
+    if (history.length < 6) {
       return res.status(422).json({
-        error: `Not enough sales history: at least 6 months are required (have ${monthly.length}).`,
-        based_on_points: monthly.length,
+        error: `Not enough sales history: at least 6 months are required (have ${history.length}).`,
+        based_on_points: history.length,
       });
     }
 
-    const sales = monthly.map((m) => Number(m.total));
-    // Future labels computed from the last history month — the AI must
-    // never stamp forecasts with past months.
-    const futureLabels = futureMonthLabels(
-      monthly[monthly.length - 1].month,
-      horizon,
-    );
+    const sales = history.map((m) => Number(m.total));
+    // Les prédictions commencent au mois qui suit le mois en cours,
+    // jamais sur un mois passé (même si l'historique a des lacunes).
+    const futureLabels = futureMonthLabels(currentMonth, horizon);
 
     const aiRes = await ai.predict({
       sales,
@@ -47,7 +49,7 @@ router.get("/predictions", async (req, res) => {
     // On retourne au frontend l'historique réel + les prédictions
     return res.json({
       predictions: aiRes.predictions,
-      history: monthly.map((m) => ({
+      history: history.map((m) => ({
         month: m.month,
         total: Number(m.total),
       })),
@@ -434,6 +436,13 @@ router.put("/recommendations/:id/toggle", async (req, res) => {
 function normalizeLang(raw) {
   const l = String(raw || "en").slice(0, 2).toLowerCase();
   return l === "fr" ? "fr" : "en";
+}
+
+/**
+ * Étiquette "YYYY-MM" d'une date.
+ */
+function monthLabel(date) {
+  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`;
 }
 
 /**

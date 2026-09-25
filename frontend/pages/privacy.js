@@ -2,6 +2,7 @@ import Head from 'next/head';
 import Link from 'next/link';
 import { useState } from 'react';
 import { useLanguage } from '../lib/LanguageContext';
+import PortalAuthPill from '../components/PortalAuthPill';
 import { Globe } from 'lucide-react';
 
 export default function PrivacyPage() {
@@ -61,9 +62,7 @@ export default function PrivacyPage() {
               <Link href="/" className="portal-nav-link">
                 {t('contact.home')}
               </Link>
-              <Link href="/login" className="portal-pill-btn">
-                {t('contact.login')}
-              </Link>
+              <PortalAuthPill />
             </div>
           </div>
         </nav>

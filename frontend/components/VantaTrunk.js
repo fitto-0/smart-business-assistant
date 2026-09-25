@@ -18,7 +18,7 @@ export default function VantaTrunk() {
           minWidth: 200.00,
           scale: 1.00,
           scaleMobile: 1.00,
-          backgroundColor: 0x0A0807, // Match Ember Noir canvas color
+          backgroundColor: 0xF8F7F5, // Light canvas — matches the light theme
           color: 0xE2703A, // Ember orange color
           chaos: 1.5,
           spacing: 0,
@@ -47,7 +47,7 @@ export default function VantaTrunk() {
     <div
       ref={vantaRef}
       className="w-full h-full"
-      style={{ minHeight: '600px', backgroundColor: '#0A0807' }}
+      style={{ minHeight: '600px', backgroundColor: '#F8F7F5' }}
     />
   );
 }
