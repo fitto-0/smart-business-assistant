@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/router";
-import Head from "next/head";
 import axios from "axios";
 import {
   Filter,
@@ -10,58 +9,79 @@ import {
   ChevronRight,
   ShoppingBag,
   X,
+  Tag,
 } from "lucide-react";
+import { motion } from "framer-motion";
 import StorefrontLayout from "../../../../components/storefront/StorefrontLayout";
 import ProductCard from "../../../../components/storefront/ProductCard";
+
+const sortOptions = [
+  { value: "newest", label: "Newest" },
+  { value: "popular", label: "Most Popular" },
+  { value: "price_asc", label: "Price: Low to High" },
+  { value: "price_desc", label: "Price: High to Low" },
+  { value: "name_asc", label: "Name: A-Z" },
+  { value: "name_desc", label: "Name: Z-A" },
+];
 
 export default function StorefrontProductsPage() {
   const router = useRouter();
   const { userId } = router.query;
-  const { category, search, sort, page = "1", view = "grid" } = router.query;
 
   const [storeSettings, setStoreSettings] = useState(null);
   const [products, setProducts] = useState([]);
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [pagination, setPagination] = useState({
-    page: 1,
-    totalPages: 1,
-    total: 0,
-  });
+  const [total, setTotal] = useState(0);
   const [filtersOpen, setFiltersOpen] = useState(false);
-  const [selectedCategory, setSelectedCategory] = useState(category || "");
-  const [searchQuery, setSearchQuery] = useState(search || "");
-  const [sortBy, setSortBy] = useState(sort || "newest");
-  const [viewMode, setViewMode] = useState(view);
+  const [selectedCategory, setSelectedCategory] = useState("");
+  const [searchQuery, setSearchQuery] = useState("");
+  const [sortBy, setSortBy] = useState("newest");
+  const [perPage, setPerPage] = useState(12);
+  const [viewMode, setViewMode] = useState("grid");
 
-  const API_URL =
-    process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
-  const validUserId =
-    userId && !isNaN(parseInt(userId)) ? parseInt(userId) : null;
-  const currentPage = parseInt(page) || 1;
+  const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
+  const validUserId = userId && !isNaN(parseInt(userId)) ? parseInt(userId) : null;
+
+  const category = router.query.category || "";
+  const search = router.query.search || "";
+  const sort = router.query.sort || "newest";
+  const page = parseInt(router.query.page, 10) || 1;
+  const sale = router.query.sale === "true";
+  const view = router.query.view === "list" ? "list" : "grid";
+
+  // URL is the source of truth (shareable links, back button)
+  useEffect(() => {
+    setSelectedCategory(category);
+    setSearchQuery(search);
+    setSortBy(sort);
+    setViewMode(view);
+  }, [category, search, sort, view]);
 
   useEffect(() => {
     if (validUserId && router.isReady) {
-      fetchStoreSettings();
+      fetchSettings();
       fetchCategories();
+    }
+  }, [validUserId, router.isReady]);
+
+  useEffect(() => {
+    if (validUserId && router.isReady) {
       fetchProducts();
     }
-  }, [
-    validUserId,
-    router.isReady,
-    currentPage,
-    selectedCategory,
-    searchQuery,
-    sortBy,
-  ]);
+  }, [validUserId, router.isReady, page, category, search, sort, sale, perPage]);
 
-  const fetchStoreSettings = async () => {
+  const fetchSettings = async () => {
     try {
       const res = await axios.get(
         `${API_URL}/store-settings/public/${validUserId}`,
       );
       setStoreSettings(res.data);
+      const configured = parseInt(res.data?.products_per_page, 10);
+      if (Number.isFinite(configured) && configured > 0) {
+        setPerPage(configured);
+      }
     } catch (err) {
       console.error("Error fetching store settings:", err);
     }
@@ -81,29 +101,23 @@ export default function StorefrontProductsPage() {
   const fetchProducts = async () => {
     try {
       setLoading(true);
+      setError(null);
       const params = new URLSearchParams();
-      params.append("limit", "12");
-      params.append("offset", ((currentPage - 1) * 12).toString());
-
-      if (selectedCategory) params.append("category", selectedCategory);
-      if (searchQuery) params.append("search", searchQuery);
-
-      // Add sort parameter
-      if (sortBy) params.append("sort", sortBy);
+      params.append("limit", String(perPage));
+      params.append("offset", ((page - 1) * perPage).toString());
+      if (category) params.append("category", category);
+      if (search) params.append("search", search);
+      if (sort) params.append("sort", sort);
+      if (sale) params.append("sale", "true");
 
       const res = await axios.get(
         `${API_URL}/storefront/${validUserId}?${params.toString()}`,
       );
       setProducts(res.data.products || []);
-
-      // Calculate pagination from total
-      const total = res.data.total || res.data.products?.length || 0;
-      setPagination((prev) => ({
-        ...prev,
-        page: currentPage,
-        totalPages: Math.ceil(total / 12),
-        total,
-      }));
+      setTotal(res.data.total || 0);
+      setCategories((prev) =>
+        prev.length ? prev : res.data.categories || [],
+      );
     } catch (err) {
       console.error("Error fetching products:", err);
       setError("Failed to load products");
@@ -112,80 +126,185 @@ export default function StorefrontProductsPage() {
     }
   };
 
+  const navigate = (overrides) => {
+    const next = {
+      category: category || "",
+      search: search || "",
+      sort,
+      sale: sale ? "true" : "",
+      page: "1",
+      view,
+      ...overrides,
+    };
+    const query = Object.fromEntries(
+      Object.entries(next).filter(([, v]) => v !== "" && v != null),
+    );
+    router.push(
+      { pathname: `/storefront/${userId}/products`, query },
+      undefined,
+      { shallow: true },
+    );
+  };
+
   const handleSearch = (e) => {
     e.preventDefault();
-    router.push(
-      `/storefront/${userId}/products?search=${encodeURIComponent(searchQuery)}&page=1`,
-      undefined,
-      { shallow: true },
-    );
-  };
-
-  const handleCategoryChange = (cat) => {
-    setSelectedCategory(cat);
-    router.push(
-      `/storefront/${userId}/products?category=${encodeURIComponent(cat)}&page=1`,
-      undefined,
-      { shallow: true },
-    );
-  };
-
-  const handleSortChange = (sort) => {
-    setSortBy(sort);
-    router.push(
-      `/storefront/${userId}/products?${new URLSearchParams({ ...router.query, sort, page: "1" })}`,
-      undefined,
-      { shallow: true },
-    );
-  };
-
-  const handlePageChange = (newPage) => {
-    router.push(
-      `/storefront/${userId}/products?${new URLSearchParams({ ...router.query, page: newPage.toString() })}`,
-      undefined,
-      { shallow: true },
-    );
+    navigate({ search: searchQuery.trim(), page: "1" });
+    setFiltersOpen(false);
   };
 
   const clearFilters = () => {
-    setSelectedCategory("");
     setSearchQuery("");
+    setSelectedCategory("");
     router.push(`/storefront/${userId}/products`, undefined, { shallow: true });
   };
 
-  const hasActiveFilters = selectedCategory || searchQuery;
+  const hasActiveFilters = Boolean(category || search || sale);
+  const totalPages = Math.max(1, Math.ceil(total / perPage));
+  const primaryColor = storeSettings?.primary_color || "#3B82F6";
+  const textColor = storeSettings?.text_color || "#1F2937";
+  const textSecondaryColor = storeSettings?.text_secondary_color || "#6B7280";
+  const borderColor = storeSettings?.border_color || "#E5E7EB";
+  const containerWidth = storeSettings?.container_width || "max-w-7xl";
+  const cardStyle = storeSettings?.product_card_style || "standard";
+  const content = storeSettings?.content_overrides || {};
+  const showFilters = storeSettings?.show_product_filters !== false;
+  const showSort = storeSettings?.show_product_sort !== false;
 
-  const sortOptions = [
-    { value: "newest", label: "Newest" },
-    { value: "price_asc", label: "Price: Low to High" },
-    { value: "price_desc", label: "Price: High to Low" },
-    { value: "popular", label: "Most Popular" },
-    { value: "name_asc", label: "Name: A-Z" },
-    { value: "name_desc", label: "Name: Z-A" },
-  ];
+  const header = (
+    <section className="py-8 border-b" style={{ borderColor: borderColor }}>
+      <div className={`${containerWidth} mx-auto px-4 sm:px-6 lg:px-8`}>
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+          <div>
+            <h1
+              className="text-3xl font-bold"
+              style={{
+                color: textColor,
+                fontFamily: storeSettings?.heading_font_family,
+              }}
+            >
+              {sale ? content.sale_title || "On Sale" : content.products_title || "Products"}
+            </h1>
+            <p className="text-sm mt-1" style={{ color: textSecondaryColor }}>
+              {total} product{total !== 1 ? "s" : ""} found
+            </p>
+          </div>
 
-  if (loading && products.length === 0) {
-    return (
-      <StorefrontLayout
-        storeSettings={storeSettings}
-        userId={validUserId}
-        pageTitle="Products"
-      >
-        <div className="store-container py-16">
-          <div className="animate-pulse space-y-8">
-            <div className="h-8 bg-gray-200 rounded w-1/4"></div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-              {[...Array(4)].map((_, i) => (
-                <div key={i} className="h-72 bg-gray-200 rounded-xl"></div>
+          {hasActiveFilters && (
+            <button
+              onClick={clearFilters}
+              className="text-sm font-medium flex items-center gap-1"
+              style={{ color: primaryColor }}
+            >
+              <X size={14} /> Clear filters
+            </button>
+          )}
+        </div>
+
+        <div className="flex flex-col md:flex-row gap-4">
+          <form onSubmit={handleSearch} className="flex-1 relative">
+            <Filter
+              size={20}
+              className="absolute left-4 top-1/2 -translate-y-1/2"
+              style={{ color: textSecondaryColor }}
+            />
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Search products..."
+              className="input-field pl-12 pr-4"
+              style={{ borderColor: borderColor }}
+            />
+          </form>
+
+          {showFilters && categories.length > 0 && (
+            <select
+              value={category}
+              onChange={(e) => navigate({ category: e.target.value })}
+              className="input-field min-w-[180px] py-2"
+              style={{ borderColor: borderColor }}
+            >
+              <option value="">All Categories</option>
+              {categories.map((cat) => (
+                <option
+                  key={cat.category || cat}
+                  value={cat.category || cat}
+                >
+                  {cat.category || cat} ({cat.count || cat.product_count || 0})
+                </option>
               ))}
-            </div>
+            </select>
+          )}
+
+          {showSort && (
+            <select
+              value={sortBy}
+              onChange={(e) => navigate({ sort: e.target.value })}
+              className="input-field min-w-[180px] py-2"
+              style={{ borderColor: borderColor }}
+            >
+              {sortOptions.map((opt) => (
+                <option key={opt.value} value={opt.value}>
+                  {opt.label}
+                </option>
+              ))}
+            </select>
+          )}
+
+          <div className="flex items-center gap-1">
+            <button
+              onClick={() => navigate({ view: "grid" })}
+              aria-label="Grid view"
+              className="p-2 rounded-lg transition-colors"
+              style={{
+                backgroundColor: viewMode === "grid" ? primaryColor : "transparent",
+                color: viewMode === "grid" ? "#FFFFFF" : textSecondaryColor,
+              }}
+            >
+              <Grid size={20} />
+            </button>
+            <button
+              onClick={() => navigate({ view: "list" })}
+              aria-label="List view"
+              className="p-2 rounded-lg transition-colors"
+              style={{
+                backgroundColor: viewMode === "list" ? primaryColor : "transparent",
+                color: viewMode === "list" ? "#FFFFFF" : textSecondaryColor,
+              }}
+            >
+              <List size={20} />
+            </button>
           </div>
         </div>
-      </StorefrontLayout>
-    );
-  }
 
-  if (error) {
+        {sale && (
+          <div className="mt-4">
+            <span
+              className="inline-flex items-center gap-1 text-xs font-semibold px-3 py-1 rounded-full"
+              style={{ backgroundColor: primaryColor + "15", color: primaryColor }}
+            >
+              <Tag size={12} /> Sale items only
+            </span>
+          </div>
+        )}
+      </div>
+    </section>
+  );
+
+  const loadingSkeleton = (
+    <div className="store-container py-16">
+      <div className="animate-pulse space-y-8">
+        <div className="h-8 bg-gray-200 rounded w-1/4"></div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          {[...Array(8)].map((_, i) => (
+            <div key={i} className="h-72 bg-gray-200 rounded-xl"></div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+
+  if (error && products.length === 0) {
     return (
       <StorefrontLayout
         storeSettings={storeSettings}
@@ -203,128 +322,19 @@ export default function StorefrontProductsPage() {
     );
   }
 
-  const primaryColor = storeSettings?.primary_color || "#3B82F6";
-  const textColor = storeSettings?.text_color || "#1F2937";
-  const textSecondaryColor = storeSettings?.text_secondary_color || "#6B7280";
-  const borderColor = storeSettings?.border_color || "#E5E7EB";
-  const containerWidth = storeSettings?.container_width || "max-w-7xl";
-  const productsLayout = storeSettings?.products_layout || "grid";
-  const showFilters = storeSettings?.show_product_filters !== false;
-  const showSort = storeSettings?.show_product_sort !== false;
-  const cardStyle = storeSettings?.product_card_style || "standard";
-  const content = storeSettings?.content_overrides || {};
-
   return (
     <StorefrontLayout
       storeSettings={storeSettings}
       userId={validUserId}
       pageTitle="Products"
     >
-      <section className="py-8 border-b" style={{ borderColor: borderColor }}>
+      {header}
+
+      <section className="py-8 min-h-[50vh]">
         <div className={`${containerWidth} mx-auto px-4 sm:px-6 lg:px-8`}>
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
-            <div>
-              <h1
-                className="text-3xl font-bold"
-                style={{
-                  color: textColor,
-                  fontFamily: storeSettings?.heading_font_family,
-                }}
-              >
-                {content.products_title || "Products"}
-              </h1>
-              <p className="text-sm mt-1" style={{ color: textSecondaryColor }}>
-                {pagination.total} product{pagination.total !== 1 ? "s" : ""}{" "}
-                found
-              </p>
-            </div>
-
-            {hasActiveFilters && (
-              <button
-                onClick={clearFilters}
-                className="text-sm font-medium flex items-center gap-1"
-                style={{ color: primaryColor }}
-              >
-                <X size={14} /> Clear filters
-              </button>
-            )}
-          </div>
-
-          {/* Search & Filters */}
-          <div className="flex flex-col md:flex-row gap-4">
-            <form onSubmit={handleSearch} className="flex-1 relative">
-              <Filter
-                size={20}
-                className="absolute left-4 top-1/2 -translate-y-1/2"
-                style={{ color: textSecondaryColor }}
-              />
-              <input
-                type="text"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search products..."
-                className="input-field pl-12 pr-4"
-                style={{ borderColor: borderColor }}
-              />
-            </form>
-
-            {showFilters && (
-              <div className="flex items-center gap-2">
-                <select
-                  value={selectedCategory}
-                  onChange={(e) => handleCategoryChange(e.target.value)}
-                  className="input-field min-w-[180px] py-2"
-                  style={{ borderColor: borderColor }}
-                >
-                  <option value="">All Categories</option>
-                  {categories.map((cat) => (
-                    <option
-                      key={cat.category || cat}
-                      value={cat.category || cat}
-                    >
-                      {cat.category || cat} ({cat.count || 0})
-                    </option>
-                  ))}
-                </select>
-              </div>
-            )}
-
-            {showSort && (
-              <select
-                value={sortBy}
-                onChange={(e) => handleSortChange(e.target.value)}
-                className="input-field min-w-[180px] py-2"
-                style={{ borderColor: borderColor }}
-              >
-                {sortOptions.map((opt) => (
-                  <option key={opt.value} value={opt.value}>
-                    {opt.label}
-                  </option>
-                ))}
-              </select>
-            )}
-
-            <div className="flex items-center gap-1">
-              <button
-                onClick={() => setViewMode("grid")}
-                className={`p-2 rounded-lg transition-colors ${viewMode === "grid" ? `bg-[${primaryColor}] text-white` : "text-gray-500 hover:bg-gray-100"}`}
-              >
-                <Grid size={20} />
-              </button>
-              <button
-                onClick={() => setViewMode("list")}
-                className={`p-2 rounded-lg transition-colors ${viewMode === "list" ? `bg-[${primaryColor}] text-white` : "text-gray-500 hover:bg-gray-100"}`}
-              >
-                <List size={20} />
-              </button>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <section className="py-8">
-        <div className={`${containerWidth} mx-auto px-4 sm:px-6 lg:px-8`}>
-          {products.length === 0 ? (
+          {loading && products.length === 0 ? (
+            loadingSkeleton
+          ) : products.length === 0 ? (
             <div className="text-center py-16">
               <ShoppingBag size={48} className="mx-auto mb-4 text-gray-300" />
               <h3
@@ -346,75 +356,97 @@ export default function StorefrontProductsPage() {
             </div>
           ) : (
             <>
-              {/* Products Grid/List */}
-              <div
-                className={`grid gap-6 ${viewMode === "list" ? "grid-cols-1" : "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"}`}
+              <motion.div
+                className={`grid gap-6 ${
+                  viewMode === "list"
+                    ? "grid-cols-1"
+                    : "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
+                }`}
+                initial="hidden"
+                animate="show"
+                variants={{
+                  hidden: {},
+                  show: { transition: { staggerChildren: 0.05 } },
+                }}
+                key={`${category}-${sort}-${page}`}
               >
                 {products.map((product) => (
-                  <ProductCard
+                  <motion.div
                     key={product.id}
-                    product={product}
-                    userId={validUserId}
-                    primaryColor={primaryColor}
-                    accentColor={storeSettings?.accent_color || "#F59E0B"}
-                    cardBackgroundColor={storeSettings?.card_background_color}
-                    cardTextColor={storeSettings?.card_text_color || textColor}
-                    borderColor={borderColor}
-                    layout={viewMode}
-                    cardStyle={cardStyle}
-                  />
+                    variants={{
+                      hidden: { opacity: 0, y: 16 },
+                      show: {
+                        opacity: 1,
+                        y: 0,
+                        transition: { duration: 0.3, ease: "easeOut" },
+                      },
+                    }}
+                  >
+                    <ProductCard
+                      product={product}
+                      userId={validUserId}
+                      primaryColor={primaryColor}
+                      accentColor={storeSettings?.accent_color || "#F59E0B"}
+                      cardBackgroundColor={storeSettings?.card_background_color}
+                      cardTextColor={storeSettings?.card_text_color || textColor}
+                      borderColor={borderColor}
+                      layout={viewMode}
+                      cardStyle={cardStyle}
+                    />
+                  </motion.div>
                 ))}
-              </div>
+              </motion.div>
 
-              {/* Pagination */}
-              {pagination.totalPages > 1 && (
+              {totalPages > 1 && (
                 <div className="flex items-center justify-center gap-2 mt-10">
                   <button
-                    onClick={() => handlePageChange(currentPage - 1)}
-                    disabled={currentPage === 1}
+                    onClick={() => navigate({ page: String(page - 1) })}
+                    disabled={page === 1}
                     className="p-2 rounded-lg border transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                     style={{ borderColor: borderColor, color: textColor }}
+                    aria-label="Previous page"
                   >
                     <ChevronLeft size={20} />
                   </button>
 
-                  {[...Array(Math.min(pagination.totalPages, 5))].map(
-                    (_, i) => {
-                      let pageNum;
-                      if (pagination.totalPages <= 5) {
-                        pageNum = i + 1;
-                      } else if (currentPage <= 3) {
-                        pageNum = i + 1;
-                      } else if (currentPage >= pagination.totalPages - 2) {
-                        pageNum = pagination.totalPages - 4 + i;
-                      } else {
-                        pageNum = currentPage - 2 + i;
-                      }
+                  {Array.from({ length: totalPages }, (_, i) => i + 1)
+                    .filter((pageNum) => {
+                      if (totalPages <= 7) return true;
+                      if (page <= 4) return pageNum <= 5 || pageNum === totalPages;
+                      if (page >= totalPages - 3)
+                        return pageNum >= totalPages - 4 || pageNum === 1;
                       return (
+                        Math.abs(pageNum - page) <= 1 ||
+                        pageNum === 1 ||
+                        pageNum === totalPages
+                      );
+                    })
+                    .map((pageNum, i, arr) => (
+                      <span key={pageNum} className="flex items-center gap-2">
+                        {i > 0 && pageNum - arr[i - 1] > 1 && (
+                          <span style={{ color: textSecondaryColor }}>…</span>
+                        )}
                         <button
-                          key={pageNum}
-                          onClick={() => handlePageChange(pageNum)}
-                          className={`w-10 h-10 rounded-lg font-medium transition-colors ${
-                            currentPage === pageNum
-                              ? `bg-[${primaryColor}] text-white`
-                              : `hover:bg-gray-100`
-                          }`}
+                          onClick={() => navigate({ page: String(pageNum) })}
+                          className="w-10 h-10 rounded-lg font-medium transition-colors"
                           style={{
-                            color:
-                              currentPage === pageNum ? "white" : textColor,
+                            backgroundColor:
+                              page === pageNum ? primaryColor : "transparent",
+                            color: page === pageNum ? "#FFFFFF" : textColor,
+                            border: `1px solid ${borderColor}`,
                           }}
                         >
                           {pageNum}
                         </button>
-                      );
-                    },
-                  )}
+                      </span>
+                    ))}
 
                   <button
-                    onClick={() => handlePageChange(currentPage + 1)}
-                    disabled={currentPage === pagination.totalPages}
+                    onClick={() => navigate({ page: String(page + 1) })}
+                    disabled={page >= totalPages}
                     className="p-2 rounded-lg border transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                     style={{ borderColor: borderColor, color: textColor }}
+                    aria-label="Next page"
                   >
                     <ChevronRight size={20} />
                   </button>

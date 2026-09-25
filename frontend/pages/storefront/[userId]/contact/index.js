@@ -17,6 +17,16 @@ import {
   ChevronRight,
 } from "lucide-react";
 import StorefrontLayout from "../../../../components/storefront/StorefrontLayout";
+import { money } from "../../../../lib/money";
+
+const SUBJECT_LABELS = {
+  general: "General Inquiry",
+  order: "Order Support",
+  product: "Product Question",
+  returns: "Returns & Exchanges",
+  wholesale: "Wholesale Inquiry",
+  other: "Other",
+};
 
 export default function StorefrontContactPage() {
   const router = useRouter();
@@ -63,18 +73,29 @@ export default function StorefrontContactPage() {
     setFormStatus({ type: "", message: "" });
 
     try {
-      // In a real app, this would send to your backend
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      const res = await axios.post(
+        `${API_URL}/storefront/${validUserId}/contact`,
+        {
+          name: formData.name,
+          email: formData.email,
+          subject:
+            SUBJECT_LABELS[formData.subject] || formData.subject || "New message",
+          message: formData.message,
+        },
+      );
       setFormStatus({
         type: "success",
         message:
-          "Thank you for your message! We'll get back to you within 24 hours.",
+          res.data?.message ||
+          "Thank you for your message! We will get back to you shortly.",
       });
       setFormData({ name: "", email: "", subject: "", message: "" });
     } catch (err) {
       setFormStatus({
         type: "error",
-        message: "Failed to send message. Please try again later.",
+        message:
+          err.response?.data?.error ||
+          "Failed to send message. Please try again later.",
       });
     } finally {
       setSubmitting(false);
@@ -109,26 +130,82 @@ export default function StorefrontContactPage() {
   const borderColor = storeSettings?.border_color || "#E5E7EB";
   const content = storeSettings?.content_overrides || {};
 
-  const contactInfo = [
+  const freeShippingThreshold = Number(content.free_shipping_threshold ?? 500);
+  const shippingFee = Number(content.shipping_fee ?? 30);
+  const contactFormEnabled = storeSettings?.contact_form_enabled !== false;
+
+  const PAYMENT_LABELS = {
+    "espèces": "cash on delivery",
+    carte: "credit or debit card",
+    virement: "bank transfer",
+    "chèque": "cheque",
+    autre: "other arrangements",
+  };
+  const enabledPayments = (
+    Array.isArray(content.payment_methods) && content.payment_methods.length
+      ? content.payment_methods
+      : ["espèces", "carte", "virement", "chèque", "autre"]
+  )
+    .map((m) => PAYMENT_LABELS[m])
+    .filter(Boolean);
+
+  const defaultFaqs = [
     {
+      q: "What are your shipping options?",
+      a:
+        freeShippingThreshold > 0
+          ? `Orders are prepared and shipped quickly. Standard delivery costs ${money(shippingFee)} and is free on orders over ${money(freeShippingThreshold)}.`
+          : `Orders are prepared and shipped quickly. Delivery costs ${money(shippingFee)} and the exact fee is confirmed with you by phone.`,
+    },
+    {
+      q: "What payment methods do you accept?",
+      a: `You can pay with: ${enabledPayments.join(", ")}.`,
+    },
+    {
+      q: "What is your return policy?",
+      a:
+        content.return_policy ||
+        "You have 30 days to return an item in its original condition. Refunds are issued once the return is received and inspected.",
+    },
+    {
+      q: "How can I track my order?",
+      a: "After placing an order you receive an order number. Use it with your phone number to ask us for a status update at any time.",
+    },
+    {
+      q: "How can I reach you?",
+      a: [
+        storeSettings?.contact_phone ? `by phone at ${storeSettings.contact_phone}` : null,
+        storeSettings?.contact_email ? `by email at ${storeSettings.contact_email}` : null,
+      ]
+        .filter(Boolean)
+        .join(" or ") || "Use the contact form on this page.",
+    },
+  ];
+  const faqs =
+    Array.isArray(content.faq) && content.faq.length > 0 ? content.faq : defaultFaqs;
+
+  const contactInfo = [
+    storeSettings?.contact_email && {
       icon: Mail,
       title: "Email Us",
-      value: storeSettings?.contact_email || "support@store.com",
-      href: `mailto:${storeSettings?.contact_email || "support@store.com"}`,
+      value: storeSettings.contact_email,
+      href: `mailto:${storeSettings.contact_email}`,
     },
-    {
+    storeSettings?.contact_phone && {
       icon: Phone,
       title: "Call Us",
-      value: storeSettings?.contact_phone || "+1 (555) 000-0000",
-      href: `tel:${storeSettings?.contact_phone || "+15550000000"}`,
+      value: storeSettings.contact_phone,
+      href: `tel:${storeSettings.contact_phone}`,
     },
-    {
+    (storeSettings?.address || storeSettings?.city) && {
       icon: MapPin,
       title: "Visit Us",
-      value: `${storeSettings?.address || "123 Main St"}, ${storeSettings?.city || "City"}, ${storeSettings?.country || "Country"}`,
+      value: [storeSettings?.address, storeSettings?.city, storeSettings?.country]
+        .filter(Boolean)
+        .join(", "),
       href: null,
     },
-  ].filter((item) => item.value);
+  ].filter(Boolean);
 
   const socialLinks = [
     { icon: Facebook, url: storeSettings?.facebook_url, label: "Facebook" },
@@ -181,7 +258,7 @@ export default function StorefrontContactPage() {
         <div className={`${containerWidth} mx-auto px-4 sm:px-6 lg:px-8`}>
           <div className="grid lg:grid-cols-3 gap-8">
             {/* Contact Info */}
-            <div className="lg:col-span-1">
+            <div className={contactFormEnabled ? "lg:col-span-1" : "lg:col-span-3"}>
               <div
                 className="p-6 rounded-2xl"
                 style={{
@@ -295,6 +372,7 @@ export default function StorefrontContactPage() {
             </div>
 
             {/* Contact Form */}
+            {contactFormEnabled && (
             <div className="lg:col-span-2">
               <div
                 className="card p-6 md:p-8"
@@ -454,6 +532,7 @@ export default function StorefrontContactPage() {
                 </form>
               </div>
             </div>
+            )}
           </div>
         </div>
       </section>
@@ -483,28 +562,7 @@ export default function StorefrontContactPage() {
           </div>
 
           <div className="max-w-3xl mx-auto space-y-4">
-            {[
-              {
-                q: "What are your shipping options?",
-                a: "We offer standard shipping (5-7 business days), express shipping (2-3 business days), and free shipping on orders over $50.",
-              },
-              {
-                q: "What is your return policy?",
-                a: "We offer a 30-day return policy on all items. Products must be in original condition with tags attached.",
-              },
-              {
-                q: "How can I track my order?",
-                a: "Once your order ships, you'll receive a tracking number via email. You can also track orders in your account.",
-              },
-              {
-                q: "Do you ship internationally?",
-                a: "Yes, we ship to most countries worldwide. Shipping costs and delivery times vary by destination.",
-              },
-              {
-                q: "What payment methods do you accept?",
-                a: "We accept all major credit cards, PayPal, Apple Pay, Google Pay, and buy now pay later options.",
-              },
-            ].map((faq, index) => (
+            {faqs.map((faq, index) => (
               <details
                 key={index}
                 className="group card p-6"

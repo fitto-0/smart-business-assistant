@@ -3,6 +3,8 @@ import { useRouter } from 'next/router';
 import Head from 'next/head';
 import axios from 'axios';
 import { ChevronRight, ShoppingBag } from 'lucide-react';
+import { motion } from 'framer-motion';
+import Link from 'next/link';
 import StorefrontLayout from '../../../../components/storefront/StorefrontLayout';
 import CategoryCard from '../../../../components/storefront/CategoryCard';
 
@@ -82,14 +84,19 @@ export default function StorefrontCategoriesPage() {
     >
       <section className="py-16">
         <div className={`${containerWidth} mx-auto px-4 sm:px-6 lg:px-8`}>
-          <div className="text-center mb-12">
+          <motion.div
+            className="text-center mb-12"
+            initial={{ opacity: 0, y: 24 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+          >
             <h1 className="text-4xl md:text-5xl font-bold mb-4" style={{ color: textColor, fontFamily: storeSettings?.heading_font_family }}>
               Shop by Category
             </h1>
             <p className="text-lg max-w-2xl mx-auto" style={{ color: textSecondaryColor }}>
               Explore our wide range of product categories and find exactly what you're looking for.
             </p>
-          </div>
+          </motion.div>
 
           {categories.length === 0 ? (
             <div className="text-center py-12">
@@ -98,22 +105,37 @@ export default function StorefrontCategoriesPage() {
               <p style={{ color: textSecondaryColor }}>Products will appear here once added.</p>
             </div>
           ) : (
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+            <motion.div
+              className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4"
+              initial="hidden"
+              animate="show"
+              variants={{ hidden: {}, show: { transition: { staggerChildren: 0.06 } } }}
+            >
               {categories.map((category) => (
-                <CategoryCard
+                <motion.div
                   key={category.category || category}
-                  category={category}
-                  userId={validUserId}
-                  primaryColor={primaryColor}
-                />
+                  variants={{ hidden: { opacity: 0, y: 20 }, show: { opacity: 1, y: 0 } }}
+                >
+                  <CategoryCard
+                    category={category}
+                    userId={validUserId}
+                    primaryColor={primaryColor}
+                  />
+                </motion.div>
               ))}
-            </div>
+            </motion.div>
           )}
 
-          <div className="text-center mt-12">
+          <div className="text-center mt-12 space-y-4">
             <p style={{ color: textSecondaryColor }}>
               {categories.length} categor{categories.length === 1 ? 'y' : 'ies'} available
             </p>
+            <Link
+              href={`/storefront/${validUserId}/products`}
+              className="btn-outline inline-flex items-center gap-2"
+            >
+              View all products <ChevronRight size={16} />
+            </Link>
           </div>
         </div>
       </section>

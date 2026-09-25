@@ -6,7 +6,6 @@ import {
   Menu,
   X,
   Search,
-  User,
   Heart,
   Facebook,
   Instagram,
@@ -14,14 +13,16 @@ import {
   Mail,
   Phone,
   MapPin,
-  ArrowRight,
-  ChevronDown,
-  ChevronRight,
-  Sun,
-  Moon,
 } from "lucide-react";
 import { useRouter } from "next/router";
+import { AnimatePresence, motion } from "framer-motion";
+import toast, { Toaster } from "react-hot-toast";
+import axios from "axios";
 import { assetUrl } from "../../lib/assetUrl";
+import { useCart, useWishlist } from "../../lib/cart";
+import { money } from "../../lib/money";
+
+const spring = { type: "spring", stiffness: 380, damping: 34 };
 
 export default function StorefrontLayout({
   children,
@@ -34,16 +35,12 @@ export default function StorefrontLayout({
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [cartOpen, setCartOpen] = useState(false);
-  const [isMobile, setIsMobile] = useState(false);
+  const [newsletterState, setNewsletterState] = useState("idle");
+  const [newsletterEmail, setNewsletterEmail] = useState("");
 
-  // Responsive breakpoint detection
-  useEffect(() => {
-    const checkMobile = () => setIsMobile(window.innerWidth < 768);
-    checkMobile();
-    window.addEventListener("resize", checkMobile);
-    return () => window.removeEventListener("resize", checkMobile);
-  }, []);
-  const [cartItems, setCartItems] = useState([]);
+  const { items: cartItems, count: cartCount, update: updateCartQuantity, subtotal } =
+    useCart(userId);
+  const wishlist = useWishlist(userId);
 
   const primaryColor = storeSettings?.primary_color || "#3B82F6";
   const secondaryColor = storeSettings?.secondary_color || "#1E40AF";
@@ -68,7 +65,19 @@ export default function StorefrontLayout({
   const headingFontFamily =
     storeSettings?.heading_font_family || "Inter, system-ui, sans-serif";
   const borderRadius = storeSettings?.border_radius || "0.75rem";
-  const containerWidth = storeSettings?.container_width || "max-w-7xl";
+
+  const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
+
+  // Close overlays on navigation
+  useEffect(() => {
+    const close = () => {
+      setMobileMenuOpen(false);
+      setSearchOpen(false);
+      setCartOpen(false);
+    };
+    router.events.on("routeChangeStart", close);
+    return () => router.events.off("routeChangeStart", close);
+  }, [router.events]);
 
   // Background values are always applied with longhand properties (`background`
   // shorthand next to `backgroundColor` makes React wipe the color again and
@@ -107,8 +116,6 @@ export default function StorefrontLayout({
 
     document.body.style.fontFamily = fontFamily;
     document.body.style.color = textColor;
-    // Same longhand-only rule as the wrapper div, and stale values are cleared
-    // so switching background type doesn't keep the previous one.
     document.body.style.backgroundColor =
       backgroundType === "color" ? backgroundColor : "transparent";
     document.body.style.backgroundImage =
@@ -139,49 +146,38 @@ export default function StorefrontLayout({
     borderRadius,
   ]);
 
+  // router.pathname is a route pattern (/storefront/[userId]/products), so the
+  // active state is computed from asPath instead.
+  const currentPath = (router.asPath || "").split("?")[0];
+  const isActive = (href) =>
+    currentPath === href || currentPath.startsWith(`${href}/`);
+
   const handleSearch = (e) => {
     e.preventDefault();
     if (searchQuery.trim()) {
       router.push(
-        `/storefront/${userId}/products?search=${encodeURIComponent(searchQuery)}`,
+        `/storefront/${userId}/products?search=${encodeURIComponent(searchQuery.trim())}`,
       );
       setSearchOpen(false);
       setSearchQuery("");
     }
   };
 
-  const addToCart = (product) => {
-    setCartItems((prev) => {
-      const existing = prev.find((item) => item.id === product.id);
-      if (existing) {
-        return prev.map((item) =>
-          item.id === product.id
-            ? { ...item, quantity: item.quantity + 1 }
-            : item,
-        );
-      }
-      return [...prev, { ...product, quantity: 1 }];
-    });
-    setCartOpen(true);
-  };
-
-  const updateCartQuantity = (productId, quantity) => {
-    if (quantity <= 0) {
-      setCartItems((prev) => prev.filter((item) => item.id !== productId));
-    } else {
-      setCartItems((prev) =>
-        prev.map((item) =>
-          item.id === productId ? { ...item, quantity } : item,
-        ),
-      );
+  const subscribeNewsletter = async (e) => {
+    e.preventDefault();
+    if (!newsletterEmail.trim()) return;
+    setNewsletterState("loading");
+    try {
+      await axios.post(`${API_URL}/storefront/${userId}/newsletter`, {
+        email: newsletterEmail.trim(),
+      });
+      setNewsletterState("done");
+      setNewsletterEmail("");
+    } catch (err) {
+      setNewsletterState("error");
+      toast.error(err.response?.data?.error || "Subscription failed");
     }
   };
-
-  const cartTotal = cartItems.reduce(
-    (sum, item) => sum + parseFloat(item.price) * item.quantity,
-    0,
-  );
-  const cartCount = cartItems.reduce((sum, item) => sum + item.quantity, 0);
 
   const navLinks = [
     {
@@ -210,6 +206,8 @@ export default function StorefrontLayout({
       show: storeSettings?.show_contact_page !== false,
     },
   ].filter((link) => link.show);
+
+  const iconButtonStyle = { color: textSecondaryColor };
 
   return (
     <>
@@ -269,17 +267,18 @@ export default function StorefrontLayout({
           * { font-family: var(--store-font) !important; }
           h1, h2, h3, h4, h5, h6 { font-family: var(--store-heading-font) !important; }
           .store-container { max-width: 80rem; margin: 0 auto; padding: 0 1.5rem; }
-          .btn-primary { background: var(--store-primary); color: ${buttonTextColor}; padding: 0.75rem 1.5rem; border-radius: var(--store-radius); font-weight: 600; transition: all 0.2s; }
+          .btn-primary { background: var(--store-primary); color: ${buttonTextColor}; padding: 0.75rem 1.5rem; border-radius: var(--store-radius); font-weight: 600; transition: all 0.2s; display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem; }
           .btn-primary:hover { opacity: 0.9; transform: translateY(-1px); }
-          .btn-secondary { background: var(--store-secondary); color: ${buttonTextColor}; padding: 0.75rem 1.5rem; border-radius: var(--store-radius); font-weight: 600; transition: all 0.2s; }
+          .btn-primary:disabled { opacity: 0.55; cursor: not-allowed; transform: none; }
+          .btn-secondary { background: var(--store-secondary); color: ${buttonTextColor}; padding: 0.75rem 1.5rem; border-radius: var(--store-radius); font-weight: 600; transition: all 0.2s; display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem; }
           .btn-secondary:hover { opacity: 0.9; }
           .btn-accent { background: var(--store-accent); color: ${buttonTextColor}; padding: 0.75rem 1.5rem; border-radius: var(--store-radius); font-weight: 600; transition: all 0.2s; }
           .btn-accent:hover { opacity: 0.9; }
-          .btn-outline { border: 2px solid var(--store-primary); color: var(--store-primary); padding: 0.75rem 1.5rem; border-radius: var(--store-radius); font-weight: 600; transition: all 0.2s; background: transparent; }
+          .btn-outline { border: 2px solid var(--store-primary); color: var(--store-primary); padding: 0.75rem 1.5rem; border-radius: var(--store-radius); font-weight: 600; transition: all 0.2s; background: transparent; display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem; }
           .btn-outline:hover { background: var(--store-primary); color: white; }
           .input-field { width: 100%; padding: 0.75rem 1rem; border: 1px solid var(--store-border); border-radius: var(--store-radius); background: white; color: var(--store-text); transition: all 0.2s; }
           .input-field:focus { outline: none; border-color: var(--store-primary); box-shadow: 0 0 0 3px ${primaryColor + "33"}; }
-          .card { background: ${cardBackgroundColor}; color: ${cardTextColor}; border: 1px solid var(--store-border); border-radius: var(--store-radius); transition: all 0.3s; }
+          .card { background: ${cardBackgroundColor}; color: ${cardTextColor}; border: 1px solid var(--store-border); border-radius: var(--store-radius); transition: box-shadow 0.3s, transform 0.3s; }
           .card:hover { box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1), 0 8px 10px -6px rgba(0,0,0,0.1); }
           .section-title { font-size: 1.875rem; font-weight: 700; color: var(--store-text); margin-bottom: 0.5rem; }
           .section-subtitle { color: var(--store-text-secondary); font-size: 1.125rem; }
@@ -288,6 +287,19 @@ export default function StorefrontLayout({
           .badge-accent { background: var(--store-accent); color: white; }
         `}</style>
       </Head>
+
+      <Toaster
+        position="top-center"
+        toastOptions={{
+          duration: 2400,
+          style: {
+            background: textColor,
+            color: "#FFFFFF",
+            borderRadius: borderRadius,
+            fontSize: "14px",
+          },
+        }}
+      />
 
       <div className="min-h-screen flex flex-col" style={backgroundStyles}>
         {/* Header */}
@@ -392,76 +404,94 @@ export default function StorefrontLayout({
 
               {/* Desktop Navigation */}
               <nav className="hidden md:flex items-center gap-8">
-                {navLinks.map((link) => (
-                  <Link
-                    key={link.href}
-                    href={link.href}
-                    className={`text-[16px] font-semibold antialiased tracking-[0.01em] transition-colors relative py-2 ${
-                      router.pathname === link.href ||
-                      router.pathname.startsWith(link.href + "/")
-                        ? `text-[${primaryColor}]`
-                        : `text-[${textSecondaryColor}] hover:text-[${primaryColor}]`
-                    }`}
-                  >
-                    {link.label}
-                    {router.pathname === link.href ||
-                      (router.pathname.startsWith(link.href + "/") && (
-                        <span
-                          className="absolute bottom-0 left-0 right-0 h-0.5 rounded-full"
+                {navLinks.map((link) => {
+                  const active = isActive(link.href);
+                  return (
+                    <Link
+                      key={link.href}
+                      href={link.href}
+                      className="text-[16px] font-semibold antialiased tracking-[0.01em] transition-colors relative py-2"
+                      style={{
+                        color: active ? primaryColor : textSecondaryColor,
+                      }}
+                    >
+                      <span
+                        className="transition-colors hover:opacity-80"
+                        onMouseEnter={(e) => {
+                          if (!active) e.currentTarget.style.color = primaryColor;
+                        }}
+                        onMouseLeave={(e) => {
+                          if (!active)
+                            e.currentTarget.style.color = textSecondaryColor;
+                        }}
+                      >
+                        {link.label}
+                      </span>
+                      {active && (
+                        <motion.span
+                          layoutId="nav-underline"
+                          className="absolute -bottom-0.5 left-0 right-0 h-0.5 rounded-full"
                           style={{ backgroundColor: primaryColor }}
                         />
-                      ))}
-                  </Link>
-                ))}
+                      )}
+                    </Link>
+                  );
+                })}
               </nav>
 
               {/* Actions */}
-              <div className="flex items-center gap-3">
-                {/* Search */}
+              <div className="flex items-center gap-2 sm:gap-3">
                 <button
                   onClick={() => setSearchOpen(!searchOpen)}
-                  className="p-2 rounded-lg hover:bg-gray-100 transition-colors text-[${textSecondaryColor}] hover:text-[${primaryColor}]"
-                  style={{ color: textSecondaryColor }}
+                  aria-label="Search"
+                  className="p-2 rounded-lg hover:bg-black/5 transition-colors"
+                  style={iconButtonStyle}
                 >
                   <Search size={20} />
                 </button>
 
-                {/* Wishlist */}
                 <Link
                   href={`/storefront/${userId}/wishlist`}
-                  className="p-2 rounded-lg hover:bg-gray-100 transition-colors text-[${textSecondaryColor}] hover:text-[${primaryColor}] relative"
+                  aria-label="Wishlist"
+                  className="p-2 rounded-lg hover:bg-black/5 transition-colors relative"
+                  style={iconButtonStyle}
                 >
                   <Heart size={20} />
+                  {wishlist.count > 0 && (
+                    <span
+                      className="absolute -top-1 -right-1 w-5 h-5 rounded-full text-[10px] flex items-center justify-center font-bold text-white"
+                      style={{ backgroundColor: accentColor }}
+                    >
+                      {wishlist.count > 99 ? "99+" : wishlist.count}
+                    </span>
+                  )}
                 </Link>
 
-                {/* Cart */}
                 <button
-                  onClick={() => setCartOpen(!cartOpen)}
-                  className="relative p-2 rounded-lg hover:bg-gray-100 transition-colors text-[${textSecondaryColor}] hover:text-[${primaryColor}]"
+                  onClick={() => setCartOpen(true)}
+                  aria-label="Open cart"
+                  className="relative p-2 rounded-lg hover:bg-black/5 transition-colors"
+                  style={iconButtonStyle}
                 >
                   <ShoppingBag size={20} />
                   {cartCount > 0 && (
-                    <span
-                      className="absolute -top-1 -right-1 w-5 h-5 rounded-full text-xs flex items-center justify-center font-bold text-white"
+                    <motion.span
+                      key={cartCount}
+                      initial={{ scale: 0.5 }}
+                      animate={{ scale: 1 }}
+                      transition={spring}
+                      className="absolute -top-1 -right-1 w-5 h-5 rounded-full text-[10px] flex items-center justify-center font-bold text-white"
                       style={{ backgroundColor: accentColor }}
                     >
                       {cartCount > 99 ? "99+" : cartCount}
-                    </span>
+                    </motion.span>
                   )}
                 </button>
 
-                {/* Account */}
-                <Link
-                  href={`/storefront/${userId}/account`}
-                  className="p-2 rounded-lg hover:bg-gray-100 transition-colors text-[${textSecondaryColor}] hover:text-[${primaryColor}]"
-                >
-                  <User size={20} />
-                </Link>
-
-                {/* Mobile Menu Button */}
                 <button
                   onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                  className="md:hidden p-2 rounded-lg hover:bg-gray-100 transition-colors text-[${textColor}]"
+                  aria-label="Menu"
+                  className="md:hidden p-2 rounded-lg hover:bg-black/5 transition-colors"
                   style={{ color: textColor }}
                 >
                   {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
@@ -470,119 +500,178 @@ export default function StorefrontLayout({
             </div>
           </div>
 
-          {/* Search Bar (Mobile/Expanded) */}
-          {searchOpen && (
-            <div className="store-container pb-4 md:hidden animate-slide-down">
-              <form onSubmit={handleSearch} className="flex gap-2">
-                <input
-                  type="text"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="Search products..."
-                  className="input-field flex-1"
-                  autoFocus
-                />
-                <button type="submit" className="btn-primary px-4">
-                  Search
-                </button>
-              </form>
-            </div>
-          )}
+          {/* Search Bar */}
+          <AnimatePresence>
+            {searchOpen && (
+              <motion.div
+                initial={{ height: 0, opacity: 0 }}
+                animate={{ height: "auto", opacity: 1 }}
+                exit={{ height: 0, opacity: 0 }}
+                transition={{ duration: 0.22 }}
+                className="store-container overflow-hidden"
+              >
+                <form onSubmit={handleSearch} className="flex gap-2 py-4">
+                  <input
+                    type="text"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    placeholder="Search products..."
+                    className="input-field flex-1"
+                    autoFocus
+                  />
+                  <button type="submit" className="btn-primary px-5">
+                    Search
+                  </button>
+                </form>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </header>
 
         {/* Mobile Menu */}
-        {mobileMenuOpen && (
-          <div className="md:hidden fixed inset-0 z-40 bg-white animate-slide-in flex flex-col">
-            <div className="p-4 border-b" style={{ borderColor: borderColor }}>
-              <button
-                onClick={() => setMobileMenuOpen(false)}
-                className="text-[${textSecondaryColor}] hover:text-[${primaryColor}]"
+        <AnimatePresence>
+          {mobileMenuOpen && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="md:hidden fixed inset-0 z-40 bg-white flex flex-col"
+            >
+              <div
+                className="p-4 border-b flex items-center justify-between"
+                style={{ borderColor: borderColor }}
               >
-                <X size={24} />
-              </button>
-            </div>
-            <nav className="p-4 space-y-2 flex-1 overflow-y-auto">
-              {navLinks.map((link) => (
-                <Link
-                  key={link.href}
-                  href={link.href}
-                  onClick={() => setMobileMenuOpen(false)}
-                  className={`block py-3 px-4 rounded-lg text-[16px] font-semibold antialiased transition-colors ${
-                    router.pathname === link.href ||
-                    router.pathname.startsWith(link.href + "/")
-                      ? `bg-[${primaryColor}] text-white`
-                      : `text-[${textColor}] hover:bg-gray-100`
-                  }`}
-                  style={{
-                    color: router.pathname === link.href ? "white" : textColor,
-                  }}
+                <span
+                  className="font-bold text-lg"
+                  style={{ color: textColor, fontFamily: headingFontFamily }}
                 >
-                  {link.label}
-                </Link>
-              ))}
-              
-              {/* Categories in Mobile Menu */}
-              {storeSettings?.show_categories_page !== false && (
-                <div className="pt-4 border-t" style={{ borderColor: borderColor }}>
-                  <h3 className="px-4 pb-2 font-semibold text-[14px] uppercase tracking-wide antialiased" style={{ color: textSecondaryColor }}>
-                    Categories
-                  </h3>
-                  <div className="space-y-1">
-                    {[
-                      { label: 'All Products', href: `/storefront/${userId}/products` },
-                      { label: 'New Arrivals', href: `/storefront/${userId}/products?sort=newest` },
-                      { label: 'Best Sellers', href: `/storefront/${userId}/products?sort=popular` },
-                      { label: 'On Sale', href: `/storefront/${userId}/products?sale=true` },
-                    ].map((cat) => (
-                      <Link
-                        key={cat.href}
-                        href={cat.href}
-                        onClick={() => setMobileMenuOpen(false)}
-                        className="block py-2 px-4 rounded-lg text-[15px] font-medium antialiased transition-colors hover:bg-gray-100"
-                        style={{ color: textColor }}
-                      >
-                        {cat.label}
-                      </Link>
-                    ))}
-                  </div>
-                </div>
-              )}
-              
-              {/* Account Links in Mobile Menu */}
-              <div className="pt-4 border-t" style={{ borderColor: borderColor }}>
-                <Link
-                  href={`/storefront/${userId}/wishlist`}
+                  {storeSettings?.store_name || "Store"}
+                </span>
+                <button
                   onClick={() => setMobileMenuOpen(false)}
-                  className="block py-3 px-4 rounded-lg font-medium transition-colors text-[${textColor}] hover:bg-gray-100"
+                  aria-label="Close menu"
+                  style={{ color: textSecondaryColor }}
                 >
-                  <Heart size={20} className="inline mr-2" /> Wishlist
-                </Link>
-                <Link
-                  href={`/storefront/${userId}/cart`}
-                  onClick={() => setMobileMenuOpen(false)}
-                  className="block py-3 px-4 rounded-lg font-medium transition-colors relative text-[${textColor}] hover:bg-gray-100"
-                >
-                  <ShoppingBag size={20} className="inline mr-2" /> Cart
-                  {cartCount > 0 && (
-                    <span className="absolute -top-1 -right-1 w-5 h-5 rounded-full text-xs flex items-center justify-center font-bold text-white" style={{ backgroundColor: accentColor }}>
-                      {cartCount > 99 ? '99+' : cartCount}
-                    </span>
-                  )}
-                </Link>
-                <Link
-                  href={`/storefront/${userId}/account`}
-                  onClick={() => setMobileMenuOpen(false)}
-                  className="block py-3 px-4 rounded-lg font-medium transition-colors text-[${textColor}] hover:bg-gray-100"
-                >
-                  <User size={20} className="inline mr-2" /> Account
-                </Link>
+                  <X size={24} />
+                </button>
               </div>
-            </nav>
-          </div>
-        )}
+              <nav className="p-4 space-y-2 flex-1 overflow-y-auto">
+                {navLinks.map((link, i) => {
+                  const active = isActive(link.href);
+                  return (
+                    <motion.div
+                      key={link.href}
+                      initial={{ opacity: 0, x: -12 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: 0.04 * i }}
+                    >
+                      <Link
+                        href={link.href}
+                        onClick={() => setMobileMenuOpen(false)}
+                        className="block py-3 px-4 rounded-lg text-[16px] font-semibold antialiased transition-colors"
+                        style={{
+                          backgroundColor: active ? primaryColor : "transparent",
+                          color: active ? "white" : textColor,
+                        }}
+                      >
+                        {link.label}
+                      </Link>
+                    </motion.div>
+                  );
+                })}
+
+                {/* Quick categories */}
+                {storeSettings?.show_categories_page !== false && (
+                  <div
+                    className="pt-4 border-t"
+                    style={{ borderColor: borderColor }}
+                  >
+                    <h3
+                      className="px-4 pb-2 font-semibold text-[14px] uppercase tracking-wide antialiased"
+                      style={{ color: textSecondaryColor }}
+                    >
+                      Categories
+                    </h3>
+                    <div className="space-y-1">
+                      {[
+                        {
+                          label: "All Products",
+                          href: `/storefront/${userId}/products`,
+                        },
+                        {
+                          label: "New Arrivals",
+                          href: `/storefront/${userId}/products?sort=newest`,
+                        },
+                        {
+                          label: "Best Sellers",
+                          href: `/storefront/${userId}/products?sort=popular`,
+                        },
+                        {
+                          label: "On Sale",
+                          href: `/storefront/${userId}/products?sale=true`,
+                        },
+                      ].map((cat) => (
+                        <Link
+                          key={cat.href}
+                          href={cat.href}
+                          onClick={() => setMobileMenuOpen(false)}
+                          className="block py-2 px-4 rounded-lg text-[15px] font-medium antialiased transition-colors hover:bg-black/5"
+                          style={{ color: textColor }}
+                        >
+                          {cat.label}
+                        </Link>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Cart / Wishlist */}
+                <div
+                  className="pt-4 border-t"
+                  style={{ borderColor: borderColor }}
+                >
+                  <Link
+                    href={`/storefront/${userId}/wishlist`}
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="block py-3 px-4 rounded-lg font-medium transition-colors hover:bg-black/5 relative"
+                    style={{ color: textColor }}
+                  >
+                    <Heart size={20} className="inline mr-2" /> Wishlist
+                    {wishlist.count > 0 && (
+                      <span
+                        className="absolute right-4 w-5 h-5 rounded-full text-[10px] flex items-center justify-center font-bold text-white"
+                        style={{ backgroundColor: accentColor }}
+                      >
+                        {wishlist.count}
+                      </span>
+                    )}
+                  </Link>
+                  <button
+                    onClick={() => {
+                      setMobileMenuOpen(false);
+                      setCartOpen(true);
+                    }}
+                    className="w-full text-left py-3 px-4 rounded-lg font-medium transition-colors hover:bg-black/5 relative"
+                    style={{ color: textColor }}
+                  >
+                    <ShoppingBag size={20} className="inline mr-2" /> Cart
+                    {cartCount > 0 && (
+                      <span
+                        className="absolute right-4 w-5 h-5 rounded-full text-[10px] flex items-center justify-center font-bold text-white"
+                        style={{ backgroundColor: accentColor }}
+                      >
+                        {cartCount > 99 ? "99+" : cartCount}
+                      </span>
+                    )}
+                  </button>
+                </div>
+              </nav>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         {/* Mobile Search Overlay */}
-        {searchOpen && (
+        {searchOpen && mobileMenuOpen === false && (
           <div
             className="md:hidden fixed inset-0 z-30 bg-black/50 animate-fade-in"
             onClick={() => setSearchOpen(false)}
@@ -590,7 +679,19 @@ export default function StorefrontLayout({
         )}
 
         {/* Main Content */}
-        <main className="flex-1">{children}</main>
+        <main className="flex-1">
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={currentPath}
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -6 }}
+              transition={{ duration: 0.22, ease: "easeOut" }}
+            >
+              {children}
+            </motion.div>
+          </AnimatePresence>
+        </main>
 
         {/* Footer */}
         <footer
@@ -692,6 +793,22 @@ export default function StorefrontLayout({
                       </Link>
                     </li>
                   ))}
+                  <li>
+                    <Link
+                      href={`/storefront/${userId}/wishlist`}
+                      className="text-gray-300 hover:text-white transition-colors"
+                    >
+                      Wishlist
+                    </Link>
+                  </li>
+                  <li>
+                    <Link
+                      href={`/storefront/${userId}/cart`}
+                      className="text-gray-300 hover:text-white transition-colors"
+                    >
+                      Cart
+                    </Link>
+                  </li>
                 </ul>
               </div>
 
@@ -708,8 +825,9 @@ export default function StorefrontLayout({
                     <li className="flex items-start gap-2">
                       <MapPin size={16} className="mt-0.5 flex-shrink-0" />
                       <span>
-                        {storeSettings.address}, {storeSettings.city},{" "}
-                        {storeSettings.country}
+                        {storeSettings.address}
+                        {storeSettings.city ? `, ${storeSettings.city}` : ""}
+                        {storeSettings.country ? `, ${storeSettings.country}` : ""}
                       </span>
                     </li>
                   )}
@@ -740,7 +858,7 @@ export default function StorefrontLayout({
 
               {/* Newsletter */}
               {storeSettings?.show_footer_newsletter &&
-                storeSettings?.show_newsletter && (
+                storeSettings?.show_newsletter !== false && (
                   <div>
                     <h4
                       className="font-semibold mb-4"
@@ -753,27 +871,34 @@ export default function StorefrontLayout({
                       {storeSettings?.newsletter_subtitle ||
                         "Get updates on new products and special offers."}
                     </p>
-                    <form
-                      className="flex gap-2"
-                      onSubmit={(e) => {
-                        e.preventDefault();
-                        alert("Newsletter signup coming soon!");
-                      }}
-                    >
-                      <input
-                        type="email"
-                        placeholder="Your email"
-                        className="input-field flex-1"
-                        style={{
-                          backgroundColor: "rgba(255,255,255,0.1)",
-                          borderColor: "rgba(255,255,255,0.2)",
-                          color: "white",
-                        }}
-                      />
-                      <button type="submit" className="btn-primary">
-                        Subscribe
-                      </button>
-                    </form>
+                    {newsletterState === "done" ? (
+                      <p className="text-sm font-medium text-green-300">
+                        Thanks! You are subscribed.
+                      </p>
+                    ) : (
+                      <form className="flex gap-2" onSubmit={subscribeNewsletter}>
+                        <input
+                          type="email"
+                          required
+                          value={newsletterEmail}
+                          onChange={(e) => setNewsletterEmail(e.target.value)}
+                          placeholder="Your email"
+                          className="input-field flex-1"
+                          style={{
+                            backgroundColor: "rgba(255,255,255,0.1)",
+                            borderColor: "rgba(255,255,255,0.2)",
+                            color: "white",
+                          }}
+                        />
+                        <button
+                          type="submit"
+                          className="btn-primary"
+                          disabled={newsletterState === "loading"}
+                        >
+                          {newsletterState === "loading" ? "..." : "Subscribe"}
+                        </button>
+                      </form>
+                    )}
                   </div>
                 )}
             </div>
@@ -798,191 +923,215 @@ export default function StorefrontLayout({
       </div>
 
       {/* Cart Sidebar */}
-      {cartOpen && (
-        <div className="fixed inset-0 z-50 flex">
-          <div
-            className="fixed inset-0 bg-black/50"
-            onClick={() => setCartOpen(false)}
-          />
-          <div
-            className="relative w-full max-w-md bg-white flex flex-col h-full shadow-2xl animate-slide-in-right"
-            style={{ borderRadius: borderRadius }}
-          >
-            <div
-              className="p-4 border-b flex items-center justify-between"
-              style={{ borderColor: borderColor }}
+      <AnimatePresence>
+        {cartOpen && (
+          <div className="fixed inset-0 z-[60] flex">
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 bg-black/50"
+              onClick={() => setCartOpen(false)}
+            />
+            <motion.aside
+              initial={{ x: "100%" }}
+              animate={{ x: 0 }}
+              exit={{ x: "100%" }}
+              transition={spring}
+              className="relative w-full max-w-md bg-white flex flex-col h-full shadow-2xl ml-auto"
+              style={{ borderRadius: `${borderRadius} 0 0 ${borderRadius}` }}
             >
-              <h3
-                className="font-semibold text-lg"
-                style={{ color: textColor, fontFamily: headingFontFamily }}
-              >
-                Shopping Cart ({cartCount})
-              </h3>
-              <button
-                onClick={() => setCartOpen(false)}
-                className="p-1 rounded hover:bg-gray-100 text-[${textSecondaryColor}]"
-              >
-                <X size={20} />
-              </button>
-            </div>
-
-            <div className="flex-1 overflow-y-auto p-4">
-              {cartItems.length === 0 ? (
-                <div className="text-center py-12">
-                  <ShoppingBag
-                    size={48}
-                    className="mx-auto mb-4 text-gray-300"
-                  />
-                  <p className="text-gray-500">Your cart is empty</p>
-                  <Link
-                    href={`/storefront/${userId}/products`}
-                    onClick={() => setCartOpen(false)}
-                    className="btn-primary inline-block mt-4"
-                  >
-                    Continue Shopping
-                  </Link>
-                </div>
-              ) : (
-                <div className="space-y-4">
-                  {cartItems.map((item) => (
-                    <div
-                      key={item.id}
-                      className="flex gap-3 p-3 rounded-lg"
-                      style={{
-                        backgroundColor: "#F9FAFB",
-                        border: `1px solid ${borderColor}`,
-                      }}
-                    >
-                      {item.image_url && (
-                        <img
-                          src={assetUrl(item.image_url)}
-                          alt={item.name}
-                          className="w-16 h-16 object-cover rounded"
-                          style={{ borderRadius: borderRadius }}
-                        />
-                      )}
-                      <div className="flex-1 min-w-0">
-                        <h4
-                          className="font-medium truncate"
-                          style={{ color: textColor }}
-                        >
-                          {item.name}
-                        </h4>
-                        <p
-                          className="text-sm font-semibold"
-                          style={{ color: primaryColor }}
-                        >
-                          {parseFloat(item.price).toFixed(2)} DA
-                        </p>
-                        <div className="flex items-center gap-2 mt-2">
-                          <button
-                            onClick={() =>
-                              updateCartQuantity(item.id, item.quantity - 1)
-                            }
-                            className="w-8 h-8 rounded border flex items-center justify-center text-[${textSecondaryColor}] hover:bg-white"
-                            style={{ borderColor: borderColor }}
-                          >
-                            -
-                          </button>
-                          <span
-                            className="w-10 text-center text-sm font-medium"
-                            style={{ color: textColor }}
-                          >
-                            {item.quantity}
-                          </span>
-                          <button
-                            onClick={() =>
-                              updateCartQuantity(item.id, item.quantity + 1)
-                            }
-                            className="w-8 h-8 rounded border flex items-center justify-center text-[${textSecondaryColor}] hover:bg-white"
-                            style={{ borderColor: borderColor }}
-                          >
-                            +
-                          </button>
-                          <button
-                            onClick={() => updateCartQuantity(item.id, 0)}
-                            className="ml-auto p-1 text-red-400 hover:text-red-600"
-                          >
-                            <X size={16} />
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-
-            {cartItems.length > 0 && (
               <div
-                className="p-4 border-t space-y-4"
+                className="p-4 border-b flex items-center justify-between"
                 style={{ borderColor: borderColor }}
               >
-                <div className="flex justify-between text-sm">
-                  <span style={{ color: textSecondaryColor }}>Subtotal</span>
-                  <span className="font-semibold" style={{ color: textColor }}>
-                    {cartTotal.toFixed(2)} DA
-                  </span>
-                </div>
-                <div className="flex justify-between text-sm">
-                  <span style={{ color: textSecondaryColor }}>Shipping</span>
-                  <span className="font-semibold" style={{ color: textColor }}>
-                    Calculated at checkout
-                  </span>
-                </div>
-                <div
-                  className="flex justify-between text-lg font-bold pt-2"
-                  style={{ borderTop: `1px solid ${borderColor}` }}
+                <h3
+                  className="font-semibold text-lg"
+                  style={{ color: textColor, fontFamily: headingFontFamily }}
                 >
-                  <span style={{ color: textColor }}>Total</span>
-                  <span style={{ color: primaryColor }}>
-                    {cartTotal.toFixed(2)} DA
-                  </span>
-                </div>
+                  Shopping Cart ({cartCount})
+                </h3>
                 <button
-                  className="btn-primary w-full py-3"
-                  onClick={() => {
-                    router.push(`/storefront/${userId}/cart`);
-                    setCartOpen(false);
-                  }}
+                  onClick={() => setCartOpen(false)}
+                  aria-label="Close cart"
+                  className="p-1 rounded hover:bg-black/5"
+                  style={{ color: textSecondaryColor }}
                 >
-                  Proceed to Checkout
-                </button>
-                <button
-                  className="btn-outline w-full py-3"
-                  onClick={() => {
-                    router.push(`/storefront/${userId}/cart`);
-                    setCartOpen(false);
-                  }}
-                >
-                  View Cart
+                  <X size={20} />
                 </button>
               </div>
-            )}
+
+              <div className="flex-1 overflow-y-auto p-4">
+                {cartItems.length === 0 ? (
+                  <div className="text-center py-12">
+                    <ShoppingBag
+                      size={48}
+                      className="mx-auto mb-4 text-gray-300"
+                    />
+                    <p style={{ color: textSecondaryColor }}>
+                      Your cart is empty
+                    </p>
+                    <Link
+                      href={`/storefront/${userId}/products`}
+                      onClick={() => setCartOpen(false)}
+                      className="btn-primary inline-flex mt-4"
+                    >
+                      Continue Shopping
+                    </Link>
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    <AnimatePresence initial={false}>
+                      {cartItems.map((item) => (
+                        <motion.div
+                          key={item.id}
+                          layout
+                          initial={{ opacity: 0, height: 0 }}
+                          animate={{ opacity: 1, height: "auto" }}
+                          exit={{ opacity: 0, height: 0 }}
+                          className="flex gap-3 p-3 rounded-lg overflow-hidden"
+                          style={{
+                            backgroundColor: "#F9FAFB",
+                            border: `1px solid ${borderColor}`,
+                          }}
+                        >
+                          {item.image_url ? (
+                            <img
+                              src={assetUrl(item.image_url)}
+                              alt={item.name}
+                              className="w-16 h-16 object-cover rounded"
+                              style={{ borderRadius: borderRadius }}
+                            />
+                          ) : (
+                            <div
+                              className="w-16 h-16 rounded flex items-center justify-center"
+                              style={{
+                                backgroundColor: "#EEF0F2",
+                                borderRadius: borderRadius,
+                                color: textSecondaryColor,
+                              }}
+                            >
+                              <ShoppingBag size={20} />
+                            </div>
+                          )}
+                          <div className="flex-1 min-w-0">
+                            <h4
+                              className="font-medium truncate"
+                              style={{ color: textColor }}
+                            >
+                              {item.name}
+                            </h4>
+                            <p
+                              className="text-sm font-semibold"
+                              style={{ color: primaryColor }}
+                            >
+                              {money(item.price)}
+                            </p>
+                            <div className="flex items-center gap-2 mt-2">
+                              <button
+                                onClick={() =>
+                                  updateCartQuantity(item.id, item.quantity - 1)
+                                }
+                                aria-label="Decrease quantity"
+                                className="w-8 h-8 rounded border flex items-center justify-center hover:bg-white"
+                                style={{
+                                  borderColor: borderColor,
+                                  color: textSecondaryColor,
+                                }}
+                              >
+                                −
+                              </button>
+                              <span
+                                className="w-8 text-center text-sm font-medium"
+                                style={{ color: textColor }}
+                              >
+                                {item.quantity}
+                              </span>
+                              <button
+                                onClick={() =>
+                                  updateCartQuantity(item.id, item.quantity + 1)
+                                }
+                                aria-label="Increase quantity"
+                                className="w-8 h-8 rounded border flex items-center justify-center hover:bg-white"
+                                style={{
+                                  borderColor: borderColor,
+                                  color: textSecondaryColor,
+                                }}
+                              >
+                                +
+                              </button>
+                              <button
+                                onClick={() => updateCartQuantity(item.id, 0)}
+                                aria-label="Remove item"
+                                className="ml-auto p-1 text-red-400 hover:text-red-600"
+                              >
+                                <X size={16} />
+                              </button>
+                            </div>
+                          </div>
+                        </motion.div>
+                      ))}
+                    </AnimatePresence>
+                  </div>
+                )}
+              </div>
+
+              {cartItems.length > 0 && (
+                <div
+                  className="p-4 border-t space-y-3"
+                  style={{ borderColor: borderColor }}
+                >
+                  <div className="flex justify-between text-sm">
+                    <span style={{ color: textSecondaryColor }}>Subtotal</span>
+                    <span className="font-semibold" style={{ color: textColor }}>
+                      {money(subtotal)}
+                    </span>
+                  </div>
+                  <div className="flex justify-between text-sm">
+                    <span style={{ color: textSecondaryColor }}>Shipping</span>
+                    <span
+                      className="font-semibold"
+                      style={{ color: textSecondaryColor }}
+                    >
+                      Calculated at checkout
+                    </span>
+                  </div>
+                  <div
+                    className="flex justify-between text-lg font-bold pt-2"
+                    style={{ borderTop: `1px solid ${borderColor}` }}
+                  >
+                    <span style={{ color: textColor }}>Total</span>
+                    <span style={{ color: primaryColor }}>{money(subtotal)}</span>
+                  </div>
+                  <button
+                    className="btn-primary w-full py-3"
+                    onClick={() => router.push(`/storefront/${userId}/cart`)}
+                  >
+                    Proceed to Checkout
+                  </button>
+                  <button
+                    className="btn-outline w-full py-3"
+                    onClick={() => router.push(`/storefront/${userId}/cart`)}
+                  >
+                    View Cart
+                  </button>
+                </div>
+              )}
+            </motion.aside>
           </div>
-        </div>
-      )}
+        )}
+      </AnimatePresence>
 
       <style>{`
         @keyframes slideDown {
           from { opacity: 0; transform: translateY(-10px); }
           to { opacity: 1; transform: translateY(0); }
         }
-        @keyframes slideIn {
-          from { opacity: 0; transform: translateX(100%); }
-          to { opacity: 1; transform: translateX(0); }
-        }
-        @keyframes slideInRight {
-          from { opacity: 0; transform: translateX(100%); }
-          to { opacity: 1; transform: translateX(0); }
-        }
         @keyframes fadeIn {
           from { opacity: 0; }
           to { opacity: 1; }
         }
         .animate-slide-down { animation: slideDown 0.2s ease-out; }
-        .animate-slide-in { animation: slideIn 0.3s ease-out; }
-        .animate-slide-in-right { animation: slideInRight 0.3s ease-out; }
         .animate-fade-in { animation: fadeIn 0.2s ease-out; }
       `}</style>
     </>

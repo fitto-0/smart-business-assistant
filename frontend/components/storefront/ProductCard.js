@@ -1,7 +1,26 @@
 import { useRouter } from "next/router";
-import { Heart, Share2, ShoppingCart, Plus } from "lucide-react";
+import { Heart, Share2, ShoppingCart, Plus, Star } from "lucide-react";
 import { motion } from "framer-motion";
+import toast from "react-hot-toast";
 import { assetUrl } from "../../lib/assetUrl";
+import { useCart, useWishlist } from "../../lib/cart";
+import { money, hasPromotion, priceOf } from "../../lib/money";
+
+function Rating({ value, count }) {
+  if (!count) return null;
+  const rating = Number(value) || 0;
+  return (
+    <span
+      className="inline-flex items-center gap-1 text-[11px] font-medium"
+      style={{ color: "#6B7280" }}
+      aria-label={`${rating} out of 5 from ${count} reviews`}
+    >
+      <Star size={12} fill="#F59E0B" stroke="#F59E0B" />
+      {rating.toFixed(1)}
+      <span className="opacity-60">({count})</span>
+    </span>
+  );
+}
 
 export default function ProductCard({
   product,
@@ -15,6 +34,8 @@ export default function ProductCard({
   cardStyle = "standard",
 }) {
   const router = useRouter();
+  const { add } = useCart(userId);
+  const wishlist = useWishlist(userId);
 
   const handleClick = () => {
     router.push(`/storefront/${userId}/product/${product.id}`);
@@ -22,67 +43,112 @@ export default function ProductCard({
 
   const handleShare = async (e) => {
     e.stopPropagation();
+    const url =
+      typeof window !== "undefined"
+        ? `${window.location.origin}/storefront/${userId}/product/${product.id}`
+        : "";
     if (navigator.share) {
       try {
         await navigator.share({
           title: product.name,
-          text: product.description,
-          url: window.location.href,
+          text: product.description || product.name,
+          url,
         });
       } catch (err) {
-        console.error("Share failed:", err);
+        /* user dismissed */
+      }
+    } else if (url) {
+      try {
+        await navigator.clipboard.writeText(url);
+        toast.success("Link copied");
+      } catch (err) {
+        toast.error("Could not copy link");
       }
     }
   };
 
   const handleAddToCart = (e) => {
     e.stopPropagation();
-    const saved = localStorage.getItem(`cart_${userId}`);
-    const cart = saved ? JSON.parse(saved) : [];
-
-    const existing = cart.find((item) => item.id === product.id);
-    if (existing) {
-      existing.quantity += 1;
-    } else {
-      cart.push({
-        ...product,
-        price:
-          product.promotion_price !== null &&
-          product.promotion_price !== undefined
-            ? product.promotion_price
-            : product.price,
-        original_price:
-          product.promotion_price !== null &&
-          product.promotion_price !== undefined
-            ? product.price
-            : null,
-        quantity: 1,
-      });
-    }
-
-    localStorage.setItem(`cart_${userId}`, JSON.stringify(cart));
-    alert(`${product.name} added to cart!`);
+    if (!inStock) return;
+    add(product, 1);
+    toast.success(`${product.name} added to cart`);
   };
 
   const handleFavorite = (e) => {
     e.stopPropagation();
+    const wasIn = wishlist.has(product.id);
+    wishlist.toggle(product);
+    toast.success(
+      wasIn ? `Removed ${product.name} from wishlist` : `Saved ${product.name} to wishlist`,
+    );
   };
 
-  const inStock = product.stock > 0;
-  const lowStock = product.stock > 0 && product.stock <= 10;
-  const isOnPromotion =
-    product.promotion_price !== null && product.promotion_price !== undefined;
-  const effectivePrice = isOnPromotion
-    ? product.promotion_price
-    : product.price;
+  const inStock = Number(product.stock) > 0;
+  const lowStock = inStock && Number(product.stock) <= 10;
+  const promo = hasPromotion(product);
+  const effectivePrice = priceOf(product);
+  const saved = wishlist.has(product.id);
 
   const isListView = layout === "list";
+
+  const badge = inStock ? (
+    <span
+      className="text-xs font-medium px-2 py-1 rounded-full"
+      style={{
+        backgroundColor: lowStock ? "#FEF3C7" : "#DCFCE7",
+        color: lowStock ? "#92400E" : "#166534",
+      }}
+    >
+      {lowStock ? `Only ${product.stock} left` : `${product.stock} in stock`}
+    </span>
+  ) : (
+    <span
+      className="text-xs font-medium px-2 py-1 rounded-full"
+      style={{ backgroundColor: "#FEE2E2", color: "#991B1B" }}
+    >
+      Out of stock
+    </span>
+  );
+
+  const priceBlock = (
+    <div className="flex items-baseline gap-2" style={{ color: accentColor }}>
+      {promo && (
+        <span className="text-sm line-through opacity-50" style={{ color: cardTextColor }}>
+          {money(product.price)}
+        </span>
+      )}
+      <span className="text-lg font-bold">{money(effectivePrice)}</span>
+      {promo && (
+        <span
+          className="text-[10px] font-bold uppercase tracking-wide px-1.5 py-0.5 rounded"
+          style={{ backgroundColor: accentColor + "22", color: accentColor }}
+        >
+          Sale
+        </span>
+      )}
+    </div>
+  );
+
+  const heartButton = (
+    <button
+      onClick={handleFavorite}
+      aria-label={saved ? "Remove from wishlist" : "Add to wishlist"}
+      className="p-2 rounded-full transition-colors"
+      style={{
+        backgroundColor: saved ? primaryColor : "rgba(255,255,255,0.9)",
+        color: saved ? "#FFFFFF" : "#6B7280",
+      }}
+    >
+      <Heart size={16} fill={saved ? "#FFFFFF" : "none"} />
+    </button>
+  );
 
   if (isListView) {
     return (
       <motion.div
         whileHover={{ x: 4 }}
-        className="card flex gap-4 p-4 cursor-pointer transition-all"
+        transition={{ type: "spring", stiffness: 400, damping: 30 }}
+        className="card flex gap-4 p-4 cursor-pointer"
         onClick={handleClick}
         style={{
           borderColor: primaryColor + "33",
@@ -91,14 +157,14 @@ export default function ProductCard({
         }}
       >
         <div
-          className="relative w-32 h-32 flex-shrink-0 rounded-lg overflow-hidden"
-          style={{ borderRadius: "0.5rem" }}
+          className="relative w-32 h-32 flex-shrink-0 overflow-hidden"
+          style={{ borderRadius: "0.5rem", backgroundColor: "rgba(0,0,0,0.03)" }}
         >
           {product.image_url ? (
             <img
               src={assetUrl(product.image_url)}
               alt={product.name}
-              className="w-full h-full object-cover"
+              className="w-full h-full object-cover transition-transform duration-300 hover:scale-105"
             />
           ) : (
             <div
@@ -119,29 +185,16 @@ export default function ProductCard({
             <div className="flex items-center gap-2 mb-1">
               <span
                 className="text-xs font-medium px-2 py-0.5 rounded"
-                style={{
-                  backgroundColor: primaryColor + "15",
-                  color: primaryColor,
-                }}
+                style={{ backgroundColor: primaryColor + "15", color: primaryColor }}
               >
                 {product.category}
               </span>
-              {product.featured && (
-                <span className="text-xs font-medium px-2 py-0.5 rounded badge badge-accent">
-                  Featured
-                </span>
-              )}
+              <Rating value={product.avg_rating} count={product.review_count} />
             </div>
-            <h3
-              className="font-semibold truncate mb-1"
-              style={{ color: cardTextColor }}
-            >
+            <h3 className="font-semibold truncate mb-1" style={{ color: cardTextColor }}>
               {product.name}
             </h3>
-            <p
-              className="text-sm line-clamp-2"
-              style={{ color: cardTextColor, opacity: 0.72 }}
-            >
+            <p className="text-sm line-clamp-2" style={{ color: cardTextColor, opacity: 0.72 }}>
               {product.description || "No description available."}
             </p>
           </div>
@@ -150,46 +203,27 @@ export default function ProductCard({
             style={{ borderColor }}
           >
             <div className="flex items-center gap-3">
-              <div className="text-lg font-bold" style={{ color: accentColor }}>
-                {isOnPromotion && (
-                  <span className="text-sm line-through opacity-60 mr-2">
-                    {parseFloat(product.price).toFixed(2)} DA
-                  </span>
-                )}
-                {parseFloat(effectivePrice).toFixed(2)} DA
-              </div>
-              <div
-                className={`text-xs font-medium px-2 py-1 rounded-full ${inStock ? (lowStock ? "bg-yellow-100 text-yellow-800" : "bg-green-100 text-green-800") : "bg-red-100 text-red-800"}`}
-              >
-                {inStock
-                  ? lowStock
-                    ? `Only ${product.stock} left`
-                    : `${product.stock} in stock`
-                  : "Out of stock"}
-              </div>
+              {priceBlock}
+              {badge}
             </div>
             <div className="flex items-center gap-2">
-              <button
+              <motion.button
+                whileTap={{ scale: 0.95 }}
                 onClick={handleAddToCart}
                 disabled={!inStock}
                 className="btn-primary flex-1 sm:w-auto py-2 px-4 text-sm"
               >
                 <Plus size={16} /> Add to Cart
-              </button>
+              </motion.button>
               <button
                 onClick={handleShare}
+                aria-label="Share"
                 className="p-2 rounded-lg border hover:bg-gray-100 transition-colors"
                 style={{ borderColor: "#E5E7EB", color: "#6B7280" }}
               >
                 <Share2 size={18} />
               </button>
-              <button
-                onClick={handleFavorite}
-                className="p-2 rounded-lg border hover:bg-gray-100 transition-colors"
-                style={{ borderColor: "#E5E7EB", color: "#6B7280" }}
-              >
-                <Heart size={18} />
-              </button>
+              {heartButton}
             </div>
           </div>
         </div>
@@ -200,8 +234,9 @@ export default function ProductCard({
   // Grid view
   return (
     <motion.div
-      whileHover={{ y: -4 }}
-      className="card cursor-pointer overflow-hidden transition-all"
+      whileHover={{ y: -6 }}
+      transition={{ type: "spring", stiffness: 350, damping: 28 }}
+      className="group card cursor-pointer overflow-hidden"
       onClick={handleClick}
       style={{
         borderColor: primaryColor + "33",
@@ -210,15 +245,12 @@ export default function ProductCard({
       }}
     >
       {/* Product Image */}
-      <div
-        className="relative aspect-square"
-        style={{ backgroundColor: "rgba(0,0,0,0.02)" }}
-      >
+      <div className="relative aspect-square" style={{ backgroundColor: "rgba(0,0,0,0.02)" }}>
         {product.image_url ? (
           <img
             src={assetUrl(product.image_url)}
             alt={product.name}
-            className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
           />
         ) : (
           <div
@@ -242,7 +274,7 @@ export default function ProductCard({
             Out of Stock
           </span>
         )}
-        {lowStock && (
+        {inStock && lowStock && (
           <span
             className="absolute top-2 left-2 badge px-2 py-1 text-xs"
             style={{ backgroundColor: "#F59E0B", color: "white" }}
@@ -251,26 +283,15 @@ export default function ProductCard({
           </span>
         )}
 
-        <div className="absolute top-2 right-2 flex flex-col gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-          <button
-            onClick={handleFavorite}
-            className="p-2 rounded-full transition-colors"
-            style={{
-              backgroundColor: "rgba(255,255,255,0.9)",
-              color: "#6B7280",
-            }}
-          >
-            <Heart size={18} />
-          </button>
+        <div className="absolute top-2 right-2 flex flex-col gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+          {heartButton}
           <button
             onClick={handleShare}
+            aria-label="Share"
             className="p-2 rounded-full transition-colors"
-            style={{
-              backgroundColor: "rgba(255,255,255,0.9)",
-              color: "#6B7280",
-            }}
+            style={{ backgroundColor: "rgba(255,255,255,0.9)", color: "#6B7280" }}
           >
-            <Share2 size={18} />
+            <Share2 size={16} />
           </button>
         </div>
       </div>
@@ -280,65 +301,40 @@ export default function ProductCard({
         <div className="flex items-center gap-2 mb-2">
           <span
             className="text-xs font-medium px-2 py-0.5 rounded"
-            style={{
-              backgroundColor: primaryColor + "15",
-              color: primaryColor,
-            }}
+            style={{ backgroundColor: primaryColor + "15", color: primaryColor }}
           >
             {product.category}
           </span>
-          {product.featured && (
-            <span className="text-xs font-medium px-2 py-0.5 rounded badge badge-accent">
-              Featured
-            </span>
-          )}
+          <Rating value={product.avg_rating} count={product.review_count} />
         </div>
         <h3
-          className="font-semibold mb-2 line-clamp-2"
+          className="font-semibold mb-2 line-clamp-2 transition-colors"
           style={{ color: cardTextColor }}
         >
           {product.name}
         </h3>
 
         {cardStyle === "detailed" && product.description && (
-          <p
-            className="text-sm mb-3 line-clamp-2"
-            style={{ color: cardTextColor, opacity: 0.72 }}
-          >
+          <p className="text-sm mb-3 line-clamp-2" style={{ color: cardTextColor, opacity: 0.72 }}>
             {product.description}
           </p>
         )}
 
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <div className="text-lg font-bold" style={{ color: accentColor }}>
-              {isOnPromotion && (
-                <span className="text-sm line-through opacity-60 mr-2">
-                  {parseFloat(product.price).toFixed(2)} DA
-                </span>
-              )}
-              {parseFloat(effectivePrice).toFixed(2)} DA
-            </div>
-            <div
-              className={`text-xs font-medium px-2 py-1 rounded-full ${inStock ? (lowStock ? "bg-yellow-100 text-yellow-800" : "bg-green-100 text-green-800") : "bg-red-100 text-red-800"}`}
-            >
-              {inStock
-                ? lowStock
-                  ? `Only ${product.stock} left`
-                  : `${product.stock} in stock`
-                : "Out of stock"}
-            </div>
+        <div className="flex items-end justify-between gap-2">
+          <div className="min-w-0">
+            {priceBlock}
+            <div className="mt-2">{badge}</div>
           </div>
 
           {cardStyle !== "minimal" && (
-            <button
+            <motion.button
+              whileTap={{ scale: 0.94 }}
               onClick={handleAddToCart}
               disabled={!inStock}
-              className="btn-primary py-2 px-3 text-sm flex items-center gap-1"
-              style={{ fontSize: "0.875rem" }}
+              className="btn-primary py-2 px-3 text-sm flex items-center gap-1 shrink-0"
             >
               <Plus size={14} /> Add
-            </button>
+            </motion.button>
           )}
         </div>
       </div>

@@ -143,6 +143,56 @@ export default function StorefrontCustomize() {
     }));
   };
 
+  const PAYMENT_OPTIONS = [
+    ["espèces", "Cash on delivery"],
+    ["carte", "Credit / debit card"],
+    ["virement", "Bank transfer"],
+    ["chèque", "Cheque"],
+    ["autre", "Other"],
+  ];
+
+  const contentList = (field) => {
+    const value = (storeSettings.content_overrides || {})[field];
+    return Array.isArray(value) ? value : [];
+  };
+
+  const updateContentItem = (field, index, key, value) => {
+    const list = contentList(field).map((item, i) =>
+      i === index ? { ...item, [key]: value } : item,
+    );
+    handleContentChange(field, list);
+  };
+
+  const addContentItem = (field, template) => {
+    handleContentChange(field, [...contentList(field), template]);
+  };
+
+  const removeContentItem = (field, index) => {
+    handleContentChange(
+      field,
+      contentList(field).filter((_, i) => i !== index),
+    );
+  };
+
+  const enabledPayments = Array.isArray(
+    (storeSettings.content_overrides || {}).payment_methods,
+  )
+    ? storeSettings.content_overrides.payment_methods
+    : PAYMENT_OPTIONS.map(([value]) => value);
+
+  const togglePaymentMethod = (value) => {
+    if (enabledPayments.includes(value) && enabledPayments.length === 1) {
+      toast.error("Keep at least one payment method enabled");
+      return;
+    }
+    handleContentChange(
+      "payment_methods",
+      enabledPayments.includes(value)
+        ? enabledPayments.filter((m) => m !== value)
+        : [...enabledPayments, value],
+    );
+  };
+
   const handleLogoUpload = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
@@ -183,11 +233,14 @@ export default function StorefrontCustomize() {
 
   const handleRemoveLogo = async () => {
     try {
+      await apiPut("/store-settings", { logo_url: "" });
       setStoreSettings((prev) => ({ ...prev, logo_url: null }));
       setLogoPreview(null);
       toast.success(t("storefront.logoRemoved") || "Logo removed");
     } catch (err) {
-      toast.error(t("storefront.logoRemoveFailed") || "Failed to remove logo");
+      toast.error(
+        err.message || t("storefront.logoRemoveFailed") || "Failed to remove logo",
+      );
     }
   };
 
@@ -866,6 +919,367 @@ export default function StorefrontCustomize() {
             </div>
           </div>
         </div>
+
+        <div className="bg-ground-secondary border hairline rounded-xl p-4 sm:p-6">
+          <h3 className="portal-heading text-lg mb-2">Checkout and pricing</h3>
+          <p className="portal-label text-muted mb-6">
+            Prices and fees are shown to customers in Moroccan dirham (MAD).
+            These values drive the cart, checkout, and shipping copy across your
+            store.
+          </p>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-5">
+            <label className="block">
+              <span className="portal-label block mb-2">Shipping fee (MAD)</span>
+              <input
+                type="number"
+                min="0"
+                value={content.shipping_fee ?? ""}
+                placeholder="30"
+                onChange={(e) => handleContentChange("shipping_fee", Number(e.target.value))}
+                className="w-full bg-ground border hairline rounded-xl px-3 py-2.5 text-ink"
+              />
+            </label>
+            <label className="block">
+              <span className="portal-label block mb-2">
+                Free shipping over (MAD)
+              </span>
+              <input
+                type="number"
+                min="0"
+                value={content.free_shipping_threshold ?? ""}
+                placeholder="500"
+                onChange={(e) =>
+                  handleContentChange("free_shipping_threshold", Number(e.target.value))
+                }
+                className="w-full bg-ground border hairline rounded-xl px-3 py-2.5 text-ink"
+              />
+            </label>
+            <label className="block">
+              <span className="portal-label block mb-2">
+                Tax rate (%)
+              </span>
+              <input
+                type="number"
+                min="0"
+                max="100"
+                value={content.tax_rate ?? ""}
+                placeholder="0"
+                onChange={(e) => handleContentChange("tax_rate", Number(e.target.value))}
+                className="w-full bg-ground border hairline rounded-xl px-3 py-2.5 text-ink"
+              />
+            </label>
+          </div>
+
+          <div className="mt-5">
+            <span className="portal-label block mb-3">
+              Payment methods offered at checkout
+            </span>
+            <div className="flex flex-wrap gap-3">
+              {PAYMENT_OPTIONS.map(([value, label]) => (
+                <label
+                  key={value}
+                  className="flex items-center gap-2 px-3 py-2 rounded-xl border hairline cursor-pointer text-sm text-ink"
+                >
+                  <input
+                    type="checkbox"
+                    checked={enabledPayments.includes(value)}
+                    onChange={() => togglePaymentMethod(value)}
+                    className="rounded"
+                  />
+                  {label}
+                </label>
+              ))}
+            </div>
+          </div>
+
+          <div className="mt-5 flex flex-wrap gap-x-6 gap-y-3">
+            <label className="flex items-center gap-2 text-sm text-ink cursor-pointer">
+              <input
+                type="checkbox"
+                checked={storeSettings.contact_form_enabled !== false}
+                onChange={(e) =>
+                  handleChange("contact_form_enabled", e.target.checked)
+                }
+                className="rounded"
+              />
+              Show the contact form
+            </label>
+            <label className="flex items-center gap-2 text-sm text-ink cursor-pointer">
+              <input
+                type="checkbox"
+                checked={!!storeSettings.show_testimonials}
+                onChange={(e) => handleChange("show_testimonials", e.target.checked)}
+                className="rounded"
+              />
+              Show testimonials on the home page
+            </label>
+          </div>
+        </div>
+
+        <div className="bg-ground-secondary border hairline rounded-xl p-4 sm:p-6">
+          <div className="flex items-start justify-between gap-4 mb-4">
+            <div>
+              <h3 className="portal-heading text-lg">Home page highlights</h3>
+              <p className="portal-label text-muted">
+                Up to four feature cards under the hero.
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={() =>
+                addContentItem("features", { icon: "star", title: "", description: "" })
+              }
+              className="portal-pill-btn shrink-0"
+            >
+              Add feature
+            </button>
+          </div>
+          <div className="space-y-4">
+            {contentList("features").length === 0 && (
+              <p className="portal-label text-muted">
+                No custom features yet, your default highlights are shown.
+              </p>
+            )}
+            {contentList("features").map((feature, index) => (
+              <div
+                key={index}
+                className="bg-ground border hairline rounded-xl p-4 grid grid-cols-1 sm:grid-cols-12 gap-3 items-start"
+              >
+                <label className="block sm:col-span-2">
+                  <span className="portal-label block mb-2">Icon</span>
+                  <input
+                    value={feature.icon || ""}
+                    placeholder="truck"
+                    onChange={(e) =>
+                      updateContentItem("features", index, "icon", e.target.value)
+                    }
+                    className="w-full bg-ground-secondary border hairline rounded-xl px-3 py-2.5 text-ink"
+                  />
+                </label>
+                <label className="block sm:col-span-4">
+                  <span className="portal-label block mb-2">Title</span>
+                  <input
+                    value={feature.title || ""}
+                    onChange={(e) =>
+                      updateContentItem("features", index, "title", e.target.value)
+                    }
+                    className="w-full bg-ground-secondary border hairline rounded-xl px-3 py-2.5 text-ink"
+                  />
+                </label>
+                <label className="block sm:col-span-5">
+                  <span className="portal-label block mb-2">Description</span>
+                  <input
+                    value={feature.description || ""}
+                    onChange={(e) =>
+                      updateContentItem("features", index, "description", e.target.value)
+                    }
+                    className="w-full bg-ground-secondary border hairline rounded-xl px-3 py-2.5 text-ink"
+                  />
+                </label>
+                <div className="sm:col-span-1 flex sm:justify-end pt-6">
+                  <button
+                    type="button"
+                    onClick={() => removeContentItem("features", index)}
+                    aria-label="Remove feature"
+                    className="p-2 rounded-xl border hairline text-red hover:bg-red/10"
+                  >
+                    <Trash2 size={16} />
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div className="bg-ground-secondary border hairline rounded-xl p-4 sm:p-6">
+          <div className="flex items-start justify-between gap-4 mb-4">
+            <div>
+              <h3 className="portal-heading text-lg">Testimonials</h3>
+              <p className="portal-label text-muted">
+                Optional quotes for the home page. When empty, your latest
+                product reviews are used.
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={() =>
+                addContentItem("testimonials", {
+                  name: "",
+                  role: "",
+                  content: "",
+                  rating: 5,
+                })
+              }
+              className="portal-pill-btn shrink-0"
+            >
+              Add testimonial
+            </button>
+          </div>
+          <div className="space-y-4">
+            {contentList("testimonials").length === 0 && (
+              <p className="portal-label text-muted">No testimonials added yet.</p>
+            )}
+            {contentList("testimonials").map((testimonial, index) => (
+              <div key={index} className="bg-ground border hairline rounded-xl p-4 space-y-3">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                  <label className="block">
+                    <span className="portal-label block mb-2">Name</span>
+                    <input
+                      value={testimonial.name || ""}
+                      onChange={(e) =>
+                        updateContentItem("testimonials", index, "name", e.target.value)
+                      }
+                      className="w-full bg-ground-secondary border hairline rounded-xl px-3 py-2.5 text-ink"
+                    />
+                  </label>
+                  <label className="block">
+                    <span className="portal-label block mb-2">Role</span>
+                    <input
+                      value={testimonial.role || ""}
+                      placeholder="Verified Buyer"
+                      onChange={(e) =>
+                        updateContentItem("testimonials", index, "role", e.target.value)
+                      }
+                      className="w-full bg-ground-secondary border hairline rounded-xl px-3 py-2.5 text-ink"
+                    />
+                  </label>
+                  <label className="block">
+                    <span className="portal-label block mb-2">Rating</span>
+                    <select
+                      value={Number(testimonial.rating || 5)}
+                      onChange={(e) =>
+                        updateContentItem(
+                          "testimonials",
+                          index,
+                          "rating",
+                          Number(e.target.value),
+                        )
+                      }
+                      className="w-full bg-ground-secondary border hairline rounded-xl px-3 py-2.5 text-ink"
+                    >
+                      {[5, 4, 3, 2, 1].map((n) => (
+                        <option key={n} value={n}>
+                          {n} star{n > 1 ? "s" : ""}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
+                </div>
+                <label className="block">
+                  <span className="portal-label block mb-2">Quote</span>
+                  <textarea
+                    rows={2}
+                    value={testimonial.content || ""}
+                    onChange={(e) =>
+                      updateContentItem("testimonials", index, "content", e.target.value)
+                    }
+                    className="w-full bg-ground-secondary border hairline rounded-xl px-3 py-2.5 text-ink"
+                  />
+                </label>
+                <button
+                  type="button"
+                  onClick={() => removeContentItem("testimonials", index)}
+                  className="flex items-center gap-2 text-sm text-red hover:opacity-80"
+                >
+                  <Trash2 size={14} /> Remove
+                </button>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div className="bg-ground-secondary border hairline rounded-xl p-4 sm:p-6">
+          <div className="flex items-start justify-between gap-4 mb-4">
+            <div>
+              <h3 className="portal-heading text-lg">
+                Frequently asked questions
+              </h3>
+              <p className="portal-label text-muted">
+                Shown on your contact page. Leave empty to use the default
+                questions about shipping, payment, and returns.
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={() => addContentItem("faq", { q: "", a: "" })}
+              className="portal-pill-btn shrink-0"
+            >
+              Add question
+            </button>
+          </div>
+          <div className="space-y-4">
+            {contentList("faq").length === 0 && (
+              <p className="portal-label text-muted">
+                Default FAQ is shown to customers.
+              </p>
+            )}
+            {contentList("faq").map((faq, index) => (
+              <div key={index} className="bg-ground border hairline rounded-xl p-4 space-y-3">
+                <label className="block">
+                  <span className="portal-label block mb-2">Question</span>
+                  <input
+                    value={faq.q || ""}
+                    onChange={(e) => updateContentItem("faq", index, "q", e.target.value)}
+                    className="w-full bg-ground-secondary border hairline rounded-xl px-3 py-2.5 text-ink"
+                  />
+                </label>
+                <label className="block">
+                  <span className="portal-label block mb-2">Answer</span>
+                  <textarea
+                    rows={2}
+                    value={faq.a || ""}
+                    onChange={(e) => updateContentItem("faq", index, "a", e.target.value)}
+                    className="w-full bg-ground-secondary border hairline rounded-xl px-3 py-2.5 text-ink"
+                  />
+                </label>
+                <button
+                  type="button"
+                  onClick={() => removeContentItem("faq", index)}
+                  className="flex items-center gap-2 text-sm text-red hover:opacity-80"
+                >
+                  <Trash2 size={14} /> Remove
+                </button>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div className="bg-ground-secondary border hairline rounded-xl p-4 sm:p-6">
+          <h3 className="portal-heading text-lg mb-4">About page and policies</h3>
+          <div className="space-y-5">
+            <label className="block">
+              <span className="portal-label block mb-2">Mission statement</span>
+              <textarea
+                rows={3}
+                value={content.mission_text || ""}
+                onChange={(e) => handleContentChange("mission_text", e.target.value)}
+                className="w-full bg-ground border hairline rounded-xl px-3 py-2.5 text-ink"
+              />
+            </label>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-5">
+              <label className="block">
+                <span className="portal-label block mb-2">Shipping policy</span>
+                <textarea
+                  rows={3}
+                  value={content.shipping_policy || ""}
+                  placeholder="Standard delivery takes 2 to 4 business days..."
+                  onChange={(e) => handleContentChange("shipping_policy", e.target.value)}
+                  className="w-full bg-ground border hairline rounded-xl px-3 py-2.5 text-ink"
+                />
+              </label>
+              <label className="block">
+                <span className="portal-label block mb-2">Return policy</span>
+                <textarea
+                  rows={3}
+                  value={content.return_policy || ""}
+                  placeholder="You have 30 days to return an item..."
+                  onChange={(e) => handleContentChange("return_policy", e.target.value)}
+                  className="w-full bg-ground border hairline rounded-xl px-3 py-2.5 text-ink"
+                />
+              </label>
+            </div>
+          </div>
+        </div>
       </div>
     );
   };
@@ -1469,22 +1883,33 @@ export default function StorefrontCustomize() {
                 "Manage your storefront branding, domain, and analytics"}
             </p>
           </div>
-          <button
-            onClick={handleSave}
-            disabled={saving}
-            className="portal-pill-btn w-full sm:w-auto justify-center shrink-0"
-          >
-            {saving ? (
-              <>
-                <span className="animate-spin rounded-full h-4 w-4 border-2 border-amber border-t-transparent mr-2"></span>
-                {t("common.saving") || "Saving..."}
-              </>
-            ) : (
-              <>
-                <Save size={16} /> {t("common.save") || "Save Changes"}
-              </>
-            )}
-          </button>
+          <div className="flex flex-col sm:flex-row gap-3 shrink-0 w-full sm:w-auto">
+            <a
+              href={`/storefront/${storefrontUserId}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="portal-pill-btn justify-center shrink-0"
+              style={{ backgroundColor: "transparent" }}
+            >
+              <Eye size={16} /> View store
+            </a>
+            <button
+              onClick={handleSave}
+              disabled={saving}
+              className="portal-pill-btn w-full sm:w-auto justify-center shrink-0"
+            >
+              {saving ? (
+                <>
+                  <span className="animate-spin rounded-full h-4 w-4 border-2 border-amber border-t-transparent mr-2"></span>
+                  {t("common.saving") || "Saving..."}
+                </>
+              ) : (
+                <>
+                  <Save size={16} /> {t("common.save") || "Save Changes"}
+                </>
+              )}
+            </button>
+          </div>
         </div>
 
         <div className="bg-ground-secondary border hairline rounded-xl overflow-hidden">
