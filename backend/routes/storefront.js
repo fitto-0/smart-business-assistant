@@ -622,6 +622,8 @@ router.post("/:userId/checkout", checkoutLimiter, async (req, res) => {
         total: lineTotal,
         sale_id: insertResult.rows[0].id,
       });
+      // stock / sold / revenue are updated by the DB trigger
+      // trigger_update_product_stats (see db/migrations/009_product_stats_trigger.sql)
     }
 
     await client.query("COMMIT");

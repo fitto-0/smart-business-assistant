@@ -27,6 +27,7 @@ const migrate = async () => {
   await runMigration("003_store_settings.sql");
   await runMigration("004_storefront_customization.sql");
   await runMigration("007_product_promotions.sql");
+  await runMigration("009_product_stats_trigger.sql");
 
   await query(`
     DO $$
