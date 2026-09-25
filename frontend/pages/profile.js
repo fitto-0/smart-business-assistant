@@ -434,8 +434,8 @@ export default function ProfilePage() {
 
         {/* Password Change Modal */}
         {showPasswordModal && (
-          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-            <div className="bg-ground-secondary border hairline rounded-xs p-6 w-full max-w-md mx-4">
+          <div className="fixed inset-0 modal-scrim flex items-center justify-center z-50">
+            <div className="modal-card bg-ground-secondary border hairline rounded-xs p-6 w-full max-w-md mx-4">
               <div className="flex items-center justify-between mb-5">
                 <h3 className="portal-heading text-lg">{t('profile.changePassword')}</h3>
                 <button onClick={() => setShowPasswordModal(false)} className="text-muted hover:text-ink">
@@ -499,8 +499,8 @@ export default function ProfilePage() {
 
         {/* 2FA Setup Modal */}
         {show2FAModal && (
-          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-            <div className="bg-ground-secondary border hairline rounded-xs p-6 w-full max-w-md mx-4">
+          <div className="fixed inset-0 modal-scrim flex items-center justify-center z-50">
+            <div className="modal-card bg-ground-secondary border hairline rounded-xs p-6 w-full max-w-md mx-4">
               <div className="flex items-center justify-between mb-5">
                 <h3 className="portal-heading text-lg">{t('profile.setup2FA')}</h3>
                 <button onClick={() => setShow2FAModal(false)} className="text-muted hover:text-ink">
@@ -565,8 +565,8 @@ export default function ProfilePage() {
 
         {/* Disable 2FA Modal */}
         {showDisable2FAModal && (
-          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-            <div className="bg-ground-secondary border hairline rounded-xs p-6 w-full max-w-md mx-4">
+          <div className="fixed inset-0 modal-scrim flex items-center justify-center z-50">
+            <div className="modal-card bg-ground-secondary border hairline rounded-xs p-6 w-full max-w-md mx-4">
               <div className="flex items-center justify-between mb-5">
                 <h3 className="portal-heading text-lg">Disable Two-Factor Authentication</h3>
                 <button onClick={() => setShowDisable2FAModal(false)} className="text-muted hover:text-ink">

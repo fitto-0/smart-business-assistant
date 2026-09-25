@@ -376,7 +376,7 @@ export default function Layout({
       {sidebarOpen && (
         <div className="lg:hidden fixed inset-0 z-40 flex">
           <div
-            className="fixed inset-0 bg-black/60 backdrop-blur-[8px]"
+            className="fixed inset-0 modal-scrim"
             onClick={() => setSidebarOpen(false)}
           />
           <aside className="relative z-50 w-72 glass border-e border-line flex flex-col">

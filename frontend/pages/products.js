@@ -524,8 +524,8 @@ export default function ProductsPage() {
 
  {/* Product Add/Edit Modal */}
  {showModal && (
- <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
- <div className="bg-surface border hairline rounded-xs p-6 w-full max-w-md animate-rise-in">
+ <div className="fixed inset-0 z-50 flex items-center justify-center p-4 modal-scrim">
+ <div className="modal-card bg-surface border hairline rounded-xs p-6 w-full max-w-md animate-rise-in">
  <div className="flex items-center justify-between mb-5">
  <h3 className="portal-heading text-lg">
  {editProduct
@@ -649,8 +649,8 @@ export default function ProductsPage() {
 
  {/* CSV Import Modal */}
  {showCsvModal && (
- <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
- <div className="bg-surface border hairline rounded-xs p-6 w-full max-w-lg animate-rise-in">
+ <div className="fixed inset-0 z-50 flex items-center justify-center p-4 modal-scrim">
+ <div className="modal-card bg-surface border hairline rounded-xs p-6 w-full max-w-lg animate-rise-in">
  <div className="flex items-center justify-between mb-5">
  <h3 className="portal-heading text-lg">
  {t("products.importFromCSV")}

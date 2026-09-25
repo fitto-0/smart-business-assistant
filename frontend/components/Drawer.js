@@ -36,11 +36,11 @@ export default function Drawer({
       <button
         aria-label="Close panel"
         onClick={onClose}
-        className="absolute inset-0 bg-black/60 backdrop-blur-[8px] cursor-default"
+        className="absolute inset-0 modal-scrim cursor-default"
       />
       {/* panel */}
       <aside
-        className={`absolute top-0 bottom-0 end-0 w-full ${widthClass} bg-surface border-s border-line flex flex-col animate-rise-in`}
+        className={`absolute top-0 bottom-0 end-0 w-full ${widthClass} modal-card bg-surface border-s border-line flex flex-col animate-rise-in`}
       >
         <div className="flex items-start justify-between gap-4 px-5 py-4 border-b border-line">
           <div className="min-w-0">

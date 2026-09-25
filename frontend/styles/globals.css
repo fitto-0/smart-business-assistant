@@ -322,7 +322,7 @@ html, body {
 .text-ink-3 { color: var(--light-ink-3) !important; font-weight: 600 !important; }
 .portal-text { color: var(--light-ink-2) !important; font-weight: 500 !important; }
 .micro, .micro-2, .breadcrumb, .kicker, .mono-num { color: var(--light-ink-2) !important; font-weight: 700 !important; letter-spacing: 0.12em !important; }
-.border-line, .hairline, .rule { border-color: var(--light-hairline) !important; background-color: var(--light-hairline) !important; }
+.border-line, .hairline, .rule { border-color: var(--light-hairline) !important; }
 .rule::before, .rule::after { background: var(--light-hairline-strong) !important; }
 /* Hover stays clear â€” ember, not dark */
 .hover\:text-ink:hover { color: var(--ember-500) !important; }
@@ -427,6 +427,30 @@ html, body {
 .bg-ground-secondary,
 .glass {
   border-radius: inherit;
+}
+
+/* ================================================================
+   MODALS / OVERLAY SURFACES — soft green scrim + warm frosted card
+   (never a flat grey box: the card blurs what is behind it)
+   ================================================================ */
+.modal-scrim {
+  background: rgb(18 36 28 / 0.42) !important;
+  backdrop-filter: blur(12px) saturate(140%);
+  -webkit-backdrop-filter: blur(12px) saturate(140%);
+}
+
+/* specificity ties .z-50 .bg-canvas — this rule wins on source order */
+.modal-card.modal-card {
+  background-color: rgb(252 247 239 / 0.82) !important;
+  background-image: linear-gradient(160deg, rgb(255 253 249 / 0.94), rgb(248 240 229 / 0.74)) !important;
+  background-clip: padding-box;
+  backdrop-filter: blur(28px) saturate(175%);
+  -webkit-backdrop-filter: blur(28px) saturate(175%);
+  border-color: rgb(255 255 255 / 0.85) !important;
+  box-shadow:
+    0 24px 64px rgb(18 36 28 / 0.22),
+    0 4px 14px rgb(18 36 28 / 0.1),
+    inset 0 1px 0 rgb(255 255 255 / 0.9) !important;
 }
 
 /* Animations */

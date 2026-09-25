@@ -212,8 +212,8 @@ export default function Reports() {
 
  {/* Create Report Modal */}
  {showCreateModal && (
- <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
- <div className="bg-surface border hairline rounded-xs p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+ <div className="fixed inset-0 modal-scrim flex items-center justify-center z-50 p-4">
+ <div className="modal-card bg-surface border hairline rounded-xs p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
  <div className="flex items-center justify-between mb-6">
  <h3 className="portal-heading text-lg">Create Custom Report</h3>
  <button
@@ -351,8 +351,8 @@ export default function Reports() {
 
  {/* Report Results Modal */}
  {showRunModal && reportData && (
- <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
- <div className="bg-surface border hairline rounded-xs p-6 w-full max-w-4xl max-h-[90vh] overflow-y-auto">
+ <div className="fixed inset-0 modal-scrim flex items-center justify-center z-50 p-4">
+ <div className="modal-card bg-surface border hairline rounded-xs p-6 w-full max-w-4xl max-h-[90vh] overflow-y-auto">
   <div className="flex items-center justify-between mb-6">
   <div>
   <h3 className="portal-heading text-lg">{reportData.reportName}</h3>

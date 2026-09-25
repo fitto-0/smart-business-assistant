@@ -35,8 +35,8 @@ const ReviewForm = ({ products, onClose, onSuccess }) => {
   };
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-      <div className="bg-ground-secondary border hairline rounded-xl p-6 w-full max-w-md">
+    <div className="fixed inset-0 modal-scrim flex items-center justify-center z-50 p-4">
+      <div className="modal-card bg-ground-secondary border hairline rounded-xl p-6 w-full max-w-md">
         <div className="flex items-center justify-between mb-6">
           <h2 className="portal-heading text-lg">Add Customer Review</h2>
           <button

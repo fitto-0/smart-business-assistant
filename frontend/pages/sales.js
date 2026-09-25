@@ -313,8 +313,8 @@ export default function SalesPage() {
 
  {/* Sale Modal */}
  {showSaleModal && (
- <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
- <div className="bg-canvas border hairline rounded-xs p-6 w-full max-w-md">
+ <div className="fixed inset-0 modal-scrim flex items-center justify-center z-50 p-4">
+ <div className="modal-card bg-canvas border hairline rounded-xs p-6 w-full max-w-md">
  <div className="flex items-center justify-between mb-4">
  <h3 className="portal-heading text-xl">{t('sales.recordSale')}</h3>
   <button onClick={closeSaleModal} className="text-ink-2 hover:text-ink">

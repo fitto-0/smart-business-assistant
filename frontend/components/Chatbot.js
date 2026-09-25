@@ -103,7 +103,7 @@ export default function Chatbot() {
   }
 
   return (
-    <div className="fixed bottom-6 end-6 w-[380px] max-w-[calc(100vw-2rem)] max-h-[600px] bg-surface border border-line rounded-none flex flex-col z-50">
+    <div className="fixed bottom-6 end-6 w-[380px] max-w-[calc(100vw-2rem)] max-h-[600px] modal-card bg-surface border border-line rounded-none flex flex-col z-50">
       {/* Header — hairline, square ember marker, status LED */}
       <div className="flex items-center justify-between gap-3 px-4 py-3 border-b border-line bg-surface">
         <div className="flex items-center gap-3 min-w-0">
