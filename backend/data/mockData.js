@@ -64,8 +64,8 @@ module.exports = {
     { id: 6, type: 'avis_négatifs', severity: 'haute', product: 'Sneakers Running', description: 'Augmentation des avis négatifs (25%)', detected: '2024-03-10', status: 'en_cours' },
   ],
   recommendations: [
-    { id: 1, priority: 'critique', category: 'stock', title: 'Réapprovisionner Café Premium 500g', action: 'Commander 200 unités', impact: '+16 000 DA/mois estimé' },
-    { id: 2, priority: 'critique', category: 'stock', title: 'Réapprovisionner Lampe de Bureau LED', action: 'Commander 300 unités', impact: '+22 050 DA/mois potentiel' },
+    { id: 1, priority: 'critique', category: 'stock', title: 'Réapprovisionner Café Premium 500g', action: 'Commander 200 unités', impact: '+16 000 MAD/mois estimé' },
+    { id: 2, priority: 'critique', category: 'stock', title: 'Réapprovisionner Lampe de Bureau LED', action: 'Commander 300 unités', impact: '+22 050 MAD/mois potentiel' },
     { id: 3, priority: 'haute', category: 'promotion', title: 'Promotion sur Sneakers Running', action: 'Promotion -20%', impact: '+45% ventes estimé' },
   ],
   predictions: [

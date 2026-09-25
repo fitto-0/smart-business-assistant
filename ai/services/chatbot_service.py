@@ -124,7 +124,7 @@ class BusinessChatbot:
             }
         total = sales_stats.get("total_revenue", 0)
         return {
-            "reply": f"Le chiffre d'affaires total enregistré est de {total:,.0f} DA.".replace(",", " "),
+            "reply": f"Le chiffre d'affaires total enregistré est de {total:,.0f} MAD.".replace(",", " "),
             "intent": "sales",
             "confidence": "high",
         }

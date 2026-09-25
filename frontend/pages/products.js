@@ -451,14 +451,14 @@ export default function ProductsPage() {
  {p.promotion_price ? (
  <div>
  <span className="line-through text-ink-3 mr-2">
- {fmt(p.price)} DA
+ {fmt(p.price)} MAD
  </span>
  <span className="text-ember-500">
- {fmt(p.promotion_price)} DA
+ {fmt(p.promotion_price)} MAD
  </span>
  </div>
  ) : (
- `${fmt(p.price)} DA`
+ `${fmt(p.price)} MAD`
  )}
  </td>
  <td
@@ -472,7 +472,7 @@ export default function ProductsPage() {
  {p.sold}
  </td>
  <td className="portal-dates-cell font-semibold text-ember-500">
- {fmt(p.revenue)} DA
+ {fmt(p.revenue)} MAD
  </td>
  <td className="portal-dates-cell">
  <div
@@ -573,7 +573,7 @@ export default function ProductsPage() {
  </div>
  <div>
  <label className="block portal-label mb-1.5">
- {t("products.price")} (DA)
+ {t("products.price")} (MAD)
  </label>
  <input
  type="number"
@@ -597,7 +597,7 @@ export default function ProductsPage() {
  </div>
  <div>
  <label className="block portal-label mb-1.5">
- {t("products.promotionPrice") || "Promotion price"} (DA)
+ {t("products.promotionPrice") || "Promotion price"} (MAD)
  </label>
  <input
  type="number"
@@ -713,7 +713,7 @@ export default function ProductsPage() {
  key={i}
  className="bg-surface p-2 rounded text-xs"
  >
- {p.name} - {p.category} - {p.price} DA
+ {p.name} - {p.category} - {p.price} MAD
  </div>
  ))}
  </div>

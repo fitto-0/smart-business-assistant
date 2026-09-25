@@ -8,9 +8,10 @@ import {
  ResponsiveContainer, ComposedChart
 } from 'recharts';
 import { CHART, SERIES, axisProps, tooltipStyle, tooltipLabelStyle, tooltipCursor, barProps, EmberAreaFill, emberUrl } from '../lib/chartTheme';
-import { fmt, fmtDA } from '../lib/format';
+import { fmt, fmtMAD } from '../lib/format';
 import PageHeader, { Ledger, Section, NoirTable, Status, Segmented, Empty } from '../components/PageHeader';
 import { TrendingUp, TrendingDown, ShoppingCart, DollarSign, BarChart2, Plus, X } from 'lucide-react';
+import toast from 'react-hot-toast';
 
 const CustomTooltip = ({ active, payload, label }) => {
  if (!active || !payload?.length) return null;
@@ -20,7 +21,7 @@ const CustomTooltip = ({ active, payload, label }) => {
  {payload.map((p, i) => (
   <p key={i} className="flex items-baseline justify-between gap-4 font-mono text-[12.5px] font-medium tabular-nums antialiased">
   <span className="text-ink-2">{p.name}</span>
- <strong className="font-medium" style={{ color: p.color || CHART.ink }}>{fmt(p.value)}</strong>
+ <strong className="font-medium" style={{ color: p.color || CHART.ink }}>{fmtMAD(p.value)}</strong>
  </p>
  ))}
  </div>
@@ -31,6 +32,7 @@ export default function SalesPage() {
  const { t } = useLanguage();
  const [monthlySales, setMonthlySales] = useState([]);
  const [topProducts, setTopProducts] = useState([]);
+ const [recentSales, setRecentSales] = useState([]);
  const [loading, setLoading] = useState(true);
  const [showSaleModal, setShowSaleModal] = useState(false);
  const [products, setProducts] = useState([]);
@@ -46,23 +48,36 @@ export default function SalesPage() {
  const [submitting, setSubmitting] = useState(false);
 
  useEffect(() => {
- const loadSales = async () => {
- try {
- const [monthly, top] = await Promise.all([
+  const loadSales = async () => {
+  try {
+  const [monthly, top, recent] = await Promise.all([
+  apiGet('/sales/monthly'),
+  apiGet('/sales/top-products', { limit: 5 }),
+  apiGet('/sales/recent', { limit: 6 })
+  ]);
+  setMonthlySales(monthly?.data || []);
+  setTopProducts(top?.data || []);
+  setRecentSales(recent?.data || []);
+  } catch (error) {
+  console.error('Failed to load sales data', error);
+  } finally {
+  setLoading(false);
+  }
+  };
+
+  loadSales();
+  }, []);
+
+ const reloadSales = async () => {
+ const [monthly, top, recent] = await Promise.all([
  apiGet('/sales/monthly'),
- apiGet('/sales/top-products', { limit: 5 })
+ apiGet('/sales/top-products', { limit: 5 }),
+ apiGet('/sales/recent', { limit: 6 })
  ]);
  setMonthlySales(monthly?.data || []);
  setTopProducts(top?.data || []);
- } catch (error) {
- console.error('Failed to load sales data', error);
- } finally {
- setLoading(false);
- }
+ setRecentSales(recent?.data || []);
  };
-
- loadSales();
- }, []);
 
  const loadProducts = async () => {
  try {
@@ -111,17 +126,12 @@ export default function SalesPage() {
  closeSaleModal();
  
  // Reload sales data
- const [monthly, top] = await Promise.all([
- apiGet('/sales/monthly'),
- apiGet('/sales/top-products', { limit: 5 })
- ]);
- setMonthlySales(monthly?.data || []);
- setTopProducts(top?.data || []);
+ await reloadSales();
  
- alert(t('sales.saleRecorded'));
+ toast.success(t('sales.saleRecorded'));
  } catch (error) {
  console.error('Failed to record sale', error);
- alert(t('sales.saleFailed'));
+ toast.error(error?.message || t('sales.saleFailed'));
  } finally {
  setSubmitting(false);
  }
@@ -132,6 +142,13 @@ export default function SalesPage() {
  const avgMonthly = Math.round(totalSales / Math.max(monthlySales.length, 1));
  const bestMonth = (monthlySales || []).reduce((a, b) => (Number(a.actual || 0) > Number(b.actual || 0) ? a : b), { month: 'N/A', actual: 0 });
  const bestMonthVentes = bestMonth.actual || 0;
+
+ const formatDate = (value) => {
+ if (!value) return '—';
+ const d = new Date(value);
+ if (Number.isNaN(d.getTime())) return String(value);
+ return d.toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit', year: 'numeric' });
+ };
 
  if (loading) {
  return <Layout title={t('sales.title')}><div className="panel px-4 py-16 text-center micro-2">{t('sales.loading')}</div></Layout>;
@@ -157,10 +174,10 @@ export default function SalesPage() {
  {/* Ledger strip — one divided band, tabular numerals */}
  <Ledger
  items={[
- { label: t('sales.totalAnnualRevenue'), value: `${fmt(totalSales)} DA` },
+ { label: t('sales.totalAnnualRevenue'), value: fmtMAD(totalSales) },
  { label: t('sales.totalOrders'), value: fmt(totalOrders) },
- { label: t('sales.monthlyAverage'), value: `${fmt(avgMonthly)} DA` },
-  { label: `${t('sales.bestMonth')} · ${bestMonth.month}`, value: `${fmt(bestMonthVentes)} DA` },
+ { label: t('sales.monthlyAverage'), value: fmtMAD(avgMonthly) },
+   { label: `${t('sales.bestMonth')} · ${bestMonth.month}`, value: fmtMAD(bestMonthVentes) },
  ]}
  />
 
@@ -221,7 +238,7 @@ export default function SalesPage() {
   <div className="flex-1 min-w-0">
   <div className="flex items-baseline justify-between gap-3">
   <span className="text-[15px] font-semibold text-ink truncate antialiased">{p.name}</span>
-  <span className="font-mono text-[13px] font-semibold tabular-nums text-ink shrink-0 antialiased">{fmt(p.revenue)} DA</span>
+   <span className="font-mono text-[13px] font-semibold tabular-nums text-ink shrink-0 antialiased">{fmtMAD(p.revenue)}</span>
   </div>
  <div className="mt-1.5 h-[3px] w-full bg-canvas">
  <div className="h-[3px] bg-ember-500/80"
@@ -238,6 +255,28 @@ export default function SalesPage() {
  </div>
  </div>
 
+ {/* Recent sales — last sold products */}
+ <Section
+ eyebrow={t('sales.recentSales')}
+ title={t('sales.recentSalesTitle')}
+ className="mt-6"
+ >
+ <NoirTable
+ columns={[
+ { key: "date", label: t('sales.date'), render: (row) => formatDate(row.date) },
+ { key: "product_name", label: t('sales.product'), render: (row) => (
+ <span className="font-semibold text-ink truncate">{row.product_name || '—'}</span>
+ ) },
+ { key: "customer_name", label: t('sales.customer'), render: (row) => row.customer_name || '—' },
+ { key: "quantity", label: t('sales.quantity'), numeric: true, render: (row) => row.quantity },
+ { key: "total_amount", label: t('sales.total'), numeric: true, render: (row) => <span className="text-ember-300">{fmtMAD(row.total_amount)}</span> },
+ ]}
+ rows={recentSales}
+ rowKey="id"
+ emptyLabel={t('sales.noRecentSales')}
+ />
+ </Section>
+
  {/* Detailed Monthly Table */}
  <Section
  eyebrow={t('sales.detailedMonthlySummary')}
@@ -247,14 +286,14 @@ export default function SalesPage() {
  <NoirTable
  columns={[
  { key: "month", label: t('sales.month') },
- { key: "actual", label: t('sales.actual'), numeric: true, render: (row) => <span className="text-ember-300">{fmt(row.actual || 0)} DA</span> },
+ { key: "actual", label: t('sales.actual'), numeric: true, render: (row) => <span className="text-ember-300">{fmtMAD(row.actual || 0)}</span> },
  { key: "target", label: t('sales.targetSales'), numeric: true, render: (row) => fmt(row.target || 0) },
  { key: "orders", label: t('sales.ordersCount'), numeric: true, render: (row) => row.orders },
  {
  key: "gap", label: t('sales.revenue'), numeric: true,
  render: (row) => {
  const ecart = Number(row.actual || 0) - Number(row.target || 0);
- return <span className={ecart >= 0 ? 'text-olive' : 'text-clay'}>{ecart >= 0 ? '+' : ''}{fmt(ecart)} DA</span>;
+ return <span className={ecart >= 0 ? 'text-olive' : 'text-clay'}>{ecart >= 0 ? '+' : ''}{fmtMAD(ecart)}</span>;
  },
  },
  {
@@ -295,7 +334,7 @@ export default function SalesPage() {
  <option value="">{t('sales.selectProduct')}</option>
  {products.map((p) => (
  <option key={p.id} value={p.id}>
- {p.name} - {fmt(p.price)} DA (Stock: {p.stock})
+   {p.name} - {fmtMAD(p.price)} (Stock: {p.stock})
  </option>
  ))}
  </select>
@@ -315,7 +354,7 @@ export default function SalesPage() {
  </div>
 
  <div>
- <label className="portal-label block mb-1">{t('sales.unitPrice')} (DA) *</label>
+ <label className="portal-label block mb-1">{t('sales.unitPrice')} (MAD) *</label>
  <input
  type="number"
  min="0"

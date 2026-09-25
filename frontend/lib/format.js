@@ -1,11 +1,13 @@
 /** Ember Noir — shared number formatting (fr-FR ledger style). */
+export const CURRENCY = "MAD";
+
 export const fmt = (n) => {
   const v = Number(n);
   if (!Number.isFinite(v)) return "—";
   return new Intl.NumberFormat("fr-FR").format(v);
 };
 
-export const fmtDA = (n) => `${fmt(n)} DA`;
+export const fmtMAD = (n) => `${fmt(n)} ${CURRENCY}`;
 
 export const fmtPct = (n, digits = 1) => {
   const v = Number(n);

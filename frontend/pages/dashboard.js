@@ -145,7 +145,7 @@ export default function Dashboard() {
   const kpiItems = [
     {
       label: t("dashboard.kpis.totalRevenue"),
-      value: `${fmt(kpis.totalRevenue)} DA`,
+      value: `${fmt(kpis.totalRevenue)} MAD`,
       delta: kpis.revenueGrowth,
     },
     {
@@ -198,11 +198,11 @@ export default function Dashboard() {
                   tickFormatter={(v) => `${v / 1000}k`}
                   width={48}
                 />
-                <Tooltip content={<ChartTooltip unit="DA" />} cursor={tooltipCursor} />
+                <Tooltip content={<ChartTooltip unit="MAD" />} cursor={tooltipCursor} />
                 <Area
                   type="monotone"
                   dataKey="actual"
-                  name="Sales (DA)"
+                  name="Sales (MAD)"
                   stroke={CHART.ember}
                   strokeWidth={2}
                   fill={emberUrl()}
@@ -210,7 +210,7 @@ export default function Dashboard() {
                 <Area
                   type="monotone"
                   dataKey="target"
-                  name="Target (DA)"
+                  name="Target (MAD)"
                   stroke={CHART.dim}
                   strokeWidth={1.5}
                   strokeDasharray="5 5"
@@ -301,7 +301,7 @@ export default function Dashboard() {
                     </div>
                     <div className="text-end shrink-0">
                       <p className="font-mono text-[14px] font-semibold tabular-nums text-ink antialiased">
-                        {fmt(product.revenue)} DA
+                        {fmt(product.revenue)} MAD
                       </p>
                       <p
                         className={`font-mono text-[12.5px] font-medium tabular-nums mt-0.5 antialiased ${product.trend >= 0 ? "text-olive" : "text-clay"}`}

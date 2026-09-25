@@ -74,7 +74,7 @@ Utilise ces données pour répondre précisément. Ne les invente pas.
 
 EXEMPLES DE BONNES RÉPONSES :
 - "Vous avez 3 produits en rupture de stock : X, Y, Z. Je recommande de les commander en priorité."
-- "Votre chiffre d'affaires est de 516 701 DA, en hausse de 18,4% par rapport au mois dernier."
+- "Votre chiffre d'affaires est de 516 701 MAD, en hausse de 18,4% par rapport au mois dernier."
 - "Je ne vois pas de données sur les catégories dans votre compte. Vous pouvez les ajouter dans la section Produits."
 """
 
@@ -337,7 +337,7 @@ EXEMPLES DE BONNES RÉPONSES :
             if sorted_by_value:
                 top = ", ".join(
                     f"{p.get('name', '?')} "
-                    f"({self._as_float(p.get('price'), 0) or 0:,.0f} DA)".replace(",", " ")
+                    f"({self._as_float(p.get('price'), 0) or 0:,.0f} MAD)".replace(",", " ")
                     for p in sorted_by_value
                 )
                 lines.append(f"TOP 3 VALEUR STOCK : {top}")
@@ -351,23 +351,23 @@ EXEMPLES DE BONNES RÉPONSES :
             ]
             if prices:
                 lines.append(
-                    f"PRIX : min {min(prices):,.0f} DA, "
-                    f"max {max(prices):,.0f} DA, "
-                    f"moyen {sum(prices) / len(prices):,.0f} DA".replace(",", " ")
+                    f"PRIX : min {min(prices):,.0f} MAD, "
+                    f"max {max(prices):,.0f} MAD, "
+                    f"moyen {sum(prices) / len(prices):,.0f} MAD".replace(",", " ")
                 )
 
             # --- Valeur totale du stock ---
             total_value = sum(_stock_value(p) for p in products)
             if total_value:
                 lines.append(
-                    f"VALEUR TOTALE STOCK : {total_value:,.0f} DA".replace(",", " ")
+                    f"VALEUR TOTALE STOCK : {total_value:,.0f} MAD".replace(",", " ")
                 )
 
         if sales_stats:
             total_revenue = self._as_float(sales_stats.get("total_revenue"))
             if total_revenue is not None:
                 lines.append(
-                    f"CHIFFRE D'AFFAIRES : {total_revenue:,.0f} DA".replace(",", " ")
+                    f"CHIFFRE D'AFFAIRES : {total_revenue:,.0f} MAD".replace(",", " ")
                 )
 
             total_sales = sales_stats.get("total_sales")

@@ -1662,7 +1662,7 @@ export default function StorefrontCustomize() {
                   </div>
                   <div className="text-right shrink-0">
                     <p className="portal-heading font-bold text-ink text-sm sm:text-base whitespace-nowrap">
-                      {product.revenue} DA
+                      {product.revenue} MAD
                     </p>
                   </div>
                 </div>

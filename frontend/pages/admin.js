@@ -107,7 +107,7 @@ export default function AdminDashboard() {
           <Metric
             icon={Coins}
             label="Platform revenue"
-            value={`${fmt(o.revenue)} DA`}
+            value={`${fmt(o.revenue)} MAD`}
             tone="bg-indigo-500"
           />
           <Metric

@@ -31,4 +31,4 @@ class Config:
 
     # Recommendation
     RECOMMENDATION_NEGATIVE_REVIEW_THRESHOLD = 0.20  # 20% d'avis négatifs → alerte
-    RECOMMENDATION_HIGH_IMPACT_MIN = 10000           # DA/mois
+    RECOMMENDATION_HIGH_IMPACT_MIN = 10000           # MAD/mois

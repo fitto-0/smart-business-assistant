@@ -17,7 +17,7 @@ const CustomTooltip = ({ active, payload, label }) => {
  <p className="portal-label mb-2 font-semibold">{label}</p>
  {payload.map((p, i) => p.value != null && (
  <p key={i} className="portal-text font-semibold" style={{ color: p.color }}>
- {p.name}: {fmt(p.value)} DA
+ {p.name}: {fmt(p.value)} MAD
  </p>
  ))}
  </div>
@@ -141,7 +141,7 @@ export default function PredictionsPage() {
  <div className="grid grid-cols-2 xl:grid-cols-4 gap-px bg-line border border-line mb-6">
  <div className="bg-surface p-4">
  <p className="micro">Predicted revenue ({horizon} months)</p>
- <p className="stat-value mt-1">{fmt(totalPredicted)} <span className="text-[0.5em] text-ink-3">DA</span></p>
+ <p className="stat-value mt-1">{fmt(totalPredicted)} <span className="text-[0.5em] text-ink-3">MAD</span></p>
  </div>
  <div className="bg-surface p-4">
  <p className="micro">Predicted growth</p>
@@ -195,8 +195,8 @@ export default function PredictionsPage() {
  {forecastStart && (
  <ReferenceLine x={forecastStart} stroke="rgb(242 236 228 / 0.15)" strokeDasharray="4 4" label={{ value: 'Forecast', fill: '#A79F95', fontSize: 10, fontFamily: "'JetBrains Mono', monospace" }} />
  )}
- <Area type="monotone" dataKey="historique" name="History (DA)" stroke="#E2703A" strokeWidth={2.5} fill="url(#histGrad)" connectNulls={false} dot={false} />
- <Area type="monotone" dataKey="prediction" name="Prediction (DA)" stroke="#7E9C6B" strokeWidth={2.5} strokeDasharray="6 3" fill="url(#predGrad)" connectNulls={false} dot={{ fill: '#7E9C6B', r: 4 }} />
+ <Area type="monotone" dataKey="historique" name="History (MAD)" stroke="#E2703A" strokeWidth={2.5} fill="url(#histGrad)" connectNulls={false} dot={false} />
+ <Area type="monotone" dataKey="prediction" name="Prediction (MAD)" stroke="#7E9C6B" strokeWidth={2.5} strokeDasharray="6 3" fill="url(#predGrad)" connectNulls={false} dot={{ fill: '#7E9C6B', r: 4 }} />
  </ComposedChart>
  </ResponsiveContainer>
  </div>
@@ -210,7 +210,7 @@ export default function PredictionsPage() {
  <tr className="border-b hairline">
  <th className="portal-dates-header">Period</th>
  <th className="portal-dates-header">Type</th>
- <th className="portal-dates-header">Predicted Sales (DA)</th>
+ <th className="portal-dates-header">Predicted Sales (MAD)</th>
  <th className="portal-dates-header">Growth vs Y-1</th>
  <th className="portal-dates-header">Data basis</th>
  </tr>
@@ -224,7 +224,7 @@ export default function PredictionsPage() {
  <tr key={p.month} className="hover:bg-canvas/50 transition-colors">
  <td className="portal-dates-cell portal-dates-cell-primary">{p.month}</td>
  <td className="portal-dates-cell"><span className="portal-label bg-olive/10 text-olive px-2 py-1 rounded">AI Prediction</span></td>
- <td className="portal-dates-cell font-bold text-olive">{fmt(Number(p.value || 0))} DA</td>
+ <td className="portal-dates-cell font-bold text-olive">{fmt(Number(p.value || 0))} MAD</td>
  <td className={`portal-dates-cell font-semibold ${change == null ? 'text-ink-3' : parseFloat(change) >= 0 ? 'text-olive' : 'text-clay'}`}>
  {change == null ? '—' : `${parseFloat(change) >= 0 ? '+' : ''}${change}%`}
  </td>
@@ -238,8 +238,8 @@ export default function PredictionsPage() {
  {meta.metrics && (
  <div className="mt-4 p-3 rounded-xs bg-canvas/50 flex flex-wrap items-center gap-x-6 gap-y-1 border hairline">
  <span className="portal-label text-ink-2">Model: {meta.model || 'Polynomial regression'}</span>
- {meta.metrics.mae != null && <span className="portal-label text-ink-2">MAE {fmt(meta.metrics.mae)} DA</span>}
- {meta.metrics.rmse != null && <span className="portal-label text-ink-2">RMSE {fmt(meta.metrics.rmse)} DA</span>}
+ {meta.metrics.mae != null && <span className="portal-label text-ink-2">MAE {fmt(meta.metrics.mae)} MAD</span>}
+ {meta.metrics.rmse != null && <span className="portal-label text-ink-2">RMSE {fmt(meta.metrics.rmse)} MAD</span>}
  {meta.metrics.r2 != null && <span className="portal-label text-ink-2">R² {meta.metrics.r2}</span>}
  <span className="portal-label text-ink-2">Trained on {meta.based_on_points} months</span>
  </div>

@@ -101,9 +101,9 @@ export const recommendations = [
   {
     id: 1, priority: 'critique', category: 'stock',
     title: 'Réapprovisionner immédiatement le Café Premium 500g',
-    description: 'Rupture de stock détectée. Ce produit génère en moyenne 16 020 DA/mois. Chaque jour sans stock = perte estimée à 534 DA.',
+    description: 'Rupture de stock détectée. Ce produit génère en moyenne 16 020 MAD/mois. Chaque jour sans stock = perte estimée à 534 MAD.',
     action: 'Commander au moins 200 unités',
-    impact: '+16 000 DA/mois estimé',
+    impact: '+16 000 MAD/mois estimé',
     icon: '📦',
   },
   {
@@ -111,7 +111,7 @@ export const recommendations = [
     title: 'Réapprovisionner la Lampe de Bureau LED',
     description: 'Stock épuisé avec une tendance négative de -25%. Risque de perte de clientèle permanente.',
     action: 'Commander 300 unités + analyser la qualité produit',
-    impact: '+22 050 DA/mois potentiel',
+    impact: '+22 050 MAD/mois potentiel',
     icon: '💡',
   },
   {
@@ -135,7 +135,7 @@ export const recommendations = [
     title: 'Anticiper le réapprovisionnement MacBook Air M2',
     description: 'Stock à 8 unités, tendance haussière de +22.1%. Risque de rupture dans 2-3 semaines.',
     action: 'Commander 25 unités supplémentaires',
-    impact: 'Éviter une perte de 107 000 DA',
+    impact: 'Éviter une perte de 107 000 MAD',
     icon: '💻',
   },
   {
