@@ -47,9 +47,17 @@ router.post("/users", async (req, res) => {
 
 router.patch("/users/:id", async (req, res) => {
   const userId = Number(req.params.id);
-  const { name, company, role, password } = req.body;
+  const { name, email, company, role, password } = req.body;
   if (!Number.isInteger(userId) || !name || !["user", "manager", "admin"].includes(role)) {
     return res.status(400).json({ error: "Données utilisateur invalides" });
+  }
+
+  const cleanEmail =
+    email === undefined || email === null || String(email).trim() === ""
+      ? null
+      : String(email).trim().toLowerCase();
+  if (cleanEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(cleanEmail)) {
+    return res.status(400).json({ error: "Adresse email invalide" });
   }
 
   try {
@@ -65,16 +73,63 @@ router.patch("/users/:id", async (req, res) => {
         `UPDATE users SET name = $1, company = $2, role = $3,
           password_hash = COALESCE($4, password_hash),
           password_last_changed = CASE WHEN $4 IS NULL THEN password_last_changed ELSE NOW() END,
+          email = COALESCE($6, email),
           updated_at = NOW() WHERE id = $5
           RETURNING id, name, email, company, role, language, created_at`,
-        [name.trim(), company || null, role, passwordHash, userId],
+        [name.trim(), company || null, role, passwordHash, userId, cleanEmail],
       );
       return result.rows[0];
     });
     res.json({ user: updated });
   } catch (error) {
+    if (error.code === "23505") {
+      return res.status(409).json({ error: "Cet email est déjà utilisé" });
+    }
     console.error("Admin user update error:", error.message);
     res.status(error.status || 500).json({ error: error.message || "Impossible de modifier l'utilisateur" });
+  }
+});
+
+router.delete("/users/:id", async (req, res) => {
+  const userId = Number(req.params.id);
+  if (!Number.isInteger(userId) || userId < 1) {
+    return res.status(400).json({ error: "Identifiant utilisateur invalide" });
+  }
+  if (userId === req.user.id) {
+    return res.status(409).json({ error: "Vous ne pouvez pas supprimer votre propre compte" });
+  }
+
+  try {
+    const removed = await transaction(async (client) => {
+      const current = await client.query(
+        "SELECT id, name, email, role FROM users WHERE id = $1 FOR UPDATE",
+        [userId],
+      );
+      if (!current.rows[0]) throw Object.assign(new Error("Utilisateur introuvable"), { status: 404 });
+
+      if (current.rows[0].role === "admin") {
+        const admins = await client.query("SELECT COUNT(*)::int AS count FROM users WHERE role = 'admin'");
+        if (admins.rows[0].count <= 1) {
+          throw Object.assign(
+            new Error("Le dernier administrateur ne peut pas être supprimé"),
+            { status: 409 },
+          );
+        }
+      }
+
+      const result = await client.query(
+        "DELETE FROM users WHERE id = $1 RETURNING id, name, email",
+        [userId],
+      );
+      return result.rows[0];
+    });
+
+    res.json({ success: true, user: removed });
+  } catch (error) {
+    console.error("Admin user delete error:", error.message);
+    res.status(error.status || 500).json({
+      error: error.message || "Impossible de supprimer l'utilisateur",
+    });
   }
 });
 

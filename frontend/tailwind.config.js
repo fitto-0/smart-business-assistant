@@ -180,7 +180,7 @@ module.exports = {
       fontSize: {
         micro: ['12px', { lineHeight: '1.45', letterSpacing: '0.14em' }],
         label: ['12.5px', { lineHeight: '1.4', letterSpacing: '0.12em' }],
-        statement: ['clamp(3rem, 9vw, 9rem)', { lineHeight: '0.92', letterSpacing: '-0.035em' }],
+        statement: ['clamp(1.35rem, 7.5vw, 4.8rem)', { lineHeight: '0.92', letterSpacing: '-0.035em' }],
         section: ['clamp(2rem, 5vw, 4.5rem)', { lineHeight: '0.95', letterSpacing: '-0.03em' }],
       },
       letterSpacing: {
