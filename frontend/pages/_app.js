@@ -11,8 +11,10 @@ export default function App({ Component, pageProps }) {
   return (
     <>
       <Head>
+        <link rel="icon" href="/favicon.ico" sizes="any" />
+        <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
         <link rel="icon" type="image/png" sizes="192x192" href="/favicon.png" />
-        <link rel="apple-touch-icon" sizes="192x192" href="/favicon.png" />
+        <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
         <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.1.9/p5.min.js" />
         <script src="https://cdn.jsdelivr.net/npm/vanta@latest/dist/vanta.trunk.min.js" />
       </Head>
