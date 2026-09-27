@@ -65,10 +65,16 @@ const storefrontNavItems = [
 ];
 
 const adminNavItems = [
-  { href: "/admin", label: "Admin dashboard", icon: ShieldCheck },
+  { href: "/admin", label: "App analytics", icon: ShieldCheck },
   { href: "/admin-users", label: "User management", icon: User },
   { href: "/admin-settings", label: "System settings", icon: Settings },
   { href: "/profile", label: "Profile", icon: User },
+];
+
+/* Manager = workspace + people/platform ops. No platform analytics. */
+const managerNavItems = [
+  { href: "/admin-users", label: "User management", icon: User },
+  { href: "/admin-settings", label: "System settings", icon: Settings },
 ];
 
 export default function Layout({
@@ -298,6 +304,31 @@ export default function Layout({
           <>
             <p className="px-3 mb-2 font-mono text-[11.5px] font-medium uppercase tracking-[0.14em] text-ink-2 antialiased">Administration</p>
             {adminNavItems.map(({ href, label, icon: Icon }) => {
+              const active = router.pathname === href;
+              return (
+                <Link
+                  key={href}
+                  href={href}
+                  onClick={() => mobile && setSidebarOpen(false)}
+                  aria-current={active ? "page" : undefined}
+                  className={ledgerLink(active)}
+                >
+                  <Icon
+                    size={17}
+                    strokeWidth={active ? 2 : 1.75}
+                    className={ledgerIcon(active)}
+                  />
+                  <span className="truncate">{label}</span>
+                </Link>
+              );
+            })}
+          </>
+        )}
+
+        {user.role === "manager" && (
+          <>
+            <p className="px-3 mt-5 mb-2 font-mono text-[11.5px] font-medium uppercase tracking-[0.14em] text-ink-2 antialiased">Management</p>
+            {managerNavItems.map(({ href, label, icon: Icon }) => {
               const active = router.pathname === href;
               return (
                 <Link

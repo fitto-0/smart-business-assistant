@@ -2,18 +2,112 @@ import { useEffect, useState } from "react";
 import Layout from "../components/Layout";
 import { apiGet, apiRequest } from "../lib/api";
 import { getUser } from "../lib/auth";
-import { Search, Save, ShieldCheck, Pencil, Trash2, X } from "lucide-react";
+import { Search, Save, ShieldCheck, Pencil, Trash2, X, Building2 } from "lucide-react";
 
 const emptyUser = { name: "", email: "", company: "", password: "", role: "user" };
 const inputClass =
   "w-full bg-ground border hairline rounded-lg px-3 py-2 text-sm outline-none focus:border-amber";
 
+const ROLE_OPTIONS = [
+  {
+    value: "user",
+    title: "User",
+    desc: "Their own business only — dashboard, sales, products and storefront. No access to other accounts.",
+  },
+  {
+    value: "manager",
+    title: "Manager",
+    desc: "Everything a user can, plus managing people and platform settings. No platform analytics, and never any access to admin accounts.",
+  },
+  {
+    value: "admin",
+    title: "Admin",
+    desc: "Owner of the platform — every account, app analytics and system settings.",
+  },
+];
+
+/* Organization (tenant) roles — used by managers inside their own organization. */
+const ORG_ROLE_OPTIONS = [
+  {
+    value: "employee",
+    title: "Employee",
+    desc: "Day-to-day work — sales, products and storefront for this organization.",
+  },
+  {
+    value: "accountant",
+    title: "Accountant",
+    desc: "Books and reports — sees the numbers, never manages people.",
+  },
+  {
+    value: "viewer",
+    title: "Viewer",
+    desc: "Read-only — can look at dashboards and reports, changes nothing.",
+  },
+  {
+    value: "manager",
+    title: "Manager",
+    desc: "Runs this organization's people and settings — still inside this organization only.",
+  },
+  {
+    value: "admin",
+    title: "Org admin",
+    desc: "Full control inside this organization — never a platform admin, never sees app analytics.",
+  },
+];
+
+const orgRoleLabel = (value) => {
+  const option = ORG_ROLE_OPTIONS.find((o) => o.value === value);
+  if (option) return option.title;
+  if (value === "owner") return "Owner";
+  return value || "—";
+};
+
+/* Role explainer cards — used as the actual role control in create + edit. */
+function RoleCards({ options, value, onChange }) {
+  return (
+    <div className="grid sm:grid-cols-3 gap-3">
+      {options.map((option) => {
+        const active = value === option.value;
+        return (
+          <button
+            key={option.value}
+            type="button"
+            onClick={() => onChange(option.value)}
+            aria-pressed={active}
+            className={`text-start rounded-xs border px-3 py-3 transition-colors duration-150 ${
+              active
+                ? "border-amber bg-surface-2"
+                : "border-line hover:bg-surface"
+            }`}
+          >
+            <span className="flex items-center justify-between gap-2">
+              <span className="portal-label">{option.title}</span>
+              <span
+                aria-hidden="true"
+                className={`w-[5px] h-[5px] shrink-0 ${
+                  active ? "bg-amber" : "bg-line"
+                }`}
+              />
+            </span>
+            <span className="block mt-1.5 text-[13px] leading-snug text-ink-2">
+              {option.desc}
+            </span>
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
 export default function AdminUsers() {
   const [users, setUsers] = useState([]);
+  const [scope, setScope] = useState("platform");
+  const [organization, setOrganization] = useState(null);
   const [search, setSearch] = useState("");
   const [message, setMessage] = useState("");
   const [isError, setIsError] = useState(false);
   const [currentUserId, setCurrentUserId] = useState(null);
+  const [currentRole, setCurrentRole] = useState(null);
   const [editing, setEditing] = useState(null);
   const [editForm, setEditForm] = useState(emptyUser);
   const [saving, setSaving] = useState(false);
@@ -28,22 +122,37 @@ export default function AdminUsers() {
 
   const load = () =>
     apiGet("/admin/users", { search })
-      .then((data) => setUsers(data.users || []))
+      .then((data) => {
+        setUsers(data.users || []);
+        setScope(data.scope || "platform");
+        setOrganization(data.organization || null);
+      })
       .catch((err) => notify(err.message, true));
 
   useEffect(() => {
     const me = getUser();
     setCurrentUserId(me ? me.id : null);
+    setCurrentRole(me ? me.role : null);
     load();
   }, []);
+
+  /* Managers only ever see their own organization — app roles never apply here. */
+  const isOrgScope = scope === "organization";
+  /* Platform admins manage app roles; managers never touch admin accounts. */
+  const canAssignAdmin = currentRole !== "manager" && !isOrgScope;
+  const isProtected = (user) =>
+    !isOrgScope && currentRole === "manager" && user.role === "admin";
+  const roleOptions = isOrgScope
+    ? ORG_ROLE_OPTIONS
+    : ROLE_OPTIONS.filter((o) => canAssignAdmin || o.value !== "admin");
 
   const update = async (user) => {
     notify("");
     try {
-      await apiRequest(`/admin/users/${user.id}`, {
-        method: "PATCH",
-        body: { name: user.name, company: user.company, role: user.role },
-      });
+      const body = isOrgScope
+        ? { name: user.name, company: user.company, orgRole: user.org_role }
+        : { name: user.name, company: user.company, role: user.role };
+      await apiRequest(`/admin/users/${user.id}`, { method: "PATCH", body });
       notify("User updated");
       load();
     } catch (err) {
@@ -54,9 +163,12 @@ export default function AdminUsers() {
   const createUser = async (event) => {
     event.preventDefault();
     try {
-      await apiRequest("/admin/users", { method: "POST", body: newUser });
-      setNewUser(emptyUser);
-      notify("User created");
+      const body = isOrgScope
+        ? { ...newUser, role: "user", orgRole: newUser.orgRole || "employee" }
+        : newUser;
+      await apiRequest("/admin/users", { method: "POST", body });
+      setNewUser({ ...emptyUser, orgRole: "employee" });
+      notify(isOrgScope ? "Member added to your organization" : "User created");
       load();
     } catch (err) {
       notify(err.message, true);
@@ -70,6 +182,7 @@ export default function AdminUsers() {
       email: user.email || "",
       company: user.company || "",
       role: user.role || "user",
+      orgRole: user.org_role || "employee",
       password: "",
     });
     setModalError("");
@@ -81,12 +194,19 @@ export default function AdminUsers() {
     setSaving(true);
     setModalError("");
     try {
-      const body = {
-        name: editForm.name,
-        email: editForm.email,
-        company: editForm.company,
-        role: editForm.role,
-      };
+      const body = isOrgScope
+        ? {
+            name: editForm.name,
+            email: editForm.email,
+            company: editForm.company,
+            orgRole: editForm.orgRole,
+          }
+        : {
+            name: editForm.name,
+            email: editForm.email,
+            company: editForm.company,
+            role: editForm.role,
+          };
       if (editForm.password) body.password = editForm.password;
       await apiRequest(`/admin/users/${editing.id}`, { method: "PATCH", body });
       setEditing(null);
@@ -115,19 +235,31 @@ export default function AdminUsers() {
   };
 
   return (
-    <Layout title="User management">
+    <Layout title={isOrgScope ? "Organization members" : "User management"}>
       <div className="p-4 sm:p-6 space-y-6">
         <div>
           <p className="portal-label text-amber">ACCESS CONTROL</p>
-          <h1 className="portal-heading text-3xl mt-1">User management</h1>
+          <h1 className="portal-heading text-3xl mt-1">
+            {isOrgScope ? "Organization members" : "User management"}
+          </h1>
           <p className="portal-text mt-2">
-            Create accounts, assign roles, and review activity across every
-            business.
+            {isOrgScope ? (
+              <>
+                Everyone inside <strong>{organization?.name || "your organization"}</strong> —
+                add people and set their role within this organization. Platform
+                accounts and app analytics belong to the platform admin.
+              </>
+            ) : (
+              <>
+                Create accounts, assign roles, and review activity across every
+                business.
+              </>
+            )}
           </p>
         </div>
         <form
           onSubmit={createUser}
-          className="bg-ground-secondary border hairline rounded-xl p-4 grid sm:grid-cols-2 lg:grid-cols-5 gap-3"
+          className="bg-ground-secondary border hairline rounded-xl p-4 grid sm:grid-cols-2 lg:grid-cols-4 gap-3"
         >
           <input
             required
@@ -161,18 +293,23 @@ export default function AdminUsers() {
             }
             className={inputClass}
           />
-          <div className="flex gap-2">
-            <select
-              value={newUser.role}
-              onChange={(e) => setNewUser({ ...newUser, role: e.target.value })}
-              className={`${inputClass} flex-1`}
-            >
-              <option value="user">User</option>
-              <option value="manager">Manager</option>
-              <option value="admin">Admin</option>
-            </select>
-            <button className="px-4 rounded-lg bg-amber text-ground font-semibold text-sm">
-              Create
+          <div className="sm:col-span-2 lg:col-span-4 flex flex-wrap items-end justify-between gap-4 pt-1">
+            <div className="flex-1 min-w-[260px]">
+              <p className="portal-label mb-2">
+                {isOrgScope ? "Role in this organization" : "Role"}
+              </p>
+              <RoleCards
+                options={roleOptions}
+                value={isOrgScope ? newUser.orgRole || "employee" : newUser.role}
+                onChange={(value) =>
+                  isOrgScope
+                    ? setNewUser({ ...newUser, orgRole: value })
+                    : setNewUser({ ...newUser, role: value })
+                }
+              />
+            </div>
+            <button className="px-5 py-2.5 rounded-lg bg-amber text-ground font-semibold text-sm">
+              {isOrgScope ? "Add member" : "Create account"}
             </button>
           </div>
         </form>
@@ -183,7 +320,9 @@ export default function AdminUsers() {
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && load()}
-              placeholder="Search users, email, company"
+              placeholder={
+                isOrgScope ? "Search members, email, company" : "Search users, email, company"
+              }
               className="w-full bg-ground-secondary border hairline rounded-lg pl-10 pr-3 py-2.5 text-sm outline-none focus:border-amber"
             />
           </div>
@@ -203,9 +342,11 @@ export default function AdminUsers() {
           <table className="w-full text-left text-sm">
             <thead className="border-b hairline">
               <tr>
-                <th className="p-4">User</th>
+                <th className="p-4">{isOrgScope ? "Member" : "User"}</th>
                 <th className="p-4">Company</th>
-                <th className="p-4">Role</th>
+                <th className="p-4">
+                  {isOrgScope ? "Organization role" : "Role"}
+                </th>
                 <th className="p-4">Last login</th>
                 <th className="p-4">Action</th>
               </tr>
@@ -220,6 +361,7 @@ export default function AdminUsers() {
                   <td className="p-4">
                     <input
                       value={user.company || ""}
+                      disabled={isProtected(user)}
                       onChange={(e) =>
                         setUsers(
                           users.map((item) =>
@@ -229,27 +371,55 @@ export default function AdminUsers() {
                           ),
                         )
                       }
-                      className="bg-transparent border-b border-transparent focus:border-amber outline-none py-1 w-44"
+                      className="bg-transparent border-b border-transparent focus:border-amber outline-none py-1 w-44 disabled:cursor-not-allowed disabled:opacity-60"
                     />
                   </td>
                   <td className="p-4">
-                    <select
-                      value={user.role}
-                      onChange={(e) =>
-                        setUsers(
-                          users.map((item) =>
-                            item.id === user.id
-                              ? { ...item, role: e.target.value }
-                              : item,
-                          ),
-                        )
-                      }
-                      className="bg-ground border hairline rounded-md px-2 py-1.5"
-                    >
-                      <option value="user">User</option>
-                      <option value="manager">Manager</option>
-                      <option value="admin">Admin</option>
-                    </select>
+                    {isProtected(user) ? (
+                      <span className="portal-label text-ink-3">
+                        Admin · protected
+                      </span>
+                    ) : isOrgScope && user.org_role === "owner" ? (
+                      <span className="portal-label text-ink-3">Owner</span>
+                    ) : isOrgScope ? (
+                      <select
+                        value={user.org_role || "employee"}
+                        onChange={(e) =>
+                          setUsers(
+                            users.map((item) =>
+                              item.id === user.id
+                                ? { ...item, org_role: e.target.value }
+                                : item,
+                            ),
+                          )
+                        }
+                        className="bg-ground border hairline rounded-md px-2 py-1.5"
+                      >
+                        {ORG_ROLE_OPTIONS.map((option) => (
+                          <option key={option.value} value={option.value}>
+                            {option.title}
+                          </option>
+                        ))}
+                      </select>
+                    ) : (
+                      <select
+                        value={user.role}
+                        onChange={(e) =>
+                          setUsers(
+                            users.map((item) =>
+                              item.id === user.id
+                                ? { ...item, role: e.target.value }
+                                : item,
+                            ),
+                          )
+                        }
+                        className="bg-ground border hairline rounded-md px-2 py-1.5"
+                      >
+                        <option value="user">User</option>
+                        <option value="manager">Manager</option>
+                        {canAssignAdmin && <option value="admin">Admin</option>}
+                      </select>
+                    )}
                   </td>
                   <td className="p-4 text-ink-secondary">
                     {user.last_login
@@ -257,6 +427,11 @@ export default function AdminUsers() {
                       : "Never"}
                   </td>
                   <td className="p-4">
+                    {isProtected(user) ? (
+                      <span className="portal-label text-ink-3">
+                        Protected by admin
+                      </span>
+                    ) : (
                     <div className="flex items-center gap-4">
                       <button
                         onClick={() => update(user)}
@@ -283,7 +458,9 @@ export default function AdminUsers() {
                         title={
                           user.id === currentUserId
                             ? "You cannot delete your own account"
-                            : "Delete user"
+                            : isOrgScope
+                              ? "Remove from organization"
+                              : "Delete user"
                         }
                         className={`font-semibold ${
                           user.id === currentUserId
@@ -295,26 +472,62 @@ export default function AdminUsers() {
                         Delete
                       </button>
                     </div>
+                    )}
                   </td>
                 </tr>
               ))}
               {users.length === 0 && (
                 <tr>
                   <td colSpan={5} className="p-6 text-center text-ink-3">
-                    No users found
+                    {isOrgScope ? "No members found" : "No users found"}
                   </td>
                 </tr>
               )}
             </tbody>
           </table>
         </div>
-        <div className="bg-teal/10 border border-teal/30 rounded-xl p-4 text-sm text-ink-secondary">
-          <ShieldCheck size={17} className="inline mr-2 text-teal" />
-          <strong className="text-ink">Role difference:</strong> Users access
-          only their own business data. Managers can be granted operational
-          access as the product evolves. Admins access this control center, all
-          tenant analytics, user roles, and system settings.
-        </div>
+        <section className="bg-ground-secondary border hairline rounded-xl p-5">
+          <div className="flex items-center gap-2 mb-4">
+            {isOrgScope ? (
+              <Building2 size={17} className="text-ember-500" />
+            ) : (
+              <ShieldCheck size={17} className="text-ember-500" />
+            )}
+            <h2 className="portal-heading text-lg">
+              {isOrgScope ? "Roles in your organization" : "Roles, in plain words"}
+            </h2>
+          </div>
+          <div
+            className={
+              isOrgScope ? "grid sm:grid-cols-2 lg:grid-cols-3 gap-4" : "grid sm:grid-cols-3 gap-4"
+            }
+          >
+            {(isOrgScope ? ORG_ROLE_OPTIONS : ROLE_OPTIONS).map((option) => (
+              <div
+                key={option.value}
+                className="border hairline rounded-xs px-3 py-3 bg-surface"
+              >
+                <p className="portal-label">{option.title}</p>
+                <p className="mt-1.5 text-[13px] leading-snug text-ink-2">
+                  {option.desc}
+                </p>
+              </div>
+            ))}
+          </div>
+          {isOrgScope ? (
+            <p className="portal-label mt-4 text-ink-3">
+              These roles live inside your organization only. App-wide accounts
+              and app analytics are handled by the platform admin.
+            </p>
+          ) : (
+            !canAssignAdmin && (
+              <p className="portal-label mt-4 text-clay">
+                As a manager you can never create, edit, reset or delete an admin
+                account.
+              </p>
+            )
+          )}
+        </section>
       </div>
 
       {/* ---- Edit user ---- */}
@@ -373,20 +586,22 @@ export default function AdminUsers() {
                   className={`mt-2 ${inputClass}`}
                 />
               </label>
-              <label className="block">
-                <span className="portal-label">Role</span>
-                <select
-                  value={editForm.role}
-                  onChange={(e) =>
-                    setEditForm({ ...editForm, role: e.target.value })
-                  }
-                  className={`mt-2 ${inputClass}`}
-                >
-                  <option value="user">User</option>
-                  <option value="manager">Manager</option>
-                  <option value="admin">Admin</option>
-                </select>
-              </label>
+              <div className="sm:col-span-2">
+                <span className="portal-label">
+                  {isOrgScope ? "Role in this organization" : "Role"}
+                </span>
+                <div className="mt-2">
+                  <RoleCards
+                    options={roleOptions}
+                    value={isOrgScope ? editForm.orgRole : editForm.role}
+                    onChange={(value) =>
+                      isOrgScope
+                        ? setEditForm({ ...editForm, orgRole: value })
+                        : setEditForm({ ...editForm, role: value })
+                    }
+                  />
+                </div>
+              </div>
               <label className="block sm:col-span-2">
                 <span className="portal-label">
                   New password — leave empty to keep the current one
@@ -433,12 +648,23 @@ export default function AdminUsers() {
           <div className="modal-card bg-surface border hairline rounded-xs p-6 w-full max-w-md">
             <p className="portal-label text-clay">DELETE USER</p>
             <h3 className="portal-heading text-lg mt-1 mb-2">
-              Delete {deleting.name}?
+              {isOrgScope ? "Remove " : "Delete "}
+              {deleting.name}
+              {isOrgScope ? " from your organization?" : "?"}
             </h3>
             <p className="portal-text text-sm">
-              {deleting.email} and all of their business data (products, sales,
-              reviews, settings) will be removed permanently. This cannot be
-              undone.
+              {isOrgScope ? (
+                <>
+                  {deleting.email} will lose access to your organization. Their
+                  platform account is not deleted.
+                </>
+              ) : (
+                <>
+                  {deleting.email} and all of their business data (products, sales,
+                  reviews, settings) will be removed permanently. This cannot be
+                  undone.
+                </>
+              )}
             </p>
             {modalError && (
               <p className="mt-4 text-sm text-clay">{modalError}</p>
@@ -455,7 +681,7 @@ export default function AdminUsers() {
                 disabled={saving}
                 className="px-4 py-2 rounded-lg bg-clay text-white font-semibold text-sm disabled:opacity-50"
               >
-                {saving ? "Deleting…" : "Delete user"}
+                {saving ? "Deleting…" : isOrgScope ? "Remove member" : "Delete user"}
               </button>
             </div>
           </div>

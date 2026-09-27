@@ -48,7 +48,8 @@ export function Ledger({ items }) {
                   Number(item.delta) >= 0 ? "text-olive" : "text-clay"
                 }`}
               >
-                {deltaGlyph(item.delta)} {fmtPct(item.delta)}
+                {deltaGlyph(item.delta)}{" "}
+                {item.deltaLabel != null ? item.deltaLabel : fmtPct(item.delta)}
               </span>
             )}
             <span className="stat-value">{item.value}</span>
