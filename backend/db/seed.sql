@@ -153,20 +153,20 @@ INSERT INTO reviews (user_id, product_id, customer_name, rating, comment, sentim
 
 -- ===================== ANOMALIES — USER 1 =====================
 INSERT INTO anomalies (user_id, type, severity, product_name, description, status, detected_at) VALUES
-(1, 'baisse_ventes', 'haute', 'Café Premium 500g', 'Baisse de 15.3% des ventes sur 30 jours', 'non_résolu', '2026-03-15'),
-(1, 'rupture_stock', 'critique', 'Café Premium 500g', 'Rupture de stock complète (0 unités)', 'non_résolu', '2026-03-14'),
-(1, 'rupture_stock', 'critique', 'Lampe de Bureau LED', 'Rupture de stock (0 unités), baisse de 25% des ventes', 'non_résolu', '2026-03-13'),
+(1, 'baisse_ventes', 'haute', 'Café Premium 500g', 'Baisse de 15.3% des ventes sur 30 jours', 'non_resolu', '2026-03-15'),
+(1, 'rupture_stock', 'critique', 'Café Premium 500g', 'Rupture de stock complète (0 unités)', 'non_resolu', '2026-03-14'),
+(1, 'rupture_stock', 'critique', 'Lampe de Bureau LED', 'Rupture de stock (0 unités), baisse de 25% des ventes', 'non_resolu', '2026-03-13'),
 (1, 'stock_faible', 'moyenne', 'MacBook Air M2', 'Stock critique : 8 unités restantes', 'en_cours', '2026-03-12'),
-(1, 'stock_faible', 'moyenne', 'Sneakers Running', 'Stock faible : 5 unités restantes, forte demande', 'non_résolu', '2026-03-11'),
-(1, 'avis_négatifs', 'haute', 'Sneakers Running', 'Augmentation des avis négatifs (25% de 1-2 étoiles)', 'en_cours', '2026-03-10');
+(1, 'stock_faible', 'moyenne', 'Sneakers Running', 'Stock faible : 5 unités restantes, forte demande', 'non_resolu', '2026-03-11'),
+(1, 'avis_negatifs', 'haute', 'Sneakers Running', 'Augmentation des avis négatifs (25% de 1-2 étoiles)', 'en_cours', '2026-03-10');
 
 -- ===================== ANOMALIES — USER 2 =====================
 INSERT INTO anomalies (user_id, type, severity, product_name, description, status, detected_at) VALUES
-(2, 'stock_faible', 'moyenne', 'Sac à Main Cuir', 'Stock faible : 6 unités restantes', 'non_résolu', '2026-03-12');
+(2, 'stock_faible', 'moyenne', 'Sac à Main Cuir', 'Stock faible : 6 unités restantes', 'non_resolu', '2026-03-12');
 
 -- ===================== ANOMALIES — USER 3 =====================
 INSERT INTO anomalies (user_id, type, severity, product_name, description, status, detected_at) VALUES
-(3, 'baisse_ventes', 'basse', 'Carnet Cuir A5', 'Légère baisse des ventes mensuelles', 'non_résolu', '2026-03-14');
+(3, 'baisse_ventes', 'basse', 'Carnet Cuir A5', 'Légère baisse des ventes mensuelles', 'non_resolu', '2026-03-14');
 
 -- ===================== RECOMMANDATIONS — USER 1 =====================
 INSERT INTO recommendations (user_id, priority, category, title, description, action, impact, icon) VALUES

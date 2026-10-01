@@ -5,6 +5,55 @@ const auth = require("../middleware/auth");
 const pool = require("../db/pool");
 const ai = require("../lib/aiClient");
 const agg = require("../lib/dataAggregator");
+const { buildPlan } = require("../lib/resolutionPlans");
+
+// ---------------------------------------------------------
+// Self-heal: older databases may not have run 011 yet.
+// Ensures resolution columns/constraint exist before queries.
+// Safe to call on every request (IF NOT EXISTS).
+// ---------------------------------------------------------
+let resolutionSchemaReady = false;
+async function ensureResolutionSchema() {
+  if (resolutionSchemaReady) return;
+  try {
+    await pool.query(`
+      ALTER TABLE anomalies
+        ADD COLUMN IF NOT EXISTS resolution_steps JSONB DEFAULT '[]'::jsonb,
+        ADD COLUMN IF NOT EXISTS current_step INTEGER DEFAULT 0
+    `);
+    await pool.query(
+      `UPDATE anomalies SET status = 'non_resolu' WHERE status = 'non_resolu'`,
+    );
+    await pool.query(
+      `UPDATE anomalies SET status = 'resolu' WHERE status = 'resolu'`,
+    );
+    await pool.query(
+      `UPDATE anomalies SET type = 'avis_negatifs' WHERE type = 'avis_negatifs'`,
+    );
+    await pool.query(
+      `ALTER TABLE anomalies DROP CONSTRAINT IF EXISTS anomalies_status_check`,
+    );
+    await pool.query(`
+      DO $$
+      BEGIN
+        IF NOT EXISTS (
+          SELECT 1 FROM pg_constraint WHERE conname = 'anomalies_status_check_unaccented'
+        ) THEN
+          ALTER TABLE anomalies ADD CONSTRAINT anomalies_status_check_unaccented
+            CHECK (status IN ('non_resolu', 'en_cours', 'resolu'));
+        END IF;
+      END $$;
+    `);
+    await pool.query(`
+      CREATE INDEX IF NOT EXISTS idx_anomalies_org_status2
+        ON anomalies(organization_id, status)
+    `);
+    resolutionSchemaReady = true;
+  } catch (err) {
+    // Log once, fail open: routes fall back to legacy columns below.
+    console.error("[analysis] resolution self-heal failed:", err.message);
+  }
+}
 
 // Toutes les routes exigent une organisation
 router.use(auth);
@@ -218,10 +267,10 @@ router.post("/detect-anomalies", async (req, res) => {
       console.warn("AI anomalies indisponible :", e.message);
     }
 
-    // Nettoyage des anciennes anomalies non résolues
+    // Nettoyage des anciennes anomalies non resolues
     await pool.query(
       `DELETE FROM anomalies
-       WHERE organization_id = $1 AND status = 'non_résolu'`,
+       WHERE organization_id = $1 AND status = 'non_resolu'`,
       [req.organizationId],
     );
 
@@ -234,7 +283,7 @@ router.post("/detect-anomalies", async (req, res) => {
         `
   INSERT INTO anomalies
     (user_id, organization_id, type, product_name, description, severity, status, detected_at)
-  VALUES ($1, $2, $3, $4, $5, $6, 'non_résolu', NOW())
+  VALUES ($1, $2, $3, $4, $5, $6, 'non_resolu', NOW())
   `,
         [
           req.user.id, // ← AJOUT
@@ -262,12 +311,23 @@ router.post("/detect-anomalies", async (req, res) => {
 
 // ---------------------------------------------------------
 // GET /api/analysis/anomalies
+// Unaccented statuses: non_resolu / en_cours / resolu
 // ---------------------------------------------------------
 router.get("/anomalies", async (req, res) => {
   try {
+    await ensureResolutionSchema();
     const { rows } = await pool.query(
       `
-      SELECT id, type, description, severity, status, detected_at
+      SELECT id, type, description, severity, detected_at,
+        product_name,
+        product_name AS product,
+        CASE
+          WHEN status = 'non_resolu' THEN 'non_resolu'
+          WHEN status = 'resolu' THEN 'resolu'
+          ELSE status
+        END AS status,
+        COALESCE(resolution_steps, '[]'::jsonb) AS resolution_steps,
+        COALESCE(current_step, 0) AS current_step
       FROM anomalies
       WHERE organization_id = $1
       ORDER BY
@@ -281,7 +341,14 @@ router.get("/anomalies", async (req, res) => {
       [req.organizationId],
     );
 
-    return res.json({ anomalies: rows });
+    const anomalies = rows.map((r) => ({
+      ...r,
+      resolution_steps: Array.isArray(r.resolution_steps)
+        ? r.resolution_steps
+        : [],
+    }));
+
+    return res.json({ anomalies });
   } catch (err) {
     console.error("[analysis/anomalies GET]", err);
     return res.status(500).json({ error: "Erreur lors de la récupération." });
@@ -289,12 +356,183 @@ router.get("/anomalies", async (req, res) => {
 });
 
 // ---------------------------------------------------------
+// GET /api/analysis/anomalies/:id/plan
+// Guided resolution: the solution + ordered steps for this anomaly.
+// ---------------------------------------------------------
+router.get("/anomalies/:id/plan", async (req, res) => {
+  try {
+    await ensureResolutionSchema();
+    const { rows } = await pool.query(
+      `
+      SELECT id, type, description, severity, detected_at,
+        product_name,
+        (metadata->>'stock') AS stock,
+        (metadata->>'deviation_pct') AS deviation_pct,
+        CASE
+          WHEN status = 'non_resolu' THEN 'non_resolu'
+          WHEN status = 'resolu' THEN 'resolu'
+          ELSE status
+        END AS status,
+        COALESCE(resolution_steps, '[]'::jsonb) AS resolution_steps,
+        COALESCE(current_step, 0) AS current_step
+      FROM anomalies
+      WHERE id = $1 AND organization_id = $2
+      `,
+      [req.params.id, req.organizationId],
+    );
+
+    if (!rows.length) {
+      return res.status(404).json({ error: "Anomaly not found." });
+    }
+
+    const anomaly = {
+      ...rows[0],
+      resolution_steps: Array.isArray(rows[0].resolution_steps)
+        ? rows[0].resolution_steps
+        : [],
+    };
+
+    return res.json({ anomaly, plan: buildPlan(anomaly) });
+  } catch (err) {
+    console.error("[analysis/anomalies plan]", err);
+    return res.status(500).json({ error: "Erreur." });
+  }
+});
+
+// ---------------------------------------------------------
+// PUT /api/analysis/anomalies/:id/step
+// body: { step: number, done: boolean } — tick one guide step.
+// Moves to en_cours on first step, stays open until resolved.
+// ---------------------------------------------------------
+router.put("/anomalies/:id/step", async (req, res) => {
+  try {
+    await ensureResolutionSchema();
+    const step = Number(req.body?.step);
+    const done = req.body?.done !== false;
+
+    const { rows } = await pool.query(
+      `SELECT id, type, product_name, status,
+        COALESCE(resolution_steps, '[]'::jsonb) AS resolution_steps,
+        COALESCE(current_step, 0) AS current_step
+       FROM anomalies WHERE id = $1 AND organization_id = $2`,
+      [req.params.id, req.organizationId],
+    );
+
+    if (!rows.length) {
+      return res.status(404).json({ error: "Anomaly not found." });
+    }
+
+    const row = rows[0];
+    if (row.status === "resolu" || row.status === "resolu") {
+      return res.status(409).json({ error: "Anomaly already resolved." });
+    }
+    if (!Number.isInteger(step) || step < 0) {
+      return res.status(400).json({ error: "Valid step index required." });
+    }
+
+    const plan = buildPlan({
+      type: row.type,
+      product_name: row.product_name,
+      resolution_steps: Array.isArray(row.resolution_steps)
+        ? row.resolution_steps
+        : [],
+      current_step: row.current_step,
+    });
+
+    if (step >= plan.total_steps) {
+      return res.status(400).json({ error: "Step out of range." });
+    }
+
+    const doneSet = new Set(
+      (Array.isArray(row.resolution_steps) ? row.resolution_steps : [])
+        .map(Number)
+        .filter((n) => Number.isInteger(n)),
+    );
+    if (done) doneSet.add(step);
+    else doneSet.delete(step);
+    const doneList = [...doneSet].sort((a, b) => a - b);
+    const nextOpen = plan.steps.find((s) => !doneSet.has(s.index));
+    const nextStep = nextOpen ? nextOpen.index : plan.total_steps;
+
+    const { rows: updated } = await pool.query(
+      `UPDATE anomalies
+       SET resolution_steps = $1::jsonb,
+           current_step = $2,
+           status = CASE WHEN status IN ('non_resolu', 'non_resolu') THEN 'en_cours' ELSE status END
+       WHERE id = $3 AND organization_id = $4
+       RETURNING id`,
+      [JSON.stringify(doneList), nextStep, req.params.id, req.organizationId],
+    );
+
+    if (!updated.length) {
+      return res.status(404).json({ error: "Anomaly not found." });
+    }
+
+    const fresh = {
+      type: row.type,
+      product_name: row.product_name,
+      resolution_steps: doneList,
+      current_step: nextStep,
+    };
+
+    return res.json({
+      success: true,
+      resolution_steps: doneList,
+      current_step: nextStep,
+      plan: buildPlan(fresh),
+    });
+  } catch (err) {
+    console.error("[analysis/anomalies step]", err);
+    return res.status(500).json({ error: "Erreur." });
+  }
+});
+
+// ---------------------------------------------------------
 // PUT /api/analysis/anomalies/:id/resolve
+// Only allowed once every guide step is done — the solution
+// must be followed, not skipped.
 // ---------------------------------------------------------
 router.put("/anomalies/:id/resolve", async (req, res) => {
   try {
+    await ensureResolutionSchema();
+    const { rows } = await pool.query(
+      `SELECT id, type, product_name, status,
+        COALESCE(resolution_steps, '[]'::jsonb) AS resolution_steps
+       FROM anomalies WHERE id = $1 AND organization_id = $2`,
+      [req.params.id, req.organizationId],
+    );
+
+    if (!rows.length) {
+      return res.status(404).json({ error: "Anomaly not found." });
+    }
+
+    const row = rows[0];
+    if (row.status === "resolu" || row.status === "resolu") {
+      return res.json({ success: true });
+    }
+
+    const plan = buildPlan({
+      type: row.type,
+      product_name: row.product_name,
+      resolution_steps: Array.isArray(row.resolution_steps)
+        ? row.resolution_steps
+        : [],
+    });
+    const doneCount = (Array.isArray(row.resolution_steps)
+      ? row.resolution_steps
+      : []
+    ).length;
+
+    if (doneCount < plan.total_steps) {
+      return res.status(409).json({
+        error: `Follow the resolution guide first (${doneCount}/${plan.total_steps} steps done).`,
+        completed_steps: doneCount,
+        total_steps: plan.total_steps,
+      });
+    }
+
     await pool.query(
-      `UPDATE anomalies SET status = 'résolu'
+      `UPDATE anomalies SET status = 'resolu', resolved_at = NOW()
        WHERE id = $1 AND organization_id = $2`,
       [req.params.id, req.organizationId],
     );
@@ -330,7 +568,7 @@ router.get("/recommendations", async (req, res) => {
       pool
         .query(
           `SELECT type, product_name, description, severity FROM anomalies
-         WHERE organization_id = $1 AND status = 'non_résolu'`,
+         WHERE organization_id = $1 AND status = 'non_resolu'`,
           [req.organizationId],
         )
         .then((r) => r.rows),
@@ -465,13 +703,19 @@ function futureMonthLabels(lastMonth, horizon) {
 }
 
 function normalizeAnomalyType(rawType) {
+  const normalized = String(rawType || "").toLowerCase();
   const map = {
     baisse_anormale: "baisse_ventes",
     pic_anormal: "pic_ventes",
     rupture_stock: "rupture_stock",
     stock_faible: "stock_faible",
+    // Legacy accented value still present in old rows/seeds.
+    "avis_negatifs": "avis_negatifs",
+    avis_negatifs: "avis_negatifs",
+    baisse_ventes: "baisse_ventes",
+    pic_ventes: "pic_ventes",
   };
-  return map[rawType] || rawType || "inconnu";
+  return map[normalized] || normalized || "inconnu";
 }
 
 module.exports = router;

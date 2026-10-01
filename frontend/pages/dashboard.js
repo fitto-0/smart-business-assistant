@@ -77,17 +77,41 @@ export default function Dashboard() {
   const [anomalies, setAnomalies] = useState([]);
   const [recommendations, setRecommendations] = useState([]);
   const [loading, setLoading] = useState(true);
+  /**
+   * Visibility granted by the owner (`GET /dashboard/config`): which widgets and
+   * which KPI cards this member may see. `null` means "the server did not restrict
+   * anything", so the dashboard keeps rendering everything it always did.
+   */
+  const [access, setAccess] = useState(null);
 
   useEffect(() => {
     const loadData = async () => {
+      const config = await apiGet("/dashboard/config").catch(() => null);
+      setAccess(config);
+
+      const granted = Array.isArray(config?.widgets) ? config.widgets : null;
+      const wants = (widget) => !granted || granted.includes(widget);
+
       try {
         const responses = await Promise.allSettled([
-          apiGet("/sales/kpis"),
-          apiGet("/sales/monthly"),
-          apiGet("/sales/categories"),
-          apiGet("/sales/top-products", { limit: 5 }),
-          apiGet("/analysis/anomalies"),
-          apiGet("/analysis/recommendations"),
+          wants("revenue") || wants("orders")
+            ? apiGet("/sales/kpis")
+            : Promise.resolve({}),
+          wants("monthly_sales")
+            ? apiGet("/sales/monthly")
+            : Promise.resolve({ data: [] }),
+          wants("categories")
+            ? apiGet("/sales/categories")
+            : Promise.resolve({ data: [] }),
+          wants("top_products")
+            ? apiGet("/sales/top-products", { limit: 5 })
+            : Promise.resolve({ data: [] }),
+          wants("anomalies") || wants("stock_alerts")
+            ? apiGet("/analysis/anomalies")
+            : Promise.resolve({ anomalies: [], stats: {} }),
+          wants("recommendations")
+            ? apiGet("/analysis/recommendations")
+            : Promise.resolve({ recommendations: [] }),
         ]);
 
         const getResponse = (index, fallback) => {
@@ -142,27 +166,67 @@ export default function Dashboard() {
     );
   }
 
+  const grantedWidgets = Array.isArray(access?.widgets) ? access.widgets : null;
+  const grantedKpis = Array.isArray(access?.kpis) ? access.kpis : null;
+  const showWidget = (widget) =>
+    !grantedWidgets || grantedWidgets.includes(widget);
+  const showKpi = (kpi) => !grantedKpis || grantedKpis.includes(kpi);
+
   const kpiItems = [
     {
+      key: "totalRevenue",
       label: t("dashboard.kpis.totalRevenue"),
       value: `${fmt(kpis.totalRevenue)} MAD`,
       delta: kpis.revenueGrowth,
     },
     {
+      key: "totalOrders",
       label: t("dashboard.kpis.totalOrders"),
       value: fmt(kpis.totalOrders),
       delta: kpis.ordersGrowth,
     },
     {
+      key: "customerSatisfaction",
       label: t("dashboard.kpis.customerSatisfaction"),
       value: `${kpis.customerSatisfaction}/5`,
       delta: kpis.satisfactionGrowth,
     },
     {
+      key: "stockAlerts",
       label: t("dashboard.kpis.stockAlerts"),
       value: fmt(kpis.stockAlerts),
     },
-  ];
+  ].filter((item) => showKpi(item.key));
+
+  /**
+   * The owner can leave a member with no widget and no KPI at all. Rather than an
+   * empty grid that looks broken, say what is happening.
+   */
+  const showsAnyWidget = [
+    "monthly_sales",
+    "categories",
+    "top_products",
+    "anomalies",
+    "recommendations",
+  ].some(showWidget);
+
+  if (kpiItems.length === 0 && !showsAnyWidget) {
+    return (
+      <Layout title={t("dashboard.title")}>
+        <PageHeader
+          index="01"
+          eyebrow={t("dashboard.title")}
+          title={t("dashboard.title")}
+        />
+        <div className="panel">
+          <Empty
+            title="Nothing granted yet"
+            hint="The owner of this organization chooses which parts of the dashboard each member can see. Ask them to share a few widgets."
+          />
+        </div>
+      </Layout>
+    );
+  }
 
   return (
     <Layout title={t("dashboard.title")}>
@@ -173,10 +237,11 @@ export default function Dashboard() {
       />
 
       {/* KPI ledger — one divided band, index + mono delta */}
-      <Ledger items={kpiItems} />
+      {kpiItems.length > 0 && <Ledger items={kpiItems} />}
 
       <div className="mt-8 grid grid-cols-1 gap-6 xl:grid-cols-3">
         {/* Sales evolution — ember area vs steel dashed target */}
+        {showWidget("monthly_sales") && (
         <Section
           eyebrow={t("dashboard.charts.salesVsTargets")}
           title={t("dashboard.charts.salesEvolution")}
@@ -220,8 +285,10 @@ export default function Dashboard() {
             </ResponsiveContainer>
           </div>
         </Section>
+        )}
 
         {/* Category mix — ring + centered mono total, square legend */}
+        {showWidget("categories") && (
         <Section
           eyebrow={t("dashboard.charts.revenueDistribution")}
           title={t("dashboard.charts.salesByCategory")}
@@ -268,10 +335,12 @@ export default function Dashboard() {
             </div>
           </div>
         </Section>
+        )}
       </div>
 
       <div className="mt-6 grid grid-cols-1 gap-6 xl:grid-cols-3">
         {/* Top products — ranked ledger rows, square index ticks */}
+        {showWidget("top_products") && (
         <Section
           eyebrow="Rankings"
           title="Top Products"
@@ -315,8 +384,10 @@ export default function Dashboard() {
             )}
           </div>
         </Section>
+        )}
 
         {/* Anomalies — hairline panel, square LED, mono severity */}
+        {showWidget("anomalies") && (
         <Section
           eyebrow="Signals"
           title={t("dashboard.anomalies.detectedAnomalies")}
@@ -351,8 +422,10 @@ export default function Dashboard() {
             )}
           </div>
         </Section>
+        )}
 
         {/* Recommendations — numbered rows, olive impact delta */}
+        {showWidget("recommendations") && (
         <Section
           eyebrow="Actions"
           title={t("dashboard.recommendations.aiRecommendations")}
@@ -383,6 +456,7 @@ export default function Dashboard() {
             )}
           </div>
         </Section>
+        )}
       </div>
     </Layout>
   );

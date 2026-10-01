@@ -12,6 +12,11 @@ const crypto = require("crypto");
 const { query } = require("../db/pool");
 const { authLimiter } = require("../middleware/rateLimit");
 const auth = require("../middleware/auth");
+const { ensureOrganizationRoles } = require("../lib/roles");
+const {
+  ensurePersonalOrganization,
+  pickDefaultOrganizationId,
+} = require("../lib/orgs");
 const { sendPasswordReset, sendEmailVerification } = require("../lib/email");
 
 // Configure multer for avatar uploads
@@ -226,18 +231,28 @@ router.post("/login", authLimiter, async (req, res) => {
       [user.id, ipAddress, userAgent],
     );
 
-    // Get user's organizations
-    const orgResult = await query(
-      `SELECT o.id, o.name, o.slug, om.role 
-       FROM organizations o
-       JOIN organization_members om ON o.id = om.organization_id
-       WHERE om.user_id = $1 AND om.status = 'active'
-       ORDER BY o.created_at ASC
-       LIMIT 1`,
-      [user.id]
-    );
+    // Resolve the organization the session starts in. A user that predates the
+    // organization model (or that registered without creating one) gets their
+    // personal organization created here so the frontend always has a scope.
+    let organizationId = await pickDefaultOrganizationId(user.id);
+    if (!organizationId) {
+      organizationId = await ensurePersonalOrganization(user);
+    }
+    if (organizationId) {
+      await ensureOrganizationRoles(organizationId);
+    }
 
-    const organizationId = orgResult.rowCount > 0 ? orgResult.rows[0].id : null;
+    const orgResult = organizationId
+      ? await query(
+          `SELECT o.id, o.name, o.slug, om.role, om.role_id
+           FROM organizations o
+           JOIN organization_members om ON o.id = om.organization_id
+           WHERE om.user_id = $1 AND om.organization_id = $2 AND om.status = 'active'
+           LIMIT 1`,
+          [user.id, organizationId],
+        )
+      : { rowCount: 0, rows: [] };
+
     const token = generateToken(user, organizationId);
 
     return res.json({
@@ -295,6 +310,11 @@ router.get("/me", require("../middleware/auth"), async (req, res) => {
       avatar_url: u.avatar_url,
       language: u.language || 'en',
       createdAt: u.created_at,
+      // Active organization, already verified by the global organization-context
+      // middleware. The frontend uses it to keep its `X-Organization-Id` in sync.
+      organizationId: req.organizationId || null,
+      organizationRole: req.memberContext ? req.memberContext.role : null,
+      memberId: req.memberContext ? req.memberContext.memberId : null,
     });
   } catch (err) {
     console.error("Erreur /me:", err);
@@ -962,6 +982,10 @@ router.post("/switch-organization", require("../middleware/auth"), async (req, r
     const user = userResult.rows[0];
     const organization = memberResult.rows[0];
 
+    // Make sure the organization has its system roles (and that this member is
+    // linked to the right role row) before the first scoped request arrives.
+    await ensureOrganizationRoles(organizationId);
+
     // Generate new token with organization context
     const token = generateToken(user, organizationId);
 
@@ -1039,7 +1063,10 @@ router.post("/refresh-token", async (req, res) => {
       role: tokenData.role,
     };
 
-    const organizationId = tokenData.organization_id;
+    let organizationId = tokenData.organization_id;
+    if (!organizationId) {
+      organizationId = await pickDefaultOrganizationId(user.id);
+    }
     const newToken = generateToken(user, organizationId);
 
     // Generate new refresh token (rotate tokens for security)

@@ -11,6 +11,10 @@ import {
   TrendingDown,
   Package,
   Star,
+  Wand2,
+  ListChecks,
+  ExternalLink,
+  Loader2,
 } from "lucide-react";
 
 const SEVERITY_CONFIG = {
@@ -55,6 +59,9 @@ export default function AnomaliesPage() {
   const [anomalies, setAnomalies] = useState([]);
   const [filter, setFilter] = useState("tous");
   const [loading, setLoading] = useState(true);
+  const [guideAnomaly, setGuideAnomaly] = useState(null);
+  const [guidePlan, setGuidePlan] = useState(null);
+  const [guideLoading, setGuideLoading] = useState(false);
 
   useEffect(() => {
     const loadAnomalies = async () => {
@@ -72,14 +79,92 @@ export default function AnomaliesPage() {
     loadAnomalies();
   }, []);
 
+  const openGuide = async (anomaly) => {
+    setGuideAnomaly(anomaly);
+    setGuidePlan(null);
+    setGuideLoading(true);
+    try {
+      const data = await apiGet(`/analysis/anomalies/${anomaly.id}/plan`);
+      setGuideAnomaly(data.anomaly || anomaly);
+      setGuidePlan(data.plan || null);
+      setAnomalies((current) =>
+        current.map((a) =>
+          a.id === anomaly.id
+            ? {
+                ...a,
+                resolution_steps: data.anomaly?.resolution_steps || a.resolution_steps || [],
+                current_step: data.anomaly?.current_step ?? a.current_step,
+                status: data.anomaly?.status || a.status,
+              }
+            : a,
+        ),
+      );
+    } catch (error) {
+      toast.error(error.message || "Failed to load the resolution guide");
+      setGuideAnomaly(null);
+    } finally {
+      setGuideLoading(false);
+    }
+  };
+
+  const closeGuide = () => {
+    setGuideAnomaly(null);
+    setGuidePlan(null);
+    setGuideLoading(false);
+  };
+
+  const toggleGuideStep = async (stepIndex, done) => {
+    if (!guideAnomaly) return;
+    try {
+      const updated = await apiPut(`/analysis/anomalies/${guideAnomaly.id}/step`, {
+        step: stepIndex,
+        done,
+      });
+      const nextPlan = updated.plan || null;
+      setGuidePlan(nextPlan);
+      setAnomalies((current) =>
+        current.map((a) =>
+          a.id === guideAnomaly.id
+            ? {
+                ...a,
+                resolution_steps: updated.resolution_steps || [],
+                current_step: updated.current_step,
+                status: a.status === "non_resolu" ? "en_cours" : a.status,
+              }
+            : a,
+        ),
+      );
+      setGuideAnomaly((current) =>
+        current
+          ? {
+              ...current,
+              resolution_steps: updated.resolution_steps || [],
+              current_step: updated.current_step,
+              status: current.status === "non_resolu" ? "en_cours" : current.status,
+            }
+          : current,
+      );
+    } catch (error) {
+      toast.error(error.message || "Failed to update step");
+    }
+  };
+
   const markResolved = async (id) => {
+    const target = anomalies.find((a) => a.id === id);
     try {
       await apiPut(`/analysis/anomalies/${id}/resolve`);
       setAnomalies((current) =>
         current.map((a) => (a.id === id ? { ...a, status: "resolu" } : a)),
       );
+      if (guideAnomaly?.id === id) closeGuide();
       toast.success("Anomaly marked as resolved");
     } catch (error) {
+      // Backend blocks resolving before the guide is complete: open the guide.
+      if (error.message && /guide|steps/i.test(error.message) && target) {
+        toast.error(error.message);
+        openGuide(target);
+        return;
+      }
       toast.error(error.message || "Failed to update");
     }
   };
@@ -269,6 +354,12 @@ export default function AnomaliesPage() {
                 <div className="flex sm:flex-col gap-2 flex-shrink-0">
                   {a.status !== "resolu" && (
                     <>
+                      <button
+                        onClick={() => openGuide(a)}
+                        className="font-mono text-[12.5px] font-medium uppercase tracking-label antialiased px-3 py-1.5 rounded-xs border border-ember-500/40 text-ember-500 hover:bg-ember-500/10 transition-colors flex items-center gap-1.5"
+                      >
+                        <Wand2 size={12} /> Resolve with guide
+                      </button>
                       {a.status === "non_resolu" && (
                         <button
                           onClick={() => markInProgress(a.id)}
@@ -281,7 +372,7 @@ export default function AnomaliesPage() {
                         onClick={() => markResolved(a.id)}
                         className="font-mono text-[12.5px] font-medium uppercase tracking-label antialiased px-3 py-1.5 rounded-xs border border-line text-ink-2 hover:text-olive hover:border-olive/50 transition-colors flex items-center gap-1.5"
                       >
-                        <CheckCircle size={12} /> Resolve
+                        <CheckCircle size={12} /> Quick resolve
                       </button>
                     </>
                   )}
@@ -296,6 +387,128 @@ export default function AnomaliesPage() {
           );
         })}
       </div>
+
+      {guideAnomaly && (
+        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-4">
+          <div
+            className="absolute inset-0 bg-ink/40 backdrop-blur-[2px]"
+            onClick={closeGuide}
+          />
+          <div className="relative bg-surface border hairline rounded-xs w-full max-w-2xl max-h-[90vh] overflow-y-auto p-5 sm:p-6 animate-rise-in">
+            <div className="flex items-start justify-between gap-4 mb-4">
+              <div>
+                <p className="micro mb-1">Resolution guide</p>
+                <h3 className="portal-heading text-lg">
+                  {guideLoading ? "Loading the solution…" : guidePlan?.title || "Resolve this anomaly"}
+                </h3>
+                <p className="portal-text mt-1.5 leading-relaxed">
+                  {guideLoading ? "Fetching the step-by-step solution." : guidePlan?.summary}
+                </p>
+              </div>
+              <button
+                onClick={closeGuide}
+                className="w-8 h-8 rounded-xs border border-line text-ink-2 hover:text-ink flex items-center justify-center flex-shrink-0"
+                aria-label="Close guide"
+              >
+                <XCircle size={15} />
+              </button>
+            </div>
+
+            {guideLoading && (
+              <div className="flex items-center justify-center gap-2 py-10 portal-text">
+                <Loader2 size={16} className="animate-spin" /> Building your steps…
+              </div>
+            )}
+
+            {!guideLoading && guidePlan && (
+              <>
+                <div className="flex items-center gap-3 mb-4 px-3 py-2.5 rounded-xs bg-canvas/60 border hairline">
+                  <ListChecks size={15} className="text-ember-500 flex-shrink-0" />
+                  <div className="flex-1 h-1.5 rounded-full bg-line/60 overflow-hidden">
+                    <div
+                      className="h-full bg-olive rounded-full transition-all"
+                      style={{
+                        width: `${guidePlan.total_steps ? Math.round((guidePlan.completed_steps / guidePlan.total_steps) * 100) : 0}%`,
+                      }}
+                    />
+                  </div>
+                  <span className="micro whitespace-nowrap">
+                    {guidePlan.completed_steps}/{guidePlan.total_steps} steps
+                  </span>
+                </div>
+
+                <ol className="space-y-3">
+                  {guidePlan.steps.map((step) => (
+                    <li
+                      key={step.index}
+                      className={`border hairline rounded-xs p-3.5 ${step.done ? "bg-olive/5 border-olive/30" : "bg-canvas/40"}`}
+                    >
+                      <label className="flex items-start gap-3 cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={Boolean(step.done)}
+                          onChange={(e) => toggleGuideStep(step.index, e.target.checked)}
+                          className="mt-1 w-4 h-4 accent-[#7E9C6B]"
+                        />
+                        <div className="flex-1 min-w-0">
+                          <p className={`text-[14px] font-medium ${step.done ? "line-through text-ink-3" : "text-ink"}`}>
+                            Step {step.index + 1} · {step.title}
+                          </p>
+                          <p className="text-[13px] text-ink-2 leading-relaxed mt-1">{step.detail}</p>
+                          <div className="flex flex-wrap items-center gap-2 mt-2">
+                            <span className="micro">Do: {step.action}</span>
+                            {step.link && (
+                              <a
+                                href={step.link}
+                                onClick={(e) => e.stopPropagation()}
+                                className="font-mono text-[12px] uppercase tracking-label text-ember-500 hover:underline inline-flex items-center gap-1"
+                              >
+                                {step.linkLabel || "Open"} <ExternalLink size={11} />
+                              </a>
+                            )}
+                          </div>
+                          <p className="micro mt-1.5 opacity-80">Done when: {step.verify}</p>
+                        </div>
+                        {step.done && <CheckCircle size={16} className="text-olive flex-shrink-0 mt-0.5" />}
+                      </label>
+                    </li>
+                  ))}
+                </ol>
+
+                <div className="flex flex-col sm:flex-row gap-2 mt-5">
+                  {guidePlan.link && (
+                    <a
+                      href={guidePlan.link}
+                      className="btn-ghost flex items-center justify-center gap-1.5 flex-1"
+                    >
+                      {guidePlan.linkLabel || "Go to solution"} <ExternalLink size={13} />
+                    </a>
+                  )}
+                  <button
+                    onClick={() => markResolved(guideAnomaly.id)}
+                    disabled={guidePlan.completed_steps < guidePlan.total_steps}
+                    title={
+                      guidePlan.completed_steps < guidePlan.total_steps
+                        ? `Complete all steps first (${guidePlan.completed_steps}/${guidePlan.total_steps})`
+                        : "All steps done — resolve now"
+                    }
+                    className={`flex items-center justify-center gap-1.5 flex-1 font-mono text-[12.5px] font-medium uppercase tracking-label px-3 py-2.5 rounded-xs border transition-colors ${
+                      guidePlan.completed_steps < guidePlan.total_steps
+                        ? "border-line text-ink-3 cursor-not-allowed"
+                        : "border-olive/50 text-olive hover:bg-olive/10"
+                    }`}
+                  >
+                    <CheckCircle size={13} />
+                    {guidePlan.completed_steps < guidePlan.total_steps
+                      ? `Resolve (${guidePlan.completed_steps}/${guidePlan.total_steps})`
+                      : "Mark resolved"}
+                  </button>
+                </div>
+              </>
+            )}
+          </div>
+        </div>
+      )}
     </Layout>
   );
 }

@@ -2,7 +2,7 @@ require("dotenv").config();
 
 const fs = require("fs");
 const path = require("path");
-const { query } = require("./pool");
+const { query, pool } = require("./pool");
 
 const runMigration = async (migrationFile) => {
   const migrationPath = path.join(__dirname, "migrations", migrationFile);
@@ -29,6 +29,13 @@ const migrate = async () => {
   await runMigration("007_product_promotions.sql");
   await runMigration("009_product_stats_trigger.sql");
   await runMigration("010_users_role_manager.sql");
+
+  // Roles, permissions and the organization-scoped data model.
+  await runMigration("011_anomaly_resolution.sql");
+  await runMigration("012_anomaly_status_default.sql");
+  await runMigration("013_custom_roles.sql");
+  await runMigration("014_org_data_sharing.sql");
+  await runMigration("015_seed_system_roles.sql");
 
   await query(`
     DO $$
@@ -145,10 +152,19 @@ const migrate = async () => {
 
   await query(`
     INSERT INTO categories (user_id, name)
-    SELECT DISTINCT user_id, category
-    FROM products
-    WHERE category IS NOT NULL
-    ON CONFLICT (user_id, name) DO NOTHING
+    SELECT DISTINCT product_categories.user_id, product_categories.category
+    FROM (
+      SELECT DISTINCT user_id, category
+      FROM products
+      WHERE category IS NOT NULL
+    ) AS product_categories
+    WHERE NOT EXISTS (
+      SELECT 1
+      FROM categories c
+      WHERE c.user_id = product_categories.user_id
+        AND c.name = product_categories.category
+    )
+    ON CONFLICT DO NOTHING
   `);
 
   await query(`
@@ -281,10 +297,19 @@ const migrate = async () => {
 
   await query(`
     INSERT INTO categories (user_id, name)
-    SELECT DISTINCT user_id, category
-    FROM products
-    WHERE category IS NOT NULL
-    ON CONFLICT (user_id, name) DO NOTHING
+    SELECT DISTINCT product_categories.user_id, product_categories.category
+    FROM (
+      SELECT DISTINCT user_id, category
+      FROM products
+      WHERE category IS NOT NULL
+    ) AS product_categories
+    WHERE NOT EXISTS (
+      SELECT 1
+      FROM categories c
+      WHERE c.user_id = product_categories.user_id
+        AND c.name = product_categories.category
+    )
+    ON CONFLICT DO NOTHING
   `);
 
   await query(`
@@ -302,9 +327,11 @@ const migrate = async () => {
   `);
 
   console.log("✓ Database migrations applied successfully");
+  await pool.end();
 };
 
 migrate().catch((error) => {
   console.error("Database migration failed:", error.message);
   process.exitCode = 1;
+  pool.end().catch(() => {});
 });

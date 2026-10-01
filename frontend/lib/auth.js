@@ -1,5 +1,5 @@
 import Cookies from "js-cookie";
-import { apiGet, apiPost, apiPut } from "./api";
+import { apiGet, apiPost, apiPut, setCurrentOrgId, clearCurrentOrgId } from "./api";
 
 const TOKEN_KEY = "sba_token";
 const USER_KEY = "sba_user";
@@ -36,12 +36,42 @@ export const login = async (email, password, totpCode) => {
 
   localStorage.setItem(USER_KEY, JSON.stringify(user));
 
+  // Re-scope the working organization: the previous tenant must not leak into the
+  // new session (a stale `X-Organization-Id` would make the API answer 403).
+  clearCurrentOrgId();
+  if (response.organization?.id) setCurrentOrgId(response.organization.id);
+
   return user;
 };
 
 export const logout = () => {
   Cookies.remove(TOKEN_KEY);
   localStorage.removeItem(USER_KEY);
+  clearCurrentOrgId();
+};
+
+/**
+ * Make `organizationId` the working organization.
+ *
+ * Two things are needed and both are done here:
+ *   1. remember the id so every request carries `X-Organization-Id`;
+ *   2. obtain a JWT bound to that organization, because the organization-scoped
+ *      permission checks (`resolveOrganizationId`) give priority to the token claim.
+ */
+export const switchOrganization = async (organizationId) => {
+  const response = await apiPost("/auth/switch-organization", {
+    organizationId,
+  });
+
+  if (response.token) {
+    Cookies.set(TOKEN_KEY, response.token, { expires: 7 });
+  }
+  if (response.user) {
+    localStorage.setItem(USER_KEY, JSON.stringify(response.user));
+  }
+  setCurrentOrgId(organizationId);
+
+  return response;
 };
 
 export const getToken = () => {

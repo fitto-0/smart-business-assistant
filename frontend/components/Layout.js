@@ -7,7 +7,12 @@ import {
   fetchCurrentUser,
   logout,
 } from "../lib/auth";
-import { apiGet, apiPut } from "../lib/api";
+import {
+  apiGet,
+  apiPut,
+  getCurrentOrgId,
+  setCurrentOrgId,
+} from "../lib/api";
 import { useLanguage } from "../lib/LanguageContext";
 import {
   LogOut,
@@ -30,6 +35,7 @@ import {
   Database,
   FileText,
   ShoppingBag,
+  Check,
 } from "lucide-react";
 import Chatbot from "./Chatbot";
 
@@ -91,6 +97,29 @@ export default function Layout({
   const [showProfileMenu, setShowProfileMenu] = useState(false);
   const [showNotificationsMenu, setShowNotificationsMenu] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const [memberAccess, setMemberAccess] = useState(null);
+
+  /**
+   * Load the user's single organization context.
+   *
+   * Simplified: no org switcher, no my-access endpoint. The backend auto-resolves
+   * the user's default org, so we just need to know their role for nav visibility.
+   */
+  const loadMemberAccess = async () => {
+    try {
+      const orgs = await apiGet("/organizations").catch(() => ({ organizations: [] }));
+      const list = orgs.organizations || [];
+      if (!list.length) return null;
+
+      const active = list[0];
+      const merged = { orgId: active.id, role: active.user_role, isOwner: active.user_role === "owner" };
+      setMemberAccess(merged);
+      setCurrentOrgId(active.id);
+      return merged;
+    } catch {
+      return null;
+    }
+  };
 
   const ROUTE_META = {
     "/dashboard": { index: "01", fallback: "Dashboard" },
@@ -130,6 +159,7 @@ export default function Layout({
       try {
         const currentUser = await fetchCurrentUser();
         setUser(currentUser);
+        loadMemberAccess();
       } catch (error) {
         logout();
         router.push("/login");
@@ -194,6 +224,25 @@ export default function Layout({
   const ledgerIcon = (active) =>
     `flex-shrink-0 ${active ? "text-ember-500" : "text-ink-2"}`;
 
+  const isOwnerMember = Boolean(memberAccess?.isOwner);
+  const allowedPages = memberAccess?.dashboard?.pages || null;
+  const canSeePage = (href) => {
+    if (isOwnerMember) return true;
+    if (!allowedPages) return true;
+    return allowedPages.includes(href);
+  };
+
+  /**
+   * The roles page is the owner's console: the API only lets the owner create,
+   * edit or delete roles (`requireOwner`), so the entry point appears for the
+   * owner alone — showing it to anyone else would only lead to a 403.
+   */
+  const visibleUserNav = userNavItems.filter((item) => {
+    if (item.ownerOnly) return isOwnerMember;
+    return canSeePage(item.href);
+  });
+  const visibleStoreNav = storefrontNavItems.filter((i) => canSeePage(i.href));
+
   const Sidebar = ({ mobile = false }) => (
     <div className={`flex flex-col h-full ${mobile ? "w-full" : "w-60"}`}>
       {/* wordmark lockup */}
@@ -248,7 +297,7 @@ export default function Layout({
         {user.role !== "admin" && (
           <>
             <p className="px-3 mb-2 font-mono text-[11.5px] font-medium uppercase tracking-[0.14em] text-ink-2 antialiased">Workspace</p>
-            {userNavItems.map(({ href, label, icon: Icon }) => {
+            {visibleUserNav.map(({ href, label, icon: Icon }) => {
               const active = router.pathname === href;
               return (
                 <Link
@@ -277,7 +326,7 @@ export default function Layout({
         {user.role !== "admin" && (
           <>
             <p className="px-3 mt-5 mb-2 font-mono text-[11.5px] font-medium uppercase tracking-[0.14em] text-ink-2 antialiased">Store</p>
-            {storefrontNavItems.map(({ href, label, icon: Icon }) => {
+            {visibleStoreNav.map(({ href, label, icon: Icon }) => {
               const active = router.pathname.startsWith(
                 "/dashboard/storefront",
               );

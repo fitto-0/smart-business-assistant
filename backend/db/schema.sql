@@ -176,13 +176,15 @@ CREATE TABLE anomalies (
     id SERIAL PRIMARY KEY,
     user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
     product_id INTEGER REFERENCES products(id) ON DELETE SET NULL,
-    type VARCHAR(30) NOT NULL CHECK (type IN ('baisse_ventes', 'rupture_stock', 'stock_faible', 'avis_négatifs', 'pic_ventes')),
+    type VARCHAR(30) NOT NULL CHECK (type IN ('baisse_ventes', 'rupture_stock', 'stock_faible', 'avis_negatifs', 'pic_ventes')),
     severity VARCHAR(20) NOT NULL CHECK (severity IN ('basse', 'moyenne', 'haute', 'critique')),
     product_name VARCHAR(200),
     description TEXT NOT NULL,
     detected_at DATE DEFAULT CURRENT_DATE,
     resolved_at DATE,
-    status VARCHAR(20) DEFAULT 'non_résolu' CHECK (status IN ('non_résolu', 'en_cours', 'résolu')),
+    status VARCHAR(20) DEFAULT 'non_resolu' CHECK (status IN ('non_resolu', 'en_cours', 'resolu')),
+    resolution_steps JSONB DEFAULT '[]'::jsonb,
+    current_step INTEGER DEFAULT 0,
     metadata JSONB,
     created_at TIMESTAMPTZ DEFAULT NOW()
 );

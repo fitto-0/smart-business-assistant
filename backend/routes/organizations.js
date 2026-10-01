@@ -5,6 +5,12 @@ const crypto = require("crypto");
 const { query } = require("../db/pool");
 const auth = require("../middleware/auth");
 const { requirePermission, requireOwnerOrAdmin, requireOwner } = require("../middleware/permissions");
+const { requireParamOrgMatch } = require("../middleware/orgContext");
+const {
+  resolveAccess,
+  ensureOrganizationRoles,
+  normalizeDashboardOverride,
+} = require("../lib/roles");
 
 // Helper to generate unique slug
 const generateSlug = (name) => {
@@ -62,7 +68,7 @@ router.get("/", auth, async (req, res) => {
  * GET /api/organizations/:id
  * Get organization details
  */
-router.get("/:id", auth, async (req, res) => {
+router.get("/:id", auth, requireParamOrgMatch, async (req, res) => {
   try {
     const organizationId = parseInt(req.params.id);
     const userId = req.user.id;
@@ -159,6 +165,10 @@ router.post(
          VALUES ($1, $2, 'owner', 'active', NOW())`,
         [organization.id, userId]
       );
+
+      // Seed the six system roles so the owner can immediately restrict/allow
+      // permissions and dashboard visibility for every future member.
+      await ensureOrganizationRoles(organization.id);
       
       // Log audit
       await query(
@@ -189,6 +199,7 @@ router.post(
 router.put(
   "/:id",
   auth,
+  requireParamOrgMatch,
   requireOwnerOrAdmin,
   [
     body("name").optional().trim().isLength({ min: 2, max: 200 }),
@@ -278,7 +289,7 @@ router.put(
  * DELETE /api/organizations/:id
  * Delete organization (owner only)
  */
-router.delete("/:id", auth, requireOwner, async (req, res) => {
+router.delete("/:id", auth, requireParamOrgMatch, requireOwner, async (req, res) => {
   try {
     const organizationId = parseInt(req.params.id);
     const userId = req.user.id;
@@ -316,33 +327,61 @@ router.delete("/:id", auth, requireOwner, async (req, res) => {
  * GET /api/organizations/:id/members
  * Get organization members
  */
-router.get("/:id/members", auth, requirePermission('team', 'view'), async (req, res) => {
+router.get("/:id/members", auth, requireParamOrgMatch, requirePermission('team', 'view'), async (req, res) => {
   try {
     const organizationId = parseInt(req.params.id);
-    
-    const result = await query(
-      `SELECT 
-        om.id as member_id,
-        om.role,
-        om.status,
-        om.joined_at,
-        om.invited_at,
-        u.id as user_id,
-        u.name,
-        u.email,
-        u.avatar_url,
-        inviter.name as invited_by_name
-       FROM organization_members om
-       JOIN users u ON om.user_id = u.id
-       LEFT JOIN users inviter ON om.invited_by = inviter.id
-       WHERE om.organization_id = $1
-       ORDER BY om.created_at DESC`,
-      [organizationId]
+    const hasRoles = await query(`SELECT to_regclass('public.organization_roles') AS r`);
+    const hasRoleCols = await query(
+      `SELECT COUNT(*)::int AS n FROM information_schema.columns WHERE table_name='organization_members' AND column_name IN ('role_id','dashboard_config')`
     );
-    
-    return res.json({
-      members: result.rows,
-    });
+    const rich = hasRoles.rows[0] && hasRoles.rows[0].r && Number(hasRoleCols.rows[0].n) === 2;
+    const result = rich
+      ? await query(
+        `SELECT
+          om.id as member_id,
+          om.role,
+          om.status,
+          om.joined_at,
+          om.invited_at,
+          om.role_id,
+          om.dashboard_config,
+          ro.name AS custom_role_name,
+          ro.slug AS custom_role_slug,
+          ro.permissions AS custom_permissions,
+          ro.dashboard_config AS custom_dashboard,
+          u.id as user_id,
+          u.name,
+          u.email,
+          u.avatar_url,
+          inviter.name as invited_by_name
+         FROM organization_members om
+         JOIN users u ON om.user_id = u.id
+         LEFT JOIN users inviter ON om.invited_by = inviter.id
+         LEFT JOIN organization_roles ro ON ro.id = om.role_id
+         WHERE om.organization_id = $1
+         ORDER BY om.created_at DESC`,
+        [organizationId]
+      )
+      : await query(
+        `SELECT
+          om.id as member_id,
+          om.role,
+          om.status,
+          om.joined_at,
+          om.invited_at,
+          u.id as user_id,
+          u.name,
+          u.email,
+          u.avatar_url,
+          inviter.name as invited_by_name
+         FROM organization_members om
+         JOIN users u ON om.user_id = u.id
+         LEFT JOIN users inviter ON om.invited_by = inviter.id
+         WHERE om.organization_id = $1
+         ORDER BY om.created_at DESC`,
+        [organizationId]
+      );
+    return res.json({ members: result.rows });
   } catch (err) {
     console.error("Error fetching members:", err);
     return res.status(500).json({ error: "Error fetching members" });
@@ -351,14 +390,18 @@ router.get("/:id/members", auth, requirePermission('team', 'view'), async (req, 
 
 /**
  * PUT /api/organizations/:id/members/:memberId
- * Update member role
+ * Update member role (legacy slug) and/or custom role + per-user dashboard.
+ * Owner decides everything here.
  */
 router.put(
   "/:id/members/:memberId",
   auth,
+  requireParamOrgMatch,
   requireOwnerOrAdmin,
   [
-    body("role").isIn(['owner', 'admin', 'manager', 'employee', 'accountant', 'viewer']),
+    body("role").optional().isString(),
+    body("roleId").optional().isInt(),
+    body("dashboardConfig").optional().isObject(),
   ],
   async (req, res) => {
     try {
@@ -370,49 +413,92 @@ router.put(
       const organizationId = parseInt(req.params.id);
       const memberId = parseInt(req.params.memberId);
       const userId = req.user.id;
-      const { role } = req.body;
-      
-      // Get current member
+      const { role, roleId, dashboardConfig, dashboard_config } = req.body;
+      const dashboardInput =
+        dashboardConfig !== undefined ? dashboardConfig : dashboard_config;
+      // `undefined` = leave untouched, `null` = clear the override,
+      // an object = keep only the keys/values the owner may actually set.
+      const dashOverride =
+        dashboardInput === undefined
+          ? undefined
+          : dashboardInput === null
+          ? null
+          : normalizeDashboardOverride(dashboardInput);
+
+      // Only owner can touch the owner account or grant owner
       const current = await query(
-        `SELECT om.*, u.name as user_name, u.email 
+        `SELECT om.*, u.name as user_name, u.email
          FROM organization_members om
          JOIN users u ON om.user_id = u.id
          WHERE om.id = $1 AND om.organization_id = $2`,
         [memberId, organizationId]
       );
-      
-      if (current.rowCount === 0) {
-        return res.status(404).json({ error: "Member not found" });
-      }
-      
-      // Cannot change owner role if you're not the owner
+      if (current.rowCount === 0) return res.status(404).json({ error: "Member not found" });
       if (current.rows[0].role === 'owner' && req.userRole !== 'owner') {
         return res.status(403).json({ error: "Only owner can change owner role" });
       }
-      
-      // Cannot change your own role
       if (current.rows[0].user_id === userId) {
         return res.status(400).json({ error: "Cannot change your own role" });
       }
-      
-      // Update role
-      await query(
-        `UPDATE organization_members 
-         SET role = $1, updated_at = NOW()
-         WHERE id = $2`,
-        [role, memberId]
+      // Only owner may grant owner slug
+      if (role === 'owner' && req.userRole !== 'owner') {
+        return res.status(403).json({ error: "Only owner can grant owner role" });
+      }
+      // Role slug may be legacy or any custom slug owned by this org
+      let nextRole = current.rows[0].role;
+      if (role !== undefined && role !== null && role !== '') {
+        const slug = String(role).trim().toLowerCase();
+        const known = ['owner','admin','manager','employee','accountant','viewer'];
+        if (!known.includes(slug)) {
+          const custom = await query(
+            `SELECT id FROM organization_roles WHERE organization_id = $1 AND slug = $2`,
+            [organizationId, slug]
+          );
+          if (custom.rowCount === 0) return res.status(400).json({ error: "Unknown role for this organization" });
+        }
+        nextRole = slug;
+      }
+      // Custom role link (owner-named roles)
+      let nextRoleId = current.rows[0].role_id ?? null;
+      if (roleId !== undefined) {
+        if (roleId === null) nextRoleId = null;
+        else {
+          const rr = await query(
+            `SELECT id, slug FROM organization_roles WHERE id = $1 AND organization_id = $2`,
+            [parseInt(roleId), organizationId]
+          );
+          if (rr.rowCount === 0) return res.status(400).json({ error: "Role not found in this organization" });
+          nextRoleId = rr.rows[0].id;
+          // Keep text slug in sync when a custom role is chosen
+          if (role === undefined) nextRole = rr.rows[0].slug;
+        }
+      }
+      const hasDashCol = await query(
+        `SELECT COUNT(*)::int AS n FROM information_schema.columns WHERE table_name='organization_members' AND column_name='dashboard_config'`
       );
-      
-      // Log audit
+      const canDash = Number(hasDashCol.rows[0].n) === 1;
+      if (dashOverride !== undefined && !canDash) {
+        return res.status(400).json({ error: "Dashboard overrides not enabled yet (run migrations)" });
+      }
+      if (canDash) {
+        await query(
+          `UPDATE organization_members
+           SET role = $1, role_id = $2, dashboard_config = $3, updated_at = NOW()
+           WHERE id = $4`,
+          [nextRole, nextRoleId, dashOverride === undefined ? current.rows[0].dashboard_config ?? null : (dashOverride === null ? null : JSON.stringify(dashOverride)), memberId]
+        );
+      } else {
+        await query(
+          `UPDATE organization_members SET role = $1, updated_at = NOW() WHERE id = $2`,
+          [nextRole, memberId]
+        );
+      }
       await query(
         `INSERT INTO audit_logs (organization_id, user_id, action, entity_type, entity_id, old_values, new_values)
          VALUES ($1, $2, 'update', 'member', $3, $4, $5)`,
-        [organizationId, userId, memberId, JSON.stringify({ role: current.rows[0].role }), JSON.stringify({ role })]
+        [organizationId, userId, memberId, JSON.stringify({ role: current.rows[0].role, role_id: current.rows[0].role_id ?? null }), JSON.stringify({ role: nextRole, role_id: nextRoleId, dashboard_config: dashOverride === undefined ? undefined : dashOverride })]
       );
-      
-      return res.json({
-        message: "Member role updated successfully",
-      });
+      return res.json({ message: "Member role updated successfully" });
     } catch (err) {
       console.error("Error updating member role:", err);
       return res.status(500).json({ error: "Error updating member role" });
@@ -424,7 +510,7 @@ router.put(
  * DELETE /api/organizations/:id/members/:memberId
  * Remove member from organization
  */
-router.delete("/:id/members/:memberId", auth, requireOwnerOrAdmin, async (req, res) => {
+router.delete("/:id/members/:memberId", auth, requireParamOrgMatch, requireOwnerOrAdmin, async (req, res) => {
   try {
     const organizationId = parseInt(req.params.id);
     const memberId = parseInt(req.params.memberId);
@@ -481,7 +567,7 @@ router.delete("/:id/members/:memberId", auth, requireOwnerOrAdmin, async (req, r
  * POST /api/organizations/:id/leave
  * Leave organization (for non-owners)
  */
-router.post("/:id/leave", auth, async (req, res) => {
+router.post("/:id/leave", auth, requireParamOrgMatch, async (req, res) => {
   try {
     const organizationId = parseInt(req.params.id);
     const userId = req.user.id;
@@ -527,10 +613,119 @@ router.post("/:id/leave", auth, async (req, res) => {
 });
 
 /**
+ * GET /api/organizations/:id/my-access
+ * What the current user can do + what dashboard the owner gave them.
+ *
+ * Single source of truth for the frontend: navigation, dashboard widgets and KPI
+ * cards are all derived from the same answer the API enforces. The backend
+ * `requirePermission` middleware remains authoritative — this endpoint only tells
+ * the UI what to render, it does not grant anything.
+ */
+router.get("/:id/my-access", auth, requireParamOrgMatch, async (req, res) => {
+  try {
+    const organizationId = parseInt(req.params.id);
+    const { getMemberContext } = require("../middleware/permissions");
+    const ctx = await getMemberContext(req.user.id, organizationId);
+    if (!ctx) return res.status(403).json({ error: "Not a member of this organization" });
+
+    const access = resolveAccess(ctx);
+
+    return res.json({
+      organizationId,
+      role: access.role,
+      roleLabel: access.roleLabel,
+      customRole: access.customRole,
+      isOwner: access.isOwner,
+      permissions: access.permissions,
+      dashboard: access.dashboard,
+      // Flattened aliases kept for the navigation code and for callers that only
+      // care about one dimension.
+      widgets: access.dashboard.widgets,
+      pages: access.dashboard.pages,
+      kpis: access.dashboard.kpis,
+      source: {
+        roleDashboard: ctx.roleDashboard || null,
+        memberOverride: ctx.memberDashboard || null,
+      },
+    });
+  } catch (err) {
+    console.error("Error fetching my-access:", err);
+    return res.status(500).json({ error: "Error fetching access" });
+  }
+});
+
+/**
+ * GET /api/organizations/:id/members/:memberId/access
+ * Owner-only: preview exactly what one member can see and do.
+ * Used by the "Dashboard visibility" panel so the owner can review before saving.
+ */
+router.get(
+  "/:id/members/:memberId/access",
+  auth,
+  requireParamOrgMatch,
+  requireOwnerOrAdmin,
+  async (req, res) => {
+    try {
+      const organizationId = parseInt(req.params.id);
+      const memberId = parseInt(req.params.memberId);
+
+      const member = await query(
+        `SELECT om.id, om.user_id, om.role, om.role_id, om.status,
+                om.dashboard_config AS member_override,
+                ro.slug AS custom_slug, ro.name AS custom_name,
+                ro.permissions AS role_permissions,
+                ro.dashboard_config AS role_dashboard,
+                u.name AS user_name, u.email
+           FROM organization_members om
+           JOIN users u ON u.id = om.user_id
+           LEFT JOIN organization_roles ro
+                  ON ro.id = om.role_id AND ro.organization_id = om.organization_id
+          WHERE om.id = $1 AND om.organization_id = $2`,
+        [memberId, organizationId],
+      );
+
+      if (member.rowCount === 0) {
+        return res.status(404).json({ error: "Member not found" });
+      }
+
+      const row = member.rows[0];
+      const access = resolveAccess({
+        memberId: row.id,
+        role: row.role,
+        isOwner: row.role === "owner",
+        roleId: row.role_id,
+        customSlug: row.custom_slug,
+        customName: row.custom_name,
+        permissions: row.role_permissions,
+        roleDashboard: row.role_dashboard,
+        memberDashboard: row.member_override,
+        status: row.status,
+      });
+
+      return res.json({
+        member: {
+          id: row.id,
+          userId: row.user_id,
+          name: row.user_name,
+          email: row.email,
+          role: row.role,
+          status: row.status,
+          customRole: access.customRole,
+        },
+        access,
+      });
+    } catch (err) {
+      console.error("Error fetching member access:", err);
+      return res.status(500).json({ error: "Error fetching member access" });
+    }
+  },
+);
+
+/**
  * GET /api/organizations/:id/branches
  * Get organization branches
  */
-router.get("/:id/branches", auth, requirePermission('branches', 'view'), async (req, res) => {
+router.get("/:id/branches", auth, requireParamOrgMatch, requirePermission('branches', 'view'), async (req, res) => {
   try {
     const organizationId = parseInt(req.params.id);
     
@@ -557,6 +752,7 @@ router.get("/:id/branches", auth, requirePermission('branches', 'view'), async (
 router.post(
   "/:id/branches",
   auth,
+  requireParamOrgMatch,
   requirePermission('branches', 'create'),
   [
     body("name").trim().isLength({ min: 2, max: 200 }),
@@ -609,6 +805,7 @@ router.post(
 router.put(
   "/:id/branches/:branchId",
   auth,
+  requireParamOrgMatch,
   requirePermission('branches', 'update'),
   [
     body("name").optional().trim().isLength({ min: 2, max: 200 }),
@@ -722,7 +919,7 @@ router.put(
  * DELETE /api/organizations/:id/branches/:branchId
  * Delete branch
  */
-router.delete("/:id/branches/:branchId", auth, requireOwner, async (req, res) => {
+router.delete("/:id/branches/:branchId", auth, requireParamOrgMatch, requireOwner, async (req, res) => {
   try {
     const organizationId = parseInt(req.params.id);
     const branchId = parseInt(req.params.branchId);

@@ -4,6 +4,8 @@
 
 const router = require("express").Router();
 const auth = require("../middleware/auth");
+const { withOrgContext } = require("../middleware/orgContext");
+const { requirePermission } = require("../middleware/permissions");
 const pool = require("../config/db");
 const multer = require("multer");
 const path = require("path");
@@ -31,7 +33,12 @@ const productImageUpload = multer({
 // =====================================================
 // GET /api/products
 // =====================================================
-router.get("/", auth, async (req, res) => {
+router.get(
+  "/",
+  auth,
+  withOrgContext(),
+  requirePermission("products", "view"),
+  async (req, res) => {
   try {
     const {
       category,
@@ -62,8 +69,10 @@ router.get("/", auth, async (req, res) => {
     const params = [];
     let idx = 1;
 
-    where.push(`p.user_id = $${idx}`);
-    params.push(req.user.id);
+    // Organization scope: every member of the organization sees the shared pool,
+    // and the owner's role permissions decide whether they may see it at all.
+    where.push(`p.organization_id = $${idx}`);
+    params.push(req.organizationId);
     idx++;
 
     if (category) {
@@ -110,7 +119,7 @@ router.get("/", auth, async (req, res) => {
               SELECT COALESCE(SUM(s.quantity), 0)
               FROM sales s
               WHERE s.product_id = p.id
-                AND s.user_id = p.user_id
+                AND s.organization_id = p.organization_id
                 AND s.date >= CURRENT_DATE - INTERVAL '60 days'
                 AND s.date < CURRENT_DATE - INTERVAL '30 days'
             ) > 0 THEN (
@@ -119,13 +128,13 @@ router.get("/", auth, async (req, res) => {
                   SELECT COALESCE(SUM(s.quantity), 0)
                   FROM sales s
                   WHERE s.product_id = p.id
-                    AND s.user_id = p.user_id
+                    AND s.organization_id = p.organization_id
                     AND s.date >= CURRENT_DATE - INTERVAL '30 days'
                 ) - (
                   SELECT COALESCE(SUM(s.quantity), 0)
                   FROM sales s
                   WHERE s.product_id = p.id
-                    AND s.user_id = p.user_id
+                    AND s.organization_id = p.organization_id
                     AND s.date >= CURRENT_DATE - INTERVAL '60 days'
                     AND s.date < CURRENT_DATE - INTERVAL '30 days'
                 )
@@ -133,7 +142,7 @@ router.get("/", auth, async (req, res) => {
                 SELECT COALESCE(SUM(s.quantity), 0)
                 FROM sales s
                 WHERE s.product_id = p.id
-                  AND s.user_id = p.user_id
+                  AND s.organization_id = p.organization_id
                   AND s.date >= CURRENT_DATE - INTERVAL '60 days'
                   AND s.date < CURRENT_DATE - INTERVAL '30 days'
               ) * 100
@@ -153,14 +162,14 @@ router.get("/", auth, async (req, res) => {
           SELECT COUNT(*)
           FROM reviews r
           WHERE r.product_id = p.id
-          AND r.user_id = p.user_id
+          AND r.organization_id = p.organization_id
         ) AS reviews_count,
 
         (
           SELECT COALESCE(AVG(r.rating), 0)::DECIMAL(2,1)
           FROM reviews r
           WHERE r.product_id = p.id
-          AND r.user_id = p.user_id
+          AND r.organization_id = p.organization_id
         ) AS avg_rating
 
       FROM products p
@@ -205,7 +214,12 @@ router.get("/", auth, async (req, res) => {
 // =====================================================
 // GET /api/products/:id
 // =====================================================
-router.get("/:id", auth, async (req, res) => {
+router.get(
+  "/:id",
+  auth,
+  withOrgContext(),
+  requirePermission("products", "view"),
+  async (req, res) => {
   try {
     const result = await query(
       `
@@ -221,7 +235,7 @@ router.get("/:id", auth, async (req, res) => {
               SELECT COALESCE(SUM(s.quantity), 0)
               FROM sales s
               WHERE s.product_id = p.id
-                AND s.user_id = p.user_id
+                AND s.organization_id = p.organization_id
                 AND s.date >= CURRENT_DATE - INTERVAL '60 days'
                 AND s.date < CURRENT_DATE - INTERVAL '30 days'
             ) > 0 THEN (
@@ -230,13 +244,13 @@ router.get("/:id", auth, async (req, res) => {
                   SELECT COALESCE(SUM(s.quantity), 0)
                   FROM sales s
                   WHERE s.product_id = p.id
-                    AND s.user_id = p.user_id
+                    AND s.organization_id = p.organization_id
                     AND s.date >= CURRENT_DATE - INTERVAL '30 days'
                 ) - (
                   SELECT COALESCE(SUM(s.quantity), 0)
                   FROM sales s
                   WHERE s.product_id = p.id
-                    AND s.user_id = p.user_id
+                    AND s.organization_id = p.organization_id
                     AND s.date >= CURRENT_DATE - INTERVAL '60 days'
                     AND s.date < CURRENT_DATE - INTERVAL '30 days'
                 )
@@ -244,7 +258,7 @@ router.get("/:id", auth, async (req, res) => {
                 SELECT COALESCE(SUM(s.quantity), 0)
                 FROM sales s
                 WHERE s.product_id = p.id
-                  AND s.user_id = p.user_id
+                  AND s.organization_id = p.organization_id
                   AND s.date >= CURRENT_DATE - INTERVAL '60 days'
                   AND s.date < CURRENT_DATE - INTERVAL '30 days'
               ) * 100
@@ -258,22 +272,22 @@ router.get("/:id", auth, async (req, res) => {
           SELECT COUNT(*)
           FROM reviews r
           WHERE r.product_id = p.id
-          AND r.user_id = p.user_id
+          AND r.organization_id = p.organization_id
         ) AS reviews_count,
 
         (
           SELECT COALESCE(AVG(r.rating), 0)::DECIMAL(2,1)
           FROM reviews r
           WHERE r.product_id = p.id
-          AND r.user_id = p.user_id
+          AND r.organization_id = p.organization_id
         ) AS avg_rating
 
       FROM products p
       WHERE p.id = $1
-      AND p.user_id = $2
+      AND p.organization_id = $2
       AND p.deleted_at IS NULL
       `,
-      [parseInt(req.params.id), req.user.id],
+      [parseInt(req.params.id), req.organizationId],
     );
 
     if (result.rowCount === 0) {
@@ -295,7 +309,12 @@ router.get("/:id", auth, async (req, res) => {
 // =====================================================
 // POST /api/products
 // =====================================================
-router.post("/", auth, async (req, res) => {
+router.post(
+  "/",
+  auth,
+  withOrgContext(),
+  requirePermission("products", "create"),
+  async (req, res) => {
   try {
     const {
       name,
@@ -344,10 +363,11 @@ router.post("/", auth, async (req, res) => {
           stock,
           description,
           sku,
-          user_id
+          user_id,
+          organization_id
         )
       VALUES
-        ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+        ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
       RETURNING *
       `,
       [
@@ -362,6 +382,7 @@ router.post("/", auth, async (req, res) => {
         description || null,
         sku || null,
         req.user.id,
+        req.organizationId,
       ],
     );
 
@@ -378,7 +399,12 @@ router.post("/", auth, async (req, res) => {
 // =====================================================
 // PUT /api/products/:id
 // =====================================================
-router.put("/:id", auth, async (req, res) => {
+router.put(
+  "/:id",
+  auth,
+  withOrgContext(),
+  requirePermission("products", "update"),
+  async (req, res) => {
   try {
     const id = parseInt(req.params.id);
 
@@ -409,8 +435,8 @@ router.put("/:id", auth, async (req, res) => {
       req.body.price !== undefined
     ) {
       const current = await query(
-        "SELECT price, promotion_price FROM products WHERE id = $1 AND user_id = $2 AND deleted_at IS NULL",
-        [id, req.user.id],
+        "SELECT price, promotion_price FROM products WHERE id = $1 AND organization_id = $2 AND deleted_at IS NULL",
+        [id, req.organizationId],
       );
 
       if (current.rowCount === 0) {
@@ -452,14 +478,14 @@ router.put("/:id", auth, async (req, res) => {
     }
 
     params.push(id);
-    params.push(req.user.id);
+    params.push(req.organizationId);
 
     const result = await query(
       `
       UPDATE products
       SET ${updates.join(", ")}
       WHERE id = $${idx}
-      AND user_id = $${idx + 1}
+      AND organization_id = $${idx + 1}
       AND deleted_at IS NULL
       RETURNING *
       `,
@@ -485,6 +511,8 @@ router.put("/:id", auth, async (req, res) => {
 router.post(
   "/:id/image",
   auth,
+  withOrgContext(),
+  requirePermission("products", "update"),
   productImageUpload.single("image"),
   async (req, res) => {
     try {
@@ -492,11 +520,11 @@ router.post(
         return res.status(400).json({ error: "An image file is required" });
 
       const result = await query(
-        "UPDATE products SET image_url = $1 WHERE id = $2 AND user_id = $3 AND deleted_at IS NULL RETURNING *",
+        "UPDATE products SET image_url = $1 WHERE id = $2 AND organization_id = $3 AND deleted_at IS NULL RETURNING *",
         [
           `/uploads/products/${req.file.filename}`,
           parseInt(req.params.id),
-          req.user.id,
+          req.organizationId,
         ],
       );
 
@@ -513,18 +541,24 @@ router.post(
 // =====================================================
 // DELETE /api/products/:id
 // =====================================================
-router.delete("/:id", auth, async (req, res) => {
+router.delete(
+  "/:id",
+  auth,
+  withOrgContext(),
+  requirePermission("products", "delete"),
+  async (req, res) => {
   try {
     const result = await query(
       `
       UPDATE products
       SET deleted_at = NOW(), updated_at = NOW()
       WHERE id = $1
-      AND user_id = $2
+      AND organization_id = $2
       AND deleted_at IS NULL
       RETURNING id, name
       `,
-      [parseInt(req.params.id), req.user.id],
+      [parseInt(req.params.id), req.organizationId],
+
     );
 
     if (result.rowCount === 0) {
@@ -549,7 +583,12 @@ router.delete("/:id", auth, async (req, res) => {
 // =====================================================
 // POST /api/products/:id/restock
 // =====================================================
-router.post("/:id/restock", auth, async (req, res) => {
+router.post(
+  "/:id/restock",
+  auth,
+  withOrgContext(),
+  requirePermission("inventory", "restock"),
+  async (req, res) => {
   try {
     const quantity = parseInt(req.body.quantity);
 
@@ -566,11 +605,11 @@ router.post("/:id/restock", auth, async (req, res) => {
         stock = stock + $1,
         updated_at = NOW()
       WHERE id = $2
-      AND user_id = $3
+      AND organization_id = $3
       AND deleted_at IS NULL
       RETURNING id, name, stock, status
       `,
-      [quantity, parseInt(req.params.id), req.user.id],
+      [quantity, parseInt(req.params.id), req.organizationId],
     );
 
     if (result.rowCount === 0) {

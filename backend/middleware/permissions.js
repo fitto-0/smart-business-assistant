@@ -90,6 +90,96 @@ const PERMISSIONS = {
   },
 };
 
+/* Everything the owner can grant — checkboxes in UI. */
+const AVAILABLE_PERMISSIONS = Object.fromEntries(
+  Object.entries(PERMISSIONS).map(([r, a]) => [r, Object.keys(a)])
+);
+const AVAILABLE_WIDGETS = ['revenue','orders','satisfaction','stock_alerts','monthly_sales','categories','top_products','anomalies','recommendations'];
+const AVAILABLE_PAGES = ['/dashboard','/sales','/products','/anomalies','/predictions','/recommendations','/reviews','/security','/backup','/reports','/dashboard/storefront','/profile'];
+const FULL_DASHBOARD = {
+  widgets: [...AVAILABLE_WIDGETS],
+  pages: [...AVAILABLE_PAGES],
+  kpis: ['totalRevenue','totalOrders','customerSatisfaction','stockAlerts'],
+};
+
+const resolveOrganizationId = (req) => {
+  const p = req.params && req.params.id ? parseInt(req.params.id) : NaN;
+  const b = req.body && req.body.organizationId ? parseInt(req.body.organizationId) : NaN;
+  const q = req.query && req.query.organizationId ? parseInt(req.query.organizationId) : NaN;
+  if (req.organizationId) return parseInt(req.organizationId);
+  if (Number.isInteger(p)) return p;
+  if (Number.isInteger(b)) return b;
+  if (Number.isInteger(q)) return q;
+  return null;
+};
+
+const getMemberContext = async (userId, organizationId) => {
+  const { query } = require('../db/pool');
+  try {
+    const r = await query(
+      `SELECT om.id, om.role, om.status, om.role_id, om.dashboard_config AS md,
+              om.permissions AS legacy_overrides,
+              ro.slug AS cslug, ro.name AS cname,
+              ro.permissions AS rperms, ro.dashboard_config AS rdash
+       FROM organization_members om
+       LEFT JOIN organization_roles ro ON ro.id = om.role_id AND ro.organization_id = om.organization_id
+       WHERE om.user_id = $1 AND om.organization_id = $2`,
+      [userId, organizationId]
+    );
+    if (r.rowCount === 0) return null;
+    const m = r.rows[0];
+    const isOwner = m.role === 'owner';
+    const permissions = m.rperms || null;
+    const roleDashboard = m.rdash || null;
+    const memberDashboard = m.md || null;
+    const dashboard =
+      memberDashboard ||
+      roleDashboard ||
+      (isOwner ? FULL_DASHBOARD : null);
+    return {
+      memberId: m.id,
+      role: m.role,
+      customSlug: m.cslug || null,
+      customName: m.cname || null,
+      roleId: m.role_id || null,
+      status: m.status,
+      isOwner,
+      permissions,
+      dashboard,
+      roleDashboard,
+      memberDashboard,
+      legacyOverrides: m.legacy_overrides || {},
+    };
+  } catch (_e) {
+    // Fallback when organization_roles / new columns do not exist yet (pre-013 DBs).
+    try {
+      const fb = await query(
+        `SELECT id, role, status FROM organization_members WHERE user_id = $1 AND organization_id = $2`,
+        [userId, organizationId]
+      );
+      if (fb.rowCount === 0) return null;
+      const m = fb.rows[0];
+      const isOwner = m.role === 'owner';
+      return {
+        memberId: m.id,
+        role: m.role,
+        customSlug: null,
+        customName: null,
+        roleId: null,
+        status: m.status,
+        isOwner,
+        permissions: null,
+        dashboard: isOwner ? FULL_DASHBOARD : null,
+        roleDashboard: null,
+        memberDashboard: null,
+        legacyOverrides: {},
+      };
+    } catch (_e2) {
+      return null;
+    }
+  }
+};
+
 /**
  * Check if a role has permission for a specific action
  */
@@ -108,51 +198,94 @@ const hasPermission = (role, resource, action) => {
 };
 
 /**
- * Middleware to check if user has required permission
+ * Expand the built-in matrix for one or more legacy role slugs into an explicit
+ * `{ resource: { action: boolean } }` map. Single source of truth used both for
+ * enforcement here and for the owner-facing role editor (`lib/roles.js`).
  */
+const permissionsForLegacyRole = (roleSlug) => {
+  const wanted = (Array.isArray(roleSlug) ? roleSlug : [roleSlug]).map((s) =>
+    String(s || '').toLowerCase()
+  );
+  const out = {};
+  for (const resource of Object.keys(PERMISSIONS)) {
+    out[resource] = {};
+    for (const action of Object.keys(PERMISSIONS[resource])) {
+      out[resource][action] = PERMISSIONS[resource][action].some((s) =>
+        wanted.includes(String(s).toLowerCase())
+      );
+    }
+  }
+  return out;
+};
+
+const checkCustom = (perms, resource, action) => {
+  if (!perms || typeof perms !== 'object') return null;
+  const res = perms[resource];
+  if (!res || typeof res !== 'object') return null;
+  if (Object.keys(res).length === 0) return null;
+  return res[action] === true;
+};
+
+/**
+ * Membership statuses that must never reach organization data.
+ * Mirrored in `lib/orgs.js` — keep the two lists in sync.
+ */
+const MEMBER_STATUSES_BLOCKED = ['removed', 'inactive', 'suspended'];
+
+/** A membership with no status at all is treated as active (legacy rows). */
+const isUsableMemberStatus = (status) =>
+  !status || !MEMBER_STATUSES_BLOCKED.includes(String(status).toLowerCase());
+
+/** 403 payload helper shared by every membership-aware middleware. */
+const rejectBlockedMember = (res, ctx) =>
+  res.status(403).json({
+    error: ctx && ctx.status
+      ? `Your membership in this organization is ${ctx.status}.`
+      : 'Not a member of this organization',
+  });
+
 const requirePermission = (resource, action) => {
   return async (req, res, next) => {
     try {
       const user = req.user;
-      const organizationId = req.organizationId;
-      
-      if (!user) {
-        return res.status(401).json({ error: 'Authentication required' });
+      const organizationId = resolveOrganizationId(req);
+      if (!user) return res.status(401).json({ error: 'Authentication required' });
+      if (!organizationId) return res.status(400).json({ error: 'Organization context required' });
+      const ctx = await getMemberContext(user.id, organizationId);
+      if (!ctx) return res.status(403).json({ error: 'Not a member of this organization' });
+      if (ctx.status !== 'active') return res.status(403).json({ error: 'Organization membership is not active' });
+
+      /**
+       * Publish the *verified* organization on the request so every downstream
+       * handler can use `req.organizationId` for its SQL filters without ever
+       * re-deriving (or trusting) the client value.
+       */
+      const grant = () => {
+        req.organizationId = organizationId;
+        req.organizationContextVerified = true;
+        req.userRole = ctx.role;
+        req.memberId = ctx.memberId;
+        req.memberContext = ctx;
+        return next();
+      };
+
+      if (ctx.isOwner) return grant();
+
+      if (ctx.permissions) {
+        const decision = checkCustom(ctx.permissions, resource, action);
+        if (decision === true) return grant();
+        if (decision === false) {
+          return res.status(403).json({ error: `Permission denied: ${resource}.${action} not granted to your role` });
+        }
+        // decision === null -> the owner-authored matrix has no opinion
+        // (untouched system role). Fall through to the built-in matrix below.
       }
-      
-      if (!organizationId) {
-        return res.status(400).json({ error: 'Organization context required' });
-      }
-      
-      // Get user's role in this organization
-      const { query } = require('../db/pool');
-      const memberResult = await query(
-        `SELECT role, status FROM organization_members 
-         WHERE user_id = $1 AND organization_id = $2`,
-        [user.id, organizationId]
-      );
-      
-      if (memberResult.rowCount === 0) {
-        return res.status(403).json({ error: 'Not a member of this organization' });
-      }
-      
-      const member = memberResult.rows[0];
-      
-      if (member.status !== 'active') {
-        return res.status(403).json({ error: 'Organization membership is not active' });
-      }
-      
-      if (!hasPermission(member.role, resource, action)) {
-        return res.status(403).json({ 
-          error: `Permission denied: ${resource}.${action} requires one of: ${PERMISSIONS[resource][action].join(', ')}` 
+      if (!hasPermission(ctx.role, resource, action)) {
+        return res.status(403).json({
+          error: `Permission denied: ${resource}.${action} requires one of: ${PERMISSIONS[resource][action].join(', ')}`
         });
       }
-      
-      // Add role to request for use in controllers
-      req.userRole = member.role;
-      req.memberId = memberResult.rows[0].id;
-      
-      next();
+      return grant();
     } catch (error) {
       console.error('Permission check error:', error);
       return res.status(500).json({ error: 'Error checking permissions' });
@@ -166,35 +299,30 @@ const requirePermission = (resource, action) => {
 const requireOwnerOrAdmin = async (req, res, next) => {
   try {
     const user = req.user;
-    const organizationId = req.organizationId;
-    
-    if (!user) {
-      return res.status(401).json({ error: 'Authentication required' });
+    const organizationId = resolveOrganizationId(req);
+    if (!user) return res.status(401).json({ error: 'Authentication required' });
+    if (!organizationId) return res.status(400).json({ error: 'Organization context required' });
+    const ctx = await getMemberContext(user.id, organizationId);
+    if (!ctx) return res.status(403).json({ error: 'Not a member of this organization' });
+    if (!isUsableMemberStatus(ctx.status) && ctx.status !== 'pending') {
+      return rejectBlockedMember(res, ctx);
     }
-    
-    if (!organizationId) {
-      return res.status(400).json({ error: 'Organization context required' });
+    if (ctx.isOwner || ctx.role === 'admin') {
+      req.userRole = ctx.role; req.memberId = ctx.memberId; req.memberContext = ctx;
+      return next();
     }
-    
-    const { query } = require('../db/pool');
-    const memberResult = await query(
-      `SELECT role FROM organization_members 
-       WHERE user_id = $1 AND organization_id = $2`,
-      [user.id, organizationId]
-    );
-    
-    if (memberResult.rowCount === 0) {
-      return res.status(403).json({ error: 'Not a member of this organization' });
+    // A custom role may be trusted with team management ONLY if the owner actually
+    // granted the write actions. `team.view` is deliberately NOT enough: seeing the
+    // member list is not the same as being allowed to change roles or remove people.
+    const matrix = ctx.permissions && Object.keys(ctx.permissions).length
+      ? ctx.permissions
+      : null;
+    const custom = matrix || permissionsForLegacyRole(ctx.role);
+    if (custom.team && (custom.team.update_roles === true || custom.team.invite === true || custom.team.remove === true)) {
+      req.userRole = ctx.role; req.memberId = ctx.memberId; req.memberContext = ctx;
+      return next();
     }
-    
-    const role = memberResult.rows[0].role;
-    
-    if (role !== 'owner' && role !== 'admin') {
-      return res.status(403).json({ error: 'Owner or admin access required' });
-    }
-    
-    req.userRole = role;
-    next();
+    return res.status(403).json({ error: 'Owner or admin access required' });
   } catch (error) {
     console.error('Owner/admin check error:', error);
     return res.status(500).json({ error: 'Error checking permissions' });
@@ -207,11 +335,8 @@ const requireOwnerOrAdmin = async (req, res, next) => {
 const requireOwner = async (req, res, next) => {
   try {
     const user = req.user;
-    const organizationId = req.organizationId;
-    
-    if (!user) {
-      return res.status(401).json({ error: 'Authentication required' });
-    }
+    const organizationId = resolveOrganizationId(req);
+    if (!user) return res.status(401).json({ error: 'Authentication required' });
     
     if (!organizationId) {
       return res.status(400).json({ error: 'Organization context required' });
@@ -219,7 +344,7 @@ const requireOwner = async (req, res, next) => {
     
     const { query } = require('../db/pool');
     const memberResult = await query(
-      `SELECT role FROM organization_members 
+      `SELECT role, status FROM organization_members 
        WHERE user_id = $1 AND organization_id = $2`,
       [user.id, organizationId]
     );
@@ -228,13 +353,18 @@ const requireOwner = async (req, res, next) => {
       return res.status(403).json({ error: 'Not a member of this organization' });
     }
     
-    const role = memberResult.rows[0].role;
+    const { role, status } = memberResult.rows[0];
+
+    if (!isUsableMemberStatus(status)) {
+      return rejectBlockedMember(res, { status });
+    }
     
     if (role !== 'owner') {
       return res.status(403).json({ error: 'Owner access required' });
     }
     
     req.userRole = role;
+    req.organizationContextVerified = true;
     next();
   } catch (error) {
     console.error('Owner check error:', error);
@@ -244,8 +374,18 @@ const requireOwner = async (req, res, next) => {
 
 module.exports = {
   PERMISSIONS,
+  AVAILABLE_PERMISSIONS,
+  AVAILABLE_WIDGETS,
+  AVAILABLE_PAGES,
+  FULL_DASHBOARD,
+  MEMBER_STATUSES_BLOCKED,
+  isUsableMemberStatus,
   hasPermission,
+  permissionsForLegacyRole,
+  checkCustom,
   requirePermission,
   requireOwnerOrAdmin,
   requireOwner,
+  getMemberContext,
+  resolveOrganizationId,
 };

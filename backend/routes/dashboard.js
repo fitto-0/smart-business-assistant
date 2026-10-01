@@ -3,6 +3,8 @@ const router = express.Router();
 const { query } = require("../db/pool");
 const auth = require("../middleware/auth");
 const { requirePermission } = require("../middleware/permissions");
+const { withOrgContext } = require("../middleware/orgContext");
+const { resolveAccess } = require("../lib/roles");
 const { createAuditLog } = require("../middleware/audit");
 
 /**
@@ -11,7 +13,7 @@ const { createAuditLog } = require("../middleware/audit");
  */
 router.get("/overview", auth, requirePermission('analytics', 'view'), async (req, res) => {
   try {
-    const organizationId = req.organizationId || req.user.id;
+    const organizationId = req.organizationId;
     const { period = '30' } = req.query; // days
 
     const startDate = new Date();
@@ -97,7 +99,7 @@ router.get("/overview", auth, requirePermission('analytics', 'view'), async (req
  */
 router.get("/sales-trend", auth, requirePermission('analytics', 'view'), async (req, res) => {
   try {
-    const organizationId = req.organizationId || req.user.id;
+    const organizationId = req.organizationId;
     const { period = '30', granularity = 'day' } = req.query;
 
     const startDate = new Date();
@@ -142,7 +144,7 @@ router.get("/sales-trend", auth, requirePermission('analytics', 'view'), async (
  */
 router.get("/top-products", auth, requirePermission('analytics', 'view'), async (req, res) => {
   try {
-    const organizationId = req.organizationId || req.user.id;
+    const organizationId = req.organizationId;
     const { limit = 10, period = '30' } = req.query;
 
     const startDate = new Date();
@@ -189,7 +191,7 @@ router.get("/top-products", auth, requirePermission('analytics', 'view'), async 
  */
 router.get("/recent-activity", auth, requirePermission('analytics', 'view'), async (req, res) => {
   try {
-    const organizationId = req.organizationId || req.user.id;
+    const organizationId = req.organizationId;
     const { limit = 20, type } = req.query;
 
     let activities = [];
@@ -318,7 +320,7 @@ router.get("/recent-activity", auth, requirePermission('analytics', 'view'), asy
  */
 router.get("/performance-metrics", auth, requirePermission('analytics', 'view'), async (req, res) => {
   try {
-    const organizationId = req.organizationId || req.user.id;
+    const organizationId = req.organizationId;
     const { period = '30' } = req.query;
 
     const startDate = new Date();
@@ -391,7 +393,7 @@ router.get("/performance-metrics", auth, requirePermission('analytics', 'view'),
  */
 router.get("/kpis", auth, requirePermission('analytics', 'view'), async (req, res) => {
   try {
-    const organizationId = req.organizationId || req.user.id;
+    const organizationId = req.organizationId;
     const { period = '30' } = req.query;
 
     const startDate = new Date();
@@ -446,5 +448,40 @@ router.get("/kpis", auth, requirePermission('analytics', 'view'), async (req, re
     return res.status(500).json({ error: "Error fetching KPIs" });
   }
 });
+
+/**
+ * GET /api/dashboard/config
+ * The dashboard the owner granted the signed-in member: widgets, pages and KPIs.
+ *
+ * Deliberately not behind `analytics.view`: the navigation needs this answer to
+ * hide pages, so it must be readable by every active member of the organization.
+ * It returns visibility information only — never business data.
+ */
+router.get("/config", auth, withOrgContext(), async (req, res) => {
+  try {
+    const access = resolveAccess(req.memberContext);
+    if (!access) {
+      return res
+        .status(403)
+        .json({ error: "Not a member of this organization" });
+    }
+    return res.json({
+      organizationId: req.organizationId,
+      role: access.role,
+      roleLabel: access.roleLabel,
+      customRole: access.customRole,
+      isOwner: access.isOwner,
+      permissions: access.permissions,
+      widgets: access.dashboard.widgets,
+      pages: access.dashboard.pages,
+      kpis: access.dashboard.kpis,
+      dashboard: access.dashboard,
+    });
+  } catch (err) {
+    console.error("Error fetching dashboard config:", err);
+    return res.status(500).json({ error: "Error fetching dashboard config" });
+  }
+});
+
 
 module.exports = router;

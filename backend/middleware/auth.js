@@ -51,6 +51,18 @@ module.exports = (req, res, next) => {
       req.organizationId = decoded.organizationId;
     }
 
+    // Unverified organization *hint* from the client (X-Organization-Id).
+    // It is deliberately NOT written to req.organizationId: only
+    // `middleware/orgContext.js` may promote a hint into a verified context,
+    // after checking the user is an active member of that organization.
+    const hintHeader =
+      req.headers["x-organization-id"] || req.headers["x-org-id"];
+    const hintValue = Array.isArray(hintHeader) ? hintHeader[0] : hintHeader;
+    const hintId = Number.parseInt(hintValue, 10);
+    if (Number.isInteger(hintId) && hintId > 0) {
+      req.organizationHintId = hintId;
+    }
+
     next();
   } catch (err) {
     console.error("Auth error:", err.message);

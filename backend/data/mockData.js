@@ -56,12 +56,12 @@ module.exports = {
     négatif: { count: 2, percentage: 20, color: '#ef4444' },
   },
   anomalies: [
-    { id: 1, type: 'baisse_ventes', severity: 'haute', product: 'Café Premium 500g', description: 'Baisse de 15.3% des ventes sur 30 jours', detected: '2024-03-15', status: 'non_résolu' },
-    { id: 2, type: 'rupture_stock', severity: 'critique', product: 'Café Premium 500g', description: 'Rupture de stock complète (0 unités)', detected: '2024-03-14', status: 'non_résolu' },
-    { id: 3, type: 'rupture_stock', severity: 'critique', product: 'Lampe de Bureau LED', description: 'Rupture de stock (0 unités), baisse de 25%', detected: '2024-03-13', status: 'non_résolu' },
+    { id: 1, type: 'baisse_ventes', severity: 'haute', product: 'Café Premium 500g', description: 'Baisse de 15.3% des ventes sur 30 jours', detected: '2024-03-15', status: 'non_resolu' },
+    { id: 2, type: 'rupture_stock', severity: 'critique', product: 'Café Premium 500g', description: 'Rupture de stock complète (0 unités)', detected: '2024-03-14', status: 'non_resolu' },
+    { id: 3, type: 'rupture_stock', severity: 'critique', product: 'Lampe de Bureau LED', description: 'Rupture de stock (0 unités), baisse de 25%', detected: '2024-03-13', status: 'non_resolu' },
     { id: 4, type: 'stock_faible', severity: 'moyenne', product: 'MacBook Air M2', description: 'Stock critique : 8 unités restantes', detected: '2024-03-12', status: 'en_cours' },
-    { id: 5, type: 'stock_faible', severity: 'moyenne', product: 'Sneakers Running', description: 'Stock faible : 5 unités restantes', detected: '2024-03-11', status: 'non_résolu' },
-    { id: 6, type: 'avis_négatifs', severity: 'haute', product: 'Sneakers Running', description: 'Augmentation des avis négatifs (25%)', detected: '2024-03-10', status: 'en_cours' },
+    { id: 5, type: 'stock_faible', severity: 'moyenne', product: 'Sneakers Running', description: 'Stock faible : 5 unités restantes', detected: '2024-03-11', status: 'non_resolu' },
+    { id: 6, type: 'avis_negatifs', severity: 'haute', product: 'Sneakers Running', description: 'Augmentation des avis négatifs (25%)', detected: '2024-03-10', status: 'en_cours' },
   ],
   recommendations: [
     { id: 1, priority: 'critique', category: 'stock', title: 'Réapprovisionner Café Premium 500g', action: 'Commander 200 unités', impact: '+16 000 MAD/mois estimé' },

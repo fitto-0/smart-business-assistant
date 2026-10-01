@@ -1,12 +1,18 @@
 /**
- * Routes ventes — PostgreSQL + multi-user isolation
+ * Routes ventes — PostgreSQL + isolation par ORGANISATION
  *
- * TOUTES les requêtes sont scopées par req.user.id (issu du JWT vérifié).
- * Aucun user_id provenant du body/query/frontend n'est jamais utilisé.
+ * Le périmètre de lecture/écriture est `req.organizationId`, résolu puis vérifié par
+ * `middleware/orgContext.js` — jamais une valeur venant du body/query/frontend.
+ * `sales.user_id` reste renseigné comme colonne d'audit « créé par », tandis que
+ * `sales.organization_id` porte le partage : tous les membres voient le même pool.
+ * Qui peut lire / créer / modifier / supprimer est décidé par le rôle que le
+ * propriétaire a attribué (`requirePermission`).
  */
 
 const router = require("express").Router();
 const auth = require("../middleware/auth");
+const { withOrgContext } = require("../middleware/orgContext");
+const { requirePermission } = require("../middleware/permissions");
 const pool = require("../config/db");
 
 const query = (text, params) => pool.query(text, params);
@@ -14,7 +20,7 @@ const query = (text, params) => pool.query(text, params);
 // =====================================================
 // GET /api/sales — liste des ventes (scopée utilisateur)
 // =====================================================
-router.get("/", auth, async (req, res) => {
+router.get("/", auth, withOrgContext(), requirePermission("sales", "view"), async (req, res) => {
   try {
     const {
       startDate,
@@ -30,8 +36,8 @@ router.get("/", auth, async (req, res) => {
     const sort = allowedSorts.includes(sortBy) ? sortBy : "date";
     const ord = order.toUpperCase() === "ASC" ? "ASC" : "DESC";
 
-    const where = ["s.user_id = $1"];
-    const params = [req.user.id];
+    const where = ["s.organization_id = $1"];
+    const params = [req.organizationId];
     let idx = 2;
 
     if (startDate) {
@@ -68,7 +74,7 @@ router.get("/", auth, async (req, res) => {
         p.name AS product_name,
         p.category AS product_category
       FROM sales s
-      LEFT JOIN products p ON p.id = s.product_id AND p.user_id = s.user_id
+      LEFT JOIN products p ON p.id = s.product_id AND p.organization_id = s.organization_id
       ${whereClause}
       ORDER BY s.${sort} ${ord}
       LIMIT $${idx}
@@ -99,9 +105,9 @@ router.get("/", auth, async (req, res) => {
 // =====================================================
 // GET /api/sales/kpis — KPIs du tableau de bord (scopés)
 // =====================================================
-router.get("/kpis", auth, async (req, res) => {
+router.get("/kpis", auth, withOrgContext(), requirePermission("sales", "view"), async (req, res) => {
   try {
-    const userId = req.user.id;
+    const organizationId = req.organizationId;
 
     // Chiffre d'affaires total + commandes + panier moyen
     const kpiResult = await query(
@@ -111,9 +117,9 @@ router.get("/kpis", auth, async (req, res) => {
         COUNT(*)::int AS total_orders,
         COALESCE(AVG(total_amount), 0)::numeric AS avg_order_value
       FROM sales
-      WHERE user_id = $1
+      WHERE organization_id = $1
       `,
-      [userId],
+      [organizationId],
     );
 
     // Croissance du CA vs mois précédent (2024 : comparaison sur mois déc.)
@@ -133,11 +139,11 @@ router.get("/kpis", auth, async (req, res) => {
             ELSE 'other'
           END AS month_key
         FROM sales
-        WHERE user_id = $1
+        WHERE organization_id = $1
       ) t
       WHERE month_key != 'other'
       `,
-      [userId],
+      [organizationId],
     );
 
     const currentRevenue = parseFloat(growthResult.rows[0].current_revenue);
@@ -156,9 +162,9 @@ router.get("/kpis", auth, async (req, res) => {
         COUNT(*)::int AS total_reviews,
         COALESCE(AVG(rating), 0)::numeric AS avg_rating
       FROM reviews
-      WHERE user_id = $1
+      WHERE organization_id = $1
       `,
-      [userId],
+      [organizationId],
     );
 
     // Croissance de la satisfaction vs mois précédent
@@ -178,11 +184,11 @@ router.get("/kpis", auth, async (req, res) => {
             ELSE 'other'
           END AS month_key
         FROM reviews
-        WHERE user_id = $1
+        WHERE organization_id = $1
       ) t
       WHERE month_key != 'other'
       `,
-      [userId],
+      [organizationId],
     );
 
     const currentRating = parseFloat(
@@ -214,10 +220,10 @@ router.get("/kpis", auth, async (req, res) => {
             ELSE 'other'
           END AS month_key
         FROM sales
-        WHERE user_id = $1
+        WHERE organization_id = $1
       ) t
       `,
-      [userId],
+      [organizationId],
     );
 
     const currentOrders = ordersGrowthResult.rows[0].current_orders;
@@ -250,9 +256,9 @@ router.get("/kpis", auth, async (req, res) => {
 // =====================================================
 // GET /api/sales/monthly — ventes vs objectifs mensuels (scopés)
 // =====================================================
-router.get("/monthly", auth, async (req, res) => {
+router.get("/monthly", auth, withOrgContext(), requirePermission("sales", "view"), async (req, res) => {
   try {
-    const userId = req.user.id;
+    const organizationId = req.organizationId;
 
     const result = await query(
       `
@@ -268,14 +274,14 @@ router.get("/monthly", auth, async (req, res) => {
       ) AS m
       LEFT JOIN sales s
         ON DATE_TRUNC('month', s.date) = m
-       AND s.user_id = $1
+       AND s.organization_id = $1
       LEFT JOIN monthly_targets t
-        ON t.user_id = $1
+        ON t.organization_id = $1
        AND t.month = TO_CHAR(m, 'YYYY-MM')
       GROUP BY m
       ORDER BY m ASC
       `,
-      [userId],
+      [organizationId],
     );
 
     return res.json({
@@ -295,9 +301,9 @@ router.get("/monthly", auth, async (req, res) => {
 // =====================================================
 // GET /api/sales/categories — répartition CA par catégorie (scopée)
 // =====================================================
-router.get("/categories", auth, async (req, res) => {
+router.get("/categories", auth, withOrgContext(), requirePermission("sales", "view"), async (req, res) => {
   try {
-    const userId = req.user.id;
+    const organizationId = req.organizationId;
 
     const result = await query(
       `
@@ -306,14 +312,14 @@ router.get("/categories", auth, async (req, res) => {
         COALESCE(SUM(s.total_amount), 0)::numeric AS amount,
         COALESCE(c.color, '#64748b') AS color
       FROM sales s
-      LEFT JOIN products p ON p.id = s.product_id AND p.user_id = s.user_id
-      LEFT JOIN categories c ON c.user_id = s.user_id AND c.name = p.category
-      WHERE s.user_id = $1
+      LEFT JOIN products p ON p.id = s.product_id AND p.organization_id = s.organization_id
+      LEFT JOIN categories c ON c.organization_id = s.organization_id AND c.name = p.category
+      WHERE s.organization_id = $1
         AND p.category IS NOT NULL
       GROUP BY p.category, c.color
       ORDER BY amount DESC
       `,
-      [userId],
+      [organizationId],
     );
 
     const total =
@@ -336,7 +342,7 @@ router.get("/categories", auth, async (req, res) => {
 // =====================================================
 // GET /api/sales/weekly — daily revenue for the current week
 // =====================================================
-router.get("/weekly", auth, async (req, res) => {
+router.get("/weekly", auth, withOrgContext(), requirePermission("sales", "view"), async (req, res) => {
   try {
     const result = await query(
       `
@@ -350,12 +356,12 @@ router.get("/weekly", auth, async (req, res) => {
         INTERVAL '1 day'
       ) AS days(day)
       LEFT JOIN sales s
-        ON s.user_id = $1
+        ON s.organization_id = $1
        AND s.date = days.day::date
       GROUP BY days.day
       ORDER BY days.day
       `,
-      [req.user.id],
+      [req.organizationId],
     );
 
     return res.json({
@@ -374,7 +380,7 @@ router.get("/weekly", auth, async (req, res) => {
 // =====================================================
 // GET /api/sales/recent — ventes récentes (scopées)
 // =====================================================
-router.get("/recent", auth, async (req, res) => {
+router.get("/recent", auth, withOrgContext(), requirePermission("sales", "view"), async (req, res) => {
   try {
     const limit = Math.min(Math.max(parseInt(req.query.limit) || 7, 1), 100);
 
@@ -388,12 +394,12 @@ router.get("/recent", auth, async (req, res) => {
         s.customer_name,
         p.name AS product_name
       FROM sales s
-      LEFT JOIN products p ON p.id = s.product_id AND p.user_id = s.user_id
-      WHERE s.user_id = $1
+      LEFT JOIN products p ON p.id = s.product_id AND p.organization_id = s.organization_id
+      WHERE s.organization_id = $1
       ORDER BY s.date DESC, s.id DESC
       LIMIT $2
       `,
-      [req.user.id, limit],
+      [req.organizationId, limit],
     );
 
     return res.json({
@@ -411,7 +417,7 @@ router.get("/recent", auth, async (req, res) => {
 // =====================================================
 // GET /api/sales/top-products — top produits par CA (scopé)
 // =====================================================
-router.get("/top-products", auth, async (req, res) => {
+router.get("/top-products", auth, withOrgContext(), requirePermission("sales", "view"), async (req, res) => {
   try {
     const limit = Math.min(Math.max(parseInt(req.query.limit) || 5, 1), 50);
 
@@ -432,7 +438,7 @@ router.get("/top-products", auth, async (req, res) => {
         COALESCE(SUM(s.total_amount), 0)::numeric AS revenue,
         COUNT(s.id)::int AS orders
       FROM sales s
-      LEFT JOIN products p ON p.id = s.product_id AND p.user_id = s.user_id
+      LEFT JOIN products p ON p.id = s.product_id AND p.organization_id = s.organization_id
       LEFT JOIN LATERAL (
         SELECT
           COALESCE(SUM(quantity) FILTER (
@@ -444,15 +450,15 @@ router.get("/top-products", auth, async (req, res) => {
           ), 0)::numeric AS previous_units
         FROM sales trend_sales
         WHERE trend_sales.product_id = p.id
-          AND trend_sales.user_id = p.user_id
+          AND trend_sales.organization_id = p.organization_id
       ) trend_data ON TRUE
-      WHERE s.user_id = $1
+      WHERE s.organization_id = $1
         AND p.id IS NOT NULL
       GROUP BY p.id, p.name, trend_data.current_units, trend_data.previous_units
       ORDER BY revenue DESC
       LIMIT $2
       `,
-      [req.user.id, limit],
+      [req.organizationId, limit],
     );
 
     return res.json({
@@ -471,7 +477,7 @@ router.get("/top-products", auth, async (req, res) => {
 // =====================================================
 // POST /api/sales — créer une vente (produit vérifié au user)
 // =====================================================
-router.post("/", auth, async (req, res) => {
+router.post("/", auth, withOrgContext(), requirePermission("sales", "create"), async (req, res) => {
   try {
     const {
       product_id,
@@ -503,10 +509,10 @@ router.post("/", auth, async (req, res) => {
       ? payment_method
       : "carte";
 
-    // ⛔ Vérification d'appartenance : le produit doit appartenir à req.user.id
+    // ⛔ Vérification d'appartenance : le produit doit appartenir à req.organizationId
     const product = await query(
-      `SELECT id, name FROM products WHERE id = $1 AND user_id = $2`,
-      [parseInt(product_id), req.user.id],
+      `SELECT id, name FROM products WHERE id = $1 AND organization_id = $2`,
+      [parseInt(product_id), req.organizationId],
     );
 
     if (product.rowCount === 0) {
@@ -516,12 +522,13 @@ router.post("/", auth, async (req, res) => {
     const result = await query(
       `
       INSERT INTO sales
-        (user_id, product_id, date, quantity, unit_price, customer_name, payment_method, notes)
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+        (organization_id, user_id, product_id, date, quantity, unit_price, customer_name, payment_method, notes)
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
       RETURNING *
       `,
       [
-        req.user.id,
+        req.organizationId,
+        req.organizationId,
         parseInt(product_id),
         date,
         qty,
@@ -542,7 +549,7 @@ router.post("/", auth, async (req, res) => {
 // =====================================================
 // PUT /api/sales/:id — modifier une vente (scopée)
 // =====================================================
-router.put("/:id", auth, async (req, res) => {
+router.put("/:id", auth, withOrgContext(), requirePermission("sales", "update"), async (req, res) => {
   try {
     const id = parseInt(req.params.id);
 
@@ -562,8 +569,8 @@ router.put("/:id", auth, async (req, res) => {
     // Si product_id fourni, vérifier l'appartenance AVANT toute mise à jour
     if (req.body.product_id !== undefined) {
       const product = await query(
-        `SELECT id FROM products WHERE id = $1 AND user_id = $2`,
-        [parseInt(req.body.product_id), req.user.id],
+        `SELECT id FROM products WHERE id = $1 AND organization_id = $2`,
+        [parseInt(req.body.product_id), req.organizationId],
       );
       if (product.rowCount === 0) {
         return res.status(404).json({ error: "Produit non trouvé" });
@@ -585,14 +592,14 @@ router.put("/:id", auth, async (req, res) => {
       return res.status(400).json({ error: "Aucun champ à mettre à jour" });
     }
 
-    params.push(id, req.user.id);
+    params.push(id, req.organizationId);
 
     const result = await query(
       `
       UPDATE sales
       SET ${updates.join(", ")}
       WHERE id = $${idx}
-      AND user_id = $${idx + 1}
+      AND organization_id = $${idx + 1}
       RETURNING *
       `,
       params,
@@ -612,16 +619,16 @@ router.put("/:id", auth, async (req, res) => {
 // =====================================================
 // DELETE /api/sales/:id — supprimer une vente (scopée)
 // =====================================================
-router.delete("/:id", auth, async (req, res) => {
+router.delete("/:id", auth, withOrgContext(), requirePermission("sales", "delete"), async (req, res) => {
   try {
     const result = await query(
       `
       DELETE FROM sales
       WHERE id = $1
-      AND user_id = $2
+      AND organization_id = $2
       RETURNING id
       `,
-      [parseInt(req.params.id), req.user.id],
+      [parseInt(req.params.id), req.organizationId],
     );
 
     if (result.rowCount === 0) {
