@@ -1,4 +1,4 @@
-﻿import { useState, useEffect } from "react";
+﻿import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/router";
 import Head from "next/head";
 import {
@@ -31,6 +31,8 @@ import {
   Zap,
   Shield,
   Type,
+  Monitor,
+  Smartphone,
 } from "lucide-react";
 import toast from "react-hot-toast";
 import { apiGet, apiPost, apiPut } from "../../lib/api";
@@ -99,7 +101,8 @@ export default function StorefrontCustomize() {
   });
   const [analytics, setAnalytics] = useState(null);
   const [analyticsLoading, setAnalyticsLoading] = useState(false);
-  const [previewMode, setPreviewMode] = useState(false);
+  const [previewViewport, setPreviewViewport] = useState("desktop");
+  const previewFrameRef = useRef(null);
   const [logoPreview, setLogoPreview] = useState(null);
   const storefrontUserId = storeSettings.user_id || getUser()?.id;
 
@@ -107,6 +110,14 @@ export default function StorefrontCustomize() {
     loadStoreSettings();
     loadAnalytics();
   }, []);
+
+  useEffect(() => {
+    if (activeTab !== "preview" || !storefrontUserId) return;
+    previewFrameRef.current?.contentWindow?.postMessage(
+      { type: "storefront-preview-settings", settings: storeSettings },
+      window.location.origin,
+    );
+  }, [activeTab, storeSettings, storefrontUserId]);
 
   const loadStoreSettings = async () => {
     try {
@@ -1696,142 +1707,77 @@ export default function StorefrontCustomize() {
             <Eye size={20} className="text-amber shrink-0" />
             {t("storefront.sections.livePreview") || "Live Preview"}
           </h3>
-          <label className="flex items-center gap-2 cursor-pointer shrink-0">
-            <input
-              type="checkbox"
-              checked={previewMode}
-              onChange={(e) => setPreviewMode(e.target.checked)}
-              className="w-4 h-4 rounded border-hairline text-amber focus:ring-amber"
-            />
-            <span className="portal-label">
-              {t("storefront.previewMode") || "Preview Mode"}
-            </span>
-          </label>
-        </div>
-
-        <div
-          className="bg-ground border-2 rounded-xl overflow-hidden"
-          style={{ borderColor: storeSettings.primary_color }}
-        >
-          <div
-            className="p-4 border-b"
-            style={{
-              borderColor: storeSettings.secondary_color,
-              backgroundColor: storeSettings.primary_color,
-            }}
-          >
-            <div className="flex items-center gap-3">
-              {storeSettings.logo_url && (
-                <img
-                  src={getAssetUrl(storeSettings.logo_url)}
-                  alt={storeSettings.store_name}
-                  className="w-10 h-10 rounded-lg object-cover"
-                />
-              )}
-              <div>
-                <h1 className="text-white font-bold text-xl">
-                  {storeSettings.store_name ||
-                    t("storefront.preview.storeName") ||
-                    "Your Store Name"}
-                </h1>
-                {storeSettings.tagline && (
-                  <p className="text-white/80 text-sm">
-                    {storeSettings.tagline}
-                  </p>
-                )}
-              </div>
+          <div className="flex flex-wrap items-center gap-2">
+            <div className="inline-flex items-center gap-1 rounded-lg border hairline bg-ground p-1">
+              <button
+                type="button"
+                aria-label="Desktop preview"
+                aria-pressed={previewViewport === "desktop"}
+                onClick={() => setPreviewViewport("desktop")}
+                className={`inline-flex items-center gap-2 rounded-md px-3 py-2 text-sm transition-colors ${previewViewport === "desktop" ? "bg-ember-500 text-white" : "portal-text hover:bg-ground-secondary"}`}
+              >
+                <Monitor size={16} />
+                <span>Desktop</span>
+              </button>
+              <button
+                type="button"
+                aria-label="Mobile preview"
+                aria-pressed={previewViewport === "mobile"}
+                onClick={() => setPreviewViewport("mobile")}
+                className={`inline-flex items-center gap-2 rounded-md px-3 py-2 text-sm transition-colors ${previewViewport === "mobile" ? "bg-ember-500 text-white" : "portal-text hover:bg-ground-secondary"}`}
+              >
+                <Smartphone size={16} />
+                <span>Mobile</span>
+              </button>
             </div>
-          </div>
-
-          <div className="p-4 sm:p-6 min-w-0">
-            {storeSettings.description && (
-              <p className="portal-text mb-6 text-ink-secondary break-words">
-                {storeSettings.description}
-              </p>
+            {storefrontUserId && (
+              <a
+                href={`/storefront/${storefrontUserId}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="portal-pill-btn inline-flex items-center gap-2"
+              >
+                <ExternalLink size={16} />
+                <span>Open storefront</span>
+              </a>
             )}
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 mb-6">
-              {storeSettings.contact_email && (
-                <a
-                  href={`mailto:${storeSettings.contact_email}`}
-                  className="flex items-center gap-2 p-3 bg-ground-secondary border hairline rounded-lg hover:border-amber/50 transition-colors min-w-0"
-                >
-                  <Mail size={18} className="text-amber shrink-0" />
-                  <span className="portal-label text-ink truncate min-w-0">
-                    {storeSettings.contact_email}
-                  </span>
-                </a>
-              )}
-              {storeSettings.contact_phone && (
-                <a
-                  href={`tel:${storeSettings.contact_phone}`}
-                  className="flex items-center gap-2 p-3 bg-ground-secondary border hairline rounded-lg hover:border-amber/50 transition-colors min-w-0"
-                >
-                  <Phone size={18} className="text-amber shrink-0" />
-                  <span className="portal-label text-ink truncate min-w-0">
-                    {storeSettings.contact_phone}
-                  </span>
-                </a>
-              )}
-              {storeSettings.address && (
-                <div className="flex items-center gap-2 p-3 bg-ground-secondary border hairline rounded-lg min-w-0 sm:col-span-2 lg:col-span-1">
-                  <MapPin size={18} className="text-amber shrink-0" />
-                  <span className="portal-label text-ink break-words min-w-0">
-                    {storeSettings.address}, {storeSettings.city},{" "}
-                    {storeSettings.country}
-                  </span>
-                </div>
-              )}
-            </div>
-
-            <div className="flex items-center gap-3 sm:gap-4 pt-4 border-t hairline flex-wrap">
-              {storeSettings.facebook_url && (
-                <a
-                  href={storeSettings.facebook_url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="p-2 bg-ground-secondary border hairline rounded-lg hover:bg-amber/10 transition-colors"
-                >
-                  📘
-                </a>
-              )}
-              {storeSettings.instagram_url && (
-                <a
-                  href={storeSettings.instagram_url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="p-2 bg-ground-secondary border hairline rounded-lg hover:bg-amber/10 transition-colors"
-                >
-                  📷
-                </a>
-              )}
-              {storeSettings.twitter_url && (
-                <a
-                  href={storeSettings.twitter_url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="p-2 bg-ground-secondary border hairline rounded-lg hover:bg-amber/10 transition-colors"
-                >
-                  🐦
-                </a>
-              )}
-              {storeSettings.whatsapp_number && (
-                <a
-                  href={`https://wa.me/${storeSettings.whatsapp_number.replace(/\D/g, "")}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="p-2 bg-ground-secondary border hairline rounded-lg hover:bg-amber/10 transition-colors"
-                >
-                  💬
-                </a>
-              )}
-            </div>
           </div>
         </div>
 
+        <div className="bg-ground border hairline rounded-xl p-3 sm:p-5">
+          <div className="flex justify-center overflow-auto">
+            {storefrontUserId ? (
+              <iframe
+                key={storefrontUserId}
+                ref={previewFrameRef}
+                title="Live storefront preview"
+                src={`/storefront/${storefrontUserId}?preview=1`}
+                onLoad={(event) =>
+                  event.currentTarget.contentWindow?.postMessage(
+                    {
+                      type: "storefront-preview-settings",
+                      settings: storeSettings,
+                    },
+                    window.location.origin,
+                  )
+                }
+                className="shrink-0 border hairline bg-white transition-all duration-300"
+                style={{
+                  width: previewViewport === "mobile" ? "390px" : "100%",
+                  maxWidth: "100%",
+                  height: previewViewport === "mobile" ? "780px" : "720px",
+                  borderRadius: previewViewport === "mobile" ? "1.5rem" : "0.75rem",
+                }}
+              />
+            ) : (
+              <div className="portal-label py-16 text-center">
+                Storefront preview is unavailable until your store is loaded.
+              </div>
+            )}
+          </div>
+        </div>
         <p className="portal-label text-muted text-center mt-4">
-          {t("storefront.preview.note") ||
-            "This is a preview of how your storefront will appear to customers."}
+          Unsaved changes appear here immediately. Save to publish them.
         </p>
       </div>
     </div>

@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/router";
 import Link from "next/link";
 import axios from "axios";
@@ -55,6 +55,7 @@ export default function StorefrontHomePage() {
   const { userId } = router.query;
 
   const [storeSettings, setStoreSettings] = useState(null);
+  const previewSettingsRef = useRef(null);
   const [featuredProducts, setFeaturedProducts] = useState([]);
   const [categories, setCategories] = useState([]);
   const [reviews, setReviews] = useState([]);
@@ -76,6 +77,31 @@ export default function StorefrontHomePage() {
     }
   }, [validUserId, router.isReady]);
 
+  useEffect(() => {
+    if (!router.isReady || router.query.preview !== "1") return;
+
+    const handlePreviewSettings = (event) => {
+      if (
+        event.origin !== window.location.origin ||
+        event.source !== window.parent ||
+        event.data?.type !== "storefront-preview-settings" ||
+        !event.data.settings ||
+        typeof event.data.settings !== "object"
+      ) {
+        return;
+      }
+
+      previewSettingsRef.current = event.data.settings;
+      setStoreSettings((current) => ({
+        ...(current || {}),
+        ...event.data.settings,
+      }));
+    };
+
+    window.addEventListener("message", handlePreviewSettings);
+    return () => window.removeEventListener("message", handlePreviewSettings);
+  }, [router.isReady, router.query.preview]);
+
   const fetchAllData = async () => {
     try {
       setLoading(true);
@@ -88,7 +114,10 @@ export default function StorefrontHomePage() {
             .get(`${API_URL}/storefront/${validUserId}/reviews?limit=6`)
             .catch(() => ({ data: { reviews: [] } })),
         ]);
-      setStoreSettings(settingsRes.data);
+      setStoreSettings({
+        ...settingsRes.data,
+        ...(previewSettingsRef.current || {}),
+      });
       setCategories(categoriesRes.data.categories || []);
       setReviews(reviewsRes.data.reviews || []);
 
