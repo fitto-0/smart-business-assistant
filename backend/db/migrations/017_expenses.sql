@@ -16,10 +16,11 @@ CREATE TABLE IF NOT EXISTS expenses (
     updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 
-CREATE INDEX idx_expenses_user ON expenses(user_id);
-CREATE INDEX idx_expenses_user_date ON expenses(user_id, date DESC);
-CREATE INDEX idx_expenses_category ON expenses(category);
+CREATE INDEX IF NOT EXISTS idx_expenses_user ON expenses(user_id);
+CREATE INDEX IF NOT EXISTS idx_expenses_user_date ON expenses(user_id, date DESC);
+CREATE INDEX IF NOT EXISTS idx_expenses_category ON expenses(category);
 
+DROP TRIGGER IF EXISTS update_expenses_updated_at ON expenses;
 CREATE TRIGGER update_expenses_updated_at
     BEFORE UPDATE ON expenses
     FOR EACH ROW

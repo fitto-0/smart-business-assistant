@@ -79,7 +79,9 @@ export default function StorefrontContactPage() {
           name: formData.name,
           email: formData.email,
           subject:
-            SUBJECT_LABELS[formData.subject] || formData.subject || "New message",
+            SUBJECT_LABELS[formData.subject] ||
+            formData.subject ||
+            "New message",
           message: formData.message,
         },
       );
@@ -135,10 +137,10 @@ export default function StorefrontContactPage() {
   const contactFormEnabled = storeSettings?.contact_form_enabled !== false;
 
   const PAYMENT_LABELS = {
-    "espèces": "cash on delivery",
+    espèces: "cash on delivery",
     carte: "credit or debit card",
     virement: "bank transfer",
-    "chèque": "cheque",
+    chèque: "cheque",
     autre: "other arrangements",
   };
   const enabledPayments = (
@@ -173,16 +175,23 @@ export default function StorefrontContactPage() {
     },
     {
       q: "How can I reach you?",
-      a: [
-        storeSettings?.contact_phone ? `by phone at ${storeSettings.contact_phone}` : null,
-        storeSettings?.contact_email ? `by email at ${storeSettings.contact_email}` : null,
-      ]
-        .filter(Boolean)
-        .join(" or ") || "Use the contact form on this page.",
+      a:
+        [
+          storeSettings?.contact_phone
+            ? `by phone at ${storeSettings.contact_phone}`
+            : null,
+          storeSettings?.contact_email
+            ? `by email at ${storeSettings.contact_email}`
+            : null,
+        ]
+          .filter(Boolean)
+          .join(" or ") || "Use the contact form on this page.",
     },
   ];
   const faqs =
-    Array.isArray(content.faq) && content.faq.length > 0 ? content.faq : defaultFaqs;
+    Array.isArray(content.faq) && content.faq.length > 0
+      ? content.faq
+      : defaultFaqs;
 
   const contactInfo = [
     storeSettings?.contact_email && {
@@ -200,7 +209,11 @@ export default function StorefrontContactPage() {
     (storeSettings?.address || storeSettings?.city) && {
       icon: MapPin,
       title: "Visit Us",
-      value: [storeSettings?.address, storeSettings?.city, storeSettings?.country]
+      value: [
+        storeSettings?.address,
+        storeSettings?.city,
+        storeSettings?.country,
+      ]
         .filter(Boolean)
         .join(", "),
       href: null,
@@ -258,7 +271,9 @@ export default function StorefrontContactPage() {
         <div className={`${containerWidth} mx-auto px-4 sm:px-6 lg:px-8`}>
           <div className="grid lg:grid-cols-3 gap-8">
             {/* Contact Info */}
-            <div className={contactFormEnabled ? "lg:col-span-1" : "lg:col-span-3"}>
+            <div
+              className={contactFormEnabled ? "lg:col-span-1" : "lg:col-span-3"}
+            >
               <div
                 className="p-6 rounded-2xl"
                 style={{
@@ -373,165 +388,168 @@ export default function StorefrontContactPage() {
 
             {/* Contact Form */}
             {contactFormEnabled && (
-            <div className="lg:col-span-2">
-              <div
-                className="card p-6 md:p-8"
-                style={{ borderRadius: borderRadius, borderColor: borderColor }}
-              >
-                <h2
-                  className="text-2xl font-bold mb-6"
+              <div className="lg:col-span-2">
+                <div
+                  className="card p-6 md:p-8"
                   style={{
-                    color: textColor,
-                    fontFamily: storeSettings?.heading_font_family,
+                    borderRadius: borderRadius,
+                    borderColor: borderColor,
                   }}
                 >
-                  Send us a Message
-                </h2>
-
-                {formStatus.type === "success" && (
-                  <div
-                    className="mb-6 p-4 rounded-xl flex items-center gap-3"
+                  <h2
+                    className="text-2xl font-bold mb-6"
                     style={{
-                      backgroundColor: "#D1FAE5",
-                      borderColor: "#10B981",
-                      borderRadius: borderRadius,
+                      color: textColor,
+                      fontFamily: storeSettings?.heading_font_family,
                     }}
                   >
-                    <CheckCircle size={20} className="text-green-600" />
-                    <p className="text-green-800">{formStatus.message}</p>
-                  </div>
-                )}
+                    Send us a Message
+                  </h2>
 
-                {formStatus.type === "error" && (
-                  <div
-                    className="mb-6 p-4 rounded-xl flex items-center gap-3"
-                    style={{
-                      backgroundColor: "#FEE2E2",
-                      borderColor: "#EF4444",
-                      borderRadius: borderRadius,
-                    }}
-                  >
-                    <AlertCircle size={20} className="text-red-600" />
-                    <p className="text-red-800">{formStatus.message}</p>
-                  </div>
-                )}
+                  {formStatus.type === "success" && (
+                    <div
+                      className="mb-6 p-4 rounded-xl flex items-center gap-3"
+                      style={{
+                        backgroundColor: "#D1FAE5",
+                        borderColor: "#10B981",
+                        borderRadius: borderRadius,
+                      }}
+                    >
+                      <CheckCircle size={20} className="text-green-600" />
+                      <p className="text-green-800">{formStatus.message}</p>
+                    </div>
+                  )}
 
-                <form onSubmit={handleSubmit} className="space-y-6">
-                  <div className="grid md:grid-cols-2 gap-6">
+                  {formStatus.type === "error" && (
+                    <div
+                      className="mb-6 p-4 rounded-xl flex items-center gap-3"
+                      style={{
+                        backgroundColor: "#FEE2E2",
+                        borderColor: "#EF4444",
+                        borderRadius: borderRadius,
+                      }}
+                    >
+                      <AlertCircle size={20} className="text-red-600" />
+                      <p className="text-red-800">{formStatus.message}</p>
+                    </div>
+                  )}
+
+                  <form onSubmit={handleSubmit} className="space-y-6">
+                    <div className="grid md:grid-cols-2 gap-6">
+                      <div>
+                        <label
+                          htmlFor="name"
+                          className="block text-sm font-medium mb-2"
+                          style={{ color: textColor }}
+                        >
+                          Your Name *
+                        </label>
+                        <input
+                          type="text"
+                          id="name"
+                          value={formData.name}
+                          onChange={(e) =>
+                            setFormData({ ...formData, name: e.target.value })
+                          }
+                          className="input-field"
+                          placeholder="Elkasmi Fatima Zahra"
+                          required
+                          style={{ borderColor: borderColor }}
+                        />
+                      </div>
+                      <div>
+                        <label
+                          htmlFor="email"
+                          className="block text-sm font-medium mb-2"
+                          style={{ color: textColor }}
+                        >
+                          Email Address *
+                        </label>
+                        <input
+                          type="email"
+                          id="email"
+                          value={formData.email}
+                          onChange={(e) =>
+                            setFormData({ ...formData, email: e.target.value })
+                          }
+                          className="input-field"
+                          placeholder="fatimazahra@example.com"
+                          required
+                          style={{ borderColor: borderColor }}
+                        />
+                      </div>
+                    </div>
+
                     <div>
                       <label
-                        htmlFor="name"
+                        htmlFor="subject"
                         className="block text-sm font-medium mb-2"
                         style={{ color: textColor }}
                       >
-                        Your Name *
+                        Subject *
                       </label>
-                      <input
-                        type="text"
-                        id="name"
-                        value={formData.name}
+                      <select
+                        id="subject"
+                        value={formData.subject}
                         onChange={(e) =>
-                          setFormData({ ...formData, name: e.target.value })
+                          setFormData({ ...formData, subject: e.target.value })
                         }
                         className="input-field"
-                        placeholder="John Doe"
+                        required
+                        style={{ borderColor: borderColor }}
+                      >
+                        <option value="">Select a subject</option>
+                        <option value="general">General Inquiry</option>
+                        <option value="order">Order Support</option>
+                        <option value="product">Product Question</option>
+                        <option value="returns">Returns & Exchanges</option>
+                        <option value="wholesale">Wholesale Inquiry</option>
+                        <option value="other">Other</option>
+                      </select>
+                    </div>
+
+                    <div>
+                      <label
+                        htmlFor="message"
+                        className="block text-sm font-medium mb-2"
+                        style={{ color: textColor }}
+                      >
+                        Message *
+                      </label>
+                      <textarea
+                        id="message"
+                        value={formData.message}
+                        onChange={(e) =>
+                          setFormData({ ...formData, message: e.target.value })
+                        }
+                        rows={5}
+                        className="input-field resize-none"
+                        placeholder="How can we help you?"
                         required
                         style={{ borderColor: borderColor }}
                       />
                     </div>
-                    <div>
-                      <label
-                        htmlFor="email"
-                        className="block text-sm font-medium mb-2"
-                        style={{ color: textColor }}
-                      >
-                        Email Address *
-                      </label>
-                      <input
-                        type="email"
-                        id="email"
-                        value={formData.email}
-                        onChange={(e) =>
-                          setFormData({ ...formData, email: e.target.value })
-                        }
-                        className="input-field"
-                        placeholder="john@example.com"
-                        required
-                        style={{ borderColor: borderColor }}
-                      />
-                    </div>
-                  </div>
 
-                  <div>
-                    <label
-                      htmlFor="subject"
-                      className="block text-sm font-medium mb-2"
-                      style={{ color: textColor }}
+                    <button
+                      type="submit"
+                      disabled={submitting}
+                      className="btn-primary w-full sm:w-auto py-3 px-8"
                     >
-                      Subject *
-                    </label>
-                    <select
-                      id="subject"
-                      value={formData.subject}
-                      onChange={(e) =>
-                        setFormData({ ...formData, subject: e.target.value })
-                      }
-                      className="input-field"
-                      required
-                      style={{ borderColor: borderColor }}
-                    >
-                      <option value="">Select a subject</option>
-                      <option value="general">General Inquiry</option>
-                      <option value="order">Order Support</option>
-                      <option value="product">Product Question</option>
-                      <option value="returns">Returns & Exchanges</option>
-                      <option value="wholesale">Wholesale Inquiry</option>
-                      <option value="other">Other</option>
-                    </select>
-                  </div>
-
-                  <div>
-                    <label
-                      htmlFor="message"
-                      className="block text-sm font-medium mb-2"
-                      style={{ color: textColor }}
-                    >
-                      Message *
-                    </label>
-                    <textarea
-                      id="message"
-                      value={formData.message}
-                      onChange={(e) =>
-                        setFormData({ ...formData, message: e.target.value })
-                      }
-                      rows={5}
-                      className="input-field resize-none"
-                      placeholder="How can we help you?"
-                      required
-                      style={{ borderColor: borderColor }}
-                    />
-                  </div>
-
-                  <button
-                    type="submit"
-                    disabled={submitting}
-                    className="btn-primary w-full sm:w-auto py-3 px-8"
-                  >
-                    {submitting ? (
-                      <>
-                        <Loader2 size={20} className="animate-spin" />
-                        Sending...
-                      </>
-                    ) : (
-                      <>
-                        <Send size={20} />
-                        Send Message
-                      </>
-                    )}
-                  </button>
-                </form>
+                      {submitting ? (
+                        <>
+                          <Loader2 size={20} className="animate-spin" />
+                          Sending...
+                        </>
+                      ) : (
+                        <>
+                          <Send size={20} />
+                          Send Message
+                        </>
+                      )}
+                    </button>
+                  </form>
+                </div>
               </div>
-            </div>
             )}
           </div>
         </div>

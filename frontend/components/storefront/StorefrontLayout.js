@@ -38,8 +38,12 @@ export default function StorefrontLayout({
   const [newsletterState, setNewsletterState] = useState("idle");
   const [newsletterEmail, setNewsletterEmail] = useState("");
 
-  const { items: cartItems, count: cartCount, update: updateCartQuantity, subtotal } =
-    useCart(userId);
+  const {
+    items: cartItems,
+    count: cartCount,
+    update: updateCartQuantity,
+    subtotal,
+  } = useCart(userId);
   const wishlist = useWishlist(userId);
 
   const primaryColor = storeSettings?.primary_color || "#3B82F6";
@@ -66,7 +70,8 @@ export default function StorefrontLayout({
     storeSettings?.heading_font_family || "Inter, system-ui, sans-serif";
   const borderRadius = storeSettings?.border_radius || "0.75rem";
 
-  const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
+  const API_URL =
+    process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
 
   // Close overlays on navigation
   useEffect(() => {
@@ -418,7 +423,8 @@ export default function StorefrontLayout({
                       <span
                         className="transition-colors hover:opacity-80"
                         onMouseEnter={(e) => {
-                          if (!active) e.currentTarget.style.color = primaryColor;
+                          if (!active)
+                            e.currentTarget.style.color = primaryColor;
                         }}
                         onMouseLeave={(e) => {
                           if (!active)
@@ -570,7 +576,9 @@ export default function StorefrontLayout({
                         onClick={() => setMobileMenuOpen(false)}
                         className="block py-3 px-4 rounded-lg text-[16px] font-semibold antialiased transition-colors"
                         style={{
-                          backgroundColor: active ? primaryColor : "transparent",
+                          backgroundColor: active
+                            ? primaryColor
+                            : "transparent",
                           color: active ? "white" : textColor,
                         }}
                       >
@@ -731,7 +739,7 @@ export default function StorefrontLayout({
                   </span>
                 </Link>
                 <p
-                  className="text-gray-300 mb-4"
+                  className="text-black-300 mb-4"
                   style={{ fontFamily: fontFamily }}
                 >
                   {storeSettings?.description ||
@@ -745,7 +753,7 @@ export default function StorefrontLayout({
                         href={storeSettings.facebook_url}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="text-gray-400 hover:text-white transition-colors"
+                        className="text-black-400 hover:text-gray transition-colors"
                       >
                         <Facebook size={20} />
                       </a>
@@ -787,7 +795,7 @@ export default function StorefrontLayout({
                     <li key={link.href}>
                       <Link
                         href={link.href}
-                        className="text-gray-300 hover:text-white transition-colors"
+                        className="text-black-300 hover:text-gray transition-colors"
                       >
                         {link.label}
                       </Link>
@@ -796,7 +804,7 @@ export default function StorefrontLayout({
                   <li>
                     <Link
                       href={`/storefront/${userId}/wishlist`}
-                      className="text-gray-300 hover:text-white transition-colors"
+                      className="text-black-300 hover:text-gray transition-colors"
                     >
                       Wishlist
                     </Link>
@@ -804,7 +812,7 @@ export default function StorefrontLayout({
                   <li>
                     <Link
                       href={`/storefront/${userId}/cart`}
-                      className="text-gray-300 hover:text-white transition-colors"
+                      className="text-black-300 hover:text-gray transition-colors"
                     >
                       Cart
                     </Link>
@@ -820,14 +828,16 @@ export default function StorefrontLayout({
                 >
                   Contact Us
                 </h4>
-                <ul className="space-y-2 text-gray-300">
+                <ul className="space-y-2 text-black-300">
                   {storeSettings?.address && (
                     <li className="flex items-start gap-2">
                       <MapPin size={16} className="mt-0.5 flex-shrink-0" />
                       <span>
                         {storeSettings.address}
                         {storeSettings.city ? `, ${storeSettings.city}` : ""}
-                        {storeSettings.country ? `, ${storeSettings.country}` : ""}
+                        {storeSettings.country
+                          ? `, ${storeSettings.country}`
+                          : ""}
                       </span>
                     </li>
                   )}
@@ -876,7 +886,10 @@ export default function StorefrontLayout({
                         Thanks! You are subscribed.
                       </p>
                     ) : (
-                      <form className="flex gap-2" onSubmit={subscribeNewsletter}>
+                      <form
+                        className="flex gap-2"
+                        onSubmit={subscribeNewsletter}
+                      >
                         <input
                           type="email"
                           required
@@ -1083,7 +1096,10 @@ export default function StorefrontLayout({
                 >
                   <div className="flex justify-between text-sm">
                     <span style={{ color: textSecondaryColor }}>Subtotal</span>
-                    <span className="font-semibold" style={{ color: textColor }}>
+                    <span
+                      className="font-semibold"
+                      style={{ color: textColor }}
+                    >
                       {money(subtotal)}
                     </span>
                   </div>
@@ -1101,7 +1117,9 @@ export default function StorefrontLayout({
                     style={{ borderTop: `1px solid ${borderColor}` }}
                   >
                     <span style={{ color: textColor }}>Total</span>
-                    <span style={{ color: primaryColor }}>{money(subtotal)}</span>
+                    <span style={{ color: primaryColor }}>
+                      {money(subtotal)}
+                    </span>
                   </div>
                   <button
                     className="btn-primary w-full py-3"

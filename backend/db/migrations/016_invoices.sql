@@ -24,9 +24,9 @@ CREATE TABLE IF NOT EXISTS invoices (
     UNIQUE(user_id, invoice_number)
 );
 
-CREATE INDEX idx_invoices_user ON invoices(user_id);
-CREATE INDEX idx_invoices_status ON invoices(status);
-CREATE INDEX idx_invoices_date ON invoices(date DESC);
+CREATE INDEX IF NOT EXISTS idx_invoices_user ON invoices(user_id);
+CREATE INDEX IF NOT EXISTS idx_invoices_status ON invoices(status);
+CREATE INDEX IF NOT EXISTS idx_invoices_date ON invoices(date DESC);
 
 -- ===================== TABLE INVOICE ITEMS =====================
 CREATE TABLE IF NOT EXISTS invoice_items (
@@ -44,7 +44,7 @@ CREATE TABLE IF NOT EXISTS invoice_items (
     created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
-CREATE INDEX idx_invoice_items_invoice ON invoice_items(invoice_id);
+CREATE INDEX IF NOT EXISTS idx_invoice_items_invoice ON invoice_items(invoice_id);
 
 -- ===================== TABLE QUOTES =====================
 CREATE TABLE IF NOT EXISTS quotes (
@@ -68,9 +68,9 @@ CREATE TABLE IF NOT EXISTS quotes (
     UNIQUE(user_id, quote_number)
 );
 
-CREATE INDEX idx_quotes_user ON quotes(user_id);
-CREATE INDEX idx_quotes_status ON quotes(status);
-CREATE INDEX idx_quotes_date ON quotes(date DESC);
+CREATE INDEX IF NOT EXISTS idx_quotes_user ON quotes(user_id);
+CREATE INDEX IF NOT EXISTS idx_quotes_status ON quotes(status);
+CREATE INDEX IF NOT EXISTS idx_quotes_date ON quotes(date DESC);
 
 -- ===================== TABLE QUOTE ITEMS =====================
 CREATE TABLE IF NOT EXISTS quote_items (
@@ -88,7 +88,7 @@ CREATE TABLE IF NOT EXISTS quote_items (
     created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
-CREATE INDEX idx_quote_items_quote ON quote_items(quote_id);
+CREATE INDEX IF NOT EXISTS idx_quote_items_quote ON quote_items(quote_id);
 
 -- ===================== INVOICE NUMBER SEQUENCE =====================
 CREATE OR REPLACE FUNCTION generate_invoice_number(p_user_id INTEGER)
@@ -137,6 +137,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+DROP TRIGGER IF EXISTS trigger_update_invoice_totals ON invoice_items;
 CREATE TRIGGER trigger_update_invoice_totals
     AFTER INSERT OR UPDATE OR DELETE ON invoice_items
     FOR EACH ROW
@@ -156,17 +157,20 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+DROP TRIGGER IF EXISTS trigger_update_quote_totals ON quote_items;
 CREATE TRIGGER trigger_update_quote_totals
     AFTER INSERT OR UPDATE OR DELETE ON quote_items
     FOR EACH ROW
     EXECUTE FUNCTION update_quote_totals();
 
 -- ===================== TRIGGER: UPDATE UPDATED_AT =====================
+DROP TRIGGER IF EXISTS update_invoices_updated_at ON invoices;
 CREATE TRIGGER update_invoices_updated_at
     BEFORE UPDATE ON invoices
     FOR EACH ROW
     EXECUTE FUNCTION update_updated_at_column();
 
+DROP TRIGGER IF EXISTS update_quotes_updated_at ON quotes;
 CREATE TRIGGER update_quotes_updated_at
     BEFORE UPDATE ON quotes
     FOR EACH ROW

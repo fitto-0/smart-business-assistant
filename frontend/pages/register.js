@@ -1,45 +1,69 @@
-import { useState } from 'react';
-import { useRouter } from 'next/router';
-import Link from 'next/link';
-import { register } from '../lib/auth';
-import { useLanguage } from '../lib/LanguageContext';
-import toast from 'react-hot-toast';
-import { Eye, EyeOff, Zap, ArrowRight, CheckCircle, ShieldCheck, TrendingUp, Brain } from 'lucide-react';
+import { useState } from "react";
+import { useRouter } from "next/router";
+import Link from "next/link";
+import { register } from "../lib/auth";
+import { useLanguage } from "../lib/LanguageContext";
+import toast from "react-hot-toast";
+import {
+  Eye,
+  EyeOff,
+  Zap,
+  ArrowRight,
+  CheckCircle,
+  ShieldCheck,
+  TrendingUp,
+  Brain,
+} from "lucide-react";
 
 export default function RegisterPage() {
   const { t } = useLanguage();
   const router = useRouter();
-  const [form, setForm] = useState({ name: '', email: '', company: '', password: '', confirm: '' });
+  const [form, setForm] = useState({
+    name: "",
+    email: "",
+    company: "",
+    password: "",
+    confirm: "",
+  });
   const [showPwd, setShowPwd] = useState(false);
   const [loading, setLoading] = useState(false);
 
   const highlights = [
-    { icon: TrendingUp, text: t('register.realTimeAnalytics') || t('login.realTimeAnalytics') },
-    { icon: Brain, text: t('register.aiPredictions') || t('login.aiPredictions') },
-    { icon: ShieldCheck, text: t('register.anomalyDetection') || t('login.anomalyDetection') },
+    {
+      icon: TrendingUp,
+      text: t("register.realTimeAnalytics") || t("login.realTimeAnalytics"),
+    },
+    {
+      icon: Brain,
+      text: t("register.aiPredictions") || t("login.aiPredictions"),
+    },
+    {
+      icon: ShieldCheck,
+      text: t("register.anomalyDetection") || t("login.anomalyDetection"),
+    },
   ];
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!form.name || !form.email || !form.password) {
-      toast.error(t('register.fillRequiredFields'));
+      toast.error(t("register.fillRequiredFields"));
       return;
     }
     if (form.password !== form.confirm) {
-      toast.error(t('register.passwordsDoNotMatch'));
+      toast.error(t("register.passwordsDoNotMatch"));
       return;
     }
     if (form.password.length < 6) {
-      toast.error(t('register.passwordMinLength'));
+      toast.error(t("register.passwordMinLength"));
       return;
     }
     setLoading(true);
     try {
       await register(form.name, form.email, form.password, form.company);
-      toast.success(t('register.accountCreated'));
-      router.push('/dashboard');
+      toast.success(t("register.accountCreated"));
+      router.push("/dashboard");
     } catch (err) {
-      toast.error(err.message || t('register.accountCreateError'));
+      toast.error(err.message || t("register.accountCreateError"));
     } finally {
       setLoading(false);
     }
@@ -62,11 +86,9 @@ export default function RegisterPage() {
 
           <div>
             <h2 className="portal-heading text-3xl leading-tight mb-3">
-              {t('register.startGrowing')}
+              {t("register.startGrowing")}
             </h2>
-            <p className="portal-text mb-8">
-              {t('register.dataPrivate')}
-            </p>
+            <p className="portal-text mb-8">{t("register.dataPrivate")}</p>
             <div className="space-y-3">
               {highlights.map(({ icon: Icon, text }) => (
                 <div key={text} className="flex items-center gap-3 portal-text">
@@ -79,7 +101,9 @@ export default function RegisterPage() {
             </div>
           </div>
 
-          <p className="portal-label text-muted">© 2026 Smart Business Assistant</p>
+          <p className="portal-label text-muted">
+            © 2026 Smart Business Assistant
+          </p>
         </div>
 
         {/* Register card */}
@@ -95,35 +119,47 @@ export default function RegisterPage() {
             </div>
           </div>
 
-          <h1 className="portal-heading text-2xl sm:text-3xl mb-2">{t('register.createAccount')}</h1>
-          <p className="portal-text mb-8">{t('register.startIntelligentAnalytics')}</p>
+          <h1 className="portal-heading text-2xl sm:text-3xl mb-2">
+            {t("register.createAccount")}
+          </h1>
+          <p className="portal-text mb-8">
+            {t("register.startIntelligentAnalytics")}
+          </p>
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="block portal-label mb-2">{t('register.fullName')}</label>
+                <label className="block portal-label mb-2">
+                  {t("register.fullName")}
+                </label>
                 <input
                   type="text"
                   value={form.name}
                   onChange={(e) => setForm({ ...form, name: e.target.value })}
                   className="w-full bg-ground-secondary border hairline rounded-xs px-4 py-3 text-ink placeholder-muted focus:outline-none focus:border-amber transition-colors"
-                  placeholder="John Doe"
+                  placeholder="Elkasmi Fatima Zahra"
                   required
                 />
               </div>
               <div>
-                <label className="block portal-label mb-2">{t('register.company')}</label>
+                <label className="block portal-label mb-2">
+                  {t("register.company")}
+                </label>
                 <input
                   type="text"
                   value={form.company}
-                  onChange={(e) => setForm({ ...form, company: e.target.value })}
+                  onChange={(e) =>
+                    setForm({ ...form, company: e.target.value })
+                  }
                   className="w-full bg-ground-secondary border hairline rounded-xs px-4 py-3 text-ink placeholder-muted focus:outline-none focus:border-amber transition-colors"
                   placeholder="My Store"
                 />
               </div>
             </div>
             <div>
-              <label className="block portal-label mb-2">{t('register.email')}</label>
+              <label className="block portal-label mb-2">
+                {t("register.email")}
+              </label>
               <input
                 type="email"
                 value={form.email}
@@ -134,12 +170,16 @@ export default function RegisterPage() {
               />
             </div>
             <div>
-              <label className="block portal-label mb-2">{t('register.password')}</label>
+              <label className="block portal-label mb-2">
+                {t("register.password")}
+              </label>
               <div className="relative">
                 <input
-                  type={showPwd ? 'text' : 'password'}
+                  type={showPwd ? "text" : "password"}
                   value={form.password}
-                  onChange={(e) => setForm({ ...form, password: e.target.value })}
+                  onChange={(e) =>
+                    setForm({ ...form, password: e.target.value })
+                  }
                   className="w-full bg-ground-secondary border hairline rounded-xs px-4 py-3 text-ink placeholder-muted focus:outline-none focus:border-amber transition-colors pr-12"
                   placeholder="Min. 6 characters"
                   required
@@ -155,7 +195,9 @@ export default function RegisterPage() {
               </div>
             </div>
             <div>
-              <label className="block portal-label mb-2">{t('register.confirmPassword')}</label>
+              <label className="block portal-label mb-2">
+                {t("register.confirmPassword")}
+              </label>
               <input
                 type="password"
                 value={form.confirm}
@@ -165,24 +207,32 @@ export default function RegisterPage() {
                 required
               />
             </div>
-            <button type="submit" disabled={loading} className="btn-ember w-full justify-center !py-3 text-base mt-2">
+            <button
+              type="submit"
+              disabled={loading}
+              className="btn-ember w-full justify-center !py-3 text-base mt-2"
+            >
               {loading ? (
                 <>
                   <span className="animate-spin rounded-full h-4 w-4 border-2 border-amber border-t-transparent"></span>
-                  {t('register.creating')}
+                  {t("register.creating")}
                 </>
               ) : (
                 <>
-                  <CheckCircle size={18} /> {t('register.createAccountBtn')} <ArrowRight size={16} />
+                  <CheckCircle size={18} /> {t("register.createAccountBtn")}{" "}
+                  <ArrowRight size={16} />
                 </>
               )}
             </button>
           </form>
 
           <p className="mt-7 text-center portal-text">
-            {t('register.haveAccount')}{' '}
-            <Link href="/login" className="text-amber hover:text-amber/80 font-semibold transition-colors">
-              {t('register.signIn')}
+            {t("register.haveAccount")}{" "}
+            <Link
+              href="/login"
+              className="text-amber hover:text-amber/80 font-semibold transition-colors"
+            >
+              {t("register.signIn")}
             </Link>
           </p>
         </div>
