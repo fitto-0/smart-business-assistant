@@ -250,7 +250,9 @@ export default function StorefrontCustomize() {
       toast.success(t("storefront.logoRemoved") || "Logo removed");
     } catch (err) {
       toast.error(
-        err.message || t("storefront.logoRemoveFailed") || "Failed to remove logo",
+        err.message ||
+          t("storefront.logoRemoveFailed") ||
+          "Failed to remove logo",
       );
     }
   };
@@ -303,11 +305,21 @@ export default function StorefrontCustomize() {
 
   const handleDomainRemove = async () => {
     if (!storeSettings.custom_domain) return;
-    if (!confirm(t("storefront.domain.removeConfirm") || "Remove this custom domain? Your store will fall back to the default URL.")) return;
+    if (
+      !confirm(
+        t("storefront.domain.removeConfirm") ||
+          "Remove this custom domain? Your store will fall back to the default URL.",
+      )
+    )
+      return;
     try {
       const { apiDelete } = await import("../../lib/api");
       await apiDelete("/store-settings/domain");
-      setStoreSettings((prev) => ({ ...prev, custom_domain: "", domain_verified: false }));
+      setStoreSettings((prev) => ({
+        ...prev,
+        custom_domain: "",
+        domain_verified: false,
+      }));
       toast.success(t("storefront.domain.removed") || "Custom domain removed");
     } catch (err) {
       toast.error(err.message || "Failed to remove domain");
@@ -940,13 +952,17 @@ export default function StorefrontCustomize() {
           </p>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-5">
             <label className="block">
-              <span className="portal-label block mb-2">Shipping fee (MAD)</span>
+              <span className="portal-label block mb-2">
+                Shipping fee (MAD)
+              </span>
               <input
                 type="number"
                 min="0"
                 value={content.shipping_fee ?? ""}
                 placeholder="30"
-                onChange={(e) => handleContentChange("shipping_fee", Number(e.target.value))}
+                onChange={(e) =>
+                  handleContentChange("shipping_fee", Number(e.target.value))
+                }
                 className="w-full bg-ground border hairline rounded-xl px-3 py-2.5 text-ink"
               />
             </label>
@@ -960,22 +976,25 @@ export default function StorefrontCustomize() {
                 value={content.free_shipping_threshold ?? ""}
                 placeholder="500"
                 onChange={(e) =>
-                  handleContentChange("free_shipping_threshold", Number(e.target.value))
+                  handleContentChange(
+                    "free_shipping_threshold",
+                    Number(e.target.value),
+                  )
                 }
                 className="w-full bg-ground border hairline rounded-xl px-3 py-2.5 text-ink"
               />
             </label>
             <label className="block">
-              <span className="portal-label block mb-2">
-                Tax rate (%)
-              </span>
+              <span className="portal-label block mb-2">Tax rate (%)</span>
               <input
                 type="number"
                 min="0"
                 max="100"
                 value={content.tax_rate ?? ""}
                 placeholder="0"
-                onChange={(e) => handleContentChange("tax_rate", Number(e.target.value))}
+                onChange={(e) =>
+                  handleContentChange("tax_rate", Number(e.target.value))
+                }
                 className="w-full bg-ground border hairline rounded-xl px-3 py-2.5 text-ink"
               />
             </label>
@@ -1019,7 +1038,9 @@ export default function StorefrontCustomize() {
               <input
                 type="checkbox"
                 checked={!!storeSettings.show_testimonials}
-                onChange={(e) => handleChange("show_testimonials", e.target.checked)}
+                onChange={(e) =>
+                  handleChange("show_testimonials", e.target.checked)
+                }
                 className="rounded"
               />
               Show testimonials on the home page
@@ -1038,7 +1059,11 @@ export default function StorefrontCustomize() {
             <button
               type="button"
               onClick={() =>
-                addContentItem("features", { icon: "star", title: "", description: "" })
+                addContentItem("features", {
+                  icon: "star",
+                  title: "",
+                  description: "",
+                })
               }
               className="portal-pill-btn shrink-0"
             >
@@ -1062,7 +1087,12 @@ export default function StorefrontCustomize() {
                     value={feature.icon || ""}
                     placeholder="truck"
                     onChange={(e) =>
-                      updateContentItem("features", index, "icon", e.target.value)
+                      updateContentItem(
+                        "features",
+                        index,
+                        "icon",
+                        e.target.value,
+                      )
                     }
                     className="w-full bg-ground-secondary border hairline rounded-xl px-3 py-2.5 text-ink"
                   />
@@ -1072,7 +1102,12 @@ export default function StorefrontCustomize() {
                   <input
                     value={feature.title || ""}
                     onChange={(e) =>
-                      updateContentItem("features", index, "title", e.target.value)
+                      updateContentItem(
+                        "features",
+                        index,
+                        "title",
+                        e.target.value,
+                      )
                     }
                     className="w-full bg-ground-secondary border hairline rounded-xl px-3 py-2.5 text-ink"
                   />
@@ -1082,7 +1117,12 @@ export default function StorefrontCustomize() {
                   <input
                     value={feature.description || ""}
                     onChange={(e) =>
-                      updateContentItem("features", index, "description", e.target.value)
+                      updateContentItem(
+                        "features",
+                        index,
+                        "description",
+                        e.target.value,
+                      )
                     }
                     className="w-full bg-ground-secondary border hairline rounded-xl px-3 py-2.5 text-ink"
                   />
@@ -1128,17 +1168,27 @@ export default function StorefrontCustomize() {
           </div>
           <div className="space-y-4">
             {contentList("testimonials").length === 0 && (
-              <p className="portal-label text-muted">No testimonials added yet.</p>
+              <p className="portal-label text-muted">
+                No testimonials added yet.
+              </p>
             )}
             {contentList("testimonials").map((testimonial, index) => (
-              <div key={index} className="bg-ground border hairline rounded-xl p-4 space-y-3">
+              <div
+                key={index}
+                className="bg-ground border hairline rounded-xl p-4 space-y-3"
+              >
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                   <label className="block">
                     <span className="portal-label block mb-2">Name</span>
                     <input
                       value={testimonial.name || ""}
                       onChange={(e) =>
-                        updateContentItem("testimonials", index, "name", e.target.value)
+                        updateContentItem(
+                          "testimonials",
+                          index,
+                          "name",
+                          e.target.value,
+                        )
                       }
                       className="w-full bg-ground-secondary border hairline rounded-xl px-3 py-2.5 text-ink"
                     />
@@ -1149,7 +1199,12 @@ export default function StorefrontCustomize() {
                       value={testimonial.role || ""}
                       placeholder="Verified Buyer"
                       onChange={(e) =>
-                        updateContentItem("testimonials", index, "role", e.target.value)
+                        updateContentItem(
+                          "testimonials",
+                          index,
+                          "role",
+                          e.target.value,
+                        )
                       }
                       className="w-full bg-ground-secondary border hairline rounded-xl px-3 py-2.5 text-ink"
                     />
@@ -1182,7 +1237,12 @@ export default function StorefrontCustomize() {
                     rows={2}
                     value={testimonial.content || ""}
                     onChange={(e) =>
-                      updateContentItem("testimonials", index, "content", e.target.value)
+                      updateContentItem(
+                        "testimonials",
+                        index,
+                        "content",
+                        e.target.value,
+                      )
                     }
                     className="w-full bg-ground-secondary border hairline rounded-xl px-3 py-2.5 text-ink"
                   />
@@ -1225,12 +1285,17 @@ export default function StorefrontCustomize() {
               </p>
             )}
             {contentList("faq").map((faq, index) => (
-              <div key={index} className="bg-ground border hairline rounded-xl p-4 space-y-3">
+              <div
+                key={index}
+                className="bg-ground border hairline rounded-xl p-4 space-y-3"
+              >
                 <label className="block">
                   <span className="portal-label block mb-2">Question</span>
                   <input
                     value={faq.q || ""}
-                    onChange={(e) => updateContentItem("faq", index, "q", e.target.value)}
+                    onChange={(e) =>
+                      updateContentItem("faq", index, "q", e.target.value)
+                    }
                     className="w-full bg-ground-secondary border hairline rounded-xl px-3 py-2.5 text-ink"
                   />
                 </label>
@@ -1239,7 +1304,9 @@ export default function StorefrontCustomize() {
                   <textarea
                     rows={2}
                     value={faq.a || ""}
-                    onChange={(e) => updateContentItem("faq", index, "a", e.target.value)}
+                    onChange={(e) =>
+                      updateContentItem("faq", index, "a", e.target.value)
+                    }
                     className="w-full bg-ground-secondary border hairline rounded-xl px-3 py-2.5 text-ink"
                   />
                 </label>
@@ -1256,14 +1323,18 @@ export default function StorefrontCustomize() {
         </div>
 
         <div className="bg-ground-secondary border hairline rounded-xl p-4 sm:p-6">
-          <h3 className="portal-heading text-lg mb-4">About page and policies</h3>
+          <h3 className="portal-heading text-lg mb-4">
+            About page and policies
+          </h3>
           <div className="space-y-5">
             <label className="block">
               <span className="portal-label block mb-2">Mission statement</span>
               <textarea
                 rows={3}
                 value={content.mission_text || ""}
-                onChange={(e) => handleContentChange("mission_text", e.target.value)}
+                onChange={(e) =>
+                  handleContentChange("mission_text", e.target.value)
+                }
                 className="w-full bg-ground border hairline rounded-xl px-3 py-2.5 text-ink"
               />
             </label>
@@ -1274,7 +1345,9 @@ export default function StorefrontCustomize() {
                   rows={3}
                   value={content.shipping_policy || ""}
                   placeholder="Standard delivery takes 2 to 4 business days..."
-                  onChange={(e) => handleContentChange("shipping_policy", e.target.value)}
+                  onChange={(e) =>
+                    handleContentChange("shipping_policy", e.target.value)
+                  }
                   className="w-full bg-ground border hairline rounded-xl px-3 py-2.5 text-ink"
                 />
               </label>
@@ -1284,7 +1357,9 @@ export default function StorefrontCustomize() {
                   rows={3}
                   value={content.return_policy || ""}
                   placeholder="You have 30 days to return an item..."
-                  onChange={(e) => handleContentChange("return_policy", e.target.value)}
+                  onChange={(e) =>
+                    handleContentChange("return_policy", e.target.value)
+                  }
                   className="w-full bg-ground border hairline rounded-xl px-3 py-2.5 text-ink"
                 />
               </label>
@@ -1355,7 +1430,8 @@ export default function StorefrontCustomize() {
                   onClick={handleDomainRemove}
                   className="px-4 py-2 rounded-xl border hairline bg-surface-2 text-ink-2 hover:text-clay hover:border-clay/30 flex items-center gap-2 font-medium"
                 >
-                  <Trash2 size={16} /> {t("storefront.domain.remove") || "Remove"}
+                  <Trash2 size={16} />{" "}
+                  {t("storefront.domain.remove") || "Remove"}
                 </button>
               </div>
             )}
@@ -1369,7 +1445,8 @@ export default function StorefrontCustomize() {
                   onClick={handleDomainRemove}
                   className="px-4 py-2 rounded-xl border hairline bg-surface-2 text-ink-2 hover:text-clay hover:border-clay/30 flex items-center gap-2 font-medium"
                 >
-                  <Trash2 size={16} /> {t("storefront.domain.remove") || "Remove"}
+                  <Trash2 size={16} />{" "}
+                  {t("storefront.domain.remove") || "Remove"}
                 </button>
               </div>
             )}
@@ -1394,7 +1471,9 @@ export default function StorefrontCustomize() {
                   <strong>@</strong> or <strong>www</strong>
                   <br />
                   {t("storefront.domain.cnameTarget") || "Target"}:{" "}
-                  <strong className="break-all">{window.location.hostname}</strong>
+                  <strong className="break-all">
+                    {window.location.hostname}
+                  </strong>
                 </div>
                 <p>
                   {t("storefront.domain.dnsStep3") ||
@@ -1766,7 +1845,8 @@ export default function StorefrontCustomize() {
                   width: previewViewport === "mobile" ? "390px" : "100%",
                   maxWidth: "100%",
                   height: previewViewport === "mobile" ? "780px" : "720px",
-                  borderRadius: previewViewport === "mobile" ? "1.5rem" : "0.75rem",
+                  borderRadius:
+                    previewViewport === "mobile" ? "1.5rem" : "0.75rem",
                 }}
               />
             ) : (

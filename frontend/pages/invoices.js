@@ -1,7 +1,14 @@
 import { useEffect, useState, useCallback } from "react";
 import { useRouter } from "next/router";
 import Layout from "../components/Layout";
-import { apiGet, apiPost, apiPut, apiDelete } from "../lib/api";
+import {
+  apiGet,
+  apiPost,
+  apiPut,
+  apiDelete,
+  getApiBaseUrl,
+  getCurrentOrgId,
+} from "../lib/api";
 import { useLanguage } from "../lib/LanguageContext";
 import { Plus, Trash2, Download, Edit2 } from "lucide-react";
 
@@ -26,6 +33,7 @@ export default function InvoicesPage() {
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState(null);
   const [saving, setSaving] = useState(false);
+  const [downloadingId, setDownloadingId] = useState(null);
   const [message, setMessage] = useState("");
   const [isError, setIsError] = useState(false);
   const [form, setForm] = useState({
@@ -114,18 +122,48 @@ export default function InvoicesPage() {
     catch (err) { notify(err.message, true); }
   };
 
-  const downloadPdf = (id) => {
+  const downloadPdf = async (id) => {
     const token = document.cookie.split("; ").find((c) => c.startsWith("sba_token="))?.split("=")[1];
-    fetch(`/api/invoices/${id}/pdf`, { headers: { Authorization: `Bearer ${token}` } })
-      .then((r) => r.blob())
-      .then((blob) => {
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement("a");
-        a.href = url;
-        a.download = `invoice-${id}.pdf`;
-        a.click();
-        URL.revokeObjectURL(url);
-      });
+    const organizationId = getCurrentOrgId();
+    const headers = {};
+    if (token) headers.Authorization = `Bearer ${token}`;
+    if (organizationId) headers["X-Organization-Id"] = String(organizationId);
+
+    setDownloadingId(id);
+    try {
+      const response = await fetch(
+        `${getApiBaseUrl()}/invoices/${id}/pdf`,
+        { headers },
+      );
+
+      if (!response.ok) {
+        const payload = await response.json().catch(() => null);
+        throw new Error(payload?.error || t("invoices.downloadPdfError") || "Failed to download invoice PDF");
+      }
+
+      const contentType = response.headers.get("content-type") || "";
+      if (!contentType.toLowerCase().includes("application/pdf")) {
+        throw new Error(t("invoices.invalidPdf") || "The server did not return a PDF");
+      }
+
+      const blob = await response.blob();
+      if ((await blob.slice(0, 5).text()) !== "%PDF-") {
+        throw new Error(t("invoices.invalidPdf") || "The downloaded file is not a valid PDF");
+      }
+
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `invoice-${id}.pdf`;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.setTimeout(() => URL.revokeObjectURL(url), 1000);
+    } catch (err) {
+      notify(err.message || t("invoices.downloadPdfError") || "Failed to download invoice PDF", true);
+    } finally {
+      setDownloadingId(null);
+    }
   };
 
   if (loading) {
@@ -272,7 +310,13 @@ export default function InvoicesPage() {
                   </td>
                   <td className="p-4">
                     <div className="flex items-center gap-3">
-                      <button onClick={() => downloadPdf(inv.id)} className="text-ink-2 hover:text-ink" title={t("invoices.downloadPdf")}>
+                      <button
+                        onClick={() => downloadPdf(inv.id)}
+                        disabled={downloadingId === inv.id}
+                        className="text-ink-2 hover:text-ink disabled:opacity-50"
+                        title={t("invoices.downloadPdf")}
+                        aria-label={t("invoices.downloadPdf")}
+                      >
                         <Download size={15} />
                       </button>
                       <button onClick={() => openEdit(inv)} className="text-ink-2 hover:text-ink" title={t("invoices.edit")}>
