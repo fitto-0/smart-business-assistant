@@ -25,16 +25,24 @@ export default function NotFoundPage() {
             </Link>
           </header>
 
-          <section className="not-found-content" aria-labelledby="not-found-title">
+          <section
+            className="not-found-content"
+            aria-labelledby="not-found-title"
+          >
             <div className="not-found-orbit orbit-one" aria-hidden="true" />
             <div className="not-found-orbit orbit-two" aria-hidden="true" />
             <div className="not-found-code" aria-hidden="true">
-              <span>4</span><i>0</i><span>4</span>
+              <span>4</span>
+              <i>0</i>
+              <span>4</span>
             </div>
             <div className="not-found-sticker sticker-top" aria-hidden="true">
               PAGE LOST
             </div>
-            <div className="not-found-sticker sticker-bottom" aria-hidden="true">
+            <div
+              className="not-found-sticker sticker-bottom"
+              aria-hidden="true"
+            >
               NO SIGNAL
             </div>
 
