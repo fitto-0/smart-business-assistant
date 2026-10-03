@@ -36,6 +36,7 @@ import {
   FileText,
   ShoppingBag,
   Check,
+  Receipt,
 } from "lucide-react";
 import Chatbot from "./Chatbot";
 
@@ -59,6 +60,8 @@ const userNavItems = [
   { href: "/security", label: "Security", icon: Shield },
   { href: "/backup", label: "Backup", icon: Database },
   { href: "/reports", label: "Reports", icon: FileText },
+  { href: "/invoices", label: "Factures", icon: FileText },
+  { href: "/expenses", label: "Dépenses", icon: Receipt },
   { href: "/profile", label: "Profile", icon: User },
 ];
 

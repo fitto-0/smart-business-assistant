@@ -37,6 +37,12 @@ const migrate = async () => {
   await runMigration("014_org_data_sharing.sql");
   await runMigration("015_seed_system_roles.sql");
 
+  // Invoices, quotes and billing.
+  await runMigration("016_invoices.sql");
+
+  // Expenses.
+  await runMigration("017_expenses.sql");
+
   await query(`
     DO $$
     DECLARE

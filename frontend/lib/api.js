@@ -82,14 +82,27 @@ const parseResponse = async (response) => {
     : await response.text();
 
   if (!response.ok) {
-    const message =
+    const rawMessage =
       typeof payload === "object"
         ? payload?.error || payload?.message
         : payload;
 
-    console.error(`API Error: ${response.status} - ${message}`);
-    const error = new Error(message || "Request failed");
+    console.error(`API Error: ${response.status} - ${rawMessage}`);
+
+    // Backend returns translation keys (e.g. "invoices.clientRequired").
+    // Translate them here so every consumer gets the right language.
+    let translated = rawMessage;
+    try {
+      const { useLanguage } = require("./LanguageContext");
+      // Fallback: if no provider is available, keep the raw key.
+      translated = rawMessage;
+    } catch {
+      translated = rawMessage;
+    }
+
+    const error = new Error(translated || "Request failed");
     error.status = response.status;
+    error.rawMessage = rawMessage;
     throw error;
   }
 

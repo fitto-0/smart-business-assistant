@@ -127,6 +127,8 @@ app.use("/api/analysis", require("./routes/analysis"));
 app.use("/api/csv", require("./routes/csv"));
 app.use("/api/chatbot", require("./routes/chatbot"));
 app.use("/api/admin", require("./routes/admin"));
+app.use("/api/invoices", require("./routes/invoices"));
+app.use("/api/expenses", require("./routes/expenses"));
 app.use("/api/storefront", require("./routes/storefront"));
 app.use("/api/store-settings", require("./routes/store-settings"));
 
