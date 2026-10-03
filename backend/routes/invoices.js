@@ -185,71 +185,245 @@ router.get("/:id/pdf", auth, async (req, res) => {
   try {
     const result = await query(
       `SELECT i.*,
+        u.company AS seller_company,
+        u.name AS seller_name,
+        u.email AS seller_email,
+        ss.store_name AS seller_store_name,
+        ss.contact_email AS seller_contact_email,
+        ss.contact_phone AS seller_contact_phone,
+        ss.address AS seller_address,
+        ss.city AS seller_city,
+        ss.country AS seller_country,
         COALESCE((SELECT json_agg(json_build_object(
           'description', ii.description, 'quantity', ii.quantity,
           'unit_price', ii.unit_price, 'discount', ii.discount, 'tva_rate', ii.tva_rate,
           'total', ii.total) ORDER BY ii.id)
           FROM invoice_items ii WHERE ii.invoice_id = i.id), '[]') AS items
-       FROM invoices i WHERE i.id = $1 AND i.user_id = $2`,
+       FROM invoices i
+       JOIN users u ON u.id = i.user_id
+       LEFT JOIN store_settings ss ON ss.user_id = i.user_id
+       WHERE i.id = $1 AND i.user_id = $2`,
       [req.params.id, req.user.id],
     );
     if (result.rowCount === 0) return res.status(404).json({ error: "Invoice not found" });
     const inv = result.rows[0];
 
-    const doc = new PDFDocument({ size: "A4", margin: 50 });
+    const doc = new PDFDocument({ size: "A4", margin: 42 });
     res.setHeader("Content-Type", "application/pdf");
     res.setHeader("Content-Disposition", `attachment; filename="${inv.invoice_number}.pdf"`);
     doc.pipe(res);
 
-    doc.fontSize(20).text("FACTURE", { align: "right" });
-    doc.fontSize(10).text(inv.invoice_number, { align: "right" });
-    doc.moveDown();
-    doc.text(`Date: ${new Date(inv.date).toLocaleDateString("fr-FR")}`);
-    if (inv.due_date) doc.text(`Échéance: ${new Date(inv.due_date).toLocaleDateString("fr-FR")}`);
-    doc.moveDown();
-    doc.fontSize(12).text("Client:", { underline: true });
-    doc.fontSize(10).text(inv.customer_name);
-    if (inv.customer_email) doc.text(inv.customer_email);
-    if (inv.customer_phone) doc.text(inv.customer_phone);
-    if (inv.customer_address) doc.text(inv.customer_address);
-    doc.moveDown(2);
+    const left = 42;
+    const right = doc.page.width - 42;
+    const contentWidth = right - left;
+    const muted = "#666666";
+    const ink = "#181818";
+    const sellerName =
+      inv.seller_store_name || inv.seller_company || inv.seller_name;
+    const sellerEmail = inv.seller_contact_email || inv.seller_email;
+    const sellerAddress = [inv.seller_address, inv.seller_city, inv.seller_country]
+      .filter(Boolean)
+      .join(", ");
+    const formatDate = (date) => new Date(date).toLocaleDateString("fr-FR");
+    const formatMoney = (amount) =>
+      `${Number(amount || 0).toLocaleString("fr-FR", {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2,
+      })} MAD`;
 
-    const tableTop = doc.y;
-    doc.fontSize(10);
-    doc.text("Description", 50, tableTop);
-    doc.text("Qté", 320, tableTop, { width: 40, align: "right" });
-    doc.text("Prix unit.", 370, tableTop, { width: 60, align: "right" });
-    doc.text("TVA", 440, tableTop, { width: 40, align: "right" });
-    doc.text("Total", 490, tableTop, { width: 60, align: "right" });
-    doc.moveTo(50, tableTop + 15).lineTo(550, tableTop + 15).stroke();
+    doc.fillColor(ink).font("Helvetica").fontSize(34).text("FACTURE", left, 38);
+    doc.save();
+    doc.strokeColor(muted).lineWidth(0.8).circle(right - 18, 62, 16).stroke();
+    doc.circle(right - 18, 62, 12).stroke();
+    doc.moveTo(right - 24, 62).lineTo(right - 12, 62).stroke();
+    doc.moveTo(right - 18, 56).lineTo(right - 18, 68).stroke();
+    doc.restore();
 
-    let y = tableTop + 25;
-    for (const item of inv.items) {
-      doc.text(item.description, 50, y, { width: 260 });
-      doc.text(String(item.quantity), 320, y, { width: 40, align: "right" });
-      doc.text(`${Number(item.unit_price).toFixed(2)} MAD`, 370, y, { width: 60, align: "right" });
-      doc.text(`${item.tva_rate}%`, 440, y, { width: 40, align: "right" });
-      doc.text(`${Number(item.total).toFixed(2)} MAD`, 490, y, { width: 60, align: "right" });
-      y += 20;
+    const drawPill = (text, x, y) => {
+      const width = doc.widthOfString(text) + 18;
+      doc.save();
+      doc.lineWidth(0.7).strokeColor(muted).roundedRect(x, y, width, 19, 9).stroke();
+      doc.font("Helvetica").fontSize(8).fillColor(ink).text(text, x + 9, y + 5, {
+        lineBreak: false,
+      });
+      doc.restore();
+      return width;
+    };
+    const invoicePillWidth = drawPill(`Facture n° ${inv.invoice_number}`, left, 91);
+    drawPill(formatDate(inv.date), left + invoicePillWidth + 8, 91);
+
+    doc.moveTo(left, 128).lineTo(right, 128).lineWidth(0.7).strokeColor(muted).stroke();
+
+    const columnTop = 146;
+    const columnWidth = contentWidth * 0.46;
+    const rightColumnX = right - columnWidth;
+    doc.font("Helvetica-Bold").fontSize(9).fillColor(ink).text(sellerName, left, columnTop, {
+      width: columnWidth,
+    });
+    let sellerY = columnTop + 16;
+    for (const detail of [inv.seller_contact_phone, sellerEmail, sellerAddress].filter(Boolean)) {
+      doc.font("Helvetica").fontSize(8).fillColor(ink).text(detail, left, sellerY, {
+        width: columnWidth,
+      });
+      sellerY = doc.y + 2;
     }
 
-    doc.moveTo(50, y).lineTo(550, y).stroke();
-    y += 15;
-    doc.text(`Sous-total: ${Number(inv.subtotal).toFixed(2)} MAD`, 370, y, { width: 180, align: "right" });
-    y += 20;
-    doc.text(`TVA: ${Number(inv.tva_amount).toFixed(2)} MAD`, 370, y, { width: 180, align: "right" });
-    y += 20;
-    doc.fontSize(12).text(`Total: ${Number(inv.total).toFixed(2)} MAD`, 370, y, { width: 180, align: "right" });
+    doc.font("Helvetica-Bold").fontSize(9).fillColor(ink).text("À L'ATTENTION DE", rightColumnX, columnTop, {
+      width: columnWidth,
+      align: "right",
+    });
+    let customerY = columnTop + 16;
+    const customerDetails = [
+      inv.customer_name,
+      inv.customer_phone,
+      inv.customer_email,
+      inv.customer_address,
+    ].filter(Boolean);
+    for (const detail of customerDetails) {
+      doc.font("Helvetica").fontSize(8).fillColor(ink).text(detail, rightColumnX, customerY, {
+        width: columnWidth,
+        align: "right",
+      });
+      customerY = doc.y + 2;
+    }
+
+    const columns = [
+      { title: "DESCRIPTION", width: 236, align: "left" },
+      { title: "PRIX", width: 86, align: "right" },
+      { title: "QUANTITÉ", width: 86, align: "right" },
+      { title: "TOTAL", width: contentWidth - 408, align: "right" },
+    ];
+    const tableX = left;
+    let tableY = Math.max(sellerY, customerY) + 22;
+    const rowBottomLimit = doc.page.height - 72;
+
+    const drawTableHeader = () => {
+      doc.save();
+      doc.rect(tableX, tableY, contentWidth, 25).fill(ink);
+      let x = tableX;
+      for (const column of columns) {
+        doc.font("Helvetica-Bold").fontSize(8).fillColor("#FFFFFF").text(
+          column.title,
+          x + 7,
+          tableY + 8,
+          { width: column.width - 14, align: column.align, lineBreak: false },
+        );
+        x += column.width;
+      }
+      doc.restore();
+      tableY += 25;
+    };
+    drawTableHeader();
+
+    for (const item of inv.items) {
+      const description = item.description || "";
+      const descriptionHeight = doc.heightOfString(description, {
+        width: columns[0].width - 14,
+        font: "Helvetica",
+        fontSize: 8,
+      });
+      const rowHeight = Math.max(23, descriptionHeight + 10);
+
+      if (tableY + rowHeight > rowBottomLimit) {
+        doc.addPage();
+        tableY = 42;
+        drawTableHeader();
+      }
+
+      doc.save();
+      doc.lineWidth(0.5).strokeColor("#999999").rect(tableX, tableY, contentWidth, rowHeight).stroke();
+      let x = tableX;
+      for (const column of columns.slice(0, -1)) {
+        x += column.width;
+        doc.moveTo(x, tableY).lineTo(x, tableY + rowHeight).stroke();
+      }
+      const values = [
+        description,
+        formatMoney(item.unit_price),
+        String(item.quantity),
+        formatMoney(item.total),
+      ];
+      x = tableX;
+      for (let index = 0; index < columns.length; index += 1) {
+        const column = columns[index];
+        doc.font("Helvetica").fontSize(8).fillColor(ink).text(
+          values[index],
+          x + 7,
+          tableY + 7,
+          { width: column.width - 14, align: column.align },
+        );
+        x += column.width;
+      }
+      doc.restore();
+      tableY += rowHeight;
+    }
+
+    const summaryHeight = 83;
+    if (tableY + summaryHeight > rowBottomLimit) {
+      doc.addPage();
+      tableY = 42;
+    }
+    let summaryY = tableY + 13;
+    const taxRates = [...new Set(inv.items.map((item) => Number(item.tva_rate)))];
+    const taxLabel = taxRates.length === 1 ? `TVA (${taxRates[0]}%)` : "TVA";
+    const summaryX = right - 220;
+    const drawSummaryRow = (label, value, y, bold = false) => {
+      doc.font(bold ? "Helvetica-Bold" : "Helvetica").fontSize(bold ? 10 : 9).fillColor(ink);
+      doc.text(label, summaryX, y, { width: 105, align: "right" });
+      doc.text(value, summaryX + 112, y, { width: 108, align: "right" });
+    };
+    drawSummaryRow("Sous-total :", formatMoney(inv.subtotal), summaryY);
+    summaryY += 19;
+    drawSummaryRow(`${taxLabel} :`, formatMoney(inv.tva_amount), summaryY);
+    summaryY += 21;
+    doc.rect(left, summaryY - 2, contentWidth, 25).fill(ink);
+    doc.fillColor("#FFFFFF").font("Helvetica-Bold").fontSize(10)
+      .text("TOTAL :", summaryX, summaryY + 5, { width: 105, align: "right" });
+    doc.text(formatMoney(inv.total), summaryX + 112, summaryY + 5, {
+      width: 108,
+      align: "right",
+    });
+    summaryY += 35;
 
     if (inv.notes) {
-      doc.moveDown(2);
-      doc.fontSize(10).text("Notes:", { underline: true });
-      doc.text(inv.notes);
+      doc.font("Helvetica-Bold").fontSize(8).fillColor(ink).text("Notes", left, summaryY);
+      doc.font("Helvetica").fontSize(8).text(inv.notes, left, summaryY + 12, {
+        width: contentWidth,
+      });
+      summaryY = doc.y + 10;
     }
 
-    doc.moveDown(2);
-    doc.fontSize(8).text(`Statut: ${inv.status}`, 50, 750);
-    doc.text(`Généré le ${new Date().toLocaleString("fr-FR")}`, 50, 765);
+    if (summaryY + 74 > rowBottomLimit) {
+      doc.addPage();
+      summaryY = 42;
+    }
+    const footerTop = Math.max(summaryY + 18, doc.page.height - 103);
+    const paymentTerms = inv.payment_terms ||
+      (inv.due_date ? `Échéance : ${formatDate(inv.due_date)}` : "Selon accord convenu");
+    doc.font("Helvetica-Bold").fontSize(8).fillColor(ink)
+      .text(`Paiement à l'ordre de ${sellerName}`, left, footerTop, { width: columnWidth });
+    if (sellerEmail) {
+      doc.font("Helvetica").fontSize(8).fillColor(muted)
+        .text(sellerEmail, left, footerTop + 12, { width: columnWidth });
+    }
+    doc.font("Helvetica-Bold").fontSize(8).fillColor(ink)
+      .text("Conditions de paiement", rightColumnX, footerTop, {
+        width: columnWidth,
+        align: "right",
+      });
+    doc.font("Helvetica").fontSize(8).fillColor(muted)
+      .text(paymentTerms, rightColumnX, footerTop + 12, {
+        width: columnWidth,
+        align: "right",
+      });
+
+    doc.moveTo(left, doc.page.height - 62).lineTo(right, doc.page.height - 62)
+      .lineWidth(0.6).strokeColor(muted).stroke();
+    doc.font("Helvetica").fontSize(8).fillColor(muted)
+      .text("MERCI POUR VOTRE CONFIANCE", left, doc.page.height - 49, {
+        width: contentWidth,
+        align: "center",
+      });
 
     doc.end();
   } catch (err) {
